@@ -91,9 +91,11 @@ public class OptimisedStorage implements LuceneStorage {
         try {
             Closeables.close(pool);
             Closeables.close(writer);
-        } catch (Throwable ignoredException) {
-        } finally {
-            ensureDirectoryUnlocked();
+        } catch (Throwable ignoredException) {}
+        finally {
+            try {
+                ensureDirectoryUnlocked();
+            } catch(Throwable ignoredException) {}
         }
     }
 
