@@ -65,18 +65,16 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
         return new RecordSequence(this, from(recordName).select(definitions(recordName)), logger);
     }
 
-    public Sequence<Record> query(final Expression expression, final Sequence<Keyword> definitions) {
+    public Sequence<Record> query(final Expression expression, final Sequence<Keyword<?>> definitions) {
         return new Sequence<Record>() {
             public Iterator<Record> iterator() {
-                return SqlRecords.this.iterator(expression, definitions);
+                return closeables.manage(new RecordIterator(connection, mappings, expression, definitions, logger));
             }
         };
     }
 
-    public RecordIterator iterator(Expression expression, Sequence<Keyword> definitions) {
-        RecordIterator iterator = new RecordIterator(connection, mappings, expression, definitions, logger);
-        closeables.add(iterator);
-        return iterator;
+    public Iterator<Record> iterator(Expression expression, Sequence<Keyword<?>> definitions) {
+        return query(expression, definitions).iterator();
     }
 
     public void define(RecordName recordName, Keyword<?>... fields) {
@@ -102,7 +100,7 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
 
     public boolean exists(RecordName recordName) {
         try {
-            query(from(recordName).select(one).where(Predicates.where(one, is(2))).build(), Sequences.<Keyword>empty()).realise();
+            query(from(recordName).select(one).where(Predicates.where(one, is(2))).build(), Sequences.<Keyword<?>>empty()).realise();
             return true;
         } catch (Exception e) {
             return false;

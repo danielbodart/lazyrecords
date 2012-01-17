@@ -18,7 +18,7 @@ public class SelectBuilderTest {
 
     @Test
     public void ifColumnsSelectedIsEmptyUseStar() throws Exception {
-        SelectExpression build = from(cars).select(Sequences.<Keyword>empty()).build();
+        SelectExpression build = from(cars).select(Sequences.<Keyword<?>>empty()).build();
         assertThat(build.text(), is("select * from cars"));
     }
 

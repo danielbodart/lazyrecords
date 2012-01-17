@@ -21,7 +21,7 @@ public class ParametrizedParser implements PredicateParser {
         this.data = data;
     }
 
-    public Predicate<Record> parse(String query, Sequence<? extends Keyword> implicits) throws IllegalArgumentException {
+    public Predicate<Record> parse(String query, Sequence<? extends Keyword<?>> implicits) throws IllegalArgumentException {
         try {
             Funclate funclate = new StringFunclate(query);
             funclate.add(instanceOf(Date.class), formatDate());

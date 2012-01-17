@@ -147,11 +147,11 @@ public class Grammar {
 
     public static final Parser<List<Pair<Class, Predicate>>> VALUE_PREDICATES = VALUE_PREDICATE.sepBy(ws(','));
 
-    public static Parser<Predicate<Record>> VALUE_ONLY(final Sequence<Keyword> keywords) {
+    public static Parser<Predicate<Record>> VALUE_ONLY(final Sequence<? extends Keyword<?>> keywords) {
         return VALUE_PREDICATES.map(new Callable1<List<Pair<Class, Predicate>>, Predicate<Record>>() {
             public Predicate<Record> call(final List<Pair<Class, Predicate>> list) throws Exception {
-                return or(keywords.map(new Callable1<Keyword, Predicate<Record>>() {
-                    public Predicate<Record> call(final Keyword keyword) throws Exception {
+                return or(keywords.map(new Callable1<Keyword<?>, Predicate<Record>>() {
+                    public Predicate<Record> call(final Keyword<?> keyword) throws Exception {
                         return matchesValues(keyword.name(), list);
                     }
                 }).toArray(Predicate.class));
@@ -168,11 +168,11 @@ public class Grammar {
         }).toArray(Predicate.class));
     }
 
-    public static Parser<Predicate<Record>> PARTS(final Sequence<Keyword> keywords) {
+    public static Parser<Predicate<Record>> PARTS(final Sequence<? extends Keyword<?>> keywords) {
         return Parsers.or(NAME_AND_VALUE, VALUE_ONLY(keywords)).prefix(NEGATION);
     }
 
-    public static Parser<Predicate<Record>> PARSER(final Sequence<Keyword> keywords) {
+    public static Parser<Predicate<Record>> PARSER(final Sequence<? extends Keyword<?>> keywords) {
         return PARTS(keywords).infixl(OR.or(AND));
     }
 

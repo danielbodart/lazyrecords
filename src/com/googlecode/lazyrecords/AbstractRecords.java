@@ -27,12 +27,11 @@ public abstract class AbstractRecords implements Records {
         return definitions.remove(recordName);
     }
 
-    @SuppressWarnings("unchecked")
-    public Sequence<Keyword> definitions(RecordName recordName) {
+    public Sequence<Keyword<?>> definitions(RecordName recordName) {
         if (!definitions.containsKey(recordName)) {
             return Sequences.empty();
         }
-        return sequence((List) definitions.get(recordName));
+        return sequence(definitions.get(recordName));
     }
 
     // Only override if you Schema based technology like SQL

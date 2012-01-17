@@ -14,11 +14,11 @@ import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
 import static com.googlecode.lazyrecords.sql.expressions.SetFunctionType.setFunctionType;
 
 public class SelectList extends CompoundExpression{
-    public SelectList(Sequence<Keyword> select) {
+    public SelectList(Sequence<Keyword<?>> select) {
         super(select.map(derivedColumn()));
     }
 
-    public static SelectList selectList(final Sequence<Keyword> select) {
+    public static SelectList selectList(final Sequence<Keyword<?>> select) {
         return new SelectList(select);
     }
 
@@ -27,10 +27,9 @@ public class SelectList extends CompoundExpression{
         return expressions.map(Expressions.text()).toString();
     }
 
-    @SuppressWarnings("unchecked")
-    public static Function1<Keyword, Expression> derivedColumn() {
-        return new Function1<Keyword, Expression>() {
-            public Expression call(Keyword keyword) throws Exception {
+    public static Function1<Keyword<?>, Expression> derivedColumn() {
+        return new Function1<Keyword<?>, Expression>() {
+            public Expression call(Keyword<?> keyword) throws Exception {
                 return derivedColumn(keyword);
             }
         };
@@ -46,17 +45,17 @@ public class SelectList extends CompoundExpression{
             return textOnly(aliasedKeyword.source()).join(asClause(aliasedKeyword));
         }
         if (callable instanceof Keyword) {
-            Keyword keyword = (Keyword) callable;
+            Keyword<?> keyword = (Keyword) callable;
             return textOnly(keyword);
         }
         if (callable instanceof SelectCallable) {
-            Sequence<Keyword> keywords = ((SelectCallable) callable).keywords();
+            Sequence<Keyword<?>> keywords = ((SelectCallable) callable).keywords();
             return selectList(keywords);
         }
         throw new UnsupportedOperationException("Unsupported callable " + callable);
     }
 
-    public static Expression asClause(Keyword keyword) {
+    public static Expression asClause(Keyword<?> keyword) {
         return expression("as " + keyword.name());
     }
 

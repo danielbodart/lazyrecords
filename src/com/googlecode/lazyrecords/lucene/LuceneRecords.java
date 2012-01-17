@@ -39,7 +39,7 @@ public class LuceneRecords extends AbstractRecords implements Queryable<Query>, 
         this(storage, new Mappings(), new PrintStream(nullOutputStream()));
     }
 
-    public Sequence<Record> query(final Query query, final Sequence<Keyword> definitions) {
+    public Sequence<Record> query(final Query query, final Sequence<Keyword<?>> definitions) {
         return new RecordSequence(lucene, storage, query, mappings.asRecord(definitions), printStream, closeables);
     }
 

@@ -1,7 +1,11 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
+import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.RecordName;
+import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Callable2;
+import com.googlecode.totallylazy.Callables;
+import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
@@ -24,17 +28,17 @@ import static com.googlecode.lazyrecords.sql.expressions.SetQuantifier.ALL;
 import static com.googlecode.lazyrecords.sql.expressions.SetQuantifier.DISTINCT;
 
 public class SelectBuilder implements Expressible, Callable<Expression> {
-    public static final ImmutableKeyword<Object> STAR = keyword("*");
-    public static final Sequence<Keyword> ALL_COLUMNS = Sequences.<Keyword>sequence(STAR);
+    public static final Keyword<Object> STAR = keyword("*");
+    public static final Sequence<Keyword<?>> ALL_COLUMNS = Sequences.<Keyword<?>>sequence(STAR);
     private final SetQuantifier setQuantifier;
-    private final Sequence<Keyword> select;
+    private final Sequence<Keyword<?>> select;
     private final RecordName table;
     private final Option<Predicate<? super Record>> where;
     private final Option<Comparator<? super Record>> comparator;
 
-    private SelectBuilder(SetQuantifier setQuantifier, Sequence<? extends Keyword> select, RecordName table, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> comparator) {
+    private SelectBuilder(SetQuantifier setQuantifier, Sequence<Keyword<?>> select, RecordName table, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> comparator) {
         this.setQuantifier = setQuantifier;
-        this.select = select.isEmpty() ? ALL_COLUMNS : select.safeCast(Keyword.class);
+        this.select = select.isEmpty() ? ALL_COLUMNS : select;
         this.table = table;
         this.where = where;
         this.comparator = comparator;
@@ -57,7 +61,7 @@ public class SelectBuilder implements Expressible, Callable<Expression> {
         return build().toString();
     }
 
-    public Sequence<Keyword> select() {
+    public Sequence<Keyword<?>> select() {
         return select;
     }
 
@@ -65,11 +69,11 @@ public class SelectBuilder implements Expressible, Callable<Expression> {
         return new SelectBuilder(ALL, ALL_COLUMNS, table, Option.<Predicate<? super Record>>none(), Option.<Comparator<? super Record>>none());
     }
 
-    public SelectBuilder select(Keyword... columns) {
+    public SelectBuilder select(Keyword<?>... columns) {
         return select(sequence(columns));
     }
 
-    public SelectBuilder select(Sequence<Keyword> columns) {
+    public SelectBuilder select(Sequence<Keyword<?>> columns) {
         return new SelectBuilder(setQuantifier, columns, table, where, comparator);
     }
 
@@ -81,10 +85,9 @@ public class SelectBuilder implements Expressible, Callable<Expression> {
         return new SelectBuilder(setQuantifier, select, table, where, Option.<Comparator<? super Record>>some(comparator));
     }
 
-    @SuppressWarnings("unchecked")
     public SelectBuilder count() {
-        Callable2 count = CountNotNull.count();
-        Sequence<Keyword> sequence = Sequences.<Keyword>sequence(aggregate(count, STAR).as(keyword("record_count")));
+        Aggregate<Number, Number> aggregate = Aggregate.aggregate(CountNotNull.count(), keyword("*", Number.class));
+        Sequence<Keyword<?>> sequence = Sequences.<Keyword<?>>sequence(aggregate.as(keyword("record_count", Number.class)));
         return new SelectBuilder(setQuantifier, sequence, table, where, comparator);
     }
 
@@ -93,10 +96,21 @@ public class SelectBuilder implements Expressible, Callable<Expression> {
     }
 
     @SuppressWarnings("unchecked")
-    public <S> SelectBuilder reduce(Callable2 callable) {
+    public SelectBuilder reduce(Callable2 callable) {
         if (callable instanceof Aggregates) {
-            return new SelectBuilder(setQuantifier, ((Aggregates) callable).value(), table, where, comparator);
+            Aggregates aggregates = (Aggregates) callable;
+            return new SelectBuilder(setQuantifier, aggregates.value().map(evil()), table, where, comparator);
         }
-        return new SelectBuilder(setQuantifier, sequence(Aggregate.aggregate(callable, select().head())), table, where, comparator);
+        Aggregate aggregate = Aggregate.aggregate(callable, select().head());
+        return new SelectBuilder(setQuantifier, Sequences.<Keyword<?>>sequence(aggregate), table, where, comparator);
+    }
+
+    private Function1<Aggregate<?, ?>, Keyword<?>> evil() {
+        return new Function1<Aggregate<?, ?>, Keyword<?>>() {
+            @Override
+            public Keyword<?> call(Aggregate<?, ?> aggregate) throws Exception {
+                return aggregate;
+            }
+        };
     }
 }

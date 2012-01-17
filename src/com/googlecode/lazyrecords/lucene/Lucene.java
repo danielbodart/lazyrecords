@@ -40,7 +40,7 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.lazyrecords.Keywords.keyword;
 
 public class Lucene {
-    public static final Keyword RECORD_KEY = keyword("type");
+    public static final Keyword<String> RECORD_KEY = keyword("type", String.class);
 
     public static TermQuery record(RecordName recordName) {
         return new TermQuery(new Term(RECORD_KEY.toString(), recordName.value()));
@@ -105,7 +105,7 @@ public class Lucene {
             return or(sequence(((OrPredicate) predicate).predicates()).map(asQuery()));
         }
         if (predicate instanceof Not) {
-            return not(query(((Not) predicate).predicate()));
+            return not(query(((Not<Record>) predicate).predicate()));
         }
         if (predicate instanceof AllPredicate) {
             return new MatchAllDocsQuery();
@@ -123,13 +123,13 @@ public class Lucene {
     }
 
     public Query where(WherePredicate where) {
-        Keyword keyword = (Keyword) where.callable();
-        Predicate predicate = where.predicate();
+        Keyword<?> keyword = (Keyword) where.callable();
+        Predicate<?> predicate = where.predicate();
         return query(keyword, predicate);
     }
 
     @SuppressWarnings("unchecked")
-    private Query query(Keyword keyword, Predicate predicate) {
+    private Query query(Keyword<?> keyword, Predicate predicate) {
         if (predicate instanceof EqualsPredicate) {
             return equalTo(keyword, ((Value) predicate).value());
         }
@@ -186,35 +186,35 @@ public class Lucene {
         throw new UnsupportedOperationException();
     }
 
-    private Query equalTo(Keyword keyword, Object value) {
+    private Query equalTo(Keyword<?> keyword, Object value) {
         return mappings.get(keyword.forClass()).equalTo(keyword.toString(), value);
     }
 
-    private Query greaterThan(Keyword keyword, Object value) {
+    private Query greaterThan(Keyword<?> keyword, Object value) {
         return mappings.get(keyword.forClass()).greaterThan(keyword.toString(), value);
     }
 
-    private Query greaterThanOrEqual(Keyword keyword, Object value) {
+    private Query greaterThanOrEqual(Keyword<?> keyword, Object value) {
         return mappings.get(keyword.forClass()).greaterThanOrEqual(keyword.toString(), value);
     }
 
-    private Query lessThan(Keyword keyword, Object value) {
+    private Query lessThan(Keyword<?> keyword, Object value) {
         return mappings.get(keyword.forClass()).lessThan(keyword.toString(), value);
     }
 
-    private Query lessThanOrEqual(Keyword keyword, Object value) {
+    private Query lessThanOrEqual(Keyword<?> keyword, Object value) {
         return mappings.get(keyword.forClass()).lessThanOrEqual(keyword.toString(), value);
     }
 
-    private Query between(Keyword keyword, Object lower, Object upper) {
+    private Query between(Keyword<?> keyword, Object lower, Object upper) {
         return mappings.get(keyword.forClass()).between(keyword.toString(), lower, upper);
     }
 
-    private Query notNull(Keyword keyword) {
+    private Query notNull(Keyword<?> keyword) {
         return mappings.get(keyword.forClass()).notNull(keyword.toString());
     }
 
-    private Function1<Object, Query> asQuery(final Keyword keyword) {
+    private Function1<Object, Query> asQuery(final Keyword<?> keyword) {
         return new Function1<Object, Query>() {
             public Query call(Object o) throws Exception {
                 return equalTo(keyword, o);

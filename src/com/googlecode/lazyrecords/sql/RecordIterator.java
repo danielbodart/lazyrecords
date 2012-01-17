@@ -16,6 +16,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
+import static com.googlecode.lazyrecords.Keywords.safeCast;
 import static com.googlecode.totallylazy.numbers.Numbers.range;
 import static com.googlecode.lazyrecords.MapRecord.record;
 import static com.googlecode.lazyrecords.RecordMethods.getKeyword;
@@ -25,12 +26,12 @@ public class RecordIterator extends StatefulIterator<Record> implements Closeabl
     private final Connection connection;
     private final Mappings mappings;
     private final Expression expression;
-    private final Sequence<Keyword> definitions;
+    private final Sequence<Keyword<?>> definitions;
     private final PrintStream logger;
     private PreparedStatement preparedStatement;
     private ResultSet resultSet;
 
-    public RecordIterator(final Connection connection, final Mappings mappings, final Expression expression, final Sequence<Keyword> definitions, final PrintStream logger) {
+    public RecordIterator(final Connection connection, final Mappings mappings, final Expression expression, final Sequence<Keyword<?>> definitions, final PrintStream logger) {
         this.definitions = definitions;
         this.logger = logger;
         this.connection = connection;
@@ -39,7 +40,6 @@ public class RecordIterator extends StatefulIterator<Record> implements Closeabl
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     protected Record getNext() throws Exception {
         ResultSet resultSet = getResultSet();
         boolean hasNext = resultSet.next();
@@ -52,8 +52,8 @@ public class RecordIterator extends StatefulIterator<Record> implements Closeabl
         final ResultSetMetaData metaData = resultSet.getMetaData();
         for (Integer index : range(1).take(metaData.getColumnCount()).safeCast(Integer.class)) {
             final String name = metaData.getColumnLabel(index);
-            Keyword keyword = getKeyword(name, definitions);
-            record.set(keyword, mappings.getValue(resultSet, index, keyword.forClass()));
+            Keyword<?> keyword = getKeyword(name, definitions);
+            record.set(safeCast(keyword), mappings.getValue(resultSet, index, keyword.forClass()));
         }
 
         return record;

@@ -9,7 +9,7 @@ public class AliasedKeyword<T> extends AbstractKeyword<T>{
         this.name = name;
     }
 
-    public Keyword source() {
+    public Keyword<T> source() {
         return source;
     }
 

@@ -8,9 +8,9 @@ public interface Record {
 
     <T> Record set(Keyword<T> name, T value);
 
-    Sequence<Pair<Keyword, Object>> fields();
+    Sequence<Pair<Keyword<?>, Object>> fields();
 
-    Sequence<Keyword> keywords();
+    Sequence<Keyword<?>> keywords();
 
-    Sequence<Object> getValuesFor(Sequence<Keyword> keywords);
+    Sequence<Object> getValuesFor(Sequence<Keyword<?>> keywords);
 }

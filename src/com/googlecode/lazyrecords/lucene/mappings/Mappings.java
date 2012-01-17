@@ -5,6 +5,7 @@ import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Pair;
+import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
@@ -55,46 +56,46 @@ public class Mappings {
         return map.get(aClass);
     }
 
-    public Function1<? super Document, Record> asRecord(final Sequence<Keyword> definitions) {
+    public Function1<Document, Record> asRecord(final Sequence<Keyword<?>> definitions) {
         return new Function1<Document, Record>() {
             public Record call(Document document) throws Exception {
                 return sequence(document.getFields()).
                         map(asPair(definitions)).
-                        filter(where(Callables.first(Keyword.class), is(not(Lucene.RECORD_KEY)))).
+                        filter(where(Callables.<Keyword<?>>first(), is(Predicates.<Keyword<?>>not(Lucene.RECORD_KEY)))).
                         fold(new SourceRecord<Document>(document), updateValues());
             }
         };
     }
 
-    public Function1<? super Fieldable, Pair<Keyword, Object>> asPair(final Sequence<Keyword> definitions) {
-        return new Function1<Fieldable, Pair<Keyword, Object>>() {
-            public Pair<Keyword, Object> call(Fieldable fieldable) throws Exception {
+    public Function1<Fieldable, Pair<Keyword<?>, Object>> asPair(final Sequence<Keyword<?>> definitions) {
+        return new Function1<Fieldable, Pair<Keyword<?>, Object>>() {
+            public Pair<Keyword<?>, Object> call(Fieldable fieldable) throws Exception {
                 String name = fieldable.name();
-                Keyword keyword = RecordMethods.getKeyword(name, definitions);
-                return pair(keyword, get(keyword.forClass()).toValue(fieldable));
+                Keyword<?> keyword = RecordMethods.getKeyword(name, definitions);
+                return Pair.<Keyword<?>, Object>pair(keyword, get(keyword.forClass()).toValue(fieldable));
             }
         };
     }
 
-    public Function1<? super Pair<Keyword, Object>, Fieldable> asField(final Sequence<Keyword> definitions) {
-        return new Function1<Pair<Keyword, Object>, Fieldable>() {
-            public Fieldable call(Pair<Keyword, Object> pair) throws Exception {
+    public Function1<Pair<Keyword<?>, Object>, Fieldable> asField(final Sequence<Keyword<?>> definitions) {
+        return new Function1<Pair<Keyword<?>, Object>, Fieldable>() {
+            public Fieldable call(Pair<Keyword<?>, Object> pair) throws Exception {
                 if (pair.second() == null) {
                     return null;
                 }
 
                 String name = pair.first().name();
-                Keyword keyword = RecordMethods.getKeyword(name, definitions);
+                Keyword<?> keyword = RecordMethods.getKeyword(name, definitions);
                 return get(keyword.forClass()).toField(name, pair.second());
             }
         };
     }
 
-    public Function1<? super Record, Document> asDocument(final RecordName recordName, final Sequence<Keyword> definitions) {
+    public Function1<? super Record, Document> asDocument(final RecordName recordName, final Sequence<Keyword<?>> definitions) {
         return new Function1<Record, Document>() {
             public Document call(Record record) throws Exception {
                 return record.fields().
-                        add(pair(Lucene.RECORD_KEY, (Object) recordName)).
+                        add(Pair.<Keyword<?>, Object>pair(Lucene.RECORD_KEY, recordName)).
                         map(asField(definitions)).
                         filter(notNullValue()).
                         fold(new Document(), intoFields());

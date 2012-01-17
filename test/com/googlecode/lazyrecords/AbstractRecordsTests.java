@@ -258,7 +258,7 @@ public abstract class AbstractRecordsTests<T extends Records> {
         Keyword<String> first = keyword("first", String.class);
         Record record = records.get(people).filter(where(lastName, is("bodart"))).map(select(firstName.as(first))).head();
         assertThat(record.get(first), Matchers.is("dan"));
-        Keyword<String> result = record.keywords().head();
+        Keyword result = record.keywords().head();
         assertThat(result, Matchers.is(first));
     }
 

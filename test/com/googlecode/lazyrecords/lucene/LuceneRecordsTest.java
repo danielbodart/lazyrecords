@@ -47,7 +47,7 @@ public class LuceneRecordsTest extends AbstractRecordsTests<LuceneRecords> {
     @Test
     public void canQueryIndexDirectly() throws Exception {
         QueryParser parser = new QueryParser(VERSION, null, ANALYZER);
-        Sequence<Record> results = records.query(parser.parse("type:people +firstName:da*"), Sequences.<Keyword>sequence(lastName));
+        Sequence<Record> results = records.query(parser.parse("type:people +firstName:da*"), Sequences.<Keyword<?>>sequence(lastName));
         assertThat(results.map(lastName), hasExactly("bodart"));
     }
 }

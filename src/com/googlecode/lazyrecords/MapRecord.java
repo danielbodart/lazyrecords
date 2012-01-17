@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords;
 
+import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Sequence;
 
@@ -15,7 +16,7 @@ import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class MapRecord implements Record {
-    private final Map<Keyword, Object> fields = new LinkedHashMap<Keyword, Object>();
+    private final Map<Keyword<?>, Object> fields = new LinkedHashMap<Keyword<?>, Object>();
 
     public <T> T get(Keyword<T> keyword) {
         return keyword.forClass().cast(fields.get(keyword));
@@ -26,16 +27,16 @@ public class MapRecord implements Record {
         return this;
     }
 
-    public Sequence<Pair<Keyword, Object>> fields() {
+    public Sequence<Pair<Keyword<?>, Object>> fields() {
         return pairs(fields);
     }
 
-    public Sequence<Keyword> keywords() {
+    public Sequence<Keyword<?>> keywords() {
         return sequence(fields.keySet());
     }
 
-    public Sequence<Object> getValuesFor(Sequence<Keyword> keywords) {
-        return fields().filter(where(first(Keyword.class), is(in(keywords)))).map(second());
+    public Sequence<Object> getValuesFor(Sequence<Keyword<?>> keywords) {
+        return fields().filter(where(Callables.<Keyword<?>>first(), is(in(keywords)))).map(second());
     }
 
     @Override

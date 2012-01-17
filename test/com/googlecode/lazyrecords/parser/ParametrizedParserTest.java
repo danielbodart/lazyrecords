@@ -19,7 +19,7 @@ public class ParametrizedParserTest {
     @Test
     public void canInjectCurrentTime() throws Exception{
         PredicateParser parser = new ParametrizedParser(new StandardParser(), new ParserParameters().add("now", Dates.date(2001, 2, 3)));
-        Predicate<Record> predicate = parser.parse("Created > $now$", Sequences.<Keyword>empty());
+        Predicate<Record> predicate = parser.parse("Created > $now$", Sequences.<Keyword<?>>empty());
         
         Keyword<Date> created = keyword("Created", Date.class);
         assertThat(predicate.matches(record().set(created, date(2001, 2, 4))), is(true));

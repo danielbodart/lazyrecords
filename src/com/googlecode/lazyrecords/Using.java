@@ -11,17 +11,17 @@ import static com.googlecode.totallylazy.Predicates.is;
 import static com.googlecode.totallylazy.Predicates.where;
 
 public class Using implements Callable1<Record, Predicate<Record>> {
-    private final Sequence<Keyword> keywords;
+    private final Sequence<Keyword<?>> keywords;
 
-    public Using(Sequence<Keyword> keywords) {
+    public Using(Sequence<Keyword<?>> keywords) {
         this.keywords = keywords;
     }
 
     public static Using using(Keyword<?>... keyword) {
-        return new Using(Sequences.<Keyword>sequence(keyword));
+        return new Using(Sequences.sequence(keyword));
     }
 
-    public static Using using(Sequence<Keyword> keyword) {
+    public static Using using(Sequence<Keyword<?>> keyword) {
         return new Using(keyword);
     }
 
@@ -29,16 +29,15 @@ public class Using implements Callable1<Record, Predicate<Record>> {
         return and(keywords.map(asPredicate(record)).toArray(Predicate.class));
     }
 
-    @SuppressWarnings("unchecked")
-    private Function1<Keyword, Predicate<Record>> asPredicate(final Record record) {
-        return new Function1<Keyword, Predicate<Record>>() {
-            public Predicate<Record> call(Keyword keyword) throws Exception {
+    private Function1<Keyword<?>, Predicate<Record>> asPredicate(final Record record) {
+        return new Function1<Keyword<?>, Predicate<Record>>() {
+            public Predicate<Record> call(Keyword<?> keyword) throws Exception {
                 return where(keyword, is(record.get(keyword)));
             }
         };
     }
 
-    public Sequence<Keyword> keywords() {
+    public Sequence<Keyword<?>> keywords() {
         return keywords;
     }
 }
