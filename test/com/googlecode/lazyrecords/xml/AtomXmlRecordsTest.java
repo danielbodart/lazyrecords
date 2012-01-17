@@ -3,6 +3,7 @@ package com.googlecode.lazyrecords.xml;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.Record;
+import com.googlecode.lazyrecords.RecordName;
 import com.googlecode.lazyrecords.Records;
 import com.googlecode.lazyrecords.xml.mappings.DateMapping;
 import com.googlecode.lazyrecords.xml.mappings.Mappings;
@@ -18,7 +19,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 public class AtomXmlRecordsTest {
-    private static final Keyword<Object> entries = Keywords.keyword("/feed/entry");
+    private static final RecordName entries = RecordName.recordName("/feed/entry");
     private static final Keyword<Integer> id = Keywords.keyword("id", Integer.class);
     private static final Keyword<URI> link = Keywords.keyword("link/@href", URI.class);
     private static final Keyword<String> content = Keywords.keyword("content", String.class);

@@ -7,6 +7,7 @@ import com.amazonaws.services.simpledb.model.CreateDomainRequest;
 import com.amazonaws.services.simpledb.model.DeletableItem;
 import com.amazonaws.services.simpledb.model.DeleteDomainRequest;
 import com.amazonaws.services.simpledb.model.Item;
+import com.googlecode.lazyrecords.RecordName;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
@@ -45,21 +46,21 @@ public class SimpleDBRecords extends AbstractRecords {
     }
 
     @Override
-    public void define(Keyword recordName, Keyword<?>... fields) {
+    public void define(RecordName recordName, Keyword<?>... fields) {
         super.define(recordName, fields);
-        sdb.createDomain(new CreateDomainRequest(recordName.name()));
+        sdb.createDomain(new CreateDomainRequest(recordName.value()));
     }
 
     @Override
-    public boolean exists(Keyword recordName) {
-        return sdb.listDomains().withDomainNames(recordName.name()).getDomainNames().size() > 0;
+    public boolean exists(RecordName recordName) {
+        return sdb.listDomains().withDomainNames(recordName.value()).getDomainNames().size() > 0;
     }
 
-    public Sequence<Record> get(Keyword recordName) {
+    public Sequence<Record> get(RecordName recordName) {
         return new SimpleDBSequence<Record>(sdb, from(recordName).select(definitions(recordName)), mappings, mappings.asRecord(definitions(recordName)), logger, consistentRead);
     }
 
-    public Number add(final Keyword recordName, Sequence<Record> records) {
+    public Number add(final RecordName recordName, Sequence<Record> records) {
         if (records.isEmpty()) {
             return 0;
         }
@@ -69,7 +70,7 @@ public class SimpleDBRecords extends AbstractRecords {
                 reduce(sum());
     }
 
-    public Number remove(Keyword recordName, Predicate<? super Record> predicate) {
+    public Number remove(RecordName recordName, Predicate<? super Record> predicate) {
         if (!exists(recordName)) {
             return 0;
         }
@@ -84,7 +85,7 @@ public class SimpleDBRecords extends AbstractRecords {
     }
 
     @Override
-    public Number remove(Keyword recordName) {
+    public Number remove(RecordName recordName) {
         Record head = get(recordName).map(select(Keywords.keyword("count(*)", String.class))).head();
         Number result = Numbers.valueOf(head.get(Keywords.keyword("Count", String.class))).get();
         List<Keyword<?>> undefine = undefine(recordName);
@@ -93,8 +94,8 @@ public class SimpleDBRecords extends AbstractRecords {
     }
 
     @Override
-    public List<Keyword<?>> undefine(Keyword recordName) {
-        sdb.deleteDomain(new DeleteDomainRequest(recordName.name()));
+    public List<Keyword<?>> undefine(RecordName recordName) {
+        sdb.deleteDomain(new DeleteDomainRequest(recordName.value()));
         return super.undefine(recordName);
     }
 
@@ -108,19 +109,19 @@ public class SimpleDBRecords extends AbstractRecords {
         };
     }
 
-    private Function1<Sequence<Record>, Number> putAttributes(final Keyword recordName) {
+    private Function1<Sequence<Record>, Number> putAttributes(final RecordName recordName) {
         return new Function1<Sequence<Record>, Number>() {
             public Number call(Sequence<Record> batch) throws Exception {
-                sdb.batchPutAttributes(new BatchPutAttributesRequest(recordName.name(), batch.map(mappings.toReplaceableItem()).toList()));
+                sdb.batchPutAttributes(new BatchPutAttributesRequest(recordName.value(), batch.map(mappings.toReplaceableItem()).toList()));
                 return batch.size();
             }
         };
     }
 
-    private Function1<Sequence<Record>, Number> deleteAttributes(final Keyword recordName) {
+    private Function1<Sequence<Record>, Number> deleteAttributes(final RecordName recordName) {
         return new Function1<Sequence<Record>, Number>() {
             public Number call(Sequence<Record> batch) throws Exception {
-                sdb.batchDeleteAttributes(new BatchDeleteAttributesRequest(recordName.name(), batch.map(asItem()).toList()));
+                sdb.batchDeleteAttributes(new BatchDeleteAttributesRequest(recordName.value(), batch.map(asItem()).toList()));
                 return batch.size();
             }
         };

@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.lucene;
 
+import com.googlecode.lazyrecords.RecordName;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Predicate;
@@ -41,8 +42,8 @@ import static com.googlecode.lazyrecords.Keywords.keyword;
 public class Lucene {
     public static final Keyword RECORD_KEY = keyword("type");
 
-    public static TermQuery record(Keyword recordName) {
-        return new TermQuery(new Term(RECORD_KEY.toString(), recordName.toString()));
+    public static TermQuery record(RecordName recordName) {
+        return new TermQuery(new Term(RECORD_KEY.toString(), recordName.value()));
     }
 
     public static Query and(Query... queries) {

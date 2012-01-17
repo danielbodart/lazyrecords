@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.UUID;
 
+import static com.googlecode.lazyrecords.RecordName.recordName;
 import static com.googlecode.totallylazy.Callables.ascending;
 import static com.googlecode.totallylazy.Callables.descending;
 import static com.googlecode.totallylazy.Pair.pair;
@@ -64,13 +65,13 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.fail;
 
 public abstract class AbstractRecordsTests<T extends Records> {
-    protected static Keyword people = keyword("people");
+    protected static RecordName people = recordName("people");
     protected static Keyword<Integer> age = keyword("age", Integer.class);
     protected static Keyword<Date> dob = keyword("dob", Date.class);
     protected static ImmutableKeyword<String> firstName = keyword("firstName", String.class);
     protected static Keyword<String> lastName = keyword("lastName", String.class);
 
-    protected static Keyword books = keyword("books");
+    protected static RecordName books = recordName("books");
     protected static Keyword<URI> isbn = keyword("isbn", URI.class);
     protected static Keyword<String> title = keyword("title", String.class);
     protected static Keyword<Boolean> inPrint = keyword("inPrint", Boolean.class);

@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.sql;
 
+import com.googlecode.lazyrecords.RecordName;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.CloseableList;
 import com.googlecode.totallylazy.Group;
@@ -60,7 +61,7 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
     }
 
 
-    public RecordSequence get(Keyword recordName) {
+    public RecordSequence get(RecordName recordName) {
         return new RecordSequence(this, from(recordName).select(definitions(recordName)), logger);
     }
 
@@ -78,7 +79,7 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
         return iterator;
     }
 
-    public void define(Keyword recordName, Keyword<?>... fields) {
+    public void define(RecordName recordName, Keyword<?>... fields) {
         super.define(recordName, fields);
         if(createTable.equals(CreateTable.Disabled)){
             return;
@@ -90,7 +91,7 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
     }
 
     @Override
-    public List<Keyword<?>> undefine(Keyword recordName) {
+    public List<Keyword<?>> undefine(RecordName recordName) {
         if(exists(recordName)){
             update(dropTable(recordName));
         }
@@ -99,7 +100,7 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
 
     private static final Keyword<Integer> one = keyword("1", Integer.class);
 
-    public boolean exists(Keyword recordName) {
+    public boolean exists(RecordName recordName) {
         try {
             query(from(recordName).select(one).where(Predicates.where(one, is(2))).build(), Sequences.<Keyword>empty()).realise();
             return true;
@@ -108,7 +109,7 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
         }
     }
 
-    public Number add(final Keyword recordName, final Sequence<Record> records) {
+    public Number add(final RecordName recordName, final Sequence<Record> records) {
         if (records.isEmpty()) {
             return 0;
         }
@@ -116,7 +117,7 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
     }
 
     @Override
-    public Number set(Keyword recordName, Sequence<? extends Pair<? extends Predicate<? super Record>, Record>> records) {
+    public Number set(RecordName recordName, Sequence<? extends Pair<? extends Predicate<? super Record>, Record>> records) {
         return update(records.map(updateStatement(recordName)));
     }
 
@@ -136,11 +137,11 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
         }).reduce(Numbers.sum());
     }
 
-    public Number remove(Keyword recordName, Predicate<? super Record> predicate) {
+    public Number remove(RecordName recordName, Predicate<? super Record> predicate) {
         return update(deleteStatement(recordName, predicate));
     }
 
-    public Number remove(Keyword recordName) {
+    public Number remove(RecordName recordName) {
         if (!exists(recordName)) {
             return 0;
         }

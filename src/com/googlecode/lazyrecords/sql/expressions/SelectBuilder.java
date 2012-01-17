@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
+import com.googlecode.lazyrecords.RecordName;
 import com.googlecode.totallylazy.Callable2;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Predicate;
@@ -27,11 +28,11 @@ public class SelectBuilder implements Expressible, Callable<Expression> {
     public static final Sequence<Keyword> ALL_COLUMNS = Sequences.<Keyword>sequence(STAR);
     private final SetQuantifier setQuantifier;
     private final Sequence<Keyword> select;
-    private final Keyword table;
+    private final RecordName table;
     private final Option<Predicate<? super Record>> where;
     private final Option<Comparator<? super Record>> comparator;
 
-    private SelectBuilder(SetQuantifier setQuantifier, Sequence<? extends Keyword> select, Keyword table, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> comparator) {
+    private SelectBuilder(SetQuantifier setQuantifier, Sequence<? extends Keyword> select, RecordName table, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> comparator) {
         this.setQuantifier = setQuantifier;
         this.select = select.isEmpty() ? ALL_COLUMNS : select.safeCast(Keyword.class);
         this.table = table;
@@ -60,7 +61,7 @@ public class SelectBuilder implements Expressible, Callable<Expression> {
         return select;
     }
 
-    public static SelectBuilder from(Keyword table) {
+    public static SelectBuilder from(RecordName table) {
         return new SelectBuilder(ALL, ALL_COLUMNS, table, Option.<Predicate<? super Record>>none(), Option.<Comparator<? super Record>>none());
     }
 

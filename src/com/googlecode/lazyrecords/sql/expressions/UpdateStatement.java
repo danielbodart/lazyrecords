@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
+import com.googlecode.lazyrecords.RecordName;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicate;
@@ -15,7 +16,7 @@ public class UpdateStatement extends CompoundExpression {
     public static final TextOnlyExpression UPDATE = textOnly("update");
     public static final TextOnlyExpression SET = textOnly("set");
 
-    public UpdateStatement(Keyword recordName, Predicate<? super Record> predicate, Record record) {
+    public UpdateStatement(RecordName recordName, Predicate<? super Record> predicate, Record record) {
         super(
                 UPDATE.join(textOnly(recordName)),
                 setClause(record),
@@ -27,11 +28,11 @@ public class UpdateStatement extends CompoundExpression {
         return SET.join(expression(record.keywords().map(Strings.format("%s=?")).toString(), record.getValuesFor(record.keywords())));
     }
 
-    public static Expression updateStatement(Keyword recordName, Predicate<? super Record> predicate, Record record) {
+    public static Expression updateStatement(RecordName recordName, Predicate<? super Record> predicate, Record record) {
         return new UpdateStatement(recordName, predicate, record);
     }
 
-    public static Function1<Pair<? extends Predicate<? super Record>, Record>, Expression> updateStatement(final Keyword recordName) {
+    public static Function1<Pair<? extends Predicate<? super Record>, Record>, Expression> updateStatement(final RecordName recordName) {
         return new Function1<Pair<? extends Predicate<? super Record>, Record>, Expression>() {
             public Expression call(Pair<? extends Predicate<? super Record>, Record> recordPair) throws Exception {
                 return updateStatement(recordName, recordPair.first(), recordPair.second());

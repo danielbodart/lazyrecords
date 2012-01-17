@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.memory;
 
+import com.googlecode.lazyrecords.RecordName;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.lazyrecords.AbstractRecords;
@@ -15,20 +16,20 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.numbers.Numbers.increment;
 
 public class MemoryRecords extends AbstractRecords {
-    private final Map<Keyword, List<Record>> memory = new HashMap<Keyword, List<Record>>();
+    private final Map<RecordName, List<Record>> memory = new HashMap<RecordName, List<Record>>();
 
-    public Sequence<Record> get(Keyword recordName) {
+    public Sequence<Record> get(RecordName recordName) {
         return sequence(recordsFor(recordName));
     }
 
-    private List<Record> recordsFor(Keyword recordName) {
+    private List<Record> recordsFor(RecordName recordName) {
         if (!memory.containsKey(recordName)) {
             memory.put(recordName, new ArrayList<Record >());
         }
         return memory.get(recordName);
     }
 
-    public Number add(Keyword recordName, Sequence<Record> records) {
+    public Number add(RecordName recordName, Sequence<Record> records) {
         if (records.isEmpty()) {
             return 0;
         }
@@ -42,7 +43,7 @@ public class MemoryRecords extends AbstractRecords {
         return count;
     }
 
-    public Number remove(Keyword recordName, Predicate<? super Record> predicate) {
+    public Number remove(RecordName recordName, Predicate<? super Record> predicate) {
         List<Record> matches = sequence(recordsFor(recordName)).
                 filter(predicate).
                 toList();

@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.xml;
 
+import com.googlecode.lazyrecords.RecordName;
 import com.googlecode.totallylazy.Xml;
 import com.googlecode.lazyrecords.AbstractRecordsTests;
 import com.googlecode.lazyrecords.Keywords;
@@ -12,8 +13,8 @@ public class XmlRecordsTest extends AbstractRecordsTests<XmlRecords>{
     private Document document;
 
     public XmlRecordsTest() {
-        people = Keywords.keyword("/data/user");
-        books = Keywords.keyword("/data/book");
+        people = RecordName.recordName("/data/user");
+        books = RecordName.recordName("/data/book");
     }
 
     @Override

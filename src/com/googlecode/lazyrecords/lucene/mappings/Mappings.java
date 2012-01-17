@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.lucene.mappings;
 
+import com.googlecode.lazyrecords.RecordName;
 import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
@@ -89,7 +90,7 @@ public class Mappings {
         };
     }
 
-    public Function1<? super Record, Document> asDocument(final Keyword recordName, final Sequence<Keyword> definitions) {
+    public Function1<? super Record, Document> asDocument(final RecordName recordName, final Sequence<Keyword> definitions) {
         return new Function1<Record, Document>() {
             public Document call(Record record) throws Exception {
                 return record.fields().

@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.xml;
 
+import com.googlecode.lazyrecords.RecordName;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Predicate;
@@ -34,22 +35,22 @@ public class XmlRecords extends AbstractRecords {
         this(document, new Mappings());
     }
 
-    public Sequence<Record> get(Keyword recordName) {
-        Sequence<Node> nodes = Xml.selectNodes(document, recordName.toString());
+    public Sequence<Record> get(RecordName recordName) {
+        Sequence<Node> nodes = Xml.selectNodes(document, recordName.value());
         return new XmlSequence(nodes, mappings, definitions(recordName));
     }
 
-    public Number add(Keyword recordName, Sequence<Record> records) {
+    public Number add(RecordName recordName, Sequence<Record> records) {
         for (Record record : records) {
-            Element newElement = record.keywords().fold(document.createElement(toTagName(recordName.toString())), addNodes(record));
+            Element newElement = record.keywords().fold(document.createElement(toTagName(recordName.value())), addNodes(record));
             Node parent = Xml.selectNodes(document, toParent(recordName)).head();
             parent.appendChild(newElement);
         }
         return records.size();
     }
 
-    private String toParent(Keyword recordName) {
-        String xpath = recordName.toString();
+    private String toParent(RecordName recordName) {
+        String xpath = recordName.value();
         String[] parts = xpath.split("/");
         return Sequences.sequence(parts).take(parts.length - 1).toString("/");
     }
@@ -76,7 +77,7 @@ public class XmlRecords extends AbstractRecords {
         return parts[parts.length - 1];
     }
 
-    public Number remove(Keyword recordName, Predicate<? super Record> predicate) {
+    public Number remove(RecordName recordName, Predicate<? super Record> predicate) {
         Sequence<Node> map = get(recordName).filter(predicate).map(asNode());
         return Xml.remove(map).size();
     }
@@ -90,7 +91,7 @@ public class XmlRecords extends AbstractRecords {
         };
     }
 
-    public Number remove(Keyword recordName) {
-        return Xml.remove(document, recordName.toString()).size();
+    public Number remove(RecordName recordName) {
+        return Xml.remove(document, recordName.value()).size();
     }
 }

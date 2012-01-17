@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
+import com.googlecode.lazyrecords.RecordName;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.lazyrecords.Keyword;
 
@@ -15,11 +16,11 @@ import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
 import static java.lang.String.format;
 
 public class TableDefinition extends TextOnlyExpression {
-    public TableDefinition(Keyword recordName, Keyword<?>[] fields) {
+    public TableDefinition(RecordName recordName, Keyword<?>[] fields) {
         super(format("create table %s (%s)", recordName, sequence(fields).map(asColumn())));
     }
 
-    public static TableDefinition tableDefinition(Keyword recordName, Keyword<?>[] fields) {
+    public static TableDefinition tableDefinition(RecordName recordName, Keyword<?>[] fields) {
         return new TableDefinition(recordName, fields);
     }
 
@@ -46,7 +47,7 @@ public class TableDefinition extends TextOnlyExpression {
         };
     }
 
-    public static CompoundExpression dropTable(Keyword recordName) {
+    public static CompoundExpression dropTable(RecordName recordName) {
         return textOnly("drop table").join(textOnly(recordName));
     }
 }
