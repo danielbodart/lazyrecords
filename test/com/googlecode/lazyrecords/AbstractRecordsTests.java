@@ -5,6 +5,7 @@ import com.googlecode.totallylazy.Closeables;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
+import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
 import com.googlecode.totallylazy.numbers.Numbers;
 import org.hamcrest.CoreMatchers;
@@ -253,12 +254,11 @@ public abstract class AbstractRecordsTests<T extends Records> {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void supportsAliasingAKeyword() throws Exception {
         Keyword<String> first = keyword("first", String.class);
         Record record = records.get(people).filter(where(lastName, is("bodart"))).map(select(firstName.as(first))).head();
         assertThat(record.get(first), Matchers.is("dan"));
-        Keyword result = record.keywords().head();
+        Keyword<String> result = Unchecked.cast(record.keywords().head());
         assertThat(result, Matchers.is(first));
     }
 

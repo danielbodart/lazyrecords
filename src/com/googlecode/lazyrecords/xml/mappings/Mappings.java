@@ -1,5 +1,7 @@
 package com.googlecode.lazyrecords.xml.mappings;
 
+import com.googlecode.totallylazy.Unchecked;
+
 import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
@@ -20,9 +22,8 @@ public class Mappings {
         add(Object.class, new ObjectMapping());
     }
 
-    @SuppressWarnings("unchecked")
     public <T> Mappings add(final Class<T> type, final Mapping<T> mapping) {
-        map.put(type, (Mapping<Object>) mapping);
+        map.put(type, Unchecked.<Mapping<Object>>cast(mapping));
         return this;
     }
 

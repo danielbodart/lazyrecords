@@ -3,6 +3,7 @@ package com.googlecode.lazyrecords.sql.mappings;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Unchecked;
 
 import java.net.URI;
 import java.sql.PreparedStatement;
@@ -34,9 +35,8 @@ public class Mappings {
         add(Object.class, new ObjectMapping());
     }
 
-    @SuppressWarnings("unchecked")
     public <T> Mappings add(final Class<T> type, final Mapping<T> mapping) {
-        map.put(type, (Mapping<Object>) mapping);
+        map.put(type, Unchecked.<Mapping<Object>>cast(mapping));
         return this;
     }
 

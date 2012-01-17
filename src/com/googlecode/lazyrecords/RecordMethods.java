@@ -8,12 +8,12 @@ import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
+import com.googlecode.totallylazy.Unchecked;
 
 import java.util.Map;
 
 import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.lazyrecords.Keywords.name;
-import static com.googlecode.lazyrecords.Keywords.safeCast;
 import static com.googlecode.totallylazy.Callables.asString;
 import static com.googlecode.totallylazy.Callables.first;
 import static com.googlecode.totallylazy.Maps.map;
@@ -27,7 +27,7 @@ public class RecordMethods {
     public static Function2<Record, Pair<Keyword<?>, Object>, Record> updateValues() {
         return new Function2<Record, Pair<Keyword<?>, Object>, Record>() {
             public Record call(Record record, Pair<Keyword<?>, Object> field) throws Exception {
-                return record.set(safeCast(field.first()), field.second());
+                return record.set(Unchecked.<Keyword<Object>>cast(field.first()), field.second());
             }
         };
     }
@@ -44,8 +44,8 @@ public class RecordMethods {
         };
     }
 
-    public static Keyword<?> getKeyword(String name, Sequence<Keyword<?>> definitions) {
-        return definitions.find(where(name(), equalIgnoringCase(name))).getOrElse(keyword(name));
+    public static Keyword<Object> getKeyword(String name, Sequence<Keyword<?>> definitions) {
+        return definitions.<Keyword<Object>>unsafeCast().find(where(name(), equalIgnoringCase(name))).getOrElse(keyword(name));
     }
 
     public static Function1<Record, Sequence<Object>> getValuesFor(final Sequence<Keyword<?>> fields) {

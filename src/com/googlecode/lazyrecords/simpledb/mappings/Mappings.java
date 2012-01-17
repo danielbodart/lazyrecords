@@ -12,6 +12,7 @@ import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Unchecked;
 
 import java.net.URI;
 import java.util.Date;
@@ -39,9 +40,8 @@ public class Mappings {
         add(Object.class, new ObjectMapping());
     }
 
-    @SuppressWarnings("unchecked")
     public <T> Mappings add(final Class<T> type, final Mapping<T> mapping) {
-        map.put(type, (Mapping<Object>) mapping);
+        map.put(type, Unchecked.<Mapping<Object>>cast(mapping));
         return this;
     }
 
@@ -60,10 +60,9 @@ public class Mappings {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public <T> T toValue(final Class<T> aClass, String value) {
         try {
-            return value == null ? null : (T) get(aClass).toValue(value);
+            return value == null ? null : aClass.cast(get(aClass).toValue(value));
         } catch (Exception e) {
             throw new UnsupportedOperationException();
         }
@@ -81,7 +80,7 @@ public class Mappings {
         return new Function2<Record, Attribute, Record>() {
             public Record call(Record mapRecord, Attribute attribute) throws Exception {
                 Keyword<?> keyword = RecordMethods.getKeyword(attribute.getName(), definitions);
-                return mapRecord.set(Keywords.safeCast(keyword), toValue(keyword.forClass(), attribute.getValue()));
+                return mapRecord.set(Unchecked.<Keyword<Object>>cast(keyword), toValue(keyword.forClass(), attribute.getValue()));
             }
         };
     }

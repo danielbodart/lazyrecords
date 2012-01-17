@@ -8,10 +8,12 @@ import com.amazonaws.services.simpledb.model.DeletableItem;
 import com.amazonaws.services.simpledb.model.DeleteDomainRequest;
 import com.amazonaws.services.simpledb.model.Item;
 import com.googlecode.lazyrecords.RecordName;
+import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
+import com.googlecode.totallylazy.Value;
 import com.googlecode.totallylazy.numbers.Numbers;
 import com.googlecode.lazyrecords.AbstractRecords;
 import com.googlecode.lazyrecords.Keyword;
@@ -99,12 +101,10 @@ public class SimpleDBRecords extends AbstractRecords {
         return super.undefine(recordName);
     }
 
-    @SuppressWarnings("unchecked")
-    private Function1<? super Record, DeletableItem> asItem() {
-        return new Function1<Record, DeletableItem>() {
-            public DeletableItem call(Record record) throws Exception {
-                Item item = ((SourceRecord<Item>) record).value();
-                return new DeletableItem().withName(item.getName());
+    private Function1<Value<Item>, DeletableItem> asItem() {
+        return new Function1<Value<Item>, DeletableItem>() {
+            public DeletableItem call(Value<Item> value) throws Exception {
+                return new DeletableItem().withName(value.value().getName());
             }
         };
     }
@@ -121,7 +121,8 @@ public class SimpleDBRecords extends AbstractRecords {
     private Function1<Sequence<Record>, Number> deleteAttributes(final RecordName recordName) {
         return new Function1<Sequence<Record>, Number>() {
             public Number call(Sequence<Record> batch) throws Exception {
-                sdb.batchDeleteAttributes(new BatchDeleteAttributesRequest(recordName.value(), batch.map(asItem()).toList()));
+                List<DeletableItem> items = batch.<Value<Item>>unsafeCast().map(asItem()).toList();
+                sdb.batchDeleteAttributes(new BatchDeleteAttributesRequest(recordName.value(), items));
                 return batch.size();
             }
         };

@@ -37,11 +37,6 @@ public class Keywords {
         };
     }
 
-    @SuppressWarnings("unchecked")
-    public static Keyword<Object> safeCast(Keyword<?> keyword) {
-        return (Keyword<Object>) keyword;
-    }
-
     public static Sequence<Keyword<?>> keywords(Sequence<Record> results) {
         return results.flatMap(keywords()).unique().realise();
     }
@@ -50,15 +45,6 @@ public class Keywords {
         return new Function1<Record, Sequence<Keyword<?>>>() {
             public Sequence<Keyword<?>> call(Record record) throws Exception {
                 return record.keywords();
-            }
-        };
-    }
-
-    public static Function1<Keyword<?>, Keyword<?>> safeCast() {
-        return new Function1<Keyword<?>, Keyword<?>>() {
-            @Override
-            public Keyword<?> call(Keyword<?> keyword) throws Exception {
-                return keyword;
             }
         };
     }

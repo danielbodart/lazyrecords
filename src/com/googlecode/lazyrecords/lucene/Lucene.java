@@ -1,6 +1,7 @@
 package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.lazyrecords.RecordName;
+import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Predicate;
@@ -99,10 +100,10 @@ public class Lucene {
             return where((WherePredicate) predicate);
         }
         if (predicate instanceof AndPredicate) {
-            return and(sequence(((AndPredicate) predicate).predicates()).map(asQuery()));
+            return and(sequence(((AndPredicate<Record>) predicate).predicates()).map(asQuery()));
         }
         if (predicate instanceof OrPredicate) {
-            return or(sequence(((OrPredicate) predicate).predicates()).map(asQuery()));
+            return or(sequence(((OrPredicate<Record>) predicate).predicates()).map(asQuery()));
         }
         if (predicate instanceof Not) {
             return not(query(((Not<Record>) predicate).predicate()));
@@ -113,23 +114,21 @@ public class Lucene {
         throw new UnsupportedOperationException();
     }
 
-    @SuppressWarnings("unchecked")
-    private Function1<? super Predicate, Query> asQuery() {
-        return new Function1<Predicate, Query>() {
-            public Query call(Predicate predicate) throws Exception {
+    private Function1<Predicate<? super Record>, Query> asQuery() {
+        return new Function1<Predicate<? super Record>, Query>() {
+            public Query call(Predicate<? super Record> predicate) throws Exception {
                 return query(predicate);
             }
         };
     }
 
-    public Query where(WherePredicate where) {
-        Keyword<?> keyword = (Keyword) where.callable();
+    public Query where(WherePredicate<Record, ?> where) {
+        Keyword<?> keyword = (Keyword<?>) where.callable();
         Predicate<?> predicate = where.predicate();
         return query(keyword, predicate);
     }
 
-    @SuppressWarnings("unchecked")
-    private Query query(Keyword<?> keyword, Predicate predicate) {
+    private Query query(Keyword<?> keyword, Predicate<?> predicate) {
         if (predicate instanceof EqualsPredicate) {
             return equalTo(keyword, ((Value) predicate).value());
         }
@@ -162,7 +161,7 @@ public class Lucene {
             return not(query(keyword, p));
         }
         if (predicate instanceof InPredicate) {
-            Sequence values = ((InPredicate) predicate).values();
+            Sequence<?> values = ((InPredicate<?>) predicate).values();
             return or(values.map(asQuery(keyword)));
         }
         if (predicate instanceof StartsWithPredicate) {

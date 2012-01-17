@@ -2,8 +2,8 @@ package com.googlecode.lazyrecords;
 
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Unchecked;
 
-import static com.googlecode.lazyrecords.Keywords.safeCast;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class SelectCallable implements Callable1<Record, Record> {
@@ -16,7 +16,7 @@ public class SelectCallable implements Callable1<Record, Record> {
     public Record call(Record source) throws Exception {
         Record result = new MapRecord();
         for (Keyword<?> keyword : keywords) {
-            result.set(safeCast(keyword), keyword.call(source));
+            result.set(Unchecked.<Keyword<Object>>cast(keyword), keyword.call(source));
         }
         return result;
     }

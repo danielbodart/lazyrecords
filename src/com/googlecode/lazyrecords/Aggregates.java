@@ -2,6 +2,7 @@ package com.googlecode.lazyrecords;
 
 import com.googlecode.totallylazy.Callable2;
 import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.Value;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
@@ -18,14 +19,10 @@ public class Aggregates implements Callable2<Record, Record, Record>, Value<Sequ
         for (Aggregate<?,?> aggregate : aggregates) {
             Object current = accumulatorValue(accumulator, aggregate);
             Object next = nextRecord.get(aggregate.source());
-            result.set(safeCast(aggregate), safeCast(aggregate).call(current, next));
+            Aggregate<Object, Object> cast = Unchecked.cast(aggregate);
+            result.set(cast, cast.call(current, next));
         }
         return result;
-    }
-
-    @SuppressWarnings("unchecked")
-    private Aggregate<Object, Object> safeCast(Aggregate<?, ?> aggregate) {
-        return (Aggregate<Object, Object>) aggregate;
     }
 
     private Object accumulatorValue(Record record, Aggregate<?,?> aggregate) {

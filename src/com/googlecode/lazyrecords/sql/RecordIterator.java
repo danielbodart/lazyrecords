@@ -1,6 +1,7 @@
 package com.googlecode.lazyrecords.sql;
 
 import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.iterators.StatefulIterator;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
@@ -16,7 +17,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
-import static com.googlecode.lazyrecords.Keywords.safeCast;
 import static com.googlecode.totallylazy.numbers.Numbers.range;
 import static com.googlecode.lazyrecords.MapRecord.record;
 import static com.googlecode.lazyrecords.RecordMethods.getKeyword;
@@ -52,8 +52,8 @@ public class RecordIterator extends StatefulIterator<Record> implements Closeabl
         final ResultSetMetaData metaData = resultSet.getMetaData();
         for (Integer index : range(1).take(metaData.getColumnCount()).safeCast(Integer.class)) {
             final String name = metaData.getColumnLabel(index);
-            Keyword<?> keyword = getKeyword(name, definitions);
-            record.set(safeCast(keyword), mappings.getValue(resultSet, index, keyword.forClass()));
+            Keyword<Object> keyword = getKeyword(name, definitions);
+            record.set(keyword, mappings.getValue(resultSet, index, keyword.forClass()));
         }
 
         return record;

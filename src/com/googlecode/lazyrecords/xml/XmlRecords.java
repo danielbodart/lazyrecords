@@ -1,11 +1,13 @@
 package com.googlecode.lazyrecords.xml;
 
 import com.googlecode.lazyrecords.RecordName;
+import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
+import com.googlecode.totallylazy.Value;
 import com.googlecode.totallylazy.Xml;
 import com.googlecode.lazyrecords.AbstractRecords;
 import com.googlecode.lazyrecords.Keyword;
@@ -55,10 +57,9 @@ public class XmlRecords extends AbstractRecords {
         return Sequences.sequence(parts).take(parts.length - 1).toString("/");
     }
 
-    @SuppressWarnings("unchecked")
-    private Function2<? super Element, ? super Keyword, Element> addNodes(final Record record) {
-        return new Function2<Element, Keyword, Element>() {
-            public Element call(Element container, Keyword field) throws Exception {
+    private Function2<Element, Keyword<?>, Element> addNodes(final Record record) {
+        return new Function2<Element, Keyword<?>, Element>() {
+            public Element call(Element container, Keyword<?> field) throws Exception {
                 Object value = record.get(field);
                 if (value != null) {
                     Mapping<Object> objectMapping = mappings.get(field.forClass());
@@ -78,17 +79,8 @@ public class XmlRecords extends AbstractRecords {
     }
 
     public Number remove(RecordName recordName, Predicate<? super Record> predicate) {
-        Sequence<Node> map = get(recordName).filter(predicate).map(asNode());
+        Sequence<Node> map = get(recordName).filter(predicate).<Value<Node>>unsafeCast().map(Callables.<Node>value());
         return Xml.remove(map).size();
-    }
-
-    @SuppressWarnings("unchecked")
-    private Function1<? super Record, Node> asNode() {
-        return new Function1<Record, Node>() {
-            public Node call(Record record) throws Exception {
-                return ((SourceRecord<Node>) record).value();
-            }
-        };
     }
 
     public Number remove(RecordName recordName) {

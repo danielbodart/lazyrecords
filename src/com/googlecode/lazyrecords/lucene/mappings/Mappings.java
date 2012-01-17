@@ -1,17 +1,18 @@
 package com.googlecode.lazyrecords.lucene.mappings;
 
+import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.Record;
+import com.googlecode.lazyrecords.RecordMethods;
 import com.googlecode.lazyrecords.RecordName;
+import com.googlecode.lazyrecords.SourceRecord;
+import com.googlecode.lazyrecords.lucene.Lucene;
 import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
-import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.RecordMethods;
-import com.googlecode.lazyrecords.SourceRecord;
-import com.googlecode.lazyrecords.lucene.Lucene;
+import com.googlecode.totallylazy.Unchecked;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Fieldable;
 
@@ -21,16 +22,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.googlecode.totallylazy.Pair.pair;
+import static com.googlecode.lazyrecords.RecordMethods.updateValues;
 import static com.googlecode.totallylazy.Predicates.is;
-import static com.googlecode.totallylazy.Predicates.not;
 import static com.googlecode.totallylazy.Predicates.notNullValue;
 import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Sequences.sequence;
-import static com.googlecode.lazyrecords.RecordMethods.updateValues;
 
 public class Mappings {
-    private final Map<Class, Mapping<Object>> map = new HashMap<Class, Mapping<Object>>();
+    private final Map<Class<?>, Mapping<Object>> map = new HashMap<Class<?>, Mapping<Object>>();
 
     public Mappings() {
         add(Date.class, new DateMapping());
@@ -43,17 +42,16 @@ public class Mappings {
         add(Object.class, new ObjectMapping());
     }
 
-    @SuppressWarnings("unchecked")
     public <T> Mappings add(final Class<T> type, final Mapping<T> mapping) {
-        map.put(type, (Mapping<Object>) mapping);
+        map.put(type, Unchecked.<Mapping<Object>>cast(mapping));
         return this;
     }
 
-    public Mapping<Object> get(final Class aClass) {
+    public Mapping<Object> get(final Class<?> aClass) {
         if (!map.containsKey(aClass)) {
-            return map.get(Object.class);
+            return (Mapping<Object>) map.get(Object.class);
         }
-        return map.get(aClass);
+        return (Mapping<Object>) map.get(aClass);
     }
 
     public Function1<Document, Record> asRecord(final Sequence<Keyword<?>> definitions) {

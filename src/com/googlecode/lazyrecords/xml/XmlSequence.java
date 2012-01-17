@@ -4,6 +4,7 @@ import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.totallylazy.Callable2;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.Xml;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
@@ -38,7 +39,7 @@ public class XmlSequence extends Sequence<Record> {
                             return nodeRecord;
                         }
                         Object value = mappings.get(keyword.forClass()).from(nodes);
-                        return nodeRecord.set(Keywords.safeCast(keyword), value);
+                        return nodeRecord.set(Unchecked.<Keyword<Object>>cast(keyword), value);
                     }
                 });
             }
