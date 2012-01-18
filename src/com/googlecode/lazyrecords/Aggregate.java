@@ -37,11 +37,11 @@ public class Aggregate<T, R> extends AliasedKeyword<T> implements Callable2<T, T
         return new Aggregate<T, R>(callable, keyword);
     }
 
-    public static <T extends Comparable<T>> Aggregate<T, T> maximum(Keyword<T> keyword) {
+    public static <T extends Comparable<? super T>> Aggregate<T, T> maximum(Keyword<T> keyword) {
         return aggregate(Maximum.<T>maximum(), keyword);
     }
 
-    public static <T extends Comparable<T>> Aggregate<T, T> minimum(Keyword<T> keyword) {
+    public static <T extends Comparable<? super T>> Aggregate<T, T> minimum(Keyword<T> keyword) {
         return aggregate(Minimum.<T>minimum(), keyword);
     }
 

@@ -18,12 +18,12 @@ import java.util.Set;
 import static java.lang.String.format;
 
 class SingleValueSequence<T> extends Sequence<T> implements Expressible {
-    private final Callable1<? super Record, T> callable;
+    private final Callable1<? super Record, ? extends T> callable;
     private final PrintStream logger;
     private final SqlRecords sqlRecords;
     private final SelectBuilder builder;
 
-    public SingleValueSequence(final SqlRecords sqlRecords, final SelectBuilder builder, final Callable1<? super Record, T> callable, final PrintStream logger) {
+    public SingleValueSequence(final SqlRecords sqlRecords, final SelectBuilder builder, final Callable1<? super Record, ? extends T> callable, final PrintStream logger) {
         this.sqlRecords = sqlRecords;
         this.builder = builder;
         this.callable = callable;
@@ -43,7 +43,7 @@ class SingleValueSequence<T> extends Sequence<T> implements Expressible {
     }
 
     @Override
-    public <S> S reduce(Callable2<? super S, ? super T, S> callable) {
+    public <S> S reduce(Callable2<? super S, ? super T, ? extends S> callable) {
         try{
             SelectBuilder reduce = builder.reduce(callable);
             return Unchecked.cast(sqlRecords.query(reduce.express(), reduce.select()).head().fields().head().second());

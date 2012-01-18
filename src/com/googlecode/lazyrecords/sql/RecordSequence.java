@@ -40,12 +40,13 @@ public class RecordSequence extends Sequence<Record> implements Expressible {
     }
 
     @Override
-    public <S> Sequence<S> map(final Callable1<? super Record, S> callable) {
+    public <S> Sequence<S> map(final Callable1<? super Record, ? extends S> callable) {
         if (callable instanceof Keyword) {
             return new SingleValueSequence<S>(sqlRecords, builder.select((Keyword) callable), callable, logger);
         }
-        if (callable instanceof SelectCallable) {
-            return Unchecked.<Sequence<S>>cast(new RecordSequence(sqlRecords, builder.select(((SelectCallable) callable).keywords()), logger));
+        Callable1 raw = (Callable1) callable;
+        if (raw instanceof SelectCallable) {
+            return Unchecked.cast(new RecordSequence(sqlRecords, builder.select(((SelectCallable) raw).keywords()), logger));
         }
         logger.println(format("Warning: Unsupported Callable1 %s dropping down to client side sequence functionality", callable));
         return super.map(callable);
@@ -72,7 +73,7 @@ public class RecordSequence extends Sequence<Record> implements Expressible {
     }
 
     @Override
-    public <S> S reduce(Callable2<? super S, ? super Record, S> callable) {
+    public <S> S reduce(Callable2<? super S, ? super Record, ? extends S> callable) {
         try {
             SelectBuilder query = builder.reduce(callable);
             return Unchecked.cast(sqlRecords.query(query.build(), query.select()).head());

@@ -75,7 +75,7 @@ public class SimpleDBSequence<T> extends Sequence<T> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <S> Sequence<S> map(final Callable1<? super T, S> callable) {
+    public <S> Sequence<S> map(final Callable1<? super T, ? extends S> callable) {
         Callable1 raw = callable;
         if (raw instanceof Keyword) {
             final Keyword<S> keyword = (Keyword<S>) raw;
