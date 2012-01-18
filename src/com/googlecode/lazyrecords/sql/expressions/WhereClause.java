@@ -5,6 +5,7 @@ import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.Value;
 import com.googlecode.totallylazy.predicates.AllPredicate;
 import com.googlecode.totallylazy.predicates.AndPredicate;
@@ -52,18 +53,18 @@ public class WhereClause extends CompoundExpression{
         }).getOrElse(empty());
     }
 
-    @SuppressWarnings("unchecked")
-    public static Expression toSql(Predicate predicate) {
+    public static Expression toSql(Predicate<?> predicate) {
         if (predicate instanceof WherePredicate) {
-            WherePredicate wherePredicate = (WherePredicate) predicate;
-            return derivedColumn(wherePredicate.callable()).join(toSql(wherePredicate.predicate()));
+            WherePredicate<Record,?> wherePredicate = Unchecked.cast(predicate);
+            Callable1<? super Record, ?> callable = wherePredicate.callable();
+            return derivedColumn(callable).join(toSql(wherePredicate.predicate()));
         }
         if (predicate instanceof AndPredicate) {
-            AndPredicate andPredicate = (AndPredicate) predicate;
+            AndPredicate<?> andPredicate = (AndPredicate) predicate;
             return Expressions.join(toExpressions(andPredicate.predicates()), "(", " and ", ")");
         }
         if (predicate instanceof OrPredicate) {
-            OrPredicate andPredicate = (OrPredicate) predicate;
+            OrPredicate<?> andPredicate = (OrPredicate) predicate;
             return Expressions.join(toExpressions(andPredicate.predicates()), "(", " or ", ")");
         }
         if (predicate instanceof NullPredicate) {
@@ -98,13 +99,13 @@ public class WhereClause extends CompoundExpression{
             return expression("between ? and ?", sequence(between.lower(), between.upper()));
         }
         if (predicate instanceof InPredicate) {
-            InPredicate inPredicate = (InPredicate) predicate;
-            Sequence sequence = inPredicate.values();
+            InPredicate<Object> inPredicate = Unchecked.cast(predicate);
+            Sequence<Object> sequence = inPredicate.values();
             if (sequence instanceof Expressible) {
                 Expression pair = ((Expressible) sequence).express();
                 return expression("in ( " + pair.text() + ")", pair.parameters());
             }
-            return expression(repeat("?").take((Integer) inPredicate.values().size()).toString("in (", ",", ")"), (Sequence<Object>) sequence);
+            return expression(repeat("?").take((Integer) inPredicate.values().size()).toString("in (", ",", ")"), sequence);
         }
         if (predicate instanceof StartsWithPredicate) {
             return expression("like ?", sequence((Object) (((StartsWithPredicate) predicate).value() + "%")));
@@ -118,17 +119,17 @@ public class WhereClause extends CompoundExpression{
         throw new UnsupportedOperationException("Unsupported predicate " + predicate);
     }
 
-    private static Sequence<Expression> toExpressions(Predicate[] predicates) {
-        return sequence(predicates).map(toSql());
+    private static Sequence<Expression> toExpressions(Sequence<? extends Predicate<?>> predicates) {
+        return predicates.map(toSql());
     }
 
-    private static Sequence<Object> getValue(Predicate predicate) {
+    private static Sequence<Object> getValue(Predicate<?> predicate) {
         return sequence(((Value) predicate).value());
     }
 
-    public static Function1<? super Predicate, Expression> toSql() {
-        return new Function1<Predicate, Expression>() {
-            public Expression call(Predicate predicate) throws Exception {
+    public static Function1<Predicate<?>, Expression> toSql() {
+        return new Function1<Predicate<?>, Expression>() {
+            public Expression call(Predicate<?> predicate) throws Exception {
                 return toSql(predicate);
             }
         };

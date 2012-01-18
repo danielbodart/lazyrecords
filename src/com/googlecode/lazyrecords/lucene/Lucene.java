@@ -1,11 +1,14 @@
 package com.googlecode.lazyrecords.lucene;
 
+import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.RecordName;
-import com.googlecode.totallylazy.Callable1;
+import com.googlecode.lazyrecords.lucene.mappings.Mappings;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.Value;
 import com.googlecode.totallylazy.predicates.AllPredicate;
 import com.googlecode.totallylazy.predicates.AndPredicate;
@@ -25,9 +28,6 @@ import com.googlecode.totallylazy.predicates.NullPredicate;
 import com.googlecode.totallylazy.predicates.OrPredicate;
 import com.googlecode.totallylazy.predicates.StartsWithPredicate;
 import com.googlecode.totallylazy.predicates.WherePredicate;
-import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.lucene.mappings.Mappings;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
@@ -37,8 +37,8 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 
-import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.lazyrecords.Keywords.keyword;
+import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class Lucene {
     public static final Keyword<String> RECORD_KEY = keyword("type", String.class);
@@ -94,19 +94,18 @@ public class Lucene {
         this.mappings = mappings;
     }
 
-    @SuppressWarnings("unchecked")
     public Query query(Predicate<? super Record> predicate) {
         if (predicate instanceof WherePredicate) {
-            return where((WherePredicate) predicate);
+            return where(Unchecked.<WherePredicate<Record, ?>>cast(predicate));
         }
         if (predicate instanceof AndPredicate) {
-            return and(sequence(((AndPredicate<Record>) predicate).predicates()).map(asQuery()));
+            return and(Unchecked.<AndPredicate<Record>>cast(predicate).predicates().map(asQuery()));
         }
         if (predicate instanceof OrPredicate) {
-            return or(sequence(((OrPredicate<Record>) predicate).predicates()).map(asQuery()));
+            return or(Unchecked.<OrPredicate<Record>>cast(predicate).predicates().map(asQuery()));
         }
         if (predicate instanceof Not) {
-            return not(query(((Not<Record>) predicate).predicate()));
+            return not(query(Unchecked.<Not<Record>>cast(predicate).predicate()));
         }
         if (predicate instanceof AllPredicate) {
             return new MatchAllDocsQuery();
