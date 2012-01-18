@@ -11,6 +11,7 @@ import com.googlecode.lazyrecords.SelectCallable;
 import com.googlecode.lazyrecords.sql.expressions.Expressible;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.expressions.SelectBuilder;
+import com.googlecode.totallylazy.Unchecked;
 
 import java.io.PrintStream;
 import java.util.Comparator;
@@ -39,13 +40,12 @@ public class RecordSequence extends Sequence<Record> implements Expressible {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <S> Sequence<S> map(final Callable1<? super Record, S> callable) {
         if (callable instanceof Keyword) {
             return new SingleValueSequence<S>(sqlRecords, builder.select((Keyword) callable), callable, logger);
         }
         if (callable instanceof SelectCallable) {
-            return (Sequence<S>) new RecordSequence(sqlRecords, builder.select(((SelectCallable) callable).keywords()), logger);
+            return Unchecked.<Sequence<S>>cast(new RecordSequence(sqlRecords, builder.select(((SelectCallable) callable).keywords()), logger));
         }
         logger.println(format("Warning: Unsupported Callable1 %s dropping down to client side sequence functionality", callable));
         return super.map(callable);
@@ -72,11 +72,10 @@ public class RecordSequence extends Sequence<Record> implements Expressible {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <S> S reduce(Callable2<? super S, ? super Record, S> callable) {
         try {
             SelectBuilder query = builder.reduce(callable);
-            return (S) sqlRecords.query(query.build(), query.select()).head();
+            return Unchecked.cast(sqlRecords.query(query.build(), query.select()).head());
         } catch (UnsupportedOperationException ex) {
             logger.println(format("Warning: Unsupported Callable2 %s dropping down to client side sequence functionality", callable));
             return super.reduce(callable);

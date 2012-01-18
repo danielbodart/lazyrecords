@@ -2,6 +2,7 @@ package com.googlecode.lazyrecords.sql.expressions;
 
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Option;
+import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.comparators.AscendingComparator;
 import com.googlecode.totallylazy.comparators.DescendingComparator;
 import com.googlecode.lazyrecords.Record;
@@ -23,13 +24,12 @@ public class OrderByClause {
         return expression("order by").join(toSql(comparator));
     }
 
-    @SuppressWarnings("unchecked")
     public static Expression toSql(Comparator<? super Record> comparator) {
         if (comparator instanceof AscendingComparator) {
-            return SelectList.derivedColumn(((AscendingComparator<? super Record, ?>) comparator).callable()).join(expression("asc"));
+            return SelectList.derivedColumn(Unchecked.<AscendingComparator<? super Record, ?>>cast(comparator).callable()).join(expression("asc"));
         }
         if (comparator instanceof DescendingComparator) {
-            return SelectList.derivedColumn(((DescendingComparator<? super Record, ?>) comparator).callable()).join(expression("desc"));
+            return SelectList.derivedColumn(Unchecked.<DescendingComparator<? super Record, ?>>cast(comparator).callable()).join(expression("desc"));
         }
         throw new UnsupportedOperationException("Unsupported comparator " + comparator);
     }

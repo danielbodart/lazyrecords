@@ -1,19 +1,15 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
-import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.RecordName;
-import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Callable2;
-import com.googlecode.totallylazy.Callables;
-import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
+import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.callables.CountNotNull;
 import com.googlecode.lazyrecords.Aggregate;
 import com.googlecode.lazyrecords.Aggregates;
-import com.googlecode.lazyrecords.ImmutableKeyword;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 
@@ -21,7 +17,6 @@ import java.util.Comparator;
 import java.util.concurrent.Callable;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
-import static com.googlecode.lazyrecords.Aggregate.aggregate;
 import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.lazyrecords.sql.expressions.SelectExpression.selectExpression;
 import static com.googlecode.lazyrecords.sql.expressions.SetQuantifier.ALL;
@@ -95,22 +90,13 @@ public class SelectBuilder implements Expressible, Callable<Expression> {
         return new SelectBuilder(DISTINCT, select, table, where, comparator);
     }
 
-    @SuppressWarnings("unchecked")
-    public SelectBuilder reduce(Callable2 callable) {
+    public SelectBuilder reduce(Callable2<?, ?, ?> callable) {
         if (callable instanceof Aggregates) {
             Aggregates aggregates = (Aggregates) callable;
-            return new SelectBuilder(setQuantifier, aggregates.value().map(evil()), table, where, comparator);
+            return new SelectBuilder(setQuantifier, aggregates.value().<Keyword<?>>unsafeCast(), table, where, comparator);
         }
-        Aggregate aggregate = Aggregate.aggregate(callable, select().head());
+        Keyword<?> head = select().head();
+        Aggregate<Object, Object> aggregate = Aggregate.aggregate(Unchecked.<Callable2<Object, Object, Object>>cast(callable), Unchecked.<Keyword<Object>>cast(head));
         return new SelectBuilder(setQuantifier, Sequences.<Keyword<?>>sequence(aggregate), table, where, comparator);
-    }
-
-    private Function1<Aggregate<?, ?>, Keyword<?>> evil() {
-        return new Function1<Aggregate<?, ?>, Keyword<?>>() {
-            @Override
-            public Keyword<?> call(Aggregate<?, ?> aggregate) throws Exception {
-                return aggregate;
-            }
-        };
     }
 }

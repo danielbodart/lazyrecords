@@ -15,6 +15,7 @@ import com.googlecode.lazyrecords.SelectCallable;
 import com.googlecode.lazyrecords.simpledb.mappings.Mappings;
 import com.googlecode.lazyrecords.sql.expressions.AbstractExpression;
 import com.googlecode.lazyrecords.sql.expressions.SelectBuilder;
+import com.googlecode.totallylazy.Unchecked;
 
 import java.io.PrintStream;
 import java.util.Comparator;
@@ -68,9 +69,8 @@ public class SimpleDBSequence<T> extends Sequence<T> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Sequence<T> filter(Predicate<? super T> predicate) {
-        return new SimpleDBSequence<T>(sdb, builder.where((Predicate) predicate), mappings, itemToRecord, logger, consistentRead);
+        return new SimpleDBSequence<T>(sdb, builder.where(Unchecked.<Predicate<Record>>cast(predicate)), mappings, itemToRecord, logger, consistentRead);
     }
 
     @Override
@@ -97,10 +97,9 @@ public class SimpleDBSequence<T> extends Sequence<T> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Sequence<T> sortBy(Comparator<? super T> comparator) {
         try {
-            return new SimpleDBSequence(sdb, builder.orderBy((Comparator) comparator), mappings, itemToRecord, logger, consistentRead);
+            return new SimpleDBSequence<T>(sdb, builder.orderBy(Unchecked.<Comparator<Record>>cast(comparator)), mappings, itemToRecord, logger, consistentRead);
         } catch (UnsupportedOperationException ex) {
             logger.println(format("Warning: Unsupported Comparator %s dropping down to client side sequence functionality", comparator));
             return super.sortBy(comparator);

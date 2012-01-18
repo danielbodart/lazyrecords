@@ -9,6 +9,7 @@ import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.sql.expressions.Expressible;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.expressions.SelectBuilder;
+import com.googlecode.totallylazy.Unchecked;
 
 import java.io.PrintStream;
 import java.util.Iterator;
@@ -42,11 +43,10 @@ class SingleValueSequence<T> extends Sequence<T> implements Expressible {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <S> S reduce(Callable2<? super S, ? super T, S> callable) {
         try{
             SelectBuilder reduce = builder.reduce(callable);
-            return (S) sqlRecords.query(reduce.express(), reduce.select()).head().fields().head().second();
+            return Unchecked.cast(sqlRecords.query(reduce.express(), reduce.select()).head().fields().head().second());
         } catch (UnsupportedOperationException ex) {
             logger.println(format("Warning: Unsupported Callable2 %s dropping down to client side sequence functionality", callable));
             return super.reduce(callable);
