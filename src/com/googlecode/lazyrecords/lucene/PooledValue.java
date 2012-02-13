@@ -2,17 +2,20 @@ package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.totallylazy.Function1;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static com.googlecode.totallylazy.Runnables.VOID;
 
 public class PooledValue {
     private final Searcher searcher;
     private final LuceneSearcher luceneSearcher;
-    private boolean dirty = false;
-    private int checkoutCount = 1;
+    private volatile boolean dirty = false;
+    private final AtomicInteger checkoutCount;
 
     PooledValue(Searcher searcher, LuceneSearcher luceneSearcher) {
         this.searcher = searcher;
         this.luceneSearcher = luceneSearcher;
+        checkoutCount = new AtomicInteger(1);
     }
 
     public static Function1<PooledValue, Boolean> isDirty() {
@@ -54,22 +57,26 @@ public class PooledValue {
         };
     }
 
+    public int checkoutCount() {
+        return checkoutCount.get();
+    }
+
     private Searcher checkout() {
-        checkoutCount++;
+        checkoutCount.incrementAndGet();
         return searcher;
     }
 
-    public static Function1<PooledValue, Integer> checkoutCount() {
+    public static Function1<PooledValue, Integer> theCheckoutCount() {
         return new Function1<PooledValue, Integer>() {
             @Override
             public Integer call(PooledValue pooledValue) throws Exception {
-                return pooledValue.checkoutCount;
+                return pooledValue.checkoutCount();
             }
         };
     }
 
     public int checkin() {
-        return --checkoutCount;
+        return checkoutCount.decrementAndGet();
     }
 
     public static Function1<PooledValue, Void> markAsDirty() {

@@ -28,7 +28,7 @@ public class RecoveringSearcher implements Searcher {
         }
     }
 
-    private void replaceBrokenSearcher() {
+    private synchronized void replaceBrokenSearcher() {
         try {
             searcher.close();
         } catch (IOException e) {

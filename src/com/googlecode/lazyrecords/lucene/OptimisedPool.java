@@ -14,7 +14,7 @@ import static com.googlecode.totallylazy.Predicates.not;
 import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Runnables.VOID;
 import static com.googlecode.totallylazy.Sequences.sequence;
-import static com.googlecode.lazyrecords.lucene.PooledValue.checkoutCount;
+import static com.googlecode.lazyrecords.lucene.PooledValue.theCheckoutCount;
 import static com.googlecode.lazyrecords.lucene.PooledValue.checkoutValue;
 import static com.googlecode.lazyrecords.lucene.PooledValue.isDirty;
 
@@ -26,9 +26,12 @@ public class OptimisedPool implements SearcherPool {
         this.directory = directory;
     }
 
-    @Override
     public synchronized int size() {
         return pool.size();
+    }
+
+    public PooledValue get(int index) {
+        return pool.get(index);
     }
 
     @Override
@@ -91,9 +94,9 @@ public class OptimisedPool implements SearcherPool {
 
     @Override
     public synchronized void markAsDirty() {
-        sequence(pool).filter(where(checkoutCount(), is(0))).
+        sequence(pool).filter(where(theCheckoutCount(), is(0))).
                 each(closeAndRemove());
-        sequence(pool).filter(where(checkoutCount(), is(not(0)))).
+        sequence(pool).filter(where(theCheckoutCount(), is(not(0)))).
                 each(PooledValue.markAsDirty());
 
     }

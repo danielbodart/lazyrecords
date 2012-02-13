@@ -8,7 +8,7 @@ import org.apache.lucene.search.TopDocs;
 import java.io.IOException;
 
 public class LuceneSearcher implements Searcher {
-    final IndexSearcher searcher;
+    private final IndexSearcher searcher;
 
     public LuceneSearcher(IndexSearcher searcher) {
         this.searcher = searcher;
