@@ -2,7 +2,6 @@ package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.totallylazy.Function;
 import com.googlecode.totallylazy.Function1;
-import org.apache.lucene.index.SegmentInfos;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.store.Directory;
 
@@ -15,9 +14,9 @@ import static com.googlecode.totallylazy.Predicates.not;
 import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Runnables.VOID;
 import static com.googlecode.totallylazy.Sequences.sequence;
-import static com.googlecode.lazyrecords.lucene.OptimisedPool.PooledValue.checkoutCount;
-import static com.googlecode.lazyrecords.lucene.OptimisedPool.PooledValue.checkoutValue;
-import static com.googlecode.lazyrecords.lucene.OptimisedPool.PooledValue.dirty;
+import static com.googlecode.lazyrecords.lucene.PooledValue.checkoutCount;
+import static com.googlecode.lazyrecords.lucene.PooledValue.checkoutValue;
+import static com.googlecode.lazyrecords.lucene.PooledValue.isDirty;
 
 public class OptimisedPool implements SearcherPool {
     private final List<PooledValue> pool = new CopyOnWriteArrayList<PooledValue>();
@@ -28,13 +27,13 @@ public class OptimisedPool implements SearcherPool {
     }
 
     @Override
-    public int size() {
+    public synchronized int size() {
         return pool.size();
     }
 
     @Override
     public synchronized Searcher searcher() throws IOException {
-        return sequence(pool).find(where(dirty(), is(false))).
+        return sequence(pool).find(where(isDirty(), is(false))).
                 map(checkoutValue()).
                 getOrElse(createSearcher());
     }
@@ -81,7 +80,7 @@ public class OptimisedPool implements SearcherPool {
     private synchronized void checkin(Searcher searcher) throws IOException {
         PooledValue pooledValue = findPooledValue(searcher);
         int count = pooledValue.checkin();
-        if(count == 0 && pooledValue.dirty){
+        if(count == 0 && pooledValue.dirty()){
             closeAndRemove(pooledValue);
         }
     }
@@ -110,85 +109,15 @@ public class OptimisedPool implements SearcherPool {
     }
 
     private void closeAndRemove(PooledValue pooledValue) throws IOException {
-        pooledValue.luceneSearcher.close();
+        pooledValue.luceneSearcher().close();
         pool.remove(pooledValue);
     }
 
     @Override
     public void close() throws IOException {
         for (PooledValue pooledValue : pool) {
-            pooledValue.luceneSearcher.close();
+            pooledValue.luceneSearcher().close();
         }
     }
 
-    static class PooledValue {
-        private final Searcher searcher;
-        private final LuceneSearcher luceneSearcher;
-        private boolean dirty = false;
-        private int checkoutCount = 1;
-
-        private PooledValue(Searcher searcher, LuceneSearcher luceneSearcher) {
-            this.searcher = searcher;
-            this.luceneSearcher = luceneSearcher;
-        }
-
-        public static Function1<PooledValue, Boolean> dirty() {
-            return new Function1<PooledValue, Boolean>() {
-                @Override
-                public Boolean call(PooledValue value) {
-                    return value.dirty;
-                }
-            };
-        }
-
-        public void dirty(boolean value) {
-            this.dirty = value;
-        }
-
-        public static Function1<PooledValue, Searcher> checkoutValue() {
-            return new Function1<PooledValue, Searcher>() {
-                @Override
-                public Searcher call(PooledValue pooledValue) throws Exception {
-                    return pooledValue.checkout();
-                }
-            };
-        }
-
-        public static Function1<PooledValue, Searcher> searcher() {
-            return new Function1<PooledValue, Searcher>() {
-                @Override
-                public Searcher call(PooledValue pooledValue) throws Exception {
-                    return pooledValue.searcher;
-                }
-            };
-        }
-
-        private Searcher checkout() {
-            checkoutCount++;
-            return searcher;
-        }
-
-        public static Function1<PooledValue, Integer> checkoutCount() {
-            return new Function1<PooledValue, Integer>() {
-                @Override
-                public Integer call(PooledValue pooledValue) throws Exception {
-                    return pooledValue.checkoutCount;
-                }
-            };
-        }
-
-        public int checkin() {
-            return --checkoutCount;
-        }
-
-        public static Function1<PooledValue, Void> markAsDirty() {
-            return new Function1<PooledValue, Void>() {
-                @Override
-                public Void call(PooledValue pooledValue) throws Exception {
-                    pooledValue.dirty(true);
-                    return VOID;
-                }
-            };
-        }
-    }
 }
