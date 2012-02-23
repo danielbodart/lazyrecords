@@ -17,64 +17,64 @@ import static com.googlecode.totallylazy.numbers.Numbers.sum;
 import static com.googlecode.lazyrecords.RecordMethods.merge;
 
 public abstract class AbstractRecords implements Records {
-    private final Map<RecordName, List<Keyword<?>>> definitions = new HashMap<RecordName, List<Keyword<?>>>();
+    private final Map<Definition, List<Keyword<?>>> definitions = new HashMap<Definition, List<Keyword<?>>>();
 
-    public void define(RecordName recordName, Keyword<?>... fields) {
-        definitions.put(recordName, list(fields));
+    public void define(Definition definition, Keyword<?>... fields) {
+        definitions.put(definition, list(fields));
     }
 
-    public List<Keyword<?>> undefine(RecordName recordName){
-        return definitions.remove(recordName);
+    public List<Keyword<?>> undefine(Definition definition){
+        return definitions.remove(definition);
     }
 
-    public Sequence<Keyword<?>> definitions(RecordName recordName) {
-        if (!definitions.containsKey(recordName)) {
+    public Sequence<Keyword<?>> definitions(Definition definition) {
+        if (!definitions.containsKey(definition)) {
             return Sequences.empty();
         }
-        return sequence(definitions.get(recordName));
+        return sequence(definitions.get(definition));
     }
 
     // Only override if you Schema based technology like SQL
-    public boolean exists(RecordName recordName) {
+    public boolean exists(Definition definition) {
         return true;
     }
 
-    public Number add(RecordName recordName, Record... records) {
+    public Number add(Definition definition, Record... records) {
         if (records.length == 0) return 0;
-        return add(recordName, sequence(records));
+        return add(definition, sequence(records));
     }
 
-    public Number set(final RecordName recordName, Pair<? extends Predicate<? super Record>, Record>... records) {
-        return set(recordName, sequence(records));
+    public Number set(final Definition definition, Pair<? extends Predicate<? super Record>, Record>... records) {
+        return set(definition, sequence(records));
     }
 
-    public Number set(final RecordName recordName, Sequence<? extends Pair<? extends Predicate<? super Record>, Record>> records) {
-        return records.map(update(recordName, false)).reduce(sum());
+    public Number set(final Definition definition, Sequence<? extends Pair<? extends Predicate<? super Record>, Record>> records) {
+        return records.map(update(definition, false)).reduce(sum());
     }
 
-    public Number put(final RecordName recordName, Pair<? extends Predicate<? super Record>, Record>... records) {
-        return put(recordName, sequence(records));
+    public Number put(final Definition definition, Pair<? extends Predicate<? super Record>, Record>... records) {
+        return put(definition, sequence(records));
     }
 
-    public Number put(final RecordName recordName, Sequence<? extends Pair<? extends Predicate<? super Record>, Record>> records) {
-        return records.map(update(recordName, true)).reduce(sum());
+    public Number put(final Definition definition, Sequence<? extends Pair<? extends Predicate<? super Record>, Record>> records) {
+        return records.map(update(definition, true)).reduce(sum());
     }
 
-    private Function1<Pair<? extends Predicate<? super Record>, Record>, Number> update(final RecordName recordName, final boolean add) {
+    private Function1<Pair<? extends Predicate<? super Record>, Record>, Number> update(final Definition definition, final boolean add) {
         return new Function1<Pair<? extends Predicate<? super Record>, Record>, Number>() {
             public Number call(Pair<? extends Predicate<? super Record>, Record> pair) throws Exception {
                 Predicate<? super Record> predicate = pair.first();
-                Sequence<Record> matched = get(recordName).filter(predicate).realise();
+                Sequence<Record> matched = get(definition).filter(predicate).realise();
                 if (add && matched.isEmpty()) {
-                    return add(recordName, pair.second());
+                    return add(definition, pair.second());
                 }
-                remove(recordName, predicate);
-                return add(recordName, matched.map(merge(pair.second())));
+                remove(definition, predicate);
+                return add(definition, matched.map(merge(pair.second())));
             }
         };
     }
 
-    public Number remove(RecordName recordName) {
-        return remove(recordName, all(Record.class));
+    public Number remove(Definition definition) {
+        return remove(definition, all(Record.class));
     }
 }

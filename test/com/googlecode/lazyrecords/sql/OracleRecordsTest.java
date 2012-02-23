@@ -1,7 +1,7 @@
 package com.googlecode.lazyrecords.sql;
 
 import com.googlecode.lazyrecords.AbstractRecordsTests;
-import com.googlecode.lazyrecords.RecordName;
+import com.googlecode.lazyrecords.RecordDefinition;
 import com.googlecode.lazyrecords.sql.mappings.Mappings;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -23,7 +23,7 @@ public class OracleRecordsTest extends AbstractRecordsTests<SqlRecords> {
 
     @Test
     public void supportsDBSequences() throws Exception {
-        Integer integer = records.get(RecordName.recordName("dual")).map(SqlKeywords.keyword("foo.nextval", Integer.class)).head();
+        Integer integer = records.get(RecordDefinition.definition("dual")).map(SqlKeywords.keyword("foo.nextval", Integer.class)).head();
         assertThat(integer, is(notNullValue()));
     }
 }

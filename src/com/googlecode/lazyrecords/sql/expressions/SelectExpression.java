@@ -1,6 +1,6 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
-import com.googlecode.lazyrecords.RecordName;
+import com.googlecode.lazyrecords.Definition;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
@@ -19,7 +19,7 @@ import static com.googlecode.lazyrecords.sql.expressions.WhereClause.whereClause
 public class SelectExpression extends CompoundExpression {
     public static final TextOnlyExpression SELECT = textOnly("select");
 
-    private SelectExpression(final SetQuantifier setQuantifier, final Sequence<Keyword<?>> select, final RecordName table, final Option<Predicate<? super Record>> where, final Option<Comparator<? super Record>> sort) {
+    private SelectExpression(final SetQuantifier setQuantifier, final Sequence<Keyword<?>> select, final Definition table, final Option<Predicate<? super Record>> where, final Option<Comparator<? super Record>> sort) {
         super(
                 querySpecification(setQuantifier, select),
                 fromClause(table),
@@ -28,7 +28,7 @@ public class SelectExpression extends CompoundExpression {
         );
     }
 
-    public static SelectExpression selectExpression(final SetQuantifier setQuantifier, final Sequence<Keyword<?>> select, final RecordName table, final Option<Predicate<? super Record>> where, final Option<Comparator<? super Record>> sort) {
+    public static SelectExpression selectExpression(final SetQuantifier setQuantifier, final Sequence<Keyword<?>> select, final Definition table, final Option<Predicate<? super Record>> where, final Option<Comparator<? super Record>> sort) {
         return new SelectExpression(setQuantifier, select, table, where, sort);
     }
 

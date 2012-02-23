@@ -1,8 +1,8 @@
 package com.googlecode.lazyrecords.lucene;
 
+import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.RecordName;
 import com.googlecode.lazyrecords.lucene.mappings.Mappings;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
@@ -43,8 +43,8 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 public class Lucene {
     public static final Keyword<String> RECORD_KEY = keyword("type", String.class);
 
-    public static TermQuery record(RecordName recordName) {
-        return new TermQuery(new Term(RECORD_KEY.toString(), recordName.value()));
+    public static TermQuery record(Definition definition) {
+        return new TermQuery(new Term(RECORD_KEY.toString(), definition.name()));
     }
 
     public static Query and(Query... queries) {

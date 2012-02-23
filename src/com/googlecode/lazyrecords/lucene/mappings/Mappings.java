@@ -1,9 +1,9 @@
 package com.googlecode.lazyrecords.lucene.mappings;
 
+import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.RecordMethods;
-import com.googlecode.lazyrecords.RecordName;
 import com.googlecode.lazyrecords.SourceRecord;
 import com.googlecode.lazyrecords.lucene.Lucene;
 import com.googlecode.totallylazy.Callables;
@@ -89,11 +89,11 @@ public class Mappings {
         };
     }
 
-    public Function1<? super Record, Document> asDocument(final RecordName recordName, final Sequence<Keyword<?>> definitions) {
+    public Function1<? super Record, Document> asDocument(final Definition definition, final Sequence<Keyword<?>> definitions) {
         return new Function1<Record, Document>() {
             public Document call(Record record) throws Exception {
                 return record.fields().
-                        add(Pair.<Keyword<?>, Object>pair(Lucene.RECORD_KEY, recordName)).
+                        add(Pair.<Keyword<?>, Object>pair(Lucene.RECORD_KEY, definition)).
                         map(asField(definitions)).
                         filter(notNullValue()).
                         fold(new Document(), intoFields());

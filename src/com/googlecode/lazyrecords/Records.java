@@ -7,27 +7,27 @@ import com.googlecode.totallylazy.Sequence;
 import java.util.List;
 
 public interface Records {
-    Sequence<Record> get(RecordName recordName);
+    Sequence<Record> get(Definition definition);
 
-    void define(RecordName recordName, Keyword<?>... fields);
+    void define(Definition definition, Keyword<?>... fields);
 
-    boolean exists(RecordName recordName);
+    boolean exists(Definition definition);
 
-    Number add(RecordName recordName, Record... records);
+    Number add(Definition definition, Record... records);
 
-    Number add(RecordName recordName, Sequence<Record> records);
+    Number add(Definition definition, Sequence<Record> records);
 
-    Number set(RecordName recordName, Pair<? extends Predicate<? super Record>, Record>... records);
+    Number set(Definition definition, Pair<? extends Predicate<? super Record>, Record>... records);
 
-    Number set(RecordName recordName, Sequence<? extends Pair<? extends Predicate<? super Record>, Record>> records);
+    Number set(Definition definition, Sequence<? extends Pair<? extends Predicate<? super Record>, Record>> records);
 
-    Number put(RecordName recordName, Pair<? extends Predicate<? super Record>, Record>... records);
+    Number put(Definition definition, Pair<? extends Predicate<? super Record>, Record>... records);
 
-    Number put(RecordName recordName, Sequence<? extends Pair<? extends Predicate<? super Record>, Record>> records);
+    Number put(Definition definition, Sequence<? extends Pair<? extends Predicate<? super Record>, Record>> records);
 
-    Number remove(RecordName recordName, Predicate<? super Record> predicate);
+    Number remove(Definition definition, Predicate<? super Record> predicate);
 
-    Number remove(RecordName recordName);
+    Number remove(Definition definition);
 
-    List<Keyword<?>> undefine(RecordName recordName);
+    List<Keyword<?>> undefine(Definition definition);
 }

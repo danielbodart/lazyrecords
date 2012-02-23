@@ -1,10 +1,9 @@
 package com.googlecode.lazyrecords.memory;
 
-import com.googlecode.lazyrecords.RecordName;
+import com.googlecode.lazyrecords.Definition;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.lazyrecords.AbstractRecords;
-import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 
 import java.util.ArrayList;
@@ -16,25 +15,25 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.numbers.Numbers.increment;
 
 public class MemoryRecords extends AbstractRecords {
-    private final Map<RecordName, List<Record>> memory = new HashMap<RecordName, List<Record>>();
+    private final Map<Definition, List<Record>> memory = new HashMap<Definition, List<Record>>();
 
-    public Sequence<Record> get(RecordName recordName) {
-        return sequence(recordsFor(recordName));
+    public Sequence<Record> get(Definition definition) {
+        return sequence(recordsFor(definition));
     }
 
-    private List<Record> recordsFor(RecordName recordName) {
-        if (!memory.containsKey(recordName)) {
-            memory.put(recordName, new ArrayList<Record >());
+    private List<Record> recordsFor(Definition definition) {
+        if (!memory.containsKey(definition)) {
+            memory.put(definition, new ArrayList<Record >());
         }
-        return memory.get(recordName);
+        return memory.get(definition);
     }
 
-    public Number add(RecordName recordName, Sequence<Record> records) {
+    public Number add(Definition definition, Sequence<Record> records) {
         if (records.isEmpty()) {
             return 0;
         }
 
-        List<Record> list = recordsFor(recordName);
+        List<Record> list = recordsFor(definition);
         Number count = 0;
         for (Record record : records) {
             list.add(record);
@@ -43,12 +42,12 @@ public class MemoryRecords extends AbstractRecords {
         return count;
     }
 
-    public Number remove(RecordName recordName, Predicate<? super Record> predicate) {
-        List<Record> matches = sequence(recordsFor(recordName)).
+    public Number remove(Definition definition, Predicate<? super Record> predicate) {
+        List<Record> matches = sequence(recordsFor(definition)).
                 filter(predicate).
                 toList();
 
-        recordsFor(recordName).removeAll(matches);
+        recordsFor(definition).removeAll(matches);
 
         return matches.size();
     }

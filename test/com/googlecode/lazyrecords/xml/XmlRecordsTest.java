@@ -1,9 +1,8 @@
 package com.googlecode.lazyrecords.xml;
 
-import com.googlecode.lazyrecords.RecordName;
+import com.googlecode.lazyrecords.RecordDefinition;
 import com.googlecode.totallylazy.Xml;
 import com.googlecode.lazyrecords.AbstractRecordsTests;
-import com.googlecode.lazyrecords.Keywords;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
@@ -13,8 +12,8 @@ public class XmlRecordsTest extends AbstractRecordsTests<XmlRecords>{
     private Document document;
 
     public XmlRecordsTest() {
-        people = RecordName.recordName("/data/user");
-        books = RecordName.recordName("/data/book");
+        people = RecordDefinition.definition("/data/user", people.fields());
+        books = RecordDefinition.definition("/data/book", books.fields());
     }
 
     @Override

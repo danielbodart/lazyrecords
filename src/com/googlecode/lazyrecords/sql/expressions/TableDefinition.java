@@ -1,6 +1,6 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
-import com.googlecode.lazyrecords.RecordName;
+import com.googlecode.lazyrecords.Definition;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.lazyrecords.Keyword;
 
@@ -16,12 +16,12 @@ import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
 import static java.lang.String.format;
 
 public class TableDefinition extends TextOnlyExpression {
-    public TableDefinition(RecordName recordName, Keyword<?>[] fields) {
-        super(format("create table %s (%s)", recordName, sequence(fields).map(asColumn())));
+    public TableDefinition(Definition definition, Keyword<?>[] fields) {
+        super(format("create table %s (%s)", definition, sequence(fields).map(asColumn())));
     }
 
-    public static TableDefinition tableDefinition(RecordName recordName, Keyword<?>[] fields) {
-        return new TableDefinition(recordName, fields);
+    public static TableDefinition tableDefinition(Definition definition, Keyword<?>[] fields) {
+        return new TableDefinition(definition, fields);
     }
 
     public static final Map<Class, String> mappings = new HashMap<Class, String>() {{
@@ -47,7 +47,7 @@ public class TableDefinition extends TextOnlyExpression {
         };
     }
 
-    public static CompoundExpression dropTable(RecordName recordName) {
-        return textOnly("drop table").join(textOnly(recordName));
+    public static CompoundExpression dropTable(Definition definition) {
+        return textOnly("drop table").join(textOnly(definition));
     }
 }

@@ -1,6 +1,6 @@
 package com.googlecode.lazyrecords.lucene;
 
-import com.googlecode.lazyrecords.RecordName;
+import com.googlecode.lazyrecords.Definition;
 import com.googlecode.totallylazy.CloseableList;
 import com.googlecode.totallylazy.LazyException;
 import com.googlecode.totallylazy.Predicate;
@@ -43,24 +43,24 @@ public class LuceneRecords extends AbstractRecords implements Queryable<Query>, 
         return new RecordSequence(lucene, storage, query, mappings.asRecord(definitions), printStream, closeables);
     }
 
-    public Sequence<Record> get(final RecordName recordName) {
-        return query(record(recordName), definitions(recordName));
+    public Sequence<Record> get(final Definition definition) {
+        return query(record(definition), definitions(definition));
     }
 
-    public Number add(RecordName recordName, Sequence<Record> records) {
+    public Number add(Definition definition, Sequence<Record> records) {
         try {
-            return storage.add(records.map(mappings.asDocument(recordName, definitions(recordName))));
+            return storage.add(records.map(mappings.asDocument(definition, definitions(definition))));
         } catch (IOException e) {
             throw LazyException.lazyException(e);
         }
     }
 
-    public Number remove(RecordName recordName, Predicate<? super Record> predicate) {
-        return remove(and(record(recordName), lucene.query(predicate)));
+    public Number remove(Definition definition, Predicate<? super Record> predicate) {
+        return remove(and(record(definition), lucene.query(predicate)));
     }
 
-    public Number remove(RecordName recordName) {
-        return remove(record(recordName));
+    public Number remove(Definition definition) {
+        return remove(record(definition));
     }
 
     public Number remove(Query query) {

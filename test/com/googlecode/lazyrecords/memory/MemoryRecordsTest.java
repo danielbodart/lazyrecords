@@ -1,6 +1,7 @@
 package com.googlecode.lazyrecords.memory;
 
-import com.googlecode.lazyrecords.RecordName;
+import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.RecordDefinition;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
 import com.googlecode.lazyrecords.AbstractRecordsTests;
 import com.googlecode.lazyrecords.Keyword;
@@ -13,7 +14,7 @@ import static com.googlecode.lazyrecords.MapRecord.record;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class MemoryRecordsTest extends AbstractRecordsTests<MemoryRecords> {
-    private static final RecordName TREES = RecordName.recordName("some_table");
+    private static final Definition TREES = RecordDefinition.definition("some_table");
     private static final Keyword<String> LEAFINESS = keyword("some_field", String.class);
 
     public MemoryRecords createRecords() {
@@ -23,7 +24,7 @@ public class MemoryRecordsTest extends AbstractRecordsTests<MemoryRecords> {
     @Test
     public void willNotFailIfAskedToRemoveATableWhichHasNotBeenAddedTo() throws Exception {
         MemoryRecords records = new MemoryRecords();
-        RecordName table = TREES;
+        Definition table = TREES;
         records.define(table, LEAFINESS);
         records.remove(table);
     }

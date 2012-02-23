@@ -23,7 +23,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.UUID;
 
-import static com.googlecode.lazyrecords.RecordName.recordName;
+import static com.googlecode.lazyrecords.RecordDefinition.definition;
 import static com.googlecode.totallylazy.Callables.ascending;
 import static com.googlecode.totallylazy.Callables.descending;
 import static com.googlecode.totallylazy.Pair.pair;
@@ -66,17 +66,17 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.fail;
 
 public abstract class AbstractRecordsTests<T extends Records> {
-    protected static RecordName people = recordName("people");
     protected static Keyword<Integer> age = keyword("age", Integer.class);
     protected static Keyword<Date> dob = keyword("dob", Date.class);
     protected static ImmutableKeyword<String> firstName = keyword("firstName", String.class);
     protected static Keyword<String> lastName = keyword("lastName", String.class);
+    protected static Definition people = definition("people", age, dob, firstName, lastName);
 
-    protected static RecordName books = recordName("books");
     protected static Keyword<URI> isbn = keyword("isbn", URI.class);
     protected static Keyword<String> title = keyword("title", String.class);
     protected static Keyword<Boolean> inPrint = keyword("inPrint", Boolean.class);
     protected static Keyword<UUID> uuid = keyword("uuid", UUID.class);
+    protected static Definition books = definition("books", isbn, title, inPrint, uuid);
 
     public static final URI zenIsbn = uri("urn:isbn:0099322617");
     public static final URI godelEsherBach = uri("urn:isbn:0140289208");

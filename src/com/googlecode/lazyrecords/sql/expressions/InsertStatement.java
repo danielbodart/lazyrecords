@@ -1,9 +1,8 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
-import com.googlecode.lazyrecords.RecordName;
+import com.googlecode.lazyrecords.Definition;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Sequence;
-import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 
 import static com.googlecode.totallylazy.Sequences.repeat;
@@ -14,10 +13,10 @@ public class InsertStatement extends CompoundExpression {
     public static final TextOnlyExpression INSERT = textOnly("insert");
     public static final TextOnlyExpression VALUES = textOnly("values");
 
-    public InsertStatement(final RecordName recordName, final Record record) {
+    public InsertStatement(final Definition definition, final Record record) {
         super(
                 INSERT,
-                textOnly("into").join(textOnly(recordName)),
+                textOnly("into").join(textOnly(definition)),
                 columns(record),
                 VALUES,
                 values(record)
@@ -37,15 +36,15 @@ public class InsertStatement extends CompoundExpression {
         return values.toString("(", ",", ")");
     }
 
-    public static Function1<Record, Expression> insertStatement(final RecordName recordName) {
+    public static Function1<Record, Expression> insertStatement(final Definition definition) {
         return new Function1<Record, Expression>() {
             public Expression call(Record record) throws Exception {
-                return insertStatement(recordName, record);
+                return insertStatement(definition, record);
             }
         };
     }
 
-    public static InsertStatement insertStatement(final RecordName recordName, final Record record) {
-        return new InsertStatement(recordName, record);
+    public static InsertStatement insertStatement(final Definition definition, final Record record) {
+        return new InsertStatement(definition, record);
     }
 }

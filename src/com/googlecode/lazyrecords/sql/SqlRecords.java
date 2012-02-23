@@ -1,6 +1,6 @@
 package com.googlecode.lazyrecords.sql;
 
-import com.googlecode.lazyrecords.RecordName;
+import com.googlecode.lazyrecords.Definition;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.CloseableList;
 import com.googlecode.totallylazy.Group;
@@ -61,8 +61,8 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
     }
 
 
-    public RecordSequence get(RecordName recordName) {
-        return new RecordSequence(this, from(recordName).select(definitions(recordName)), logger);
+    public RecordSequence get(Definition definition) {
+        return new RecordSequence(this, from(definition).select(definitions(definition)), logger);
     }
 
     public Sequence<Record> query(final Expression expression, final Sequence<Keyword<?>> definitions) {
@@ -77,46 +77,46 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
         return query(expression, definitions).iterator();
     }
 
-    public void define(RecordName recordName, Keyword<?>... fields) {
-        super.define(recordName, fields);
+    public void define(Definition definition, Keyword<?>... fields) {
+        super.define(definition, fields);
         if(createTable.equals(CreateTable.Disabled)){
             return;
         }
-        if (exists(recordName)) {
+        if (exists(definition)) {
             return;
         }
-        update(tableDefinition(recordName, fields));
+        update(tableDefinition(definition, fields));
     }
 
     @Override
-    public List<Keyword<?>> undefine(RecordName recordName) {
-        if(exists(recordName)){
-            update(dropTable(recordName));
+    public List<Keyword<?>> undefine(Definition definition) {
+        if(exists(definition)){
+            update(dropTable(definition));
         }
-        return super.undefine(recordName);
+        return super.undefine(definition);
     }
 
     private static final Keyword<Integer> one = keyword("1", Integer.class);
 
-    public boolean exists(RecordName recordName) {
+    public boolean exists(Definition definition) {
         try {
-            query(from(recordName).select(one).where(Predicates.where(one, is(2))).build(), Sequences.<Keyword<?>>empty()).realise();
+            query(from(definition).select(one).where(Predicates.where(one, is(2))).build(), Sequences.<Keyword<?>>empty()).realise();
             return true;
         } catch (Exception e) {
             return false;
         }
     }
 
-    public Number add(final RecordName recordName, final Sequence<Record> records) {
+    public Number add(final Definition definition, final Sequence<Record> records) {
         if (records.isEmpty()) {
             return 0;
         }
-        return update(records.map(insertStatement(recordName)));
+        return update(records.map(insertStatement(definition)));
     }
 
     @Override
-    public Number set(RecordName recordName, Sequence<? extends Pair<? extends Predicate<? super Record>, Record>> records) {
-        return update(records.map(updateStatement(recordName)));
+    public Number set(Definition definition, Sequence<? extends Pair<? extends Predicate<? super Record>, Record>> records) {
+        return update(records.map(updateStatement(definition)));
     }
 
     public Number update(final Expression... expressions) {
@@ -135,15 +135,15 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
         }).reduce(Numbers.sum());
     }
 
-    public Number remove(RecordName recordName, Predicate<? super Record> predicate) {
-        return update(deleteStatement(recordName, predicate));
+    public Number remove(Definition definition, Predicate<? super Record> predicate) {
+        return update(deleteStatement(definition, predicate));
     }
 
-    public Number remove(RecordName recordName) {
-        if (!exists(recordName)) {
+    public Number remove(Definition definition) {
+        if (!exists(definition)) {
             return 0;
         }
-        return update(deleteStatement(recordName));
+        return update(deleteStatement(definition));
     }
 
 }

@@ -7,8 +7,7 @@ import com.amazonaws.services.simpledb.model.CreateDomainRequest;
 import com.amazonaws.services.simpledb.model.DeletableItem;
 import com.amazonaws.services.simpledb.model.DeleteDomainRequest;
 import com.amazonaws.services.simpledb.model.Item;
-import com.googlecode.lazyrecords.RecordName;
-import com.googlecode.totallylazy.Callables;
+import com.googlecode.lazyrecords.Definition;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
@@ -19,7 +18,6 @@ import com.googlecode.lazyrecords.AbstractRecords;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.SourceRecord;
 import com.googlecode.lazyrecords.simpledb.mappings.Mappings;
 
 import java.io.PrintStream;
@@ -48,57 +46,57 @@ public class SimpleDBRecords extends AbstractRecords {
     }
 
     @Override
-    public void define(RecordName recordName, Keyword<?>... fields) {
-        super.define(recordName, fields);
-        sdb.createDomain(new CreateDomainRequest(recordName.value()));
+    public void define(Definition definition, Keyword<?>... fields) {
+        super.define(definition, fields);
+        sdb.createDomain(new CreateDomainRequest(definition.name()));
     }
 
     @Override
-    public boolean exists(RecordName recordName) {
-        return sdb.listDomains().withDomainNames(recordName.value()).getDomainNames().size() > 0;
+    public boolean exists(Definition definition) {
+        return sdb.listDomains().withDomainNames(definition.name()).getDomainNames().size() > 0;
     }
 
-    public Sequence<Record> get(RecordName recordName) {
-        return new SimpleDBSequence<Record>(sdb, from(recordName).select(definitions(recordName)), mappings, mappings.asRecord(definitions(recordName)), logger, consistentRead);
+    public Sequence<Record> get(Definition definition) {
+        return new SimpleDBSequence<Record>(sdb, from(definition).select(definitions(definition)), mappings, mappings.asRecord(definitions(definition)), logger, consistentRead);
     }
 
-    public Number add(final RecordName recordName, Sequence<Record> records) {
+    public Number add(final Definition definition, Sequence<Record> records) {
         if (records.isEmpty()) {
             return 0;
         }
 
         return records.recursive(Sequences.<Record>splitAt(25)).
-                mapConcurrently(putAttributes(recordName)).
+                mapConcurrently(putAttributes(definition)).
                 reduce(sum());
     }
 
-    public Number remove(RecordName recordName, Predicate<? super Record> predicate) {
-        if (!exists(recordName)) {
+    public Number remove(Definition definition, Predicate<? super Record> predicate) {
+        if (!exists(definition)) {
             return 0;
         }
-        Sequence<Record> items = get(recordName).filter(predicate).realise();
+        Sequence<Record> items = get(definition).filter(predicate).realise();
         if (items.isEmpty()) {
             return 0;
         }
 
         return items.recursive(Sequences.<Record>splitAt(25)).
-                mapConcurrently(deleteAttributes(recordName)).
+                mapConcurrently(deleteAttributes(definition)).
                 reduce(sum());
     }
 
     @Override
-    public Number remove(RecordName recordName) {
-        Record head = get(recordName).map(select(Keywords.keyword("count(*)", String.class))).head();
+    public Number remove(Definition definition) {
+        Record head = get(definition).map(select(Keywords.keyword("count(*)", String.class))).head();
         Number result = Numbers.valueOf(head.get(Keywords.keyword("Count", String.class))).get();
-        List<Keyword<?>> undefine = undefine(recordName);
-        define(recordName, undefine.toArray(new Keyword[0]));
+        List<Keyword<?>> undefine = undefine(definition);
+        define(definition, undefine.toArray(new Keyword[0]));
         return result;
     }
 
     @Override
-    public List<Keyword<?>> undefine(RecordName recordName) {
-        sdb.deleteDomain(new DeleteDomainRequest(recordName.value()));
-        return super.undefine(recordName);
+    public List<Keyword<?>> undefine(Definition definition) {
+        sdb.deleteDomain(new DeleteDomainRequest(definition.name()));
+        return super.undefine(definition);
     }
 
     private Function1<Value<Item>, DeletableItem> asItem() {
@@ -109,20 +107,20 @@ public class SimpleDBRecords extends AbstractRecords {
         };
     }
 
-    private Function1<Sequence<Record>, Number> putAttributes(final RecordName recordName) {
+    private Function1<Sequence<Record>, Number> putAttributes(final Definition definition) {
         return new Function1<Sequence<Record>, Number>() {
             public Number call(Sequence<Record> batch) throws Exception {
-                sdb.batchPutAttributes(new BatchPutAttributesRequest(recordName.value(), batch.map(mappings.toReplaceableItem()).toList()));
+                sdb.batchPutAttributes(new BatchPutAttributesRequest(definition.name(), batch.map(mappings.toReplaceableItem()).toList()));
                 return batch.size();
             }
         };
     }
 
-    private Function1<Sequence<Record>, Number> deleteAttributes(final RecordName recordName) {
+    private Function1<Sequence<Record>, Number> deleteAttributes(final Definition definition) {
         return new Function1<Sequence<Record>, Number>() {
             public Number call(Sequence<Record> batch) throws Exception {
                 List<DeletableItem> items = batch.<Value<Item>>unsafeCast().map(asItem()).toList();
-                sdb.batchDeleteAttributes(new BatchDeleteAttributesRequest(recordName.value(), items));
+                sdb.batchDeleteAttributes(new BatchDeleteAttributesRequest(definition.name(), items));
                 return batch.size();
             }
         };

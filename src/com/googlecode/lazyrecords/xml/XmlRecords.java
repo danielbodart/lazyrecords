@@ -1,8 +1,7 @@
 package com.googlecode.lazyrecords.xml;
 
-import com.googlecode.lazyrecords.RecordName;
+import com.googlecode.lazyrecords.Definition;
 import com.googlecode.totallylazy.Callables;
-import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
@@ -12,7 +11,6 @@ import com.googlecode.totallylazy.Xml;
 import com.googlecode.lazyrecords.AbstractRecords;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.SourceRecord;
 import com.googlecode.lazyrecords.xml.mappings.Mapping;
 import com.googlecode.lazyrecords.xml.mappings.Mappings;
 import org.w3c.dom.Document;
@@ -37,22 +35,22 @@ public class XmlRecords extends AbstractRecords {
         this(document, new Mappings());
     }
 
-    public Sequence<Record> get(RecordName recordName) {
-        Sequence<Node> nodes = Xml.selectNodes(document, recordName.value());
-        return new XmlSequence(nodes, mappings, definitions(recordName));
+    public Sequence<Record> get(Definition definition) {
+        Sequence<Node> nodes = Xml.selectNodes(document, definition.name());
+        return new XmlSequence(nodes, mappings, definitions(definition));
     }
 
-    public Number add(RecordName recordName, Sequence<Record> records) {
+    public Number add(Definition definition, Sequence<Record> records) {
         for (Record record : records) {
-            Element newElement = record.keywords().fold(document.createElement(toTagName(recordName.value())), addNodes(record));
-            Node parent = Xml.selectNodes(document, toParent(recordName)).head();
+            Element newElement = record.keywords().fold(document.createElement(toTagName(definition.name())), addNodes(record));
+            Node parent = Xml.selectNodes(document, toParent(definition)).head();
             parent.appendChild(newElement);
         }
         return records.size();
     }
 
-    private String toParent(RecordName recordName) {
-        String xpath = recordName.value();
+    private String toParent(Definition definition) {
+        String xpath = definition.name();
         String[] parts = xpath.split("/");
         return Sequences.sequence(parts).take(parts.length - 1).toString("/");
     }
@@ -78,12 +76,12 @@ public class XmlRecords extends AbstractRecords {
         return parts[parts.length - 1];
     }
 
-    public Number remove(RecordName recordName, Predicate<? super Record> predicate) {
-        Sequence<Node> map = get(recordName).filter(predicate).<Value<Node>>unsafeCast().map(Callables.<Node>value());
+    public Number remove(Definition definition, Predicate<? super Record> predicate) {
+        Sequence<Node> map = get(definition).filter(predicate).<Value<Node>>unsafeCast().map(Callables.<Node>value());
         return Xml.remove(map).size();
     }
 
-    public Number remove(RecordName recordName) {
-        return Xml.remove(document, recordName.value()).size();
+    public Number remove(Definition definition) {
+        return Xml.remove(document, definition.name()).size();
     }
 }

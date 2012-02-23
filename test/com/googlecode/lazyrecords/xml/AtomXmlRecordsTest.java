@@ -1,9 +1,10 @@
 package com.googlecode.lazyrecords.xml;
 
+import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.RecordName;
+import com.googlecode.lazyrecords.RecordDefinition;
 import com.googlecode.lazyrecords.Records;
 import com.googlecode.lazyrecords.xml.mappings.DateMapping;
 import com.googlecode.lazyrecords.xml.mappings.Mappings;
@@ -19,11 +20,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 public class AtomXmlRecordsTest {
-    private static final RecordName entries = RecordName.recordName("/feed/entry");
     private static final Keyword<Integer> id = Keywords.keyword("id", Integer.class);
     private static final Keyword<URI> link = Keywords.keyword("link/@href", URI.class);
     private static final Keyword<String> content = Keywords.keyword("content", String.class);
     private static final Keyword<Date> updated = Keywords.keyword("updated", Date.class);
+    private static final Definition entries = RecordDefinition.definition("/feed/entry", id, link, content, updated);
 
     @Test
     public void canGetElements() throws Exception {
