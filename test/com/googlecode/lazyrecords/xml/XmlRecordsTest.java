@@ -2,13 +2,13 @@ package com.googlecode.lazyrecords.xml;
 
 import com.googlecode.lazyrecords.RecordDefinition;
 import com.googlecode.totallylazy.Xml;
-import com.googlecode.lazyrecords.AbstractRecordsTests;
+import com.googlecode.lazyrecords.RecordsContract;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
 import static com.googlecode.totallylazy.Xml.document;
 
-public class XmlRecordsTest extends AbstractRecordsTests<XmlRecords>{
+public class XmlRecordsTest extends RecordsContract<XmlRecords> {
     private Document document;
 
     public XmlRecordsTest() {

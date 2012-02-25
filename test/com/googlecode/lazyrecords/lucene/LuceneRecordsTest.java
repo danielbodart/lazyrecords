@@ -2,7 +2,7 @@ package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
-import com.googlecode.lazyrecords.AbstractRecordsTests;
+import com.googlecode.lazyrecords.RecordsContract;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.lucene.mappings.Mappings;
@@ -21,7 +21,7 @@ import static com.googlecode.totallylazy.Files.temporaryDirectory;
 import static com.googlecode.totallylazy.matchers.IterableMatcher.hasExactly;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class LuceneRecordsTest extends AbstractRecordsTests<LuceneRecords> {
+public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
     public static final Version VERSION = Version.LUCENE_33;
     public static final Analyzer ANALYZER = new StandardAnalyzer(VERSION);
     private Directory directory;

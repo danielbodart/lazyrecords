@@ -3,7 +3,7 @@ package com.googlecode.lazyrecords.simpledb;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.PropertiesCredentials;
 import com.amazonaws.services.simpledb.AmazonSimpleDBClient;
-import com.googlecode.lazyrecords.AbstractRecordsTests;
+import com.googlecode.lazyrecords.RecordsContract;
 import com.googlecode.lazyrecords.simpledb.mappings.Mappings;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -16,7 +16,7 @@ import static com.googlecode.lazyrecords.MapRecord.record;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @Ignore("Manual test")
-public class SimpleDBRecordsTest extends AbstractRecordsTests<SimpleDBRecords>{
+public class SimpleDBRecordsTest extends RecordsContract<SimpleDBRecords> {
     @Override
     protected SimpleDBRecords createRecords() throws Exception {
         InputStream credentials = getClass().getResourceAsStream("AwsCredentials.properties");

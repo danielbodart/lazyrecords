@@ -1,6 +1,6 @@
 package com.googlecode.lazyrecords.sql;
 
-import com.googlecode.lazyrecords.AbstractRecordsTests;
+import com.googlecode.lazyrecords.RecordsContract;
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.RecordDefinition;
 import com.googlecode.lazyrecords.sql.mappings.Mappings;
@@ -11,7 +11,7 @@ import static java.sql.DriverManager.getConnection;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-public class SqlRecordsTest extends AbstractRecordsTests<SqlRecords> {
+public class SqlRecordsTest extends RecordsContract<SqlRecords> {
     public SqlRecords createRecords() throws Exception {
         return new SqlRecords(getConnection("jdbc:h2:mem:totallylazy", "SA", ""), CreateTable.Enabled, new Mappings(), logger);
     }

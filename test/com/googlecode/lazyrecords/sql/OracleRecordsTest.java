@@ -1,6 +1,6 @@
 package com.googlecode.lazyrecords.sql;
 
-import com.googlecode.lazyrecords.AbstractRecordsTests;
+import com.googlecode.lazyrecords.RecordsContract;
 import com.googlecode.lazyrecords.RecordDefinition;
 import com.googlecode.lazyrecords.sql.mappings.Mappings;
 import org.junit.Ignore;
@@ -14,7 +14,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @Ignore("Manual test")
-public class OracleRecordsTest extends AbstractRecordsTests<SqlRecords> {
+public class OracleRecordsTest extends RecordsContract<SqlRecords> {
     public SqlRecords createRecords() throws Exception {
         Class.forName("oracle.jdbc.driver.OracleDriver");
 

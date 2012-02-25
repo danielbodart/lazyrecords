@@ -3,7 +3,7 @@ package com.googlecode.lazyrecords.memory;
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.RecordDefinition;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
-import com.googlecode.lazyrecords.AbstractRecordsTests;
+import com.googlecode.lazyrecords.RecordsContract;
 import com.googlecode.lazyrecords.Keyword;
 import org.junit.Test;
 
@@ -13,7 +13,7 @@ import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.lazyrecords.MapRecord.record;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class MemoryRecordsTest extends AbstractRecordsTests<MemoryRecords> {
+public class MemoryRecordsTest extends RecordsContract<MemoryRecords> {
     private static final Definition TREES = RecordDefinition.definition("some_table");
     private static final Keyword<String> LEAFINESS = keyword("some_field", String.class);
 
