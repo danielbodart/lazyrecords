@@ -16,12 +16,12 @@ import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
 import static java.lang.String.format;
 
 public class TableDefinition extends TextOnlyExpression {
-    public TableDefinition(Definition definition, Keyword<?>[] fields) {
-        super(format("create table %s (%s)", definition, sequence(fields).map(asColumn())));
+    public TableDefinition(Definition definition) {
+        super(format("create table %s (%s)", definition, definition.fields().map(asColumn())));
     }
 
-    public static TableDefinition tableDefinition(Definition definition, Keyword<?>[] fields) {
-        return new TableDefinition(definition, fields);
+    public static TableDefinition tableDefinition(Definition definition) {
+        return new TableDefinition(definition);
     }
 
     public static final Map<Class, String> mappings = new HashMap<Class, String>() {{

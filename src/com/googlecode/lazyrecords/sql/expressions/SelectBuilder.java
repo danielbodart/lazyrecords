@@ -61,7 +61,7 @@ public class SelectBuilder implements Expressible, Callable<Expression> {
     }
 
     public static SelectBuilder from(Definition table) {
-        return new SelectBuilder(ALL, ALL_COLUMNS, table, Option.<Predicate<? super Record>>none(), Option.<Comparator<? super Record>>none());
+        return new SelectBuilder(ALL, table.fields(), table, Option.<Predicate<? super Record>>none(), Option.<Comparator<? super Record>>none());
     }
 
     public SelectBuilder select(Keyword<?>... columns) {

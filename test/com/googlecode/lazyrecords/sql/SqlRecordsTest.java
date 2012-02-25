@@ -20,7 +20,7 @@ public class SqlRecordsTest extends AbstractRecordsTests<SqlRecords> {
     public void existsReturnsFalseIfTableNotDefined() throws Exception {
         Definition sometable = RecordDefinition.definition("sometable");
         assertThat(records.exists(sometable), is(false));
-        records.define(sometable, keyword("id", Integer.class));
+        records.define(sometable);
         assertThat(records.exists(sometable), is(true));
     }
 }

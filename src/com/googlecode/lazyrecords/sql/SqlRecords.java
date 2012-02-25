@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.sql.Connection;
 import java.util.Iterator;
-import java.util.List;
 
 import static com.googlecode.totallylazy.Closeables.using;
 import static com.googlecode.totallylazy.Predicates.is;
@@ -62,7 +61,7 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
 
 
     public RecordSequence get(Definition definition) {
-        return new RecordSequence(this, from(definition).select(definitions(definition)), logger);
+        return new RecordSequence(this, from(definition), logger);
     }
 
     public Sequence<Record> query(final Expression expression, final Sequence<Keyword<?>> definitions) {
@@ -77,19 +76,19 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
         return query(expression, definitions).iterator();
     }
 
-    public void define(Definition definition, Keyword<?>... fields) {
-        super.define(definition, fields);
+    public void define(Definition definition) {
+        super.define(definition);
         if(createTable.equals(CreateTable.Disabled)){
             return;
         }
         if (exists(definition)) {
             return;
         }
-        update(tableDefinition(definition, fields));
+        update(tableDefinition(definition));
     }
 
     @Override
-    public List<Keyword<?>> undefine(Definition definition) {
+    public boolean undefine(Definition definition) {
         if(exists(definition)){
             update(dropTable(definition));
         }

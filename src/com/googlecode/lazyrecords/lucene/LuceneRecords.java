@@ -44,12 +44,12 @@ public class LuceneRecords extends AbstractRecords implements Queryable<Query>, 
     }
 
     public Sequence<Record> get(final Definition definition) {
-        return query(record(definition), definitions(definition));
+        return query(record(definition), definition.fields());
     }
 
     public Number add(Definition definition, Sequence<Record> records) {
         try {
-            return storage.add(records.map(mappings.asDocument(definition, definitions(definition))));
+            return storage.add(records.map(mappings.asDocument(definition)));
         } catch (IOException e) {
             throw LazyException.lazyException(e);
         }

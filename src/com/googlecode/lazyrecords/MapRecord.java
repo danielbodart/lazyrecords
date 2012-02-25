@@ -19,7 +19,9 @@ public class MapRecord implements Record {
     private final Map<Keyword<?>, Object> fields = new LinkedHashMap<Keyword<?>, Object>();
 
     public <T> T get(Keyword<T> keyword) {
-        return keyword.forClass().cast(fields.get(keyword));
+        Object value = fields.get(keyword);
+        Class<T> aClass = keyword.forClass();
+        return aClass.cast(value);
     }
 
     public <T> Record set(Keyword<T> name, T value) {

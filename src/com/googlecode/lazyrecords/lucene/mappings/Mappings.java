@@ -89,12 +89,12 @@ public class Mappings {
         };
     }
 
-    public Function1<? super Record, Document> asDocument(final Definition definition, final Sequence<Keyword<?>> definitions) {
+    public Function1<? super Record, Document> asDocument(final Definition definition) {
         return new Function1<Record, Document>() {
             public Document call(Record record) throws Exception {
                 return record.fields().
                         add(Pair.<Keyword<?>, Object>pair(Lucene.RECORD_KEY, definition)).
-                        map(asField(definitions)).
+                        map(asField(definition.fields())).
                         filter(notNullValue()).
                         fold(new Document(), intoFields());
             }

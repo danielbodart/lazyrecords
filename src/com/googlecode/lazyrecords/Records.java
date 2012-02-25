@@ -9,10 +9,6 @@ import java.util.List;
 public interface Records {
     Sequence<Record> get(Definition definition);
 
-    void define(Definition definition, Keyword<?>... fields);
-
-    boolean exists(Definition definition);
-
     Number add(Definition definition, Record... records);
 
     Number add(Definition definition, Sequence<Record> records);
@@ -29,5 +25,9 @@ public interface Records {
 
     Number remove(Definition definition);
 
-    List<Keyword<?>> undefine(Definition definition);
+    void define(Definition definition);
+
+    boolean exists(Definition definition);
+
+    boolean undefine(Definition definition);
 }

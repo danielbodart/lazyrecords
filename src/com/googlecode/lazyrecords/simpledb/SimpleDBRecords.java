@@ -46,8 +46,8 @@ public class SimpleDBRecords extends AbstractRecords {
     }
 
     @Override
-    public void define(Definition definition, Keyword<?>... fields) {
-        super.define(definition, fields);
+    public void define(Definition definition) {
+        super.define(definition);
         sdb.createDomain(new CreateDomainRequest(definition.name()));
     }
 
@@ -57,7 +57,7 @@ public class SimpleDBRecords extends AbstractRecords {
     }
 
     public Sequence<Record> get(Definition definition) {
-        return new SimpleDBSequence<Record>(sdb, from(definition).select(definitions(definition)), mappings, mappings.asRecord(definitions(definition)), logger, consistentRead);
+        return new SimpleDBSequence<Record>(sdb, from(definition), mappings, mappings.asRecord(definition.fields()), logger, consistentRead);
     }
 
     public Number add(final Definition definition, Sequence<Record> records) {
@@ -88,13 +88,13 @@ public class SimpleDBRecords extends AbstractRecords {
     public Number remove(Definition definition) {
         Record head = get(definition).map(select(Keywords.keyword("count(*)", String.class))).head();
         Number result = Numbers.valueOf(head.get(Keywords.keyword("Count", String.class))).get();
-        List<Keyword<?>> undefine = undefine(definition);
-        define(definition, undefine.toArray(new Keyword[0]));
+        undefine(definition);
+        define(definition);
         return result;
     }
 
     @Override
-    public List<Keyword<?>> undefine(Definition definition) {
+    public boolean undefine(Definition definition) {
         sdb.deleteDomain(new DeleteDomainRequest(definition.name()));
         return super.undefine(definition);
     }

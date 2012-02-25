@@ -25,7 +25,7 @@ public class MemoryRecordsTest extends AbstractRecordsTests<MemoryRecords> {
     public void willNotFailIfAskedToRemoveATableWhichHasNotBeenAddedTo() throws Exception {
         MemoryRecords records = new MemoryRecords();
         Definition table = TREES;
-        records.define(table, LEAFINESS);
+        records.define(table);
         records.remove(table);
     }
 

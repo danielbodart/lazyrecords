@@ -37,7 +37,7 @@ public class XmlRecords extends AbstractRecords {
 
     public Sequence<Record> get(Definition definition) {
         Sequence<Node> nodes = Xml.selectNodes(document, definition.name());
-        return new XmlSequence(nodes, mappings, definitions(definition));
+        return new XmlSequence(nodes, mappings, definition.fields());
     }
 
     public Number add(Definition definition, Sequence<Record> records) {

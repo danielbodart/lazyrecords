@@ -70,12 +70,13 @@ public abstract class AbstractRecordsTests<T extends Records> {
     protected static Keyword<Date> dob = keyword("dob", Date.class);
     protected static ImmutableKeyword<String> firstName = keyword("firstName", String.class);
     protected static Keyword<String> lastName = keyword("lastName", String.class);
-    protected static Definition people = definition("people", age, dob, firstName, lastName);
 
     protected static Keyword<URI> isbn = keyword("isbn", URI.class);
     protected static Keyword<String> title = keyword("title", String.class);
     protected static Keyword<Boolean> inPrint = keyword("inPrint", Boolean.class);
     protected static Keyword<UUID> uuid = keyword("uuid", UUID.class);
+
+    protected static Definition people = definition("people", age, dob, firstName, lastName, isbn);
     protected static Definition books = definition("books", isbn, title, inPrint, uuid);
 
     public static final URI zenIsbn = uri("urn:isbn:0099322617");
@@ -110,7 +111,7 @@ public abstract class AbstractRecordsTests<T extends Records> {
 
     private void setupPeople() {
         records.undefine(people);
-        records.define(people, age, dob, firstName, lastName, isbn);
+        records.define(people);
         records.add(people,
                 record().set(firstName, "dan").set(lastName, "bodart").set(age, 10).set(dob, date(1977, 1, 10)).set(isbn, zenIsbn),
                 record().set(firstName, "matt").set(lastName, "savage").set(age, 12).set(dob, date(1975, 1, 10)).set(isbn, godelEsherBach),
@@ -119,7 +120,7 @@ public abstract class AbstractRecordsTests<T extends Records> {
 
     private void setupBooks() {
         records.undefine(books);
-        records.define(books, isbn, title, inPrint, uuid);
+        records.define(books);
         records.add(books,
                 record().set(isbn, zenIsbn).set(title, "Zen And The Art Of Motorcycle Maintenance").set(inPrint, true).set(uuid, zenUuid),
                 record().set(isbn, godelEsherBach).set(title, "Godel, Escher, Bach: An Eternal Golden Braid").set(inPrint, false).set(uuid, randomUUID()),
