@@ -7,9 +7,7 @@ import com.googlecode.totallylazy.CloseableList;
 import com.googlecode.totallylazy.Group;
 import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicate;
-import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Sequences;
 import com.googlecode.totallylazy.numbers.Numbers;
 import com.googlecode.lazyrecords.AbstractRecords;
 import com.googlecode.lazyrecords.Keyword;
@@ -33,8 +31,6 @@ import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.lazyrecords.sql.expressions.DeleteStatement.deleteStatement;
 import static com.googlecode.lazyrecords.sql.expressions.InsertStatement.insertStatement;
 import static com.googlecode.lazyrecords.sql.expressions.SelectBuilder.from;
-import static com.googlecode.lazyrecords.sql.expressions.TableDefinition.dropTable;
-import static com.googlecode.lazyrecords.sql.expressions.TableDefinition.tableDefinition;
 import static com.googlecode.lazyrecords.sql.expressions.UpdateStatement.updateStatement;
 import static java.lang.String.format;
 
@@ -82,8 +78,8 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
     }
 
     @Override
-    public boolean undefine(Definition definition) {
-        return definer.undefine(definition);
+    public void undefine(Definition definition) {
+        definer.undefine(definition);
     }
 
     public boolean exists(Definition definition) {

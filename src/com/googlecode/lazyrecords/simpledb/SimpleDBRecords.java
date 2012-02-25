@@ -15,7 +15,6 @@ import com.googlecode.totallylazy.Sequences;
 import com.googlecode.totallylazy.Value;
 import com.googlecode.totallylazy.numbers.Numbers;
 import com.googlecode.lazyrecords.AbstractRecords;
-import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.simpledb.mappings.Mappings;
@@ -47,7 +46,6 @@ public class SimpleDBRecords extends AbstractRecords {
 
     @Override
     public void define(Definition definition) {
-        super.define(definition);
         sdb.createDomain(new CreateDomainRequest(definition.name()));
     }
 
@@ -94,9 +92,8 @@ public class SimpleDBRecords extends AbstractRecords {
     }
 
     @Override
-    public boolean undefine(Definition definition) {
+    public void undefine(Definition definition) {
         sdb.deleteDomain(new DeleteDomainRequest(definition.name()));
-        return super.undefine(definition);
     }
 
     private Function1<Value<Item>, DeletableItem> asItem() {

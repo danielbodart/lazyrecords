@@ -14,8 +14,7 @@ public abstract class AbstractRecords implements Records {
     public void define(Definition definition) {
     }
 
-    public boolean undefine(Definition definition){
-        return true;
+    public void undefine(Definition definition){
     }
 
     // Only override if you Schema based technology like SQL

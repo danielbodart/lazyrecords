@@ -5,5 +5,5 @@ public interface RecordsDefiner {
 
     boolean exists(Definition definition);
 
-    boolean undefine(Definition definition);
+    void undefine(Definition definition);
 }

@@ -45,10 +45,9 @@ public class SqlRecordsDefiner implements RecordsDefiner {
     }
 
     @Override
-    public boolean undefine(Definition definition) {
+    public void undefine(Definition definition) {
         if(exists(definition)){
             sqlRecords.update(dropTable(definition));
         }
-        return true;
     }
 }
