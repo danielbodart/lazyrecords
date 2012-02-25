@@ -73,19 +73,6 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
         return query(expression, definitions).iterator();
     }
 
-    public void define(Definition definition) {
-        schema.define(definition);
-    }
-
-    @Override
-    public void undefine(Definition definition) {
-        schema.undefine(definition);
-    }
-
-    public boolean exists(Definition definition) {
-        return schema.exists(definition);
-    }
-
     public Number add(final Definition definition, final Sequence<Record> records) {
         if (records.isEmpty()) {
             return 0;
@@ -119,10 +106,13 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
     }
 
     public Number remove(Definition definition) {
-        if (!exists(definition)) {
+        if (!schema.exists(definition)) {
             return 0;
         }
         return update(deleteStatement(definition));
     }
 
+    public Schema schema() {
+        return schema;
+    }
 }

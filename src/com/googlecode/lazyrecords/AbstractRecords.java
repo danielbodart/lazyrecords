@@ -11,16 +11,6 @@ import static com.googlecode.totallylazy.numbers.Numbers.sum;
 import static com.googlecode.lazyrecords.RecordMethods.merge;
 
 public abstract class AbstractRecords implements Records {
-    public void define(Definition definition) {
-    }
-
-    public void undefine(Definition definition){
-    }
-
-    public boolean exists(Definition definition) {
-        return true;
-    }
-
     public Number add(Definition definition, Record... records) {
         if (records.length == 0) return 0;
         return add(definition, sequence(records));

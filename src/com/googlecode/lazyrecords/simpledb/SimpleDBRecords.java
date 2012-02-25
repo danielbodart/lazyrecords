@@ -5,26 +5,26 @@ import com.amazonaws.services.simpledb.model.BatchDeleteAttributesRequest;
 import com.amazonaws.services.simpledb.model.BatchPutAttributesRequest;
 import com.amazonaws.services.simpledb.model.DeletableItem;
 import com.amazonaws.services.simpledb.model.Item;
+import com.googlecode.lazyrecords.AbstractRecords;
 import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.Keywords;
+import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.Schema;
+import com.googlecode.lazyrecords.simpledb.mappings.Mappings;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
 import com.googlecode.totallylazy.Value;
 import com.googlecode.totallylazy.numbers.Numbers;
-import com.googlecode.lazyrecords.AbstractRecords;
-import com.googlecode.lazyrecords.Keywords;
-import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.simpledb.mappings.Mappings;
 
 import java.io.PrintStream;
 import java.util.List;
 
-import static com.googlecode.totallylazy.Streams.nullPrintStream;
-import static com.googlecode.totallylazy.numbers.Numbers.sum;
 import static com.googlecode.lazyrecords.SelectCallable.select;
 import static com.googlecode.lazyrecords.sql.expressions.SelectBuilder.from;
+import static com.googlecode.totallylazy.Streams.nullPrintStream;
+import static com.googlecode.totallylazy.numbers.Numbers.sum;
 
 public class SimpleDBRecords extends AbstractRecords {
     private final AmazonSimpleDB sdb;
@@ -45,21 +45,6 @@ public class SimpleDBRecords extends AbstractRecords {
         this(sdb, consistentRead, new Mappings(), nullPrintStream());
     }
 
-    @Override
-    public void define(Definition definition) {
-        schema.define(definition);
-    }
-
-    @Override
-    public boolean exists(Definition definition) {
-        return schema.exists(definition);
-    }
-
-    @Override
-    public void undefine(Definition definition) {
-        schema.undefine(definition);
-    }
-
     public Sequence<Record> get(Definition definition) {
         return new SimpleDBSequence<Record>(sdb, from(definition), mappings, mappings.asRecord(definition.fields()), logger, consistentRead);
     }
@@ -75,7 +60,7 @@ public class SimpleDBRecords extends AbstractRecords {
     }
 
     public Number remove(Definition definition, Predicate<? super Record> predicate) {
-        if (!exists(definition)) {
+        if (!schema.exists(definition)) {
             return 0;
         }
         Sequence<Record> items = get(definition).filter(predicate).realise();
@@ -92,8 +77,8 @@ public class SimpleDBRecords extends AbstractRecords {
     public Number remove(Definition definition) {
         Record head = get(definition).map(select(Keywords.keyword("count(*)", String.class))).head();
         Number result = Numbers.valueOf(head.get(Keywords.keyword("Count", String.class))).get();
-        undefine(definition);
-        define(definition);
+        schema.undefine(definition);
+        schema.define(definition);
         return result;
     }
 
@@ -124,5 +109,7 @@ public class SimpleDBRecords extends AbstractRecords {
         };
     }
 
-
+    public Schema schema() {
+        return schema;
+    }
 }

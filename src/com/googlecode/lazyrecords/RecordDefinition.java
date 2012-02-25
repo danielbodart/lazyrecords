@@ -2,6 +2,7 @@ package com.googlecode.lazyrecords;
 
 import com.googlecode.totallylazy.Sequence;
 
+import static com.googlecode.totallylazy.Sequences.first;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class RecordDefinition implements Definition {
@@ -17,8 +18,8 @@ public class RecordDefinition implements Definition {
         return new RecordDefinition(name, sequence(fields));
     }
 
-    public static Definition definition(final String name, final Keyword<?>... otherFields) {
-        return new RecordDefinition(name, sequence(otherFields));
+    public static Definition definition(final String name, final Keyword<?> head, final Keyword<?>... tail) {
+        return new RecordDefinition(name, sequence(tail).cons(head));
     }
 
     @Override

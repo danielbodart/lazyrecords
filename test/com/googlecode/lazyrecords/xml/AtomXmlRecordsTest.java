@@ -29,7 +29,6 @@ public class AtomXmlRecordsTest {
     @Test
     public void canGetElements() throws Exception {
         Records records = new XmlRecords(document(XML), new Mappings().add(Date.class, DateMapping.atomDateFormat()));
-        records.define(entries);
         Record record = records.get(entries).head();
         assertThat(record.get(id), is(ID));
         assertThat(record.get(link), is(LINK));

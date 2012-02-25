@@ -3,8 +3,11 @@ package com.googlecode.lazyrecords.simpledb;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.PropertiesCredentials;
 import com.amazonaws.services.simpledb.AmazonSimpleDBClient;
-import com.googlecode.lazyrecords.RecordsContract;
+import com.googlecode.lazyrecords.Record;
+import com.googlecode.lazyrecords.SchemaBasedRecordContract;
 import com.googlecode.lazyrecords.simpledb.mappings.Mappings;
+import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.matchers.NumberMatcher;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -15,13 +18,15 @@ import static com.googlecode.totallylazy.matchers.NumberMatcher.is;
 import static com.googlecode.lazyrecords.MapRecord.record;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@Ignore("Manual test")
-public class SimpleDBRecordsTest extends RecordsContract<SimpleDBRecords> {
+@Ignore("Manual Test")
+public class SimpleDBRecordsTest extends SchemaBasedRecordContract<SimpleDBRecords> {
     @Override
     protected SimpleDBRecords createRecords() throws Exception {
         InputStream credentials = getClass().getResourceAsStream("AwsCredentials.properties");
         System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
-        return new SimpleDBRecords(new AmazonSimpleDBClient(new PropertiesCredentials(credentials), new ClientConfiguration().withMaxErrorRetry(5)), true, new Mappings(), logger);
+        SimpleDBRecords simpleDBRecords = new SimpleDBRecords(new AmazonSimpleDBClient(new PropertiesCredentials(credentials), new ClientConfiguration().withMaxErrorRetry(5)), true, new Mappings(), logger);
+        schema = simpleDBRecords.schema();
+        return simpleDBRecords;
     }
 
     @Override
@@ -31,7 +36,10 @@ public class SimpleDBRecordsTest extends RecordsContract<SimpleDBRecords> {
 
     @Test
     public void canAddMoreThat25RecordsAtATimeAndReceiveMoreThanAHundred() throws Exception {
-        records.add(books, repeat(record().set(isbn, zenIsbn)).take(100));
+        assertThat(records.get(books).size(), is(3));
+        Sequence<Record> newBooks = repeat(record().set(isbn, zenIsbn)).take(100);
+        assertThat(newBooks.size(), NumberMatcher.is(100));
+        records.add(books, newBooks);
         assertThat(records.get(books).size(), is(103));
     }
 }

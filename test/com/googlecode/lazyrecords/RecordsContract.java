@@ -92,10 +92,14 @@ public abstract class RecordsContract<T extends Records> {
     protected abstract T createRecords() throws Exception;
 
     @Before
-    public void addRecords() throws Exception {
+    public void setupRecords() throws Exception {
         stream = new ByteArrayOutputStream();
         logger = new PrintStream(streams(System.out, stream));
         this.records = createRecords();
+        setupData();
+    }
+
+    protected void setupData() {
         setupPeople();
         setupBooks();
     }
@@ -110,8 +114,7 @@ public abstract class RecordsContract<T extends Records> {
     }
 
     private void setupPeople() {
-        records.undefine(people);
-        records.define(people);
+        records.remove(people);
         records.add(people,
                 record().set(firstName, "dan").set(lastName, "bodart").set(age, 10).set(dob, date(1977, 1, 10)).set(isbn, zenIsbn),
                 record().set(firstName, "matt").set(lastName, "savage").set(age, 12).set(dob, date(1975, 1, 10)).set(isbn, godelEsherBach),
@@ -119,8 +122,7 @@ public abstract class RecordsContract<T extends Records> {
     }
 
     private void setupBooks() {
-        records.undefine(books);
-        records.define(books);
+        records.remove(books);
         records.add(books,
                 record().set(isbn, zenIsbn).set(title, "Zen And The Art Of Motorcycle Maintenance").set(inPrint, true).set(uuid, zenUuid),
                 record().set(isbn, godelEsherBach).set(title, "Godel, Escher, Bach: An Eternal Golden Braid").set(inPrint, false).set(uuid, randomUUID()),

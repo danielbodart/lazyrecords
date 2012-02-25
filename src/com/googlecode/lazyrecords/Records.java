@@ -4,7 +4,7 @@ import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 
-public interface Records extends RecordsReader, Schema {
+public interface Records extends RecordsReader {
 
     Number add(Definition definition, Record... records);
 

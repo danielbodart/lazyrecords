@@ -1,5 +1,7 @@
 package com.googlecode.lazyrecords.sql;
 
+import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.RecordsContract;
 import com.googlecode.lazyrecords.RecordDefinition;
 import com.googlecode.lazyrecords.sql.mappings.Mappings;
@@ -23,7 +25,9 @@ public class OracleRecordsTest extends RecordsContract<SqlRecords> {
 
     @Test
     public void supportsDBSequences() throws Exception {
-        Integer integer = records.get(RecordDefinition.definition("dual")).map(SqlKeywords.keyword("foo.nextval", Integer.class)).head();
+        Keyword<Integer> nextVal = SqlKeywords.keyword("foo.nextval", Integer.class);
+        Definition definition = RecordDefinition.definition("dual", nextVal);
+        Integer integer = records.get(definition).map(nextVal).head();
         assertThat(integer, is(notNullValue()));
     }
 }
