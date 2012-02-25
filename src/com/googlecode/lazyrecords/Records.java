@@ -4,10 +4,7 @@ import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 
-import java.util.List;
-
-public interface Records {
-    Sequence<Record> get(Definition definition);
+public interface Records extends RecordsReader {
 
     Number add(Definition definition, Record... records);
 
