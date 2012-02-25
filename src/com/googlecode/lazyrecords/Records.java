@@ -4,7 +4,7 @@ import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 
-public interface Records extends RecordsReader {
+public interface Records extends RecordsReader, RecordsDefiner {
 
     Number add(Definition definition, Record... records);
 
@@ -22,9 +22,4 @@ public interface Records extends RecordsReader {
 
     Number remove(Definition definition);
 
-    void define(Definition definition);
-
-    boolean exists(Definition definition);
-
-    boolean undefine(Definition definition);
 }

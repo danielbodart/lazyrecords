@@ -1,6 +1,7 @@
 package com.googlecode.lazyrecords.sql;
 
 import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.RecordsDefiner;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.CloseableList;
 import com.googlecode.totallylazy.Group;
@@ -41,14 +42,14 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
     private final Connection connection;
     private final PrintStream logger;
     private final Mappings mappings;
-    private final CreateTable createTable;
     private final CloseableList closeables = new CloseableList();
+    private final RecordsDefiner definer;
 
     public SqlRecords(final Connection connection, CreateTable createTable, Mappings mappings, PrintStream logger) {
         this.connection = connection;
-        this.createTable = createTable;
         this.mappings = mappings;
         this.logger = logger;
+        definer = new SqlRecordsDefiner(this, createTable);
     }
 
     public SqlRecords(final Connection connection) {
@@ -77,33 +78,16 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
     }
 
     public void define(Definition definition) {
-        super.define(definition);
-        if(createTable.equals(CreateTable.Disabled)){
-            return;
-        }
-        if (exists(definition)) {
-            return;
-        }
-        update(tableDefinition(definition));
+        definer.define(definition);
     }
 
     @Override
     public boolean undefine(Definition definition) {
-        if(exists(definition)){
-            update(dropTable(definition));
-        }
-        return super.undefine(definition);
+        return definer.undefine(definition);
     }
 
-    private static final Keyword<Integer> one = keyword("1", Integer.class);
-
     public boolean exists(Definition definition) {
-        try {
-            query(from(definition).select(one).where(Predicates.where(one, is(2))).build(), Sequences.<Keyword<?>>empty()).realise();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+        return definer.exists(definition);
     }
 
     public Number add(final Definition definition, final Sequence<Record> records) {
