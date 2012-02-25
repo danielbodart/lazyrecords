@@ -1,7 +1,7 @@
 package com.googlecode.lazyrecords.sql;
 
 import com.googlecode.lazyrecords.Definition;
-import com.googlecode.lazyrecords.RecordsDefiner;
+import com.googlecode.lazyrecords.Schema;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.CloseableList;
 import com.googlecode.totallylazy.Group;
@@ -39,13 +39,13 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
     private final PrintStream logger;
     private final Mappings mappings;
     private final CloseableList closeables = new CloseableList();
-    private final RecordsDefiner definer;
+    private final Schema schema;
 
     public SqlRecords(final Connection connection, CreateTable createTable, Mappings mappings, PrintStream logger) {
         this.connection = connection;
         this.mappings = mappings;
         this.logger = logger;
-        definer = new SqlRecordsDefiner(this, createTable);
+        schema = new SqlSchema(this, createTable);
     }
 
     public SqlRecords(final Connection connection) {
@@ -74,16 +74,16 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
     }
 
     public void define(Definition definition) {
-        definer.define(definition);
+        schema.define(definition);
     }
 
     @Override
     public void undefine(Definition definition) {
-        definer.undefine(definition);
+        schema.undefine(definition);
     }
 
     public boolean exists(Definition definition) {
-        return definer.exists(definition);
+        return schema.exists(definition);
     }
 
     public Number add(final Definition definition, final Sequence<Record> records) {

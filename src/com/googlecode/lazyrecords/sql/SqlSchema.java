@@ -2,7 +2,7 @@ package com.googlecode.lazyrecords.sql;
 
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.lazyrecords.RecordsDefiner;
+import com.googlecode.lazyrecords.Schema;
 import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequences;
 
@@ -12,11 +12,11 @@ import static com.googlecode.lazyrecords.sql.expressions.TableDefinition.dropTab
 import static com.googlecode.lazyrecords.sql.expressions.TableDefinition.tableDefinition;
 import static com.googlecode.totallylazy.Predicates.is;
 
-public class SqlRecordsDefiner implements RecordsDefiner {
+public class SqlSchema implements Schema {
     private final SqlRecords sqlRecords;
     private final CreateTable createTable;
 
-    public SqlRecordsDefiner(SqlRecords sqlRecords, CreateTable createTable) {
+    public SqlSchema(SqlRecords sqlRecords, CreateTable createTable) {
         this.sqlRecords = sqlRecords;
         this.createTable = createTable;
     }

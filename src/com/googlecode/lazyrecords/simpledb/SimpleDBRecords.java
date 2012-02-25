@@ -3,11 +3,10 @@ package com.googlecode.lazyrecords.simpledb;
 import com.amazonaws.services.simpledb.AmazonSimpleDB;
 import com.amazonaws.services.simpledb.model.BatchDeleteAttributesRequest;
 import com.amazonaws.services.simpledb.model.BatchPutAttributesRequest;
-import com.amazonaws.services.simpledb.model.CreateDomainRequest;
 import com.amazonaws.services.simpledb.model.DeletableItem;
-import com.amazonaws.services.simpledb.model.DeleteDomainRequest;
 import com.amazonaws.services.simpledb.model.Item;
 import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.Schema;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
@@ -32,12 +31,14 @@ public class SimpleDBRecords extends AbstractRecords {
     private final Mappings mappings;
     private final PrintStream logger;
     private final boolean consistentRead;
+    private final Schema schema;
 
     public SimpleDBRecords(final AmazonSimpleDB sdb, boolean consistentRead, final Mappings mappings, final PrintStream logger) {
         this.consistentRead = consistentRead;
         this.mappings = mappings;
         this.sdb = sdb;
         this.logger = logger;
+        schema = new SimpleDBSchema(sdb);
     }
 
     public SimpleDBRecords(final AmazonSimpleDB sdb, boolean consistentRead) {
@@ -46,12 +47,17 @@ public class SimpleDBRecords extends AbstractRecords {
 
     @Override
     public void define(Definition definition) {
-        sdb.createDomain(new CreateDomainRequest(definition.name()));
+        schema.define(definition);
     }
 
     @Override
     public boolean exists(Definition definition) {
-        return sdb.listDomains().withDomainNames(definition.name()).getDomainNames().size() > 0;
+        return schema.exists(definition);
+    }
+
+    @Override
+    public void undefine(Definition definition) {
+        schema.undefine(definition);
     }
 
     public Sequence<Record> get(Definition definition) {
@@ -89,11 +95,6 @@ public class SimpleDBRecords extends AbstractRecords {
         undefine(definition);
         define(definition);
         return result;
-    }
-
-    @Override
-    public void undefine(Definition definition) {
-        sdb.deleteDomain(new DeleteDomainRequest(definition.name()));
     }
 
     private Function1<Value<Item>, DeletableItem> asItem() {

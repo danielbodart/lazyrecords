@@ -1,6 +1,6 @@
 package com.googlecode.lazyrecords;
 
-public interface RecordsDefiner {
+public interface Schema {
     void define(Definition definition);
 
     boolean exists(Definition definition);
