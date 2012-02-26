@@ -13,7 +13,7 @@ import java.util.Date;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.lazyrecords.Keywords.keyword;
-import static com.googlecode.lazyrecords.MapRecord.record;
+import static com.googlecode.lazyrecords.Record.constructors.record;
 import static com.googlecode.totallylazy.time.Dates.date;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;

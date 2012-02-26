@@ -8,7 +8,7 @@ import com.googlecode.totallylazy.Sequence;
 import static com.googlecode.totallylazy.Predicates.all;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.numbers.Numbers.sum;
-import static com.googlecode.lazyrecords.RecordMethods.merge;
+import static com.googlecode.lazyrecords.Record.functions.merge;
 
 public abstract class AbstractRecords implements Records {
     public Number add(Definition definition, Record... records) {

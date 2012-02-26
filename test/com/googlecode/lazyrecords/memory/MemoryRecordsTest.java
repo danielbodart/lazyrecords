@@ -13,7 +13,7 @@ import static com.googlecode.lazyrecords.Definition.constructors.definition;
 import static com.googlecode.totallylazy.Predicates.is;
 import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.lazyrecords.Keywords.keyword;
-import static com.googlecode.lazyrecords.MapRecord.record;
+import static com.googlecode.lazyrecords.Record.constructors.record;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class MemoryRecordsTest extends SchemaBasedRecordContract<MemoryRecords> {

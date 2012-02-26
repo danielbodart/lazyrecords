@@ -18,6 +18,9 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 public class MapRecord implements Record {
     private final Map<Keyword<?>, Object> fields = new LinkedHashMap<Keyword<?>, Object>();
 
+    MapRecord() {
+    }
+
     public <T> T get(Keyword<T> keyword) {
         Object value = fields.get(keyword);
         Class<T> aClass = keyword.forClass();
@@ -44,10 +47,6 @@ public class MapRecord implements Record {
     @Override
     public String toString() {
         return fields().toString();
-    }
-
-    public static Record record() {
-        return new MapRecord();
     }
 
     @Override

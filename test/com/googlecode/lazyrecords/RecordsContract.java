@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.UUID;
 
 import static com.googlecode.lazyrecords.Definition.constructors.definition;
+import static com.googlecode.lazyrecords.Record.methods.update;
 import static com.googlecode.totallylazy.Callables.ascending;
 import static com.googlecode.totallylazy.Callables.descending;
 import static com.googlecode.totallylazy.Pair.pair;
@@ -55,8 +56,7 @@ import static com.googlecode.lazyrecords.Aggregate.sum;
 import static com.googlecode.lazyrecords.Aggregates.to;
 import static com.googlecode.lazyrecords.Join.join;
 import static com.googlecode.lazyrecords.Keywords.keyword;
-import static com.googlecode.lazyrecords.MapRecord.record;
-import static com.googlecode.lazyrecords.RecordMethods.update;
+import static com.googlecode.lazyrecords.Record.constructors.record;
 import static com.googlecode.lazyrecords.SelectCallable.select;
 import static com.googlecode.lazyrecords.Using.using;
 import static com.googlecode.totallylazy.time.Dates.date;

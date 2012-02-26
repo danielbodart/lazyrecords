@@ -5,9 +5,7 @@ import com.amazonaws.services.simpledb.model.Item;
 import com.amazonaws.services.simpledb.model.ReplaceableAttribute;
 import com.amazonaws.services.simpledb.model.ReplaceableItem;
 import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.RecordMethods;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Pair;
@@ -20,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.googlecode.lazyrecords.Record.methods.getKeyword;
 import static com.googlecode.lazyrecords.SourceRecord.record;
 import static com.googlecode.totallylazy.Callables.second;
 import static com.googlecode.totallylazy.Predicates.is;
@@ -79,7 +78,7 @@ public class Mappings {
     public Function2<Record, Attribute, Record> asField(final Sequence<Keyword<?>> definitions) {
         return new Function2<Record, Attribute, Record>() {
             public Record call(Record mapRecord, Attribute attribute) throws Exception {
-                Keyword<?> keyword = RecordMethods.getKeyword(attribute.getName(), definitions);
+                Keyword<?> keyword = getKeyword(attribute.getName(), definitions);
                 return mapRecord.set(Unchecked.<Keyword<Object>>cast(keyword), toValue(keyword.forClass(), attribute.getValue()));
             }
         };

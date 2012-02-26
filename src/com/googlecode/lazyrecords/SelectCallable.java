@@ -14,7 +14,7 @@ public class SelectCallable implements Callable1<Record, Record> {
     }
 
     public Record call(Record source) throws Exception {
-        Record result = new MapRecord();
+        Record result = Record.constructors.record();
         for (Keyword<?> keyword : keywords) {
             result.set(Unchecked.<Keyword<Object>>cast(keyword), keyword.call(source));
         }

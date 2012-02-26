@@ -1,7 +1,7 @@
 package com.googlecode.lazyrecords;
 
 public abstract class AbstractKeyword<T> implements Keyword<T> {
-    private Record metadata = MapRecord.record();
+    private Record metadata = Record.constructors.record();
 
     @Override
     public boolean equals(Object other) {

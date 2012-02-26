@@ -3,7 +3,6 @@ package com.googlecode.lazyrecords.lucene.mappings;
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.RecordMethods;
 import com.googlecode.lazyrecords.SourceRecord;
 import com.googlecode.lazyrecords.lucene.Lucene;
 import com.googlecode.totallylazy.Callables;
@@ -22,7 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.googlecode.lazyrecords.RecordMethods.updateValues;
+import static com.googlecode.lazyrecords.Record.functions.updateValues;
+import static com.googlecode.lazyrecords.Record.methods.getKeyword;
 import static com.googlecode.totallylazy.Predicates.is;
 import static com.googlecode.totallylazy.Predicates.notNullValue;
 import static com.googlecode.totallylazy.Predicates.where;
@@ -69,7 +69,7 @@ public class Mappings {
         return new Function1<Fieldable, Pair<Keyword<?>, Object>>() {
             public Pair<Keyword<?>, Object> call(Fieldable fieldable) throws Exception {
                 String name = fieldable.name();
-                Keyword<?> keyword = RecordMethods.getKeyword(name, definitions);
+                Keyword<?> keyword = getKeyword(name, definitions);
                 return Pair.<Keyword<?>, Object>pair(keyword, get(keyword.forClass()).toValue(fieldable));
             }
         };
@@ -83,7 +83,7 @@ public class Mappings {
                 }
 
                 String name = pair.first().name();
-                Keyword<?> keyword = RecordMethods.getKeyword(name, definitions);
+                Keyword<?> keyword = getKeyword(name, definitions);
                 return get(keyword.forClass()).toField(name, pair.second());
             }
         };

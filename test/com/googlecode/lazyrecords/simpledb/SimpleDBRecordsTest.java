@@ -15,7 +15,7 @@ import java.io.InputStream;
 
 import static com.googlecode.totallylazy.Sequences.repeat;
 import static com.googlecode.totallylazy.matchers.NumberMatcher.is;
-import static com.googlecode.lazyrecords.MapRecord.record;
+import static com.googlecode.lazyrecords.Record.constructors.record;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @Ignore("Manual Test")

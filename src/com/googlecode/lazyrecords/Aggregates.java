@@ -5,6 +5,7 @@ import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.Value;
 
+import static com.googlecode.lazyrecords.Record.constructors.record;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class Aggregates implements Callable2<Record, Record, Record>, Value<Sequence<Aggregate<?,?>>> {
@@ -15,7 +16,7 @@ public class Aggregates implements Callable2<Record, Record, Record>, Value<Sequ
     }
 
     public Record call(final Record accumulator, final Record nextRecord) throws Exception {
-        Record result = new MapRecord();
+        Record result = record();
         for (Aggregate<?,?> aggregate : aggregates) {
             Object current = accumulatorValue(accumulator, aggregate);
             Object next = nextRecord.get(aggregate.source());

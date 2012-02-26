@@ -18,8 +18,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 import static com.googlecode.totallylazy.numbers.Numbers.range;
-import static com.googlecode.lazyrecords.MapRecord.record;
-import static com.googlecode.lazyrecords.RecordMethods.getKeyword;
+import static com.googlecode.lazyrecords.Record.methods.getKeyword;
 import static java.lang.String.format;
 
 public class RecordIterator extends StatefulIterator<Record> implements Closeable {
@@ -48,7 +47,7 @@ public class RecordIterator extends StatefulIterator<Record> implements Closeabl
             return finished();
         }
 
-        final Record record = record();
+        final Record record = Record.constructors.record();
         final ResultSetMetaData metaData = resultSet.getMetaData();
         for (Integer index : range(1).take(metaData.getColumnCount()).safeCast(Integer.class)) {
             final String name = metaData.getColumnLabel(index);

@@ -3,19 +3,15 @@ package com.googlecode.lazyrecords;
 import com.googlecode.totallylazy.Pair;
 import org.junit.Test;
 
-import java.util.Date;
-
-import static com.googlecode.totallylazy.matchers.IterableMatcher.hasExactly;
 import static com.googlecode.lazyrecords.Keywords.keyword;
-import static com.googlecode.lazyrecords.MapRecord.record;
-import static com.googlecode.lazyrecords.RecordMethods.filter;
+import static com.googlecode.lazyrecords.Record.constructors.record;
+import static com.googlecode.lazyrecords.Record.methods.filter;
+import static com.googlecode.totallylazy.matchers.IterableMatcher.hasExactly;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class RecordMethodsTest {
+public class RecordTest {
     protected static Keyword<Integer> age = keyword("age", Integer.class);
-    protected static Keyword<Date> dob = keyword("dob", Date.class);
     protected static ImmutableKeyword<String> firstName = keyword("firstName", String.class);
-    protected static Keyword<String> lastName = keyword("lastName", String.class);
 
     @Test
     public void canEasilyFilterFields() throws Exception {
