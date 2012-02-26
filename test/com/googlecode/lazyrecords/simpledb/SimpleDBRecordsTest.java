@@ -5,7 +5,7 @@ import com.amazonaws.auth.PropertiesCredentials;
 import com.amazonaws.services.simpledb.AmazonSimpleDBClient;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.SchemaBasedRecordContract;
-import com.googlecode.lazyrecords.mappings.Mappings;
+import com.googlecode.lazyrecords.simpledb.mappings.Mappings;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
 import org.junit.Ignore;

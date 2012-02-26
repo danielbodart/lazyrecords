@@ -10,7 +10,7 @@ import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.Schema;
-import com.googlecode.lazyrecords.mappings.Mappings;
+import com.googlecode.lazyrecords.simpledb.mappings.Mappings;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
