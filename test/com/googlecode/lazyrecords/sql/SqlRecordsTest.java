@@ -6,6 +6,7 @@ import com.googlecode.lazyrecords.SchemaBasedRecordContract;
 import com.googlecode.lazyrecords.sql.mappings.Mappings;
 import org.junit.Test;
 
+import static com.googlecode.lazyrecords.Definition.constructors.definition;
 import static com.googlecode.lazyrecords.sql.SqlKeywords.keyword;
 import static java.sql.DriverManager.getConnection;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -20,7 +21,7 @@ public class SqlRecordsTest extends SchemaBasedRecordContract<SqlRecords> {
 
     @Test
     public void existsReturnsFalseIfTableNotDefined() throws Exception {
-        Definition sometable = RecordDefinition.definition("sometable", age);
+        Definition sometable = definition("sometable", age);
         assertThat(schema.exists(sometable), is(false));
         schema.define(sometable);
         assertThat(schema.exists(sometable), is(true));

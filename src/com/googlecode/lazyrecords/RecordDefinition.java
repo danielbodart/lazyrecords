@@ -9,17 +9,10 @@ public class RecordDefinition implements Definition {
     private final String name;
     private final Sequence<Keyword<?>> fields;
 
-    private RecordDefinition(final String name, final Sequence<Keyword<?>> fields) {
+    // See Definition.constructors.definition to construct
+    RecordDefinition(final String name, final Iterable<? extends Keyword<?>> fields) {
         this.name = name;
-        this.fields = fields;
-    }
-
-    public static Definition definition(final String name, final Iterable<? extends Keyword<?>> fields) {
-        return new RecordDefinition(name, sequence(fields));
-    }
-
-    public static Definition definition(final String name, final Keyword<?> head, final Keyword<?>... tail) {
-        return new RecordDefinition(name, sequence(tail).cons(head));
+        this.fields = sequence(fields);
     }
 
     @Override

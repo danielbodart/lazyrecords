@@ -8,6 +8,7 @@ import com.googlecode.lazyrecords.sql.mappings.Mappings;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import static com.googlecode.lazyrecords.Definition.constructors.definition;
 import static com.googlecode.lazyrecords.Keywords.keyword;
 import static java.lang.System.getenv;
 import static java.sql.DriverManager.getConnection;
@@ -26,7 +27,7 @@ public class OracleRecordsTest extends RecordsContract<SqlRecords> {
     @Test
     public void supportsDBSequences() throws Exception {
         Keyword<Integer> nextVal = SqlKeywords.keyword("foo.nextval", Integer.class);
-        Definition definition = RecordDefinition.definition("dual", nextVal);
+        Definition definition = definition("dual", nextVal);
         Integer integer = records.get(definition).head().get(nextVal);
         assertThat(integer, is(notNullValue()));
     }

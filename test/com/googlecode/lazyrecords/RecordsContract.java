@@ -23,7 +23,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.UUID;
 
-import static com.googlecode.lazyrecords.RecordDefinition.definition;
+import static com.googlecode.lazyrecords.Definition.constructors.definition;
 import static com.googlecode.totallylazy.Callables.ascending;
 import static com.googlecode.totallylazy.Callables.descending;
 import static com.googlecode.totallylazy.Pair.pair;

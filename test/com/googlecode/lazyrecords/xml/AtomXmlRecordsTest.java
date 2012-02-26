@@ -13,6 +13,7 @@ import org.junit.Test;
 import java.net.URI;
 import java.util.Date;
 
+import static com.googlecode.lazyrecords.Definition.constructors.definition;
 import static com.googlecode.totallylazy.URLs.uri;
 import static com.googlecode.totallylazy.Xml.document;
 import static com.googlecode.totallylazy.time.Dates.date;
@@ -24,7 +25,7 @@ public class AtomXmlRecordsTest {
     private static final Keyword<URI> link = Keywords.keyword("link/@href", URI.class);
     private static final Keyword<String> content = Keywords.keyword("content", String.class);
     private static final Keyword<Date> updated = Keywords.keyword("updated", Date.class);
-    private static final Definition entries = RecordDefinition.definition("/feed/entry", id, link, content, updated);
+    private static final Definition entries = definition("/feed/entry", id, link, content, updated);
 
     @Test
     public void canGetElements() throws Exception {

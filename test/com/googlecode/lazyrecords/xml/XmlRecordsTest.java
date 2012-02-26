@@ -6,14 +6,15 @@ import com.googlecode.lazyrecords.RecordsContract;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
+import static com.googlecode.lazyrecords.Definition.constructors.definition;
 import static com.googlecode.totallylazy.Xml.document;
 
 public class XmlRecordsTest extends RecordsContract<XmlRecords> {
     private Document document;
 
     public XmlRecordsTest() {
-        people = RecordDefinition.definition("/data/user", people.fields());
-        books = RecordDefinition.definition("/data/book", books.fields());
+        people = definition("/data/user", people.fields());
+        books = definition("/data/book", books.fields());
     }
 
     @Override

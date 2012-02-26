@@ -9,6 +9,7 @@ import com.googlecode.lazyrecords.RecordsContract;
 import com.googlecode.lazyrecords.Keyword;
 import org.junit.Test;
 
+import static com.googlecode.lazyrecords.Definition.constructors.definition;
 import static com.googlecode.totallylazy.Predicates.is;
 import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.lazyrecords.Keywords.keyword;
@@ -17,7 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class MemoryRecordsTest extends SchemaBasedRecordContract<MemoryRecords> {
     private static final Keyword<String> LEAFINESS = keyword("some_field", String.class);
-    private static final Definition TREES = RecordDefinition.definition("some_table", LEAFINESS);
+    private static final Definition TREES = definition("some_table", LEAFINESS);
 
     public MemoryRecords createRecords() {
         schema = new Schemaless();
