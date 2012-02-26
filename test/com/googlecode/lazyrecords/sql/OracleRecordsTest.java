@@ -20,14 +20,14 @@ public class OracleRecordsTest extends RecordsContract<SqlRecords> {
     public SqlRecords createRecords() throws Exception {
         Class.forName("oracle.jdbc.driver.OracleDriver");
 
-        return new SqlRecords(getConnection(getenv("JDBC_URL"), getenv("JDBC_USERNAME"), getenv("JDBC_PASSWORD")), CreateTable.Enabled, new Mappings(), System.out);
+        return new SqlRecords(getConnection(getenv("JDBC_URL"), getenv("JDBC_USERNAME"), getenv("JDBC_PASSWORD")), new Mappings(), System.out);
     }
 
     @Test
     public void supportsDBSequences() throws Exception {
         Keyword<Integer> nextVal = SqlKeywords.keyword("foo.nextval", Integer.class);
         Definition definition = RecordDefinition.definition("dual", nextVal);
-        Integer integer = records.get(definition).map(nextVal).head();
+        Integer integer = records.get(definition).head().get(nextVal);
         assertThat(integer, is(notNullValue()));
     }
 }

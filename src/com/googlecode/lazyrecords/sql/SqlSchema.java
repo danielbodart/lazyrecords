@@ -14,18 +14,13 @@ import static com.googlecode.totallylazy.Predicates.is;
 
 public class SqlSchema implements Schema {
     private final SqlRecords sqlRecords;
-    private final CreateTable createTable;
 
-    public SqlSchema(SqlRecords sqlRecords, CreateTable createTable) {
+    public SqlSchema(SqlRecords sqlRecords) {
         this.sqlRecords = sqlRecords;
-        this.createTable = createTable;
     }
 
     @Override
     public void define(Definition definition) {
-        if(createTable.equals(CreateTable.Disabled)){
-            return;
-        }
         if (exists(definition)) {
             return;
         }

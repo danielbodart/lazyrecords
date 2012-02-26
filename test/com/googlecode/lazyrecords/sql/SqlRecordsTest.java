@@ -13,8 +13,8 @@ import static org.hamcrest.Matchers.is;
 
 public class SqlRecordsTest extends SchemaBasedRecordContract<SqlRecords> {
     public SqlRecords createRecords() throws Exception {
-        SqlRecords sqlRecords = new SqlRecords(getConnection("jdbc:h2:mem:totallylazy", "SA", ""), CreateTable.Enabled, new Mappings(), logger);
-        schema = sqlRecords.schema();
+        SqlRecords sqlRecords = new SqlRecords(getConnection("jdbc:h2:mem:totallylazy", "SA", ""), new Mappings(), logger);
+        schema = new SqlSchema(sqlRecords);
         return sqlRecords;
     }
 

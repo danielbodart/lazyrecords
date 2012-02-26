@@ -33,16 +33,16 @@ public class SimpleDBRecords extends AbstractRecords {
     private final boolean consistentRead;
     private final Schema schema;
 
-    public SimpleDBRecords(final AmazonSimpleDB sdb, boolean consistentRead, final Mappings mappings, final PrintStream logger) {
+    public SimpleDBRecords(final AmazonSimpleDB sdb, boolean consistentRead, final Mappings mappings, final PrintStream logger, final Schema schema) {
         this.consistentRead = consistentRead;
         this.mappings = mappings;
         this.sdb = sdb;
         this.logger = logger;
-        schema = new SimpleDBSchema(sdb);
+        this.schema = schema;
     }
 
     public SimpleDBRecords(final AmazonSimpleDB sdb, boolean consistentRead) {
-        this(sdb, consistentRead, new Mappings(), nullPrintStream());
+        this(sdb, consistentRead, new Mappings(), nullPrintStream(), new SimpleDBSchema(sdb));
     }
 
     public Sequence<Record> get(Definition definition) {
@@ -107,9 +107,5 @@ public class SimpleDBRecords extends AbstractRecords {
                 return batch.size();
             }
         };
-    }
-
-    public Schema schema() {
-        return schema;
     }
 }

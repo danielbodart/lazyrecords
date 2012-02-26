@@ -24,9 +24,9 @@ public class SimpleDBRecordsTest extends SchemaBasedRecordContract<SimpleDBRecor
     protected SimpleDBRecords createRecords() throws Exception {
         InputStream credentials = getClass().getResourceAsStream("AwsCredentials.properties");
         System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
-        SimpleDBRecords simpleDBRecords = new SimpleDBRecords(new AmazonSimpleDBClient(new PropertiesCredentials(credentials), new ClientConfiguration().withMaxErrorRetry(5)), true, new Mappings(), logger);
-        schema = simpleDBRecords.schema();
-        return simpleDBRecords;
+        final AmazonSimpleDBClient amazonSimpleDBClient = new AmazonSimpleDBClient(new PropertiesCredentials(credentials), new ClientConfiguration().withMaxErrorRetry(5));
+        schema = new SimpleDBSchema(amazonSimpleDBClient);
+        return new SimpleDBRecords(amazonSimpleDBClient, true, new Mappings(), logger, schema);
     }
 
     @Override

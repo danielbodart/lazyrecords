@@ -1,7 +1,6 @@
 package com.googlecode.lazyrecords.sql;
 
 import com.googlecode.lazyrecords.Definition;
-import com.googlecode.lazyrecords.Schema;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.CloseableList;
 import com.googlecode.totallylazy.Group;
@@ -39,17 +38,15 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
     private final PrintStream logger;
     private final Mappings mappings;
     private final CloseableList closeables = new CloseableList();
-    private final Schema schema;
 
-    public SqlRecords(final Connection connection, CreateTable createTable, Mappings mappings, PrintStream logger) {
+    public SqlRecords(final Connection connection, Mappings mappings, PrintStream logger) {
         this.connection = connection;
         this.mappings = mappings;
         this.logger = logger;
-        schema = new SqlSchema(this, createTable);
     }
 
     public SqlRecords(final Connection connection) {
-        this(connection, CreateTable.Enabled, new Mappings(), new PrintStream(nullOutputStream()));
+        this(connection, new Mappings(), new PrintStream(nullOutputStream()));
     }
 
     public void close() throws IOException {
@@ -106,13 +103,6 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
     }
 
     public Number remove(Definition definition) {
-        if (!schema.exists(definition)) {
-            return 0;
-        }
         return update(deleteStatement(definition));
-    }
-
-    public Schema schema() {
-        return schema;
     }
 }
