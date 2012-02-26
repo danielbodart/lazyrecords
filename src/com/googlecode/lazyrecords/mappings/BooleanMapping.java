@@ -1,4 +1,4 @@
-package com.googlecode.lazyrecords.simpledb.mappings;
+package com.googlecode.lazyrecords.mappings;
 
 public class BooleanMapping implements Mapping<Boolean>{
     public Boolean toValue(String value) {

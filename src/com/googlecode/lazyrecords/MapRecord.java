@@ -18,6 +18,7 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 public class MapRecord implements Record {
     private final Map<Keyword<?>, Object> fields = new LinkedHashMap<Keyword<?>, Object>();
 
+    // See Record.constructors.record to create
     MapRecord() {
     }
 

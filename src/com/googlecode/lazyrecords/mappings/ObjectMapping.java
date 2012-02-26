@@ -1,4 +1,4 @@
-package com.googlecode.lazyrecords.simpledb.mappings;
+package com.googlecode.lazyrecords.mappings;
 
 public class ObjectMapping implements Mapping<Object>{
     public Object toValue(String value) {

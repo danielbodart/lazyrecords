@@ -1,4 +1,4 @@
-package com.googlecode.lazyrecords.simpledb.mappings;
+package com.googlecode.lazyrecords.mappings;
 
 import com.googlecode.totallylazy.time.DateConverter;
 import com.googlecode.totallylazy.time.DateFormatConverter;

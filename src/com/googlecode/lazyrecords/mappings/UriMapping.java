@@ -1,4 +1,4 @@
-package com.googlecode.lazyrecords.simpledb.mappings;
+package com.googlecode.lazyrecords.mappings;
 
 import java.net.URI;
 

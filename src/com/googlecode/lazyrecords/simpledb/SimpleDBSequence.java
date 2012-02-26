@@ -12,7 +12,7 @@ import com.googlecode.totallylazy.Sequences;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.SelectCallable;
-import com.googlecode.lazyrecords.simpledb.mappings.Mappings;
+import com.googlecode.lazyrecords.mappings.Mappings;
 import com.googlecode.lazyrecords.sql.expressions.AbstractExpression;
 import com.googlecode.lazyrecords.sql.expressions.SelectBuilder;
 import com.googlecode.totallylazy.Unchecked;
