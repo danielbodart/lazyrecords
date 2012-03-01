@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.xml;
 
+import com.googlecode.lazyrecords.AliasedKeyword;
 import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.totallylazy.Callable2;
 import com.googlecode.totallylazy.Function1;
@@ -32,17 +33,28 @@ public class XmlSequence extends Sequence<Record> {
     private Function1<? super Node, Record> asRecord() {
         return new Function1<Node, Record>() {
             public Record call(final Node node) throws Exception {
-                return definitions.fold(new SourceRecord<Node>(node), new Callable2<Record, Keyword<?>, Record>() {
-                    public Record call(Record nodeRecord, Keyword<?> keyword) throws Exception {
-                        Sequence<Node> nodes = Xml.selectNodes(node, keyword.name());
-                        if (nodes.isEmpty()) {
-                            return nodeRecord;
-                        }
-                        Object value = mappings.get(keyword.forClass()).from(nodes);
-                        return nodeRecord.set(Unchecked.<Keyword<Object>>cast(keyword), value);
-                    }
-                });
+                return definitions.fold(new SourceRecord<Node>(node), populateFrom(node));
             }
         };
+    }
+
+    private Callable2<Record, Keyword<?>, Record> populateFrom(final Node node) {
+        return new Callable2<Record, Keyword<?>, Record>() {
+            public Record call(Record nodeRecord, Keyword<?> keyword) throws Exception {
+                Sequence<Node> nodes = Xml.selectNodes(node, xpath(keyword));
+                if (nodes.isEmpty()) {
+                    return nodeRecord;
+                }
+                Object value = mappings.get(keyword.forClass()).from(nodes);
+                return nodeRecord.set(Keywords.keyword(keyword.name()), value);
+            }
+        };
+    }
+
+    private String xpath(Keyword<?> keyword) {
+        if(keyword instanceof AliasedKeyword){
+            return ((AliasedKeyword) keyword).source().name();
+        }
+        return keyword.name();
     }
 }

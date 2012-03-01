@@ -13,6 +13,10 @@ public class ImmutableKeyword<T> extends AbstractKeyword<T> {
     }
 
 
+    public AliasedKeyword<T> as(String name) {
+        return new AliasedKeyword<T>(this, name);
+    }
+
     public AliasedKeyword<T> as(Keyword<T> keyword) {
         return new AliasedKeyword<T>(this, keyword.name());
     }
