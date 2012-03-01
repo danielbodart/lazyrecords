@@ -1,15 +1,17 @@
 package com.googlecode.lazyrecords;
 
+import static com.googlecode.totallylazy.Unchecked.cast;
+
 public class ImmutableKeyword<T> extends AbstractKeyword<T> {
     private final String name;
     private final Class<T> aClass;
 
-    public ImmutableKeyword(String name, Class<T> aClass) {
+    public ImmutableKeyword(String name, Class<? extends T> aClass) {
         if(name == null){
             throw new IllegalArgumentException("name");
         }
         this.name = name;
-        this.aClass = aClass;
+        this.aClass = cast(aClass);
     }
 
 
@@ -27,5 +29,11 @@ public class ImmutableKeyword<T> extends AbstractKeyword<T> {
 
     public Class<T> forClass() {
         return aClass;
+    }
+
+    @Override
+    public ImmutableKeyword<T> metadata(Record metadata) {
+        super.metadata(metadata);
+        return this;
     }
 }
