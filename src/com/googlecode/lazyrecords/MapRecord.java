@@ -52,7 +52,7 @@ public class MapRecord implements Record {
 
     @Override
     public final boolean equals(final Object o) {
-        return o instanceof MapRecord && fields().equals(((MapRecord) o).fields());
+        return o instanceof Record && fields().equals(((Record) o).fields());
     }
 
     @Override
