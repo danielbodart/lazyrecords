@@ -2,7 +2,7 @@ package com.googlecode.lazyrecords.mappings;
 
 import com.googlecode.totallylazy.numbers.Numbers;
 
-public class IntegerMapping implements Mapping<Integer>{
+public class LexicalIntegerMapping implements Mapping<Integer>{
     public Integer toValue(String value) {
         return Numbers.parseLexicalString(value, Integer.MIN_VALUE).intValue();
     }

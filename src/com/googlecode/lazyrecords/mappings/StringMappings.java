@@ -15,8 +15,8 @@ public class StringMappings {
 
     public StringMappings() {
         add(Date.class, new DateMapping());
-        add(Integer.class, new IntegerMapping());
-        add(Long.class, new LongMapping());
+        add(Integer.class, new LexicalIntegerMapping());
+        add(Long.class, new LexicalLongMapping());
         add(URI.class, new UriMapping());
         add(Boolean.class, new BooleanMapping());
         add(UUID.class, new UUIDMapping());
