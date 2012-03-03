@@ -27,8 +27,12 @@ public class LexicalMappings {
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     public <T> LexicalMapping<T> get(final Class<? extends T> aClass) {
         if (!map.containsKey(aClass)) {
+            if(aClass.isEnum()){
+                return new EnumMapping(aClass);
+            }
             return new ObjectMapping<T>(aClass);
         }
         return cast(map.get(aClass));
