@@ -4,7 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class BooleanMapping implements Mapping<Boolean>{
+public class BooleanMapping implements SqlMapping<Boolean> {
     public Boolean getValue(ResultSet resultSet, Integer index) throws SQLException {
         return resultSet.getBoolean(index);
     }

@@ -1,7 +1,6 @@
 package com.googlecode.lazyrecords.sql;
 
 import com.googlecode.lazyrecords.Definition;
-import com.googlecode.lazyrecords.RecordDefinition;
 import com.googlecode.lazyrecords.SchemaBasedRecordContract;
 import com.googlecode.lazyrecords.sql.mappings.Mappings;
 import org.junit.Test;

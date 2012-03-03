@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.sql.mappings;
 
+import com.googlecode.lazyrecords.mappings.LexicalMappings;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Sequence;
@@ -21,28 +22,30 @@ import static com.googlecode.totallylazy.numbers.Numbers.range;
 import static com.googlecode.totallylazy.numbers.Numbers.sum;
 
 public class Mappings {
-    private final Map<Class, Mapping<Object>> map = new HashMap<Class, Mapping<Object>>();
+    private final Map<Class, SqlMapping<Object>> map = new HashMap<Class, SqlMapping<Object>>();
+    private final LexicalMappings lexicalMappings;
 
-    public Mappings() {
+    public Mappings(LexicalMappings lexicalMappings) {
+        this.lexicalMappings = lexicalMappings;
+        add(Boolean.class, new BooleanMapping());
         add(Date.class, new DateMapping());
         add(Timestamp.class, new TimestampMapping());
         add(Integer.class, new IntegerMapping());
         add(Long.class, new LongMapping());
-        add(String.class, new StringMapping());
-        add(URI.class, new UriMapping());
-        add(Boolean.class, new BooleanMapping());
-        add(UUID.class, new UUIDMapping());
-        add(Object.class, new ObjectMapping());
     }
 
-    public <T> Mappings add(final Class<T> type, final Mapping<T> mapping) {
-        map.put(type, Unchecked.<Mapping<Object>>cast(mapping));
+    public Mappings() {
+        this(new LexicalMappings());
+    }
+
+    public <T> Mappings add(final Class<T> type, final SqlMapping<T> mapping) {
+        map.put(type, Unchecked.<SqlMapping<Object>>cast(mapping));
         return this;
     }
 
-    public Mapping<Object> get(final Class aClass) {
+    public SqlMapping<Object> get(final Class aClass) {
         if (!map.containsKey(aClass)) {
-            return map.get(Object.class);
+            return new ObjectMapping(aClass, lexicalMappings);
         }
         return map.get(aClass);
     }

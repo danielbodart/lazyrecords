@@ -1,7 +1,6 @@
 package com.googlecode.lazyrecords.sql;
 
 import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.iterators.StatefulIterator;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;

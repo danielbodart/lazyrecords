@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 
-public class DateMapping implements Mapping<Date>{
+public class DateMapping implements SqlMapping<Date> {
     public Date getValue(ResultSet resultSet, Integer index) throws SQLException {
         return new Date(resultSet.getTimestamp(index).getTime());
     }

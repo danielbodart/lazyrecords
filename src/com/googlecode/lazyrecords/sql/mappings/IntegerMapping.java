@@ -4,7 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class IntegerMapping implements Mapping<Integer> {
+public class IntegerMapping implements SqlMapping<Integer> {
     public Integer getValue(ResultSet resultSet, Integer index) throws SQLException {
         int result = resultSet.getInt(index);
         if (resultSet.wasNull()) {
