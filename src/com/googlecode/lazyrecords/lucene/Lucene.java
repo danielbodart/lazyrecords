@@ -35,6 +35,7 @@ import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.search.WildcardQuery;
 
 import static com.googlecode.lazyrecords.Keywords.keyword;
@@ -184,32 +185,36 @@ public class Lucene {
         throw new UnsupportedOperationException();
     }
 
+    private Query newRange(Keyword<?> keyword, Object lower, Object upper, boolean minInclusive, boolean maxInclusive) {
+        return new TermRangeQuery(keyword.name(), lower == null ? null : mappings.toString(keyword.forClass(), lower), upper == null ? null : mappings.toString(keyword.forClass(), upper), minInclusive, maxInclusive);
+    }
+
     private Query equalTo(Keyword<?> keyword, Object value) {
-        return mappings.get(keyword.forClass()).equalTo(keyword.toString(), value);
+        return newRange(keyword, value, value, true, true);
     }
 
     private Query greaterThan(Keyword<?> keyword, Object value) {
-        return mappings.get(keyword.forClass()).greaterThan(keyword.toString(), value);
+        return newRange(keyword, value, null, false, true);
     }
 
     private Query greaterThanOrEqual(Keyword<?> keyword, Object value) {
-        return mappings.get(keyword.forClass()).greaterThanOrEqual(keyword.toString(), value);
+        return newRange(keyword, value, null, true, true);
     }
 
     private Query lessThan(Keyword<?> keyword, Object value) {
-        return mappings.get(keyword.forClass()).lessThan(keyword.toString(), value);
+        return newRange(keyword, null, value, true, false);
     }
 
     private Query lessThanOrEqual(Keyword<?> keyword, Object value) {
-        return mappings.get(keyword.forClass()).lessThanOrEqual(keyword.toString(), value);
+        return newRange(keyword, null, value, true, true);
     }
 
     private Query between(Keyword<?> keyword, Object lower, Object upper) {
-        return mappings.get(keyword.forClass()).between(keyword.toString(), lower, upper);
+        return newRange(keyword, lower, upper, true, true);
     }
 
     private Query notNull(Keyword<?> keyword) {
-        return mappings.get(keyword.forClass()).notNull(keyword.toString());
+        return newRange(keyword, null, null, true, true);
     }
 
     private Function1<Object, Query> asQuery(final Keyword<?> keyword) {

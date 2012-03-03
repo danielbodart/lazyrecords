@@ -5,21 +5,16 @@ import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.SourceRecord;
 import com.googlecode.lazyrecords.lucene.Lucene;
+import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Unchecked;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Fieldable;
-
-import java.net.URI;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 import static com.googlecode.lazyrecords.Record.functions.updateValues;
 import static com.googlecode.lazyrecords.Record.methods.getKeyword;
@@ -28,32 +23,7 @@ import static com.googlecode.totallylazy.Predicates.notNullValue;
 import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
-public class Mappings {
-    private final Map<Class<?>, Mapping<Object>> map = new HashMap<Class<?>, Mapping<Object>>();
-
-    public Mappings() {
-        add(Date.class, new DateMapping());
-        add(Integer.class, new NumericIntegerMapping());
-        add(Long.class, new NumericLongMapping());
-        add(String.class, new StringMapping());
-        add(URI.class, new UriMapping());
-        add(Boolean.class, new BooleanMapping());
-        add(UUID.class, new UUIDMapping());
-        add(Object.class, new ObjectMapping());
-    }
-
-    public <T> Mappings add(final Class<T> type, final Mapping<T> mapping) {
-        map.put(type, Unchecked.<Mapping<Object>>cast(mapping));
-        return this;
-    }
-
-    public Mapping<Object> get(final Class<?> aClass) {
-        if (!map.containsKey(aClass)) {
-            return (Mapping<Object>) map.get(Object.class);
-        }
-        return (Mapping<Object>) map.get(aClass);
-    }
-
+public class Mappings extends StringMappings {
     public Function1<Document, Record> asRecord(final Sequence<Keyword<?>> definitions) {
         return new Function1<Document, Record>() {
             public Record call(Document document) throws Exception {
@@ -70,7 +40,7 @@ public class Mappings {
             public Pair<Keyword<?>, Object> call(Fieldable fieldable) throws Exception {
                 String name = fieldable.name();
                 Keyword<?> keyword = getKeyword(name, definitions);
-                return Pair.<Keyword<?>, Object>pair(keyword, get(keyword.forClass()).toValue(fieldable));
+                return Pair.<Keyword<?>, Object>pair(keyword, toValue(keyword.forClass(), fieldable.stringValue()));
             }
         };
     }
@@ -84,7 +54,7 @@ public class Mappings {
 
                 String name = pair.first().name();
                 Keyword<?> keyword = getKeyword(name, definitions);
-                return get(keyword.forClass()).toField(name, pair.second());
+                return new Field(name, Mappings.this.toString(keyword.forClass(), pair.second()), Field.Store.YES, Field.Index.NOT_ANALYZED);
             }
         };
     }

@@ -1,6 +1,7 @@
 package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.CloseableList;
 import com.googlecode.totallylazy.LazyException;
 import com.googlecode.totallylazy.Predicate;
@@ -31,7 +32,7 @@ public class LuceneRecords extends AbstractRecords implements Queryable<Query>, 
         this.storage = storage;
         this.mappings = mappings;
         this.printStream = printStream;
-        lucene = new Lucene(this.mappings);
+        lucene = new Lucene(mappings);
         closeables = new CloseableList();
     }
 
