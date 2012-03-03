@@ -15,7 +15,7 @@ public class DateMapping implements LexicalMapping<Date> {
     }
 
     public DateMapping() {
-        this(new DateFormatConverter(Dates.LUCENE()));
+        this(DateFormatConverter.defaultConverter());
     }
 
     public Date toValue(String value) throws ParseException {
