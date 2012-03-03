@@ -5,7 +5,6 @@ import com.googlecode.lazyrecords.mappings.LongMapping;
 import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.Unchecked;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +34,7 @@ public class XmlMappings {
     }
 
     public XmlMapping<Object> get(final Class aClass) {
-        if(!map.containsKey(aClass)) {
+        if (!map.containsKey(aClass)) {
             return new ObjectMapping(aClass, stringMappings);
         }
         return map.get(aClass);

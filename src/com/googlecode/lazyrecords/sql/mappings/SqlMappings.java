@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.sql.mappings;
 
+import com.googlecode.lazyrecords.mappings.StringMapping;
 import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Pair;
@@ -38,6 +39,11 @@ public class SqlMappings {
 
     public <T> SqlMappings add(final Class<T> type, final SqlMapping<T> mapping) {
         map.put(type, Unchecked.<SqlMapping<Object>>cast(mapping));
+        return this;
+    }
+
+    public <T> SqlMappings add(final Class<T> type, final StringMapping<T> mapping) {
+        stringMappings.add(type, mapping);
         return this;
     }
 
