@@ -10,24 +10,24 @@ import java.util.UUID;
 
 import static com.googlecode.totallylazy.Unchecked.cast;
 
-public class StringMappings {
-    private final Map<Class, Mapping<Object>> map = new HashMap<Class, Mapping<Object>>();
+public class LexicalMappings {
+    private final Map<Class, LexicalMapping<Object>> map = new HashMap<Class, LexicalMapping<Object>>();
 
-    public StringMappings() {
+    public LexicalMappings() {
         add(Date.class, new DateMapping());
-        add(Integer.class, new LexicalIntegerMapping());
-        add(Long.class, new LexicalLongMapping());
+        add(Integer.class, new IntegerMapping());
+        add(Long.class, new LongMapping());
         add(URI.class, new UriMapping());
         add(Boolean.class, new BooleanMapping());
         add(UUID.class, new UUIDMapping());
     }
 
-    public <T> StringMappings add(final Class<T> type, final Mapping<T> mapping) {
-        map.put(type, Unchecked.<Mapping<Object>>cast(mapping));
+    public <T> LexicalMappings add(final Class<T> type, final LexicalMapping<T> mapping) {
+        map.put(type, Unchecked.<LexicalMapping<Object>>cast(mapping));
         return this;
     }
 
-    public <T> Mapping<T> get(final Class<? extends T> aClass) {
+    public <T> LexicalMapping<T> get(final Class<? extends T> aClass) {
         if (!map.containsKey(aClass)) {
             return new ObjectMapping<T>(aClass);
         }

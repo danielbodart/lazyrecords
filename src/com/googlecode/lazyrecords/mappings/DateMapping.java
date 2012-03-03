@@ -7,7 +7,7 @@ import com.googlecode.totallylazy.time.Dates;
 import java.text.ParseException;
 import java.util.Date;
 
-public class DateMapping implements Mapping<Date>{
+public class DateMapping implements LexicalMapping<Date> {
     private final DateConverter converter;
 
     public DateMapping(DateConverter converter) {

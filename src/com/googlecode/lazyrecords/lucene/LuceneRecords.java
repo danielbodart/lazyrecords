@@ -1,7 +1,6 @@
 package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.lazyrecords.Definition;
-import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.CloseableList;
 import com.googlecode.totallylazy.LazyException;
 import com.googlecode.totallylazy.Predicate;

@@ -4,7 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import static com.googlecode.totallylazy.Unchecked.cast;
 
-public class ObjectMapping<T> implements Mapping<T> {
+public class ObjectMapping<T> implements LexicalMapping<T> {
     private final Class<? extends T> aClass;
 
     public ObjectMapping(Class<? extends T> aClass) {

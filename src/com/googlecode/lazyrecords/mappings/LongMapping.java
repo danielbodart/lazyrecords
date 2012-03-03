@@ -4,7 +4,7 @@ import com.googlecode.totallylazy.numbers.Numbers;
 
 import static com.googlecode.totallylazy.numbers.Numbers.parseLexicalString;
 
-public class LexicalLongMapping implements Mapping<Long>{
+public class LongMapping implements LexicalMapping<Long> {
     public Long toValue(String value) {
         return parseLexicalString(value, Long.MIN_VALUE).longValue();
     }

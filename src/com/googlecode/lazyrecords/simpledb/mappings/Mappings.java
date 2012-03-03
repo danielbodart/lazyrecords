@@ -6,7 +6,7 @@ import com.amazonaws.services.simpledb.model.ReplaceableAttribute;
 import com.amazonaws.services.simpledb.model.ReplaceableItem;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.mappings.StringMappings;
+import com.googlecode.lazyrecords.mappings.LexicalMappings;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Pair;
@@ -23,7 +23,7 @@ import static com.googlecode.totallylazy.Predicates.notNullValue;
 import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
-public class Mappings extends StringMappings {
+public class Mappings extends LexicalMappings {
     public Function1<Item, Record> asRecord(final Sequence<Keyword<?>> definitions) {
         return new Function1<Item, Record>() {
             public Record call(Item item) throws Exception {

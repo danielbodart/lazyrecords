@@ -12,7 +12,7 @@ import com.googlecode.totallylazy.Sequences;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.SelectCallable;
-import com.googlecode.lazyrecords.mappings.StringMappings;
+import com.googlecode.lazyrecords.mappings.LexicalMappings;
 import com.googlecode.lazyrecords.sql.expressions.AbstractExpression;
 import com.googlecode.lazyrecords.sql.expressions.SelectBuilder;
 import com.googlecode.totallylazy.Unchecked;
@@ -26,12 +26,12 @@ import static java.lang.String.format;
 public class SimpleDBSequence<T> extends Sequence<T> {
     private final AmazonSimpleDB sdb;
     private final SelectBuilder builder;
-    private final StringMappings mappings;
+    private final LexicalMappings mappings;
     private final Callable1<? super Item, T> itemToRecord;
     private final PrintStream logger;
     private final boolean consistentRead;
 
-    public SimpleDBSequence(AmazonSimpleDB sdb, SelectBuilder builder, StringMappings mappings, Callable1<? super Item, T> itemToRecord, PrintStream logger, boolean consistentRead) {
+    public SimpleDBSequence(AmazonSimpleDB sdb, SelectBuilder builder, LexicalMappings mappings, Callable1<? super Item, T> itemToRecord, PrintStream logger, boolean consistentRead) {
         this.sdb = sdb;
         this.builder = builder;
         this.mappings = mappings;
