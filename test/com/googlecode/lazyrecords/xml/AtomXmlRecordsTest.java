@@ -5,7 +5,7 @@ import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.Records;
-import com.googlecode.lazyrecords.xml.mappings.DateMapping;
+import com.googlecode.lazyrecords.mappings.DateMapping;
 import com.googlecode.lazyrecords.xml.mappings.XmlMappings;
 import org.junit.Test;
 

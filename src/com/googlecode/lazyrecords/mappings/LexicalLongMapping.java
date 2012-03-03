@@ -4,12 +4,12 @@ import com.googlecode.totallylazy.numbers.Numbers;
 
 import static com.googlecode.totallylazy.numbers.Numbers.parseLexicalString;
 
-public class LongMapping implements StringMapping<Long> {
+public class LexicalLongMapping implements StringMapping<Long> {
     public Long toValue(String value) {
-        return Long.parseLong(value);
+        return parseLexicalString(value, Long.MIN_VALUE).longValue();
     }
 
     public String toString(Long value) {
-        return Long.toString(value);
+        return Numbers.toLexicalString(value, Long.MIN_VALUE, Long.MAX_VALUE);
     }
 }

@@ -1,5 +1,7 @@
 package com.googlecode.lazyrecords.xml.mappings;
 
+import com.googlecode.lazyrecords.mappings.IntegerMapping;
+import com.googlecode.lazyrecords.mappings.LongMapping;
 import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.Unchecked;
 
@@ -13,9 +15,8 @@ public class XmlMappings {
 
     public XmlMappings(StringMappings stringMappings) {
         this.stringMappings = stringMappings;
-        add(Date.class, DateMapping.defaultFormat());
-        add(Integer.class, new IntegerMapping());
-        add(Long.class, new LongMapping());
+        stringMappings.add(Integer.class, new IntegerMapping());
+        stringMappings.add(Long.class, new LongMapping());
         add(String.class, new StringMapping());
     }
 
@@ -25,6 +26,11 @@ public class XmlMappings {
 
     public <T> XmlMappings add(final Class<T> type, final XmlMapping<T> mapping) {
         map.put(type, Unchecked.<XmlMapping<Object>>cast(mapping));
+        return this;
+    }
+
+    public <T> XmlMappings add(final Class<T> type, final com.googlecode.lazyrecords.mappings.StringMapping<T> mapping) {
+        stringMappings.add(type, mapping);
         return this;
     }
 

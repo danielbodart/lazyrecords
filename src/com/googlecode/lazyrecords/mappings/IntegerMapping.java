@@ -1,13 +1,11 @@
 package com.googlecode.lazyrecords.mappings;
 
-import com.googlecode.totallylazy.numbers.Numbers;
-
 public class IntegerMapping implements StringMapping<Integer> {
     public Integer toValue(String value) {
-        return Numbers.parseLexicalString(value, Integer.MIN_VALUE).intValue();
+        return Integer.parseInt(value);
     }
 
     public String toString(Integer value) {
-        return Numbers.toLexicalString(value, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        return Integer.toString(value);
     }
 }
