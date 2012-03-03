@@ -4,7 +4,7 @@ import com.googlecode.totallylazy.Sequence;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-public class IntegerMapping implements Mapping<Integer>  {
+public class IntegerMapping implements XmlMapping<Integer> {
     private final StringMapping mapping = new StringMapping();
 
     public Sequence<Node> to(Document document, String expression, Integer value) {

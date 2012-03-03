@@ -11,7 +11,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
 
-public class DateMapping implements Mapping<Date> {
+public class DateMapping implements XmlMapping<Date> {
     private final StringMapping mapping = new StringMapping();
     private final DateConverter dateConverter;
 

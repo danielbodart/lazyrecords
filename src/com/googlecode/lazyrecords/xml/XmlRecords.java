@@ -1,6 +1,7 @@
 package com.googlecode.lazyrecords.xml;
 
 import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.xml.mappings.XmlMapping;
 import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Predicate;
@@ -11,7 +12,6 @@ import com.googlecode.totallylazy.Xml;
 import com.googlecode.lazyrecords.AbstractRecords;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.xml.mappings.Mapping;
 import com.googlecode.lazyrecords.xml.mappings.Mappings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -60,7 +60,7 @@ public class XmlRecords extends AbstractRecords {
             public Element call(Element container, Keyword<?> field) throws Exception {
                 Object value = record.get(field);
                 if (value != null) {
-                    Mapping<Object> objectMapping = mappings.get(field.forClass());
+                    XmlMapping<Object> objectMapping = mappings.get(field.forClass());
                     Sequence<Node> nodes = objectMapping.to(document, field.toString(), value);
                     for (Node node : nodes) {
                         container.appendChild(node);

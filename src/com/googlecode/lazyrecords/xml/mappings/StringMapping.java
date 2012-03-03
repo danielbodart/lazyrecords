@@ -9,7 +9,7 @@ import org.w3c.dom.Node;
 import static com.googlecode.totallylazy.Xml.contents;
 import static com.googlecode.lazyrecords.xml.XmlRecords.toTagName;
 
-public class StringMapping implements Mapping<String> {
+public class StringMapping implements XmlMapping<String> {
     public Sequence<Node> to(Document document, String expression, String value) {
         Element element = document.createElement(toTagName(expression));
         element.appendChild(document.createTextNode(value));
