@@ -10,7 +10,7 @@ import static org.hamcrest.Matchers.is;
 public class EnumMappingTest {
     @Test
     public void canConvertAnyEnum() throws Exception {
-        LexicalMapping<Formatter.BigDecimalLayoutForm> mapping = new EnumMapping<Formatter.BigDecimalLayoutForm>(Formatter.BigDecimalLayoutForm.class);
+        StringMapping<Formatter.BigDecimalLayoutForm> mapping = new EnumMapping<Formatter.BigDecimalLayoutForm>(Formatter.BigDecimalLayoutForm.class);
         Formatter.BigDecimalLayoutForm enumValue = Formatter.BigDecimalLayoutForm.DECIMAL_FLOAT;
 
         String stringValue = mapping.toString(enumValue);

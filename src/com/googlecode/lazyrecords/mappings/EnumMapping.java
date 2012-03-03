@@ -1,8 +1,6 @@
 package com.googlecode.lazyrecords.mappings;
 
-import java.util.Formatter;
-
-public class EnumMapping<E extends Enum<E>> implements LexicalMapping<E>{
+public class EnumMapping<E extends Enum<E>> implements StringMapping<E> {
     private final Class<E> aClass;
 
     public EnumMapping(Class<E> aClass) {

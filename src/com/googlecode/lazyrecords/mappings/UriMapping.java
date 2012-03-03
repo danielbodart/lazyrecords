@@ -4,7 +4,7 @@ import java.net.URI;
 
 import static com.googlecode.totallylazy.URLs.uri;
 
-public class UriMapping implements LexicalMapping<URI> {
+public class UriMapping implements StringMapping<URI> {
     public URI toValue(String value) {
         return uri(value);
     }

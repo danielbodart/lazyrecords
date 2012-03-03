@@ -10,7 +10,7 @@ import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.Schema;
-import com.googlecode.lazyrecords.simpledb.mappings.Mappings;
+import com.googlecode.lazyrecords.simpledb.mappings.SimpleDBMappings;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
@@ -28,12 +28,12 @@ import static com.googlecode.totallylazy.numbers.Numbers.sum;
 
 public class SimpleDBRecords extends AbstractRecords {
     private final AmazonSimpleDB sdb;
-    private final Mappings mappings;
+    private final SimpleDBMappings mappings;
     private final PrintStream logger;
     private final boolean consistentRead;
     private final Schema schema;
 
-    public SimpleDBRecords(final AmazonSimpleDB sdb, boolean consistentRead, final Mappings mappings, final PrintStream logger, final Schema schema) {
+    public SimpleDBRecords(final AmazonSimpleDB sdb, boolean consistentRead, final SimpleDBMappings mappings, final PrintStream logger, final Schema schema) {
         this.consistentRead = consistentRead;
         this.mappings = mappings;
         this.sdb = sdb;
@@ -42,7 +42,7 @@ public class SimpleDBRecords extends AbstractRecords {
     }
 
     public SimpleDBRecords(final AmazonSimpleDB sdb, boolean consistentRead) {
-        this(sdb, consistentRead, new Mappings(), nullPrintStream(), new SimpleDBSchema(sdb));
+        this(sdb, consistentRead, new SimpleDBMappings(), nullPrintStream(), new SimpleDBSchema(sdb));
     }
 
     public Sequence<Record> get(Definition definition) {

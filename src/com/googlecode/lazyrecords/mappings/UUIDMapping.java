@@ -2,7 +2,7 @@ package com.googlecode.lazyrecords.mappings;
 
 import java.util.UUID;
 
-public class UUIDMapping implements LexicalMapping<UUID> {
+public class UUIDMapping implements StringMapping<UUID> {
     public UUID toValue(String value) {
         return UUID.fromString(value);
     }

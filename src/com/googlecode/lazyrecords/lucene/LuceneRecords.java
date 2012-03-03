@@ -9,7 +9,7 @@ import com.googlecode.lazyrecords.AbstractRecords;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Queryable;
 import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.lucene.mappings.Mappings;
+import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
 import org.apache.lucene.search.Query;
 
 import java.io.Closeable;
@@ -22,12 +22,12 @@ import static com.googlecode.lazyrecords.lucene.Lucene.record;
 
 public class LuceneRecords extends AbstractRecords implements Queryable<Query>, Closeable {
     private final LuceneStorage storage;
-    private final Mappings mappings;
+    private final LuceneMappings mappings;
     private final PrintStream printStream;
     private final Lucene lucene;
     private CloseableList closeables;
 
-    public LuceneRecords(final LuceneStorage storage, final Mappings mappings, final PrintStream printStream) throws IOException {
+    public LuceneRecords(final LuceneStorage storage, final LuceneMappings mappings, final PrintStream printStream) throws IOException {
         this.storage = storage;
         this.mappings = mappings;
         this.printStream = printStream;
@@ -36,7 +36,7 @@ public class LuceneRecords extends AbstractRecords implements Queryable<Query>, 
     }
 
     public LuceneRecords(final LuceneStorage storage) throws IOException {
-        this(storage, new Mappings(), new PrintStream(nullOutputStream()));
+        this(storage, new LuceneMappings(), new PrintStream(nullOutputStream()));
     }
 
     public Sequence<Record> query(final Query query, final Sequence<Keyword<?>> definitions) {

@@ -12,7 +12,7 @@ import com.googlecode.totallylazy.Xml;
 import com.googlecode.lazyrecords.AbstractRecords;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.xml.mappings.Mappings;
+import com.googlecode.lazyrecords.xml.mappings.XmlMappings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -24,15 +24,15 @@ import static com.googlecode.totallylazy.Xml.xpath;
 public class XmlRecords extends AbstractRecords {
     private final XPath xpath = xpath();
     private final Document document;
-    private final Mappings mappings;
+    private final XmlMappings mappings;
 
-    public XmlRecords(Document document, Mappings mappings) {
+    public XmlRecords(Document document, XmlMappings mappings) {
         this.document = document;
         this.mappings = mappings;
     }
 
     public XmlRecords(Document document) {
-        this(document, new Mappings());
+        this(document, new XmlMappings());
     }
 
     public Sequence<Record> get(Definition definition) {

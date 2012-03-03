@@ -9,17 +9,17 @@ import com.googlecode.totallylazy.Xml;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.SourceRecord;
-import com.googlecode.lazyrecords.xml.mappings.Mappings;
+import com.googlecode.lazyrecords.xml.mappings.XmlMappings;
 import org.w3c.dom.Node;
 
 import java.util.Iterator;
 
 public class XmlSequence extends Sequence<Record> {
     private final Sequence<Node> nodes;
-    private final Mappings mappings;
+    private final XmlMappings mappings;
     private final Sequence<Keyword<?>> definitions;
 
-    public XmlSequence(Sequence<Node> nodes, Mappings mappings, Sequence<Keyword<?>> definitions) {
+    public XmlSequence(Sequence<Node> nodes, XmlMappings mappings, Sequence<Keyword<?>> definitions) {
         this.nodes = nodes;
         this.mappings = mappings;
         this.definitions = definitions;

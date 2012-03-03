@@ -5,7 +5,7 @@ import com.googlecode.totallylazy.Sequences;
 import com.googlecode.lazyrecords.RecordsContract;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.lucene.mappings.Mappings;
+import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.queryParser.QueryParser;
@@ -33,7 +33,7 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
         file = temporaryDirectory("totallylazy");
         directory = new NIOFSDirectory(file);
         storage = new OptimisedStorage(directory);
-        return new LuceneRecords(storage, new Mappings(), logger);
+        return new LuceneRecords(storage, new LuceneMappings(), logger);
     }
 
     @After

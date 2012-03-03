@@ -5,7 +5,7 @@ import com.googlecode.totallylazy.iterators.StatefulIterator;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
-import com.googlecode.lazyrecords.sql.mappings.Mappings;
+import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -22,14 +22,14 @@ import static java.lang.String.format;
 
 public class RecordIterator extends StatefulIterator<Record> implements Closeable {
     private final Connection connection;
-    private final Mappings mappings;
+    private final SqlMappings mappings;
     private final Expression expression;
     private final Sequence<Keyword<?>> definitions;
     private final PrintStream logger;
     private PreparedStatement preparedStatement;
     private ResultSet resultSet;
 
-    public RecordIterator(final Connection connection, final Mappings mappings, final Expression expression, final Sequence<Keyword<?>> definitions, final PrintStream logger) {
+    public RecordIterator(final Connection connection, final SqlMappings mappings, final Expression expression, final Sequence<Keyword<?>> definitions, final PrintStream logger) {
         this.definitions = definitions;
         this.logger = logger;
         this.connection = connection;

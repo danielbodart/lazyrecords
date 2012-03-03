@@ -1,12 +1,11 @@
 package com.googlecode.lazyrecords.sql.mappings;
 
-import com.googlecode.lazyrecords.mappings.LexicalMappings;
+import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Unchecked;
 
-import java.net.URI;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,19 +13,18 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.numbers.Numbers.numbers;
 import static com.googlecode.totallylazy.numbers.Numbers.range;
 import static com.googlecode.totallylazy.numbers.Numbers.sum;
 
-public class Mappings {
+public class SqlMappings {
     private final Map<Class, SqlMapping<Object>> map = new HashMap<Class, SqlMapping<Object>>();
-    private final LexicalMappings lexicalMappings;
+    private final StringMappings stringMappings;
 
-    public Mappings(LexicalMappings lexicalMappings) {
-        this.lexicalMappings = lexicalMappings;
+    public SqlMappings(StringMappings stringMappings) {
+        this.stringMappings = stringMappings;
         add(Boolean.class, new BooleanMapping());
         add(Date.class, new DateMapping());
         add(Timestamp.class, new TimestampMapping());
@@ -34,18 +32,18 @@ public class Mappings {
         add(Long.class, new LongMapping());
     }
 
-    public Mappings() {
-        this(new LexicalMappings());
+    public SqlMappings() {
+        this(new StringMappings());
     }
 
-    public <T> Mappings add(final Class<T> type, final SqlMapping<T> mapping) {
+    public <T> SqlMappings add(final Class<T> type, final SqlMapping<T> mapping) {
         map.put(type, Unchecked.<SqlMapping<Object>>cast(mapping));
         return this;
     }
 
     public SqlMapping<Object> get(final Class aClass) {
         if (!map.containsKey(aClass)) {
-            return new ObjectMapping(aClass, lexicalMappings);
+            return new ObjectMapping(aClass, stringMappings);
         }
         return map.get(aClass);
     }

@@ -5,7 +5,7 @@ import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.SourceRecord;
 import com.googlecode.lazyrecords.lucene.Lucene;
-import com.googlecode.lazyrecords.mappings.LexicalMappings;
+import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
@@ -23,7 +23,7 @@ import static com.googlecode.totallylazy.Predicates.notNullValue;
 import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
-public class Mappings extends LexicalMappings {
+public class LuceneMappings extends StringMappings {
     public Function1<Document, Record> asRecord(final Sequence<Keyword<?>> definitions) {
         return new Function1<Document, Record>() {
             public Record call(Document document) throws Exception {
@@ -54,7 +54,7 @@ public class Mappings extends LexicalMappings {
 
                 String name = pair.first().name();
                 Keyword<?> keyword = getKeyword(name, definitions);
-                return new Field(name, Mappings.this.toString(keyword.forClass(), pair.second()), Field.Store.YES, Field.Index.NOT_ANALYZED);
+                return new Field(name, LuceneMappings.this.toString(keyword.forClass(), pair.second()), Field.Store.YES, Field.Index.NOT_ANALYZED);
             }
         };
     }

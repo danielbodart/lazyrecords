@@ -3,7 +3,7 @@ package com.googlecode.lazyrecords.lucene;
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.lucene.mappings.Mappings;
+import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Predicate;
@@ -89,9 +89,9 @@ public class Lucene {
         };
     }
 
-    private final Mappings mappings;
+    private final LuceneMappings mappings;
 
-    public Lucene(Mappings mappings) {
+    public Lucene(LuceneMappings mappings) {
         this.mappings = mappings;
     }
 

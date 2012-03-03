@@ -5,7 +5,7 @@ import com.amazonaws.auth.PropertiesCredentials;
 import com.amazonaws.services.simpledb.AmazonSimpleDBClient;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.SchemaBasedRecordContract;
-import com.googlecode.lazyrecords.simpledb.mappings.Mappings;
+import com.googlecode.lazyrecords.simpledb.mappings.SimpleDBMappings;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
 import org.junit.Ignore;
@@ -26,7 +26,7 @@ public class SimpleDBRecordsTest extends SchemaBasedRecordContract<SimpleDBRecor
         System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
         final AmazonSimpleDBClient amazonSimpleDBClient = new AmazonSimpleDBClient(new PropertiesCredentials(credentials), new ClientConfiguration().withMaxErrorRetry(5));
         schema = new SimpleDBSchema(amazonSimpleDBClient);
-        return new SimpleDBRecords(amazonSimpleDBClient, true, new Mappings(), logger, schema);
+        return new SimpleDBRecords(amazonSimpleDBClient, true, new SimpleDBMappings(), logger, schema);
     }
 
     @Override

@@ -10,10 +10,10 @@ import java.util.UUID;
 
 import static com.googlecode.totallylazy.Unchecked.cast;
 
-public class LexicalMappings {
-    private final Map<Class, LexicalMapping<Object>> map = new HashMap<Class, LexicalMapping<Object>>();
+public class StringMappings {
+    private final Map<Class, StringMapping<Object>> map = new HashMap<Class, StringMapping<Object>>();
 
-    public LexicalMappings() {
+    public StringMappings() {
         add(Date.class, new DateMapping());
         add(Integer.class, new IntegerMapping());
         add(Long.class, new LongMapping());
@@ -22,13 +22,13 @@ public class LexicalMappings {
         add(UUID.class, new UUIDMapping());
     }
 
-    public <T> LexicalMappings add(final Class<T> type, final LexicalMapping<T> mapping) {
-        map.put(type, Unchecked.<LexicalMapping<Object>>cast(mapping));
+    public <T> StringMappings add(final Class<T> type, final StringMapping<T> mapping) {
+        map.put(type, Unchecked.<StringMapping<Object>>cast(mapping));
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    public <T> LexicalMapping<T> get(final Class<? extends T> aClass) {
+    public <T> StringMapping<T> get(final Class<? extends T> aClass) {
         if (!map.containsKey(aClass)) {
             if(aClass.isEnum()){
                 return new EnumMapping(aClass);

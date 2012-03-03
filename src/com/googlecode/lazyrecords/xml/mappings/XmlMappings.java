@@ -1,38 +1,36 @@
 package com.googlecode.lazyrecords.xml.mappings;
 
-import com.googlecode.lazyrecords.mappings.LexicalMappings;
+import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.Unchecked;
 
-import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
-public class Mappings {
+public class XmlMappings {
     private final Map<Class, XmlMapping<Object>> map = new HashMap<Class, XmlMapping<Object>>();
-    private final LexicalMappings lexicalMappings;
+    private final StringMappings stringMappings;
 
-    public Mappings(LexicalMappings lexicalMappings) {
-        this.lexicalMappings = lexicalMappings;
+    public XmlMappings(StringMappings stringMappings) {
+        this.stringMappings = stringMappings;
         add(Date.class, DateMapping.defaultFormat());
         add(Integer.class, new IntegerMapping());
         add(Long.class, new LongMapping());
         add(String.class, new StringMapping());
     }
 
-    public Mappings() {
-        this(new LexicalMappings());
+    public XmlMappings() {
+        this(new StringMappings());
     }
 
-    public <T> Mappings add(final Class<T> type, final XmlMapping<T> mapping) {
+    public <T> XmlMappings add(final Class<T> type, final XmlMapping<T> mapping) {
         map.put(type, Unchecked.<XmlMapping<Object>>cast(mapping));
         return this;
     }
 
     public XmlMapping<Object> get(final Class aClass) {
         if(!map.containsKey(aClass)) {
-            return new ObjectMapping(aClass, lexicalMappings);
+            return new ObjectMapping(aClass, stringMappings);
         }
         return map.get(aClass);
     }

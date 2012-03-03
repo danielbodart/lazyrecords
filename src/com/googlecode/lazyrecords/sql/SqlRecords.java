@@ -14,7 +14,7 @@ import com.googlecode.lazyrecords.Queryable;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.expressions.Expressions;
-import com.googlecode.lazyrecords.sql.mappings.Mappings;
+import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -36,17 +36,17 @@ import static java.lang.String.format;
 public class SqlRecords extends AbstractRecords implements Queryable<Expression>, Closeable {
     private final Connection connection;
     private final PrintStream logger;
-    private final Mappings mappings;
+    private final SqlMappings mappings;
     private final CloseableList closeables = new CloseableList();
 
-    public SqlRecords(final Connection connection, Mappings mappings, PrintStream logger) {
+    public SqlRecords(final Connection connection, SqlMappings mappings, PrintStream logger) {
         this.connection = connection;
         this.mappings = mappings;
         this.logger = logger;
     }
 
     public SqlRecords(final Connection connection) {
-        this(connection, new Mappings(), new PrintStream(nullOutputStream()));
+        this(connection, new SqlMappings(), new PrintStream(nullOutputStream()));
     }
 
     public void close() throws IOException {

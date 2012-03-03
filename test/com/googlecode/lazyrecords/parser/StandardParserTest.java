@@ -5,7 +5,7 @@ import com.googlecode.totallylazy.Sequences;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.lucene.Lucene;
-import com.googlecode.lazyrecords.lucene.mappings.Mappings;
+import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
 import com.googlecode.lazyrecords.sql.expressions.WhereClause;
 import org.junit.Test;
 
@@ -376,7 +376,7 @@ public class StandardParserTest {
     }
 
     private void assertLuceneSyntax(Predicate<Record> predicate) {
-        String luceneQuery = new Lucene(new Mappings()).query(predicate).toString();
+        String luceneQuery = new Lucene(new LuceneMappings()).query(predicate).toString();
         System.out.println("LUCENE = " + luceneQuery);
         assertThat(luceneQuery, is(notNullValue()));
     }

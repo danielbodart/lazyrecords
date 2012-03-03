@@ -4,10 +4,9 @@ import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.RecordDefinition;
 import com.googlecode.lazyrecords.Records;
 import com.googlecode.lazyrecords.xml.mappings.DateMapping;
-import com.googlecode.lazyrecords.xml.mappings.Mappings;
+import com.googlecode.lazyrecords.xml.mappings.XmlMappings;
 import org.junit.Test;
 
 import java.net.URI;
@@ -29,7 +28,7 @@ public class AtomXmlRecordsTest {
 
     @Test
     public void canGetElements() throws Exception {
-        Records records = new XmlRecords(document(XML), new Mappings().add(Date.class, DateMapping.atomDateFormat()));
+        Records records = new XmlRecords(document(XML), new XmlMappings().add(Date.class, DateMapping.atomDateFormat()));
         Record record = records.get(entries).head();
         assertThat(record.get(id), is(ID));
         assertThat(record.get(link), is(LINK));

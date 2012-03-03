@@ -1,6 +1,6 @@
 package com.googlecode.lazyrecords.mappings;
 
-public class BooleanMapping implements LexicalMapping<Boolean> {
+public class BooleanMapping implements StringMapping<Boolean> {
     public Boolean toValue(String value) {
         return Boolean.parseBoolean(value);
     }
