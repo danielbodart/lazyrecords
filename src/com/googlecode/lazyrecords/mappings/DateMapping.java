@@ -2,6 +2,7 @@ package com.googlecode.lazyrecords.mappings;
 
 import com.googlecode.totallylazy.time.DateConverter;
 import com.googlecode.totallylazy.time.DateFormatConverter;
+import com.googlecode.totallylazy.time.Dates;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -14,7 +15,7 @@ public class DateMapping implements Mapping<Date>{
     }
 
     public DateMapping() {
-        this(DateFormatConverter.defaultConverter());
+        this(new DateFormatConverter(Dates.LUCENE()));
     }
 
     public Date toValue(String value) throws ParseException {
