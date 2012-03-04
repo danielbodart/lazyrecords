@@ -1,5 +1,7 @@
 package com.googlecode.lazyrecords.sql;
 
+import com.googlecode.lazyrecords.Logger;
+import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.iterators.StatefulIterator;
 import com.googlecode.lazyrecords.Keyword;
@@ -16,6 +18,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
+import static com.googlecode.totallylazy.Pair.pair;
 import static com.googlecode.totallylazy.numbers.Numbers.range;
 import static com.googlecode.lazyrecords.Record.methods.getKeyword;
 import static java.lang.String.format;
@@ -25,11 +28,11 @@ public class RecordIterator extends StatefulIterator<Record> implements Closeabl
     private final SqlMappings mappings;
     private final Expression expression;
     private final Sequence<Keyword<?>> definitions;
-    private final PrintStream logger;
+    private final Logger logger;
     private PreparedStatement preparedStatement;
     private ResultSet resultSet;
 
-    public RecordIterator(final Connection connection, final SqlMappings mappings, final Expression expression, final Sequence<Keyword<?>> definitions, final PrintStream logger) {
+    public RecordIterator(final Connection connection, final SqlMappings mappings, final Expression expression, final Sequence<Keyword<?>> definitions, final Logger logger) {
         this.definitions = definitions;
         this.logger = logger;
         this.connection = connection;
@@ -66,7 +69,7 @@ public class RecordIterator extends StatefulIterator<Record> implements Closeabl
 
     private ResultSet prepareStatement() throws SQLException {
         if (preparedStatement == null) {
-            logger.println(format("SQL: %s", expression));
+            logger.log(Maps.map(pair("sql", expression)));
             preparedStatement = connection.prepareStatement(expression.text());
             mappings.addValues(preparedStatement, expression.parameters());
         }

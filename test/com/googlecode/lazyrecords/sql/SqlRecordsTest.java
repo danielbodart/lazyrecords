@@ -1,6 +1,7 @@
 package com.googlecode.lazyrecords.sql;
 
 import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.PrintStreamLogger;
 import com.googlecode.lazyrecords.SchemaBasedRecordContract;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
 import org.junit.Test;
@@ -13,7 +14,7 @@ import static org.hamcrest.Matchers.is;
 
 public class SqlRecordsTest extends SchemaBasedRecordContract<SqlRecords> {
     public SqlRecords createRecords() throws Exception {
-        SqlRecords sqlRecords = new SqlRecords(getConnection("jdbc:h2:mem:totallylazy", "SA", ""), new SqlMappings(), logger);
+        SqlRecords sqlRecords = new SqlRecords(getConnection("jdbc:h2:mem:totallylazy", "SA", ""), new SqlMappings(), new PrintStreamLogger(logger));
         schema = new SqlSchema(sqlRecords);
         return sqlRecords;
     }

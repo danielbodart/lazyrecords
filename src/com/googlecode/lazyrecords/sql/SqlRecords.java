@@ -1,9 +1,12 @@
 package com.googlecode.lazyrecords.sql;
 
 import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.IgnoreLogger;
+import com.googlecode.lazyrecords.Logger;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.CloseableList;
 import com.googlecode.totallylazy.Group;
+import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
@@ -23,6 +26,7 @@ import java.sql.Connection;
 import java.util.Iterator;
 
 import static com.googlecode.totallylazy.Closeables.using;
+import static com.googlecode.totallylazy.Pair.pair;
 import static com.googlecode.totallylazy.Predicates.is;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.Streams.nullOutputStream;
@@ -35,18 +39,18 @@ import static java.lang.String.format;
 
 public class SqlRecords extends AbstractRecords implements Queryable<Expression>, Closeable {
     private final Connection connection;
-    private final PrintStream logger;
+    private final Logger logger;
     private final SqlMappings mappings;
     private final CloseableList closeables = new CloseableList();
 
-    public SqlRecords(final Connection connection, SqlMappings mappings, PrintStream logger) {
+    public SqlRecords(final Connection connection, SqlMappings mappings, Logger logger) {
         this.connection = connection;
         this.mappings = mappings;
         this.logger = logger;
     }
 
     public SqlRecords(final Connection connection) {
-        this(connection, new SqlMappings(), new PrintStream(nullOutputStream()));
+        this(connection, new SqlMappings(), new IgnoreLogger());
     }
 
     public void close() throws IOException {
@@ -89,10 +93,10 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
     public Number update(final Sequence<Expression> expressions) {
         return expressions.groupBy(Expressions.text()).map(new Callable1<Group<String, Expression>, Number>() {
             public Number call(Group<String, Expression> group) throws Exception {
-                logger.print(format("SQL: %s", group.key()));
+                logger.log(Maps.map(pair("sql", expressions)));
                 Number rowCount = using(connection.prepareStatement(group.key()),
                         mappings.addValuesInBatch(group.map(Expressions.parameters())));
-                logger.println(format(" Count:%s", rowCount));
+                logger.log(Maps.map(pair("count", rowCount)));
                 return rowCount;
             }
         }).reduce(Numbers.sum());

@@ -1,8 +1,10 @@
 package com.googlecode.lazyrecords.sql;
 
+import com.googlecode.lazyrecords.Logger;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Callable2;
 import com.googlecode.totallylazy.Iterators;
+import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sets;
 import com.googlecode.lazyrecords.Record;
@@ -13,17 +15,19 @@ import com.googlecode.totallylazy.Unchecked;
 
 import java.io.PrintStream;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
+import static com.googlecode.totallylazy.Pair.pair;
 import static java.lang.String.format;
 
 class SingleValueSequence<T> extends Sequence<T> implements Expressible {
     private final Callable1<? super Record, ? extends T> callable;
-    private final PrintStream logger;
+    private final Logger logger;
     private final SqlRecords sqlRecords;
     private final SelectBuilder builder;
 
-    public SingleValueSequence(final SqlRecords sqlRecords, final SelectBuilder builder, final Callable1<? super Record, ? extends T> callable, final PrintStream logger) {
+    public SingleValueSequence(final SqlRecords sqlRecords, final SelectBuilder builder, final Callable1<? super Record, ? extends T> callable, final Logger logger) {
         this.sqlRecords = sqlRecords;
         this.builder = builder;
         this.callable = callable;
@@ -48,7 +52,7 @@ class SingleValueSequence<T> extends Sequence<T> implements Expressible {
             SelectBuilder reduce = builder.reduce(callable);
             return Unchecked.cast(sqlRecords.query(reduce.express(), reduce.select()).head().fields().head().second());
         } catch (UnsupportedOperationException ex) {
-            logger.println(format("Warning: Unsupported Callable2 %s dropping down to client side sequence functionality", callable));
+            logger.log(Maps.map(pair("message", "Unsupported function passed to reduce, moving computation to client"), pair("function", callable)));
             return super.reduce(callable);
         }
     }

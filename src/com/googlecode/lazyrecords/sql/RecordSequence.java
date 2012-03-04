@@ -1,7 +1,9 @@
 package com.googlecode.lazyrecords.sql;
 
+import com.googlecode.lazyrecords.Logger;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Callable2;
+import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sets;
@@ -18,14 +20,15 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Set;
 
+import static com.googlecode.totallylazy.Pair.pair;
 import static java.lang.String.format;
 
 public class RecordSequence extends Sequence<Record> implements Expressible {
     private final SqlRecords sqlRecords;
     private final SelectBuilder builder;
-    private final PrintStream logger;
+    private final Logger logger;
 
-    public RecordSequence(final SqlRecords records, final SelectBuilder builder, final PrintStream logger) {
+    public RecordSequence(final SqlRecords records, final SelectBuilder builder, final Logger logger) {
         this.sqlRecords = records;
         this.builder = builder;
         this.logger = logger;
@@ -48,7 +51,7 @@ public class RecordSequence extends Sequence<Record> implements Expressible {
         if (raw instanceof SelectCallable) {
             return Unchecked.cast(new RecordSequence(sqlRecords, builder.select(((SelectCallable) raw).keywords()), logger));
         }
-        logger.println(format("Warning: Unsupported Callable1 %s dropping down to client side sequence functionality", callable));
+        logger.log(Maps.map(pair("message", "Unsupported function passed to 'map', moving computation to client"), pair("function", callable)));
         return super.map(callable);
     }
 
@@ -57,7 +60,7 @@ public class RecordSequence extends Sequence<Record> implements Expressible {
         try {
             return new RecordSequence(sqlRecords, builder.where(predicate), logger);
         } catch (UnsupportedOperationException ex) {
-            logger.println(format("Warning: Unsupported Predicate %s dropping down to client side sequence functionality", predicate));
+            logger.log(Maps.map(pair("message", "Unsupported predicate passed to 'filter', moving computation to client"), pair("predicate", predicate)));
             return super.filter(predicate);
         }
     }
@@ -67,7 +70,7 @@ public class RecordSequence extends Sequence<Record> implements Expressible {
         try {
             return new RecordSequence(sqlRecords, builder.orderBy(comparator), logger);
         } catch (UnsupportedOperationException ex) {
-            logger.println(format("Warning: Unsupported Comparator %s dropping down to client side sequence functionality", comparator));
+            logger.log(Maps.map(pair("message", "Unsupported comparator passed to 'sortBy', moving computation to client"), pair("comparator", comparator)));
             return super.sortBy(comparator);
         }
     }
@@ -78,7 +81,7 @@ public class RecordSequence extends Sequence<Record> implements Expressible {
             SelectBuilder query = builder.reduce(callable);
             return Unchecked.cast(sqlRecords.query(query.build(), query.select()).head());
         } catch (UnsupportedOperationException ex) {
-            logger.println(format("Warning: Unsupported Callable2 %s dropping down to client side sequence functionality", callable));
+            logger.log(Maps.map(pair("message", "Unsupported function passed to 'reduce', moving computation to client"), pair("function", callable)));
             return super.reduce(callable);
         }
     }

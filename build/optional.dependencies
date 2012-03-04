@@ -1,5 +1,5 @@
-mvn://repo.bodar.com/com.googlecode.funclate:funclate:jar|sources:67
-mvn://repo.bodar.com/com.googlecode.lazyparsec:lazyparsec:jar|sources:5
+mvn://repo.bodar.com/com.googlecode.funclate:funclate:jar|sources:69
+mvn://repo.bodar.com/com.googlecode.lazyparsec:lazyparsec:jar|sources:7
 
 mvn:cglib:cglib-nodep:jar:2.2
 mvn:org.objenesis:objenesis:jar:1.2

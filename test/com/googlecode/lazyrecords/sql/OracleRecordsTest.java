@@ -2,6 +2,7 @@ package com.googlecode.lazyrecords.sql;
 
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.PrintStreamLogger;
 import com.googlecode.lazyrecords.RecordsContract;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
 import org.junit.Ignore;
@@ -20,7 +21,7 @@ public class OracleRecordsTest extends RecordsContract<SqlRecords> {
     public SqlRecords createRecords() throws Exception {
         Class.forName("oracle.jdbc.driver.OracleDriver");
 
-        return new SqlRecords(getConnection(getenv("JDBC_URL"), getenv("JDBC_USERNAME"), getenv("JDBC_PASSWORD")), new SqlMappings(), System.out);
+        return new SqlRecords(getConnection(getenv("JDBC_URL"), getenv("JDBC_USERNAME"), getenv("JDBC_PASSWORD")), new SqlMappings(), new PrintStreamLogger(logger));
     }
 
     @Test
