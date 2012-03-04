@@ -1,27 +1,27 @@
 package com.googlecode.lazyrecords.sql;
 
-import com.googlecode.lazyrecords.Logger;
-import com.googlecode.totallylazy.Maps;
-import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.iterators.StatefulIterator;
 import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.Logger;
+import com.googlecode.lazyrecords.Loggers;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
+import com.googlecode.totallylazy.Maps;
+import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.iterators.StatefulIterator;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
+import java.util.Map;
 
-import static com.googlecode.totallylazy.Pair.pair;
-import static com.googlecode.totallylazy.numbers.Numbers.range;
 import static com.googlecode.lazyrecords.Record.methods.getKeyword;
-import static java.lang.String.format;
+import static com.googlecode.totallylazy.Pair.pair;
+import static com.googlecode.totallylazy.callables.TimeCallable.calculateMilliseconds;
+import static com.googlecode.totallylazy.numbers.Numbers.range;
 
 public class RecordIterator extends StatefulIterator<Record> implements Closeable {
     private final Connection connection;
@@ -42,7 +42,7 @@ public class RecordIterator extends StatefulIterator<Record> implements Closeabl
 
     @Override
     protected Record getNext() throws Exception {
-        ResultSet resultSet = getResultSet();
+        ResultSet resultSet = resultSet();
         boolean hasNext = resultSet.next();
         if (!hasNext) {
             close();
@@ -60,20 +60,17 @@ public class RecordIterator extends StatefulIterator<Record> implements Closeabl
         return record;
     }
 
-    private ResultSet getResultSet() throws Exception {
+    private ResultSet resultSet() throws Exception {
         if (resultSet == null) {
-            resultSet = prepareStatement();
-        }
-        return resultSet;
-    }
-
-    private ResultSet prepareStatement() throws SQLException {
-        if (preparedStatement == null) {
-            logger.log(Maps.map(pair("sql", expression)));
+            Map<String, Object> log = Maps.<String, Object>map(pair(Loggers.SQL, expression));
+            long start = System.nanoTime();
             preparedStatement = connection.prepareStatement(expression.text());
             mappings.addValues(preparedStatement, expression.parameters());
+            resultSet = preparedStatement.executeQuery();
+            log.put(Loggers.MILLISECONDS, calculateMilliseconds(start, System.nanoTime()));
+            logger.log(log);
         }
-        return preparedStatement.executeQuery();
+        return resultSet;
     }
 
     public void close() throws IOException {

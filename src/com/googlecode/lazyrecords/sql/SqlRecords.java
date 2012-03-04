@@ -3,6 +3,7 @@ package com.googlecode.lazyrecords.sql;
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.IgnoreLogger;
 import com.googlecode.lazyrecords.Logger;
+import com.googlecode.lazyrecords.Loggers;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.CloseableList;
 import com.googlecode.totallylazy.Group;
@@ -21,15 +22,15 @@ import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.sql.Connection;
 import java.util.Iterator;
+import java.util.Map;
 
+import static com.googlecode.lazyrecords.Loggers.milliseconds;
 import static com.googlecode.totallylazy.Closeables.using;
 import static com.googlecode.totallylazy.Pair.pair;
 import static com.googlecode.totallylazy.Predicates.is;
 import static com.googlecode.totallylazy.Sequences.sequence;
-import static com.googlecode.totallylazy.Streams.nullOutputStream;
 import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.lazyrecords.sql.expressions.DeleteStatement.deleteStatement;
 import static com.googlecode.lazyrecords.sql.expressions.InsertStatement.insertStatement;
@@ -93,10 +94,11 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
     public Number update(final Sequence<Expression> expressions) {
         return expressions.groupBy(Expressions.text()).map(new Callable1<Group<String, Expression>, Number>() {
             public Number call(Group<String, Expression> group) throws Exception {
-                logger.log(Maps.map(pair("sql", expressions)));
+                Map<String,Object> log = Maps.<String,Object>map(pair(Loggers.SQL, expressions));
                 Number rowCount = using(connection.prepareStatement(group.key()),
-                        mappings.addValuesInBatch(group.map(Expressions.parameters())));
-                logger.log(Maps.map(pair("count", rowCount)));
+                        mappings.addValuesInBatch(group.map(Expressions.parameters())).time(milliseconds(log)));
+                log.put(Loggers.COUNT, rowCount);
+                logger.log(log);
                 return rowCount;
             }
         }).reduce(Numbers.sum());

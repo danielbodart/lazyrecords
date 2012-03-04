@@ -1,6 +1,7 @@
 package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.lazyrecords.Logger;
+import com.googlecode.lazyrecords.Loggers;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Closeables;
 import com.googlecode.totallylazy.Maps;
@@ -13,10 +14,11 @@ import org.apache.lucene.store.AlreadyClosedException;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.util.Map;
 
 import static com.googlecode.totallylazy.Arrays.containsIndex;
 import static com.googlecode.totallylazy.Pair.pair;
+import static com.googlecode.totallylazy.callables.TimeCallable.calculateMilliseconds;
 
 public class LuceneIterator extends StatefulIterator<Record> implements Closeable{
     private final LuceneStorage storage;
@@ -47,8 +49,12 @@ public class LuceneIterator extends StatefulIterator<Record> implements Closeabl
 
     private ScoreDoc[] scoreDocs() throws IOException {
         if( scoreDocs == null) {
-            logger.log(Maps.map(pair("lucene", query)));
+            Map<String,Object> log = Maps.<String, Object>map(pair(Loggers.LUCENE, query));
+            long start = System.nanoTime();
             scoreDocs = searcher().search(query).scoreDocs;
+            log.put(Loggers.MILLISECONDS, calculateMilliseconds(start, System.nanoTime()));
+            log.put(Loggers.COUNT, scoreDocs.length);
+            logger.log(log);
         }
         return scoreDocs;
     }
