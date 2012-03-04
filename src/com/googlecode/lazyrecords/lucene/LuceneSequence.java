@@ -13,7 +13,7 @@ import java.util.Iterator;
 
 import static com.googlecode.lazyrecords.lucene.Lucene.and;
 
-public class RecordSequence extends Sequence<Record> {
+public class LuceneSequence extends Sequence<Record> {
     private final LuceneStorage storage;
     private final Query query;
     private final Logger logger;
@@ -21,7 +21,7 @@ public class RecordSequence extends Sequence<Record> {
     private final Callable1<? super Document,Record> documentToRecord;
     private CloseableList closeables;
 
-    public RecordSequence(final Lucene lucene, final LuceneStorage storage, final Query query,
+    public LuceneSequence(final Lucene lucene, final LuceneStorage storage, final Query query,
                           final Callable1<? super Document, Record> documentToRecord, final Logger logger, CloseableList closeables) {
         this.lucene = lucene;
         this.storage = storage;
@@ -38,6 +38,6 @@ public class RecordSequence extends Sequence<Record> {
 
     @Override
     public Sequence<Record> filter(Predicate<? super Record> predicate) {
-        return new RecordSequence(lucene, storage, and(query, lucene.query(predicate)), documentToRecord, logger, closeables);
+        return new LuceneSequence(lucene, storage, and(query, lucene.query(predicate)), documentToRecord, logger, closeables);
     }
 }

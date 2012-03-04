@@ -59,14 +59,14 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
     }
 
 
-    public RecordSequence get(Definition definition) {
-        return new RecordSequence(this, from(definition), logger);
+    public SqlSequence get(Definition definition) {
+        return new SqlSequence(this, from(definition), logger);
     }
 
     public Sequence<Record> query(final Expression expression, final Sequence<Keyword<?>> definitions) {
         return new Sequence<Record>() {
             public Iterator<Record> iterator() {
-                return closeables.manage(new RecordIterator(connection, mappings, expression, definitions, logger));
+                return closeables.manage(new SqlIterator(connection, mappings, expression, definitions, logger));
             }
         };
     }

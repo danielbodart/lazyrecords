@@ -16,9 +16,7 @@ import org.apache.lucene.search.Query;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.PrintStream;
 
-import static com.googlecode.totallylazy.Streams.nullOutputStream;
 import static com.googlecode.lazyrecords.lucene.Lucene.and;
 import static com.googlecode.lazyrecords.lucene.Lucene.record;
 
@@ -42,7 +40,7 @@ public class LuceneRecords extends AbstractRecords implements Queryable<Query>, 
     }
 
     public Sequence<Record> query(final Query query, final Sequence<Keyword<?>> definitions) {
-        return new RecordSequence(lucene, storage, query, mappings.asRecord(definitions), logger, closeables);
+        return new LuceneSequence(lucene, storage, query, mappings.asRecord(definitions), logger, closeables);
     }
 
     public Sequence<Record> get(final Definition definition) {

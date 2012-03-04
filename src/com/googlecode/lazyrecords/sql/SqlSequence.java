@@ -15,7 +15,6 @@ import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.expressions.SelectBuilder;
 import com.googlecode.totallylazy.Unchecked;
 
-import java.io.PrintStream;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Set;
@@ -23,12 +22,12 @@ import java.util.Set;
 import static com.googlecode.totallylazy.Pair.pair;
 import static java.lang.String.format;
 
-public class RecordSequence extends Sequence<Record> implements Expressible {
+public class SqlSequence extends Sequence<Record> implements Expressible {
     private final SqlRecords sqlRecords;
     private final SelectBuilder builder;
     private final Logger logger;
 
-    public RecordSequence(final SqlRecords records, final SelectBuilder builder, final Logger logger) {
+    public SqlSequence(final SqlRecords records, final SelectBuilder builder, final Logger logger) {
         this.sqlRecords = records;
         this.builder = builder;
         this.logger = logger;
@@ -49,7 +48,7 @@ public class RecordSequence extends Sequence<Record> implements Expressible {
         }
         Callable1 raw = (Callable1) callable;
         if (raw instanceof SelectCallable) {
-            return Unchecked.cast(new RecordSequence(sqlRecords, builder.select(((SelectCallable) raw).keywords()), logger));
+            return Unchecked.cast(new SqlSequence(sqlRecords, builder.select(((SelectCallable) raw).keywords()), logger));
         }
         logger.log(Maps.map(pair("message", "Unsupported function passed to 'map', moving computation to client"), pair("function", callable)));
         return super.map(callable);
@@ -58,7 +57,7 @@ public class RecordSequence extends Sequence<Record> implements Expressible {
     @Override
     public Sequence<Record> filter(Predicate<? super Record> predicate) {
         try {
-            return new RecordSequence(sqlRecords, builder.where(predicate), logger);
+            return new SqlSequence(sqlRecords, builder.where(predicate), logger);
         } catch (UnsupportedOperationException ex) {
             logger.log(Maps.map(pair("message", "Unsupported predicate passed to 'filter', moving computation to client"), pair("predicate", predicate)));
             return super.filter(predicate);
@@ -68,7 +67,7 @@ public class RecordSequence extends Sequence<Record> implements Expressible {
     @Override
     public Sequence<Record> sortBy(Comparator<? super Record> comparator) {
         try {
-            return new RecordSequence(sqlRecords, builder.orderBy(comparator), logger);
+            return new SqlSequence(sqlRecords, builder.orderBy(comparator), logger);
         } catch (UnsupportedOperationException ex) {
             logger.log(Maps.map(pair("message", "Unsupported comparator passed to 'sortBy', moving computation to client"), pair("comparator", comparator)));
             return super.sortBy(comparator);
@@ -99,7 +98,7 @@ public class RecordSequence extends Sequence<Record> implements Expressible {
 
     @Override
     public Sequence<Record> unique() {
-        return new RecordSequence(sqlRecords, builder.distinct(), logger);
+        return new SqlSequence(sqlRecords, builder.distinct(), logger);
     }
 
     @Override

@@ -23,7 +23,7 @@ import static com.googlecode.totallylazy.Pair.pair;
 import static com.googlecode.totallylazy.callables.TimeCallable.calculateMilliseconds;
 import static com.googlecode.totallylazy.numbers.Numbers.range;
 
-public class RecordIterator extends StatefulIterator<Record> implements Closeable {
+public class SqlIterator extends StatefulIterator<Record> implements Closeable {
     private final Connection connection;
     private final SqlMappings mappings;
     private final Expression expression;
@@ -32,7 +32,7 @@ public class RecordIterator extends StatefulIterator<Record> implements Closeabl
     private PreparedStatement preparedStatement;
     private ResultSet resultSet;
 
-    public RecordIterator(final Connection connection, final SqlMappings mappings, final Expression expression, final Sequence<Keyword<?>> definitions, final Logger logger) {
+    public SqlIterator(final Connection connection, final SqlMappings mappings, final Expression expression, final Sequence<Keyword<?>> definitions, final Logger logger) {
         this.definitions = definitions;
         this.logger = logger;
         this.connection = connection;
