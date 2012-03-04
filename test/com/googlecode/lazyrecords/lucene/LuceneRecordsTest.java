@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.lucene;
 
+import com.googlecode.lazyrecords.PrintStreamLogger;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
 import com.googlecode.lazyrecords.RecordsContract;
@@ -33,7 +34,7 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
         file = temporaryDirectory("totallylazy");
         directory = new NIOFSDirectory(file);
         storage = new OptimisedStorage(directory);
-        return new LuceneRecords(storage, new LuceneMappings(), logger);
+        return new LuceneRecords(storage, new LuceneMappings(), new PrintStreamLogger(logger));
     }
 
     @After
@@ -41,7 +42,6 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
         super.cleanUp();
         storage.close();
         directory.close();
-        System.out.println(file);
     }
 
     @Test

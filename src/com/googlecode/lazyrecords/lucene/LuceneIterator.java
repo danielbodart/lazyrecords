@@ -1,7 +1,9 @@
 package com.googlecode.lazyrecords.lucene;
 
+import com.googlecode.lazyrecords.Logger;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Closeables;
+import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.iterators.StatefulIterator;
 import com.googlecode.lazyrecords.Record;
 import org.apache.lucene.document.Document;
@@ -14,22 +16,23 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 import static com.googlecode.totallylazy.Arrays.containsIndex;
+import static com.googlecode.totallylazy.Pair.pair;
 
 public class LuceneIterator extends StatefulIterator<Record> implements Closeable{
     private final LuceneStorage storage;
     private final Query query;
     private final Callable1<? super Document, Record> documentToRecord;
-    private final PrintStream printStream;
+    private final Logger logger;
     private ScoreDoc[] scoreDocs;
     private int index = 0;
     private Searcher searcher;
     private boolean closed = false;
 
-    public LuceneIterator(LuceneStorage storage, Query query, Callable1<? super Document, Record> documentToRecord, PrintStream printStream) {
+    public LuceneIterator(LuceneStorage storage, Query query, Callable1<? super Document, Record> documentToRecord, Logger logger) {
         this.storage = storage;
         this.query = query;
         this.documentToRecord = documentToRecord;
-        this.printStream = printStream;
+        this.logger = logger;
     }
 
     @Override
@@ -44,7 +47,7 @@ public class LuceneIterator extends StatefulIterator<Record> implements Closeabl
 
     private ScoreDoc[] scoreDocs() throws IOException {
         if( scoreDocs == null) {
-            printStream.println("LUCENE = " + query);
+            logger.log(Maps.map(pair("lucene", query)));
             scoreDocs = searcher().search(query).scoreDocs;
         }
         return scoreDocs;

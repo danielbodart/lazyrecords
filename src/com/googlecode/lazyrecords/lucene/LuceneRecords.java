@@ -1,6 +1,8 @@
 package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.IgnoreLogger;
+import com.googlecode.lazyrecords.Logger;
 import com.googlecode.totallylazy.CloseableList;
 import com.googlecode.totallylazy.LazyException;
 import com.googlecode.totallylazy.Predicate;
@@ -23,24 +25,24 @@ import static com.googlecode.lazyrecords.lucene.Lucene.record;
 public class LuceneRecords extends AbstractRecords implements Queryable<Query>, Closeable {
     private final LuceneStorage storage;
     private final LuceneMappings mappings;
-    private final PrintStream printStream;
+    private final Logger logger;
     private final Lucene lucene;
     private CloseableList closeables;
 
-    public LuceneRecords(final LuceneStorage storage, final LuceneMappings mappings, final PrintStream printStream) throws IOException {
+    public LuceneRecords(final LuceneStorage storage, final LuceneMappings mappings, final Logger logger) throws IOException {
         this.storage = storage;
         this.mappings = mappings;
-        this.printStream = printStream;
+        this.logger = logger;
         lucene = new Lucene(mappings);
         closeables = new CloseableList();
     }
 
     public LuceneRecords(final LuceneStorage storage) throws IOException {
-        this(storage, new LuceneMappings(), new PrintStream(nullOutputStream()));
+        this(storage, new LuceneMappings(), new IgnoreLogger());
     }
 
     public Sequence<Record> query(final Query query, final Sequence<Keyword<?>> definitions) {
-        return new RecordSequence(lucene, storage, query, mappings.asRecord(definitions), printStream, closeables);
+        return new RecordSequence(lucene, storage, query, mappings.asRecord(definitions), logger, closeables);
     }
 
     public Sequence<Record> get(final Definition definition) {
