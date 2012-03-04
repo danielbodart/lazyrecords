@@ -86,7 +86,7 @@ public abstract class RecordsContract<T extends Records> {
 
     protected T records;
 
-    protected PrintStream logger;
+    protected Logger logger;
     private ByteArrayOutputStream stream;
 
     protected abstract T createRecords() throws Exception;
@@ -94,7 +94,7 @@ public abstract class RecordsContract<T extends Records> {
     @Before
     public void setupRecords() throws Exception {
         stream = new ByteArrayOutputStream();
-        logger = new PrintStream(streams(System.out, stream));
+        logger = new PrintStreamLogger(new PrintStream(streams(System.out, stream)));
         this.records = createRecords();
         setupData();
     }

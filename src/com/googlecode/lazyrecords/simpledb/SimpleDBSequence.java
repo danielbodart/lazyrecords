@@ -4,8 +4,10 @@ import com.amazonaws.services.simpledb.AmazonSimpleDB;
 import com.amazonaws.services.simpledb.model.Item;
 import com.amazonaws.services.simpledb.model.SelectRequest;
 import com.amazonaws.services.simpledb.model.SelectResult;
+import com.googlecode.lazyrecords.Logger;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Function1;
+import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
@@ -21,6 +23,7 @@ import java.io.PrintStream;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import static com.googlecode.totallylazy.Pair.pair;
 import static java.lang.String.format;
 
 public class SimpleDBSequence<T> extends Sequence<T> {
@@ -28,10 +31,10 @@ public class SimpleDBSequence<T> extends Sequence<T> {
     private final SelectBuilder builder;
     private final StringMappings mappings;
     private final Callable1<? super Item, T> itemToRecord;
-    private final PrintStream logger;
+    private final Logger logger;
     private final boolean consistentRead;
 
-    public SimpleDBSequence(AmazonSimpleDB sdb, SelectBuilder builder, StringMappings mappings, Callable1<? super Item, T> itemToRecord, PrintStream logger, boolean consistentRead) {
+    public SimpleDBSequence(AmazonSimpleDB sdb, SelectBuilder builder, StringMappings mappings, Callable1<? super Item, T> itemToRecord, Logger logger, boolean consistentRead) {
         this.sdb = sdb;
         this.builder = builder;
         this.mappings = mappings;
@@ -46,7 +49,7 @@ public class SimpleDBSequence<T> extends Sequence<T> {
 
     private Iterator<T> iterator(final AbstractExpression expression) {
         String selectExpression = expression.toString(value());
-        logger.println("SimpleDB: " + selectExpression);
+        logger.log(Maps.map(pair("simpleDB", selectExpression)));
         return iterator(new SelectRequest(selectExpression, consistentRead)).map(itemToRecord).iterator();
     }
 
@@ -84,7 +87,7 @@ public class SimpleDBSequence<T> extends Sequence<T> {
         if (raw instanceof SelectCallable) {
             return (Sequence<S>) new SimpleDBSequence(sdb, builder.select(((SelectCallable) raw).keywords()), mappings, itemToRecord, logger, consistentRead);
         }
-        logger.println(format("Warning: Unsupported Callable1 %s dropping down to client side sequence functionality", callable));
+        logger.log(Maps.map(pair("message", "Unsupported function passed to 'map', moving computation to client"), pair("function", callable)));
         return super.map(callable);
     }
 
@@ -101,7 +104,7 @@ public class SimpleDBSequence<T> extends Sequence<T> {
         try {
             return new SimpleDBSequence<T>(sdb, builder.orderBy(Unchecked.<Comparator<Record>>cast(comparator)), mappings, itemToRecord, logger, consistentRead);
         } catch (UnsupportedOperationException ex) {
-            logger.println(format("Warning: Unsupported Comparator %s dropping down to client side sequence functionality", comparator));
+            logger.log(Maps.map(pair("message", "Unsupported comparator passed to 'sortBy', moving computation to client"), pair("comparator", comparator)));
             return super.sortBy(comparator);
         }
     }

@@ -21,7 +21,9 @@ public class OracleRecordsTest extends RecordsContract<SqlRecords> {
     public SqlRecords createRecords() throws Exception {
         Class.forName("oracle.jdbc.driver.OracleDriver");
 
-        return new SqlRecords(getConnection(getenv("JDBC_URL"), getenv("JDBC_USERNAME"), getenv("JDBC_PASSWORD")), new SqlMappings(), new PrintStreamLogger(logger));
+        return new SqlRecords(getConnection(getenv("JDBC_URL"), getenv("JDBC_USERNAME"), getenv("JDBC_PASSWORD")),
+                new SqlMappings(),
+                logger);
     }
 
     @Test

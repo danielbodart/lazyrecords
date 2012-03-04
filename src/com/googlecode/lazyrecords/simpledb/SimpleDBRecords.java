@@ -7,7 +7,9 @@ import com.amazonaws.services.simpledb.model.DeletableItem;
 import com.amazonaws.services.simpledb.model.Item;
 import com.googlecode.lazyrecords.AbstractRecords;
 import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.IgnoreLogger;
 import com.googlecode.lazyrecords.Keywords;
+import com.googlecode.lazyrecords.Logger;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.Schema;
 import com.googlecode.lazyrecords.simpledb.mappings.SimpleDBMappings;
@@ -29,11 +31,11 @@ import static com.googlecode.totallylazy.numbers.Numbers.sum;
 public class SimpleDBRecords extends AbstractRecords {
     private final AmazonSimpleDB sdb;
     private final SimpleDBMappings mappings;
-    private final PrintStream logger;
+    private final Logger logger;
     private final boolean consistentRead;
     private final Schema schema;
 
-    public SimpleDBRecords(final AmazonSimpleDB sdb, boolean consistentRead, final SimpleDBMappings mappings, final PrintStream logger, final Schema schema) {
+    public SimpleDBRecords(final AmazonSimpleDB sdb, boolean consistentRead, final SimpleDBMappings mappings, final Logger logger, final Schema schema) {
         this.consistentRead = consistentRead;
         this.mappings = mappings;
         this.sdb = sdb;
@@ -42,7 +44,7 @@ public class SimpleDBRecords extends AbstractRecords {
     }
 
     public SimpleDBRecords(final AmazonSimpleDB sdb, boolean consistentRead) {
-        this(sdb, consistentRead, new SimpleDBMappings(), nullPrintStream(), new SimpleDBSchema(sdb));
+        this(sdb, consistentRead, new SimpleDBMappings(), new IgnoreLogger(), new SimpleDBSchema(sdb));
     }
 
     public Sequence<Record> get(Definition definition) {

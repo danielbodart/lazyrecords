@@ -34,7 +34,7 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
         file = temporaryDirectory("totallylazy");
         directory = new NIOFSDirectory(file);
         storage = new OptimisedStorage(directory);
-        return new LuceneRecords(storage, new LuceneMappings(), new PrintStreamLogger(logger));
+        return new LuceneRecords(storage, new LuceneMappings(), logger);
     }
 
     @After
