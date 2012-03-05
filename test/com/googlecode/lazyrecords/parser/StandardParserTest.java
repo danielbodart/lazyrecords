@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.parser;
 
+import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequences;
 import com.googlecode.lazyrecords.Keyword;
@@ -376,7 +377,7 @@ public class StandardParserTest {
     }
 
     private void assertLuceneSyntax(Predicate<Record> predicate) {
-        String luceneQuery = new Lucene(new LuceneMappings()).query(predicate).toString();
+        String luceneQuery = new Lucene(new StringMappings()).query(predicate).toString();
         System.out.println("LUCENE = " + luceneQuery);
         assertThat(luceneQuery, is(notNullValue()));
     }

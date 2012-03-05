@@ -4,6 +4,7 @@ import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
+import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Predicate;
@@ -89,9 +90,9 @@ public class Lucene {
         };
     }
 
-    private final LuceneMappings mappings;
+    private final StringMappings mappings;
 
-    public Lucene(LuceneMappings mappings) {
+    public Lucene(StringMappings mappings) {
         this.mappings = mappings;
     }
 

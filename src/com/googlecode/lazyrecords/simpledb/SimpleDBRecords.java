@@ -48,7 +48,7 @@ public class SimpleDBRecords extends AbstractRecords {
     }
 
     public Sequence<Record> get(Definition definition) {
-        return new SimpleDBSequence<Record>(sdb, from(definition), mappings, mappings.asRecord(definition.fields()), logger, consistentRead);
+        return new SimpleDBSequence<Record>(sdb, from(definition), mappings.stringMappings(), mappings.asRecord(definition.fields()), logger, consistentRead);
     }
 
     public Number add(final Definition definition, Sequence<Record> records) {

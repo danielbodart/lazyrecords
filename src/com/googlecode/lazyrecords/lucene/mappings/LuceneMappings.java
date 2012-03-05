@@ -23,7 +23,21 @@ import static com.googlecode.totallylazy.Predicates.notNullValue;
 import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
-public class LuceneMappings extends StringMappings {
+public class LuceneMappings {
+    private final StringMappings stringMappings;
+
+    public LuceneMappings(StringMappings stringMappings) {
+        this.stringMappings = stringMappings;
+    }
+
+    public LuceneMappings() {
+        this(new StringMappings());
+    }
+
+    public StringMappings stringMappings() {
+        return stringMappings;
+    }
+
     public Function1<Document, Record> asRecord(final Sequence<Keyword<?>> definitions) {
         return new Function1<Document, Record>() {
             public Record call(Document document) throws Exception {
@@ -40,7 +54,7 @@ public class LuceneMappings extends StringMappings {
             public Pair<Keyword<?>, Object> call(Fieldable fieldable) throws Exception {
                 String name = fieldable.name();
                 Keyword<?> keyword = getKeyword(name, definitions);
-                return Pair.<Keyword<?>, Object>pair(keyword, toValue(keyword.forClass(), fieldable.stringValue()));
+                return Pair.<Keyword<?>, Object>pair(keyword, stringMappings.toValue(keyword.forClass(), fieldable.stringValue()));
             }
         };
     }
@@ -54,7 +68,7 @@ public class LuceneMappings extends StringMappings {
 
                 String name = pair.first().name();
                 Keyword<?> keyword = getKeyword(name, definitions);
-                return new Field(name, LuceneMappings.this.toString(keyword.forClass(), pair.second()), Field.Store.YES, Field.Index.NOT_ANALYZED);
+                return new Field(name, LuceneMappings.this.stringMappings.toString(keyword.forClass(), pair.second()), Field.Store.YES, Field.Index.NOT_ANALYZED);
             }
         };
     }

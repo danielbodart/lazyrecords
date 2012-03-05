@@ -23,7 +23,21 @@ import static com.googlecode.totallylazy.Predicates.notNullValue;
 import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
-public class SimpleDBMappings extends StringMappings {
+public class SimpleDBMappings {
+    private final StringMappings stringMappings;
+
+    public SimpleDBMappings(StringMappings stringMappings) {
+        this.stringMappings = stringMappings;
+    }
+
+    public SimpleDBMappings() {
+        this(new StringMappings());
+    }
+
+    public StringMappings stringMappings() {
+        return stringMappings;
+    }
+
     public Function1<Item, Record> asRecord(final Sequence<Keyword<?>> definitions) {
         return new Function1<Item, Record>() {
             public Record call(Item item) throws Exception {
@@ -36,7 +50,7 @@ public class SimpleDBMappings extends StringMappings {
         return new Function2<Record, Attribute, Record>() {
             public Record call(Record mapRecord, Attribute attribute) throws Exception {
                 Keyword<?> keyword = getKeyword(attribute.getName(), definitions);
-                return mapRecord.set(Unchecked.<Keyword<Object>>cast(keyword), toValue(keyword.forClass(), attribute.getValue()));
+                return mapRecord.set(Unchecked.<Keyword<Object>>cast(keyword), stringMappings.toValue(keyword.forClass(), attribute.getValue()));
             }
         };
     }
@@ -56,7 +70,7 @@ public class SimpleDBMappings extends StringMappings {
             public ReplaceableAttribute call(Pair<Keyword<?>, Object> pair) throws Exception {
                 Keyword<?> keyword = pair.first();
                 Object value = pair.second();
-                String valueAsString = SimpleDBMappings.this.toString(Unchecked.<Class<Object>>cast(keyword.forClass()), value);
+                String valueAsString = SimpleDBMappings.this.stringMappings.toString(Unchecked.<Class<Object>>cast(keyword.forClass()), value);
                 return new ReplaceableAttribute(keyword.name(), valueAsString, true);
             }
         };

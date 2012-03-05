@@ -31,7 +31,7 @@ public class LuceneRecords extends AbstractRecords implements Queryable<Query>, 
         this.storage = storage;
         this.mappings = mappings;
         this.logger = logger;
-        lucene = new Lucene(mappings);
+        lucene = new Lucene(mappings.stringMappings());
         closeables = new CloseableList();
     }
 
