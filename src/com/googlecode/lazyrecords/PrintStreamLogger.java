@@ -11,7 +11,7 @@ public class PrintStreamLogger implements Logger {
     }
 
     @Override
-    public Logger log(Map<String, ?> parameters) {
+    public Logger log(final Map<String, ?> parameters) {
         printStream.println(parameters);
         return this;
     }

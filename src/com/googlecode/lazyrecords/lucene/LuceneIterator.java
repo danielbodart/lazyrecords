@@ -49,7 +49,7 @@ public class LuceneIterator extends StatefulIterator<Record> implements Closeabl
 
     private ScoreDoc[] scoreDocs() throws IOException {
         if( scoreDocs == null) {
-            Map<String,Object> log = Maps.<String, Object>map(pair(Loggers.LUCENE, query));
+            Map<String,Object> log = Maps.<String, Object>map(pair(Loggers.TYPE, Loggers.LUCENE), pair(Loggers.EXPRESSION, query));
             long start = System.nanoTime();
             scoreDocs = searcher().search(query).scoreDocs;
             log.put(Loggers.MILLISECONDS, calculateMilliseconds(start, System.nanoTime()));

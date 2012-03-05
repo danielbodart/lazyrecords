@@ -62,7 +62,7 @@ public class SqlIterator extends StatefulIterator<Record> implements Closeable {
 
     private ResultSet resultSet() throws Exception {
         if (resultSet == null) {
-            Map<String, Object> log = Maps.<String, Object>map(pair(Loggers.SQL, expression));
+            Map<String, Object> log = Maps.<String, Object>map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.EXPRESSION, expression));
             long start = System.nanoTime();
             preparedStatement = connection.prepareStatement(expression.text());
             mappings.addValues(preparedStatement, expression.parameters());

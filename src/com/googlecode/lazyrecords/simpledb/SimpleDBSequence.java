@@ -4,20 +4,11 @@ import com.amazonaws.services.simpledb.AmazonSimpleDB;
 import com.amazonaws.services.simpledb.model.Item;
 import com.amazonaws.services.simpledb.model.SelectRequest;
 import com.amazonaws.services.simpledb.model.SelectResult;
-import com.googlecode.lazyrecords.Logger;
-import com.googlecode.totallylazy.Callable1;
-import com.googlecode.totallylazy.Function1;
-import com.googlecode.totallylazy.Maps;
-import com.googlecode.totallylazy.Predicate;
-import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Sequences;
-import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.SelectCallable;
+import com.googlecode.lazyrecords.*;
+import com.googlecode.totallylazy.*;
 import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.lazyrecords.sql.expressions.AbstractExpression;
 import com.googlecode.lazyrecords.sql.expressions.SelectBuilder;
-import com.googlecode.totallylazy.Unchecked;
 
 import java.io.PrintStream;
 import java.util.Comparator;
@@ -49,7 +40,7 @@ public class SimpleDBSequence<T> extends Sequence<T> {
 
     private Iterator<T> iterator(final AbstractExpression expression) {
         String selectExpression = expression.toString(value());
-        logger.log(Maps.map(pair("simpleDB", selectExpression)));
+        logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SIMPLE_DB), pair(Loggers.EXPRESSION, selectExpression)));
         return iterator(new SelectRequest(selectExpression, consistentRead)).map(itemToRecord).iterator();
     }
 
@@ -87,7 +78,7 @@ public class SimpleDBSequence<T> extends Sequence<T> {
         if (raw instanceof SelectCallable) {
             return (Sequence<S>) new SimpleDBSequence(sdb, builder.select(((SelectCallable) raw).keywords()), mappings, itemToRecord, logger, consistentRead);
         }
-        logger.log(Maps.map(pair("message", "Unsupported function passed to 'map', moving computation to client"), pair("function", callable)));
+        logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SIMPLE_DB), pair(Loggers.MESSAGE, "Unsupported function passed to 'map', moving computation to client"), pair(Loggers.FUNCTION, callable)));
         return super.map(callable);
     }
 
@@ -104,7 +95,7 @@ public class SimpleDBSequence<T> extends Sequence<T> {
         try {
             return new SimpleDBSequence<T>(sdb, builder.orderBy(Unchecked.<Comparator<Record>>cast(comparator)), mappings, itemToRecord, logger, consistentRead);
         } catch (UnsupportedOperationException ex) {
-            logger.log(Maps.map(pair("message", "Unsupported comparator passed to 'sortBy', moving computation to client"), pair("comparator", comparator)));
+            logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SIMPLE_DB), pair(Loggers.MESSAGE, "Unsupported comparator passed to 'sortBy', moving computation to client"), pair(Loggers.COMPARATOR, comparator)));
             return super.sortBy(comparator);
         }
     }

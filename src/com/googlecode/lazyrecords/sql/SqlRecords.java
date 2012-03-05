@@ -94,7 +94,7 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
     public Number update(final Sequence<Expression> expressions) {
         return expressions.groupBy(Expressions.text()).map(new Callable1<Group<String, Expression>, Number>() {
             public Number call(Group<String, Expression> group) throws Exception {
-                Map<String,Object> log = Maps.<String,Object>map(pair(Loggers.SQL, expressions));
+                Map<String,Object> log = Maps.<String,Object>map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.EXPRESSION, expressions));
                 Number rowCount = using(connection.prepareStatement(group.key()),
                         mappings.addValuesInBatch(group.map(Expressions.parameters())).time(milliseconds(log)));
                 log.put(Loggers.COUNT, rowCount);
