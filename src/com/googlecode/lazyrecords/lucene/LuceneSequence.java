@@ -3,12 +3,14 @@ package com.googlecode.lazyrecords.lucene;
 import com.googlecode.lazyrecords.Logger;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.CloseableList;
+import com.googlecode.totallylazy.LazyException;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.lazyrecords.Record;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.Query;
 
+import java.io.IOException;
 import java.util.Iterator;
 
 import static com.googlecode.lazyrecords.lucene.Lucene.and;
@@ -39,5 +41,14 @@ public class LuceneSequence extends Sequence<Record> {
     @Override
     public Sequence<Record> filter(Predicate<? super Record> predicate) {
         return new LuceneSequence(lucene, storage, and(query, lucene.query(predicate)), documentToRecord, logger, closeables);
+    }
+
+    @Override
+    public Number size() {
+        try {
+            return storage.count(query);
+        } catch (IOException e) {
+            throw LazyException.lazyException(e);
+        }
     }
 }
