@@ -3,6 +3,7 @@ package com.googlecode.lazyrecords.lucene;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.TopDocs;
 
 import java.io.IOException;
@@ -15,8 +16,8 @@ public class LuceneSearcher implements Searcher {
     }
 
     @Override
-    public TopDocs search(Query query) throws IOException {
-        return searcher.search(query, Integer.MAX_VALUE);
+    public TopDocs search(Query query, Sort sort) throws IOException {
+        return searcher.search(query, Integer.MAX_VALUE, sort);
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.googlecode.totallylazy.Callable1;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.TopDocs;
 
 import java.io.IOException;
@@ -18,8 +19,8 @@ public class PooledSearcher implements Searcher {
     }
 
     @Override
-    public TopDocs search(Query query) throws IOException {
-        return searcher.search(query);
+    public TopDocs search(Query query, Sort sort) throws IOException {
+        return searcher.search(query, sort);
     }
 
     @Override

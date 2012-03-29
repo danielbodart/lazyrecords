@@ -10,6 +10,7 @@ import com.googlecode.lazyrecords.Record;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.Sort;
 import org.apache.lucene.store.AlreadyClosedException;
 
 import java.io.Closeable;
@@ -23,6 +24,7 @@ import static com.googlecode.totallylazy.callables.TimeCallable.calculateMillise
 public class LuceneIterator extends StatefulIterator<Record> implements Closeable{
     private final LuceneStorage storage;
     private final Query query;
+    private final Sort sort;
     private final Callable1<? super Document, Record> documentToRecord;
     private final Logger logger;
     private ScoreDoc[] scoreDocs;
@@ -30,9 +32,10 @@ public class LuceneIterator extends StatefulIterator<Record> implements Closeabl
     private Searcher searcher;
     private boolean closed = false;
 
-    public LuceneIterator(LuceneStorage storage, Query query, Callable1<? super Document, Record> documentToRecord, Logger logger) {
+    public LuceneIterator(LuceneStorage storage, Query query, Sort sort, Callable1<? super Document, Record> documentToRecord, Logger logger) {
         this.storage = storage;
         this.query = query;
+        this.sort = sort;
         this.documentToRecord = documentToRecord;
         this.logger = logger;
     }
@@ -51,7 +54,7 @@ public class LuceneIterator extends StatefulIterator<Record> implements Closeabl
         if( scoreDocs == null) {
             Map<String,Object> log = Maps.<String, Object>map(pair(Loggers.TYPE, Loggers.LUCENE), pair(Loggers.EXPRESSION, query));
             long start = System.nanoTime();
-            scoreDocs = searcher().search(query).scoreDocs;
+            scoreDocs = searcher().search(query, sort).scoreDocs;
             log.put(Loggers.MILLISECONDS, calculateMilliseconds(start, System.nanoTime()));
             log.put(Loggers.COUNT, scoreDocs.length);
             logger.log(log);

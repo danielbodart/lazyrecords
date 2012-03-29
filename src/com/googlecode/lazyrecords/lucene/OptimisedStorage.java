@@ -9,6 +9,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.Sort;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.Version;
 
@@ -70,7 +71,7 @@ public class OptimisedStorage implements LuceneStorage {
         return search(new Callable1<Searcher, Integer>() {
             @Override
             public Integer call(Searcher searcher) throws Exception {
-                return searcher.search(query).totalHits;
+                return searcher.search(query, new Sort()).totalHits;
             }
         });
     }

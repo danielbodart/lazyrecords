@@ -2,15 +2,19 @@ package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.Named;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
 import com.googlecode.lazyrecords.mappings.StringMappings;
+import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.Value;
+import com.googlecode.totallylazy.comparators.AscendingComparator;
+import com.googlecode.totallylazy.comparators.DescendingComparator;
 import com.googlecode.totallylazy.predicates.AllPredicate;
 import com.googlecode.totallylazy.predicates.AndPredicate;
 import com.googlecode.totallylazy.predicates.Between;
@@ -35,9 +39,13 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.search.WildcardQuery;
+
+import java.util.Comparator;
 
 import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.totallylazy.Sequences.sequence;
@@ -94,6 +102,27 @@ public class Lucene {
 
     public Lucene(StringMappings mappings) {
         this.mappings = mappings;
+    }
+
+    public static Sort sort(Comparator<? super Record> comparator) {
+        if (comparator instanceof AscendingComparator) {
+            return sortBy(name(((AscendingComparator) comparator).callable()), false);
+        }
+        if (comparator instanceof DescendingComparator) {
+            return sortBy(name(((DescendingComparator) comparator).callable()), true);
+        }
+        throw new UnsupportedOperationException("Unsupported comparator " + comparator);
+    }
+
+    private static Sort sortBy(String name, boolean reverse) {
+        return new Sort(new SortField(name, SortField.STRING, reverse));
+    }
+
+    private static String name(Callable1<?, ?> callable) {
+        if(callable instanceof Named){
+            return ((Named) callable).name();
+        }
+        throw new UnsupportedOperationException("Unsupported callable " + callable);
     }
 
     public Query query(Predicate<? super Record> predicate) {

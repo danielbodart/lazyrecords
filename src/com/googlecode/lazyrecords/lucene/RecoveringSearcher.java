@@ -4,6 +4,7 @@ import com.googlecode.totallylazy.Callers;
 import com.googlecode.totallylazy.Closeables;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.TopDocs;
 
 import java.io.IOException;
@@ -19,12 +20,12 @@ public class RecoveringSearcher implements Searcher {
     }
 
     @Override
-    public TopDocs search(Query query) throws IOException {
+    public TopDocs search(Query query, Sort sort) throws IOException {
         try {
-            return searcher.search(query);
+            return searcher.search(query, sort);
         } catch (Exception e) {
             replaceBrokenSearcher();
-            return search(query);
+            return search(query, sort);
         }
     }
 
