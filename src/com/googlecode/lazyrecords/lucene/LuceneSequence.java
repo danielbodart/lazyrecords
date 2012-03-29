@@ -48,7 +48,7 @@ public class LuceneSequence extends Sequence<Record> {
 
     @Override
     public Sequence<Record> filter(Predicate<? super Record> predicate) {
-        return new LuceneSequence(lucene, storage, and(query, lucene.query(predicate)), documentToRecord, logger, closeables, new Sort());
+        return new LuceneSequence(lucene, storage, and(query, lucene.query(predicate)), documentToRecord, logger, closeables, sort);
     }
 
     @Override
