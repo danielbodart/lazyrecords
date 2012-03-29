@@ -83,7 +83,7 @@ public class SelectBuilder implements Expressible, Callable<Expression> {
     public SelectBuilder count() {
         Aggregate<Long, Number> aggregate = Aggregate.aggregate(CountNotNull.count(), keyword("*", Long.class));
         Sequence<Keyword<?>> sequence = Sequences.<Keyword<?>>sequence(aggregate.as(keyword("record_count", Long.class)));
-        return new SelectBuilder(setQuantifier, sequence, table, where, comparator);
+        return new SelectBuilder(setQuantifier, sequence, table, where, Option.<Comparator<? super Record>>none());
     }
 
     public SelectBuilder distinct() {

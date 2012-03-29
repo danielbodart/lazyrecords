@@ -3,6 +3,7 @@ package com.googlecode.lazyrecords.sql;
 import com.googlecode.lazyrecords.*;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
 import com.googlecode.totallylazy.Predicates;
+import com.googlecode.totallylazy.matchers.NumberMatcher;
 import org.junit.Test;
 
 import static com.googlecode.lazyrecords.Definition.constructors.definition;
@@ -56,5 +57,10 @@ public class SqlRecordsTest extends RecordsContract<Records> {
         records.set(columnWithSpace, update(using(firstName), record().set(firstName, "dan").set(age, 11)));
         assertThat(records.get(columnWithSpace).filter(where(age, Predicates.is(11))).map(firstName).head(), is("dan"));
         records.remove(columnWithSpace, always());
+    }
+
+    @Test
+    public void supportsCountOnSortedRecords() throws Exception {
+        assertThat(records.get(people).sortBy(age).size(), NumberMatcher.is(3));
     }
 }
