@@ -4,20 +4,20 @@ import com.googlecode.lazyrecords.Definition;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.lazyrecords.Keyword;
 
-import java.net.URI;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.googlecode.lazyrecords.sql.expressions.Expressions.name;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
 import static java.lang.String.format;
 
 public class TableDefinition extends TextOnlyExpression {
     public TableDefinition(Definition definition) {
-        super(format("create table %s (%s)", definition, definition.fields().map(asColumn())));
+        super(format("create table %s (%s)", name(definition), definition.fields().map(asColumn())));
     }
 
     public static TableDefinition tableDefinition(Definition definition) {
@@ -37,7 +37,7 @@ public class TableDefinition extends TextOnlyExpression {
     public static Function1<? super Keyword<?>, String> asColumn() {
         return new Function1<Keyword<?>, String>() {
             public String call(Keyword<?> keyword) throws Exception {
-                return format("%s %s", keyword, type(keyword.forClass()));
+                return format("%s %s", name(keyword), type(keyword.forClass()));
             }
         };
     }

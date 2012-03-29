@@ -10,6 +10,7 @@ import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.SelectCallable;
 
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.expression;
+import static com.googlecode.lazyrecords.sql.expressions.Expressions.name;
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
 import static com.googlecode.lazyrecords.sql.expressions.SetFunctionType.setFunctionType;
 
@@ -42,11 +43,11 @@ public class SelectList extends CompoundExpression{
         }
         if (callable instanceof AliasedKeyword) {
             AliasedKeyword aliasedKeyword = (AliasedKeyword) callable;
-            return textOnly(aliasedKeyword.source()).join(asClause(aliasedKeyword));
+            return name(aliasedKeyword.source()).join(asClause(aliasedKeyword));
         }
         if (callable instanceof Keyword) {
             Keyword<?> keyword = (Keyword) callable;
-            return textOnly(keyword);
+            return name(keyword);
         }
         if (callable instanceof SelectCallable) {
             Sequence<Keyword<?>> keywords = ((SelectCallable) callable).keywords();

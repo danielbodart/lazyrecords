@@ -11,6 +11,7 @@ import com.googlecode.lazyrecords.Minimum;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.googlecode.lazyrecords.sql.expressions.Expressions.name;
 import static java.lang.String.format;
 
 public class SetFunctionType extends TextOnlyExpression {
@@ -30,7 +31,7 @@ public class SetFunctionType extends TextOnlyExpression {
         if (!names.containsKey(aClass)) {
             throw new UnsupportedOperationException();
         }
-        return format("%s(%s)", names.get(aClass), column);
+        return format("%s(%s)", names.get(aClass), name(column));
     }
 
     public static SetFunctionType setFunctionType(Callable2<?, ?, ?> callable, Keyword<?> column) {

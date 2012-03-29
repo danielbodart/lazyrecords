@@ -17,5 +17,4 @@ public class TextOnlyExpression extends AbstractExpression {
     public Sequence<Object> parameters() {
         return Sequences.empty();
     }
-
 }

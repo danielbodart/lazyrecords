@@ -5,8 +5,7 @@ import com.googlecode.totallylazy.Value;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
 
-public interface Definition {
-    String name();
+public interface Definition extends Named{
     Sequence<Keyword<?>> fields();
 
     public static final class constructors{
