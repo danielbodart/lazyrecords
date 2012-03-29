@@ -28,23 +28,25 @@ public class TableDefinition extends TextOnlyExpression {
         put(Date.class, "timestamp");
         put(Integer.class, "integer");
         put(Long.class, "bigint");
-        put(String.class, "varchar(4000)");
         put(Timestamp.class, "timestamp");
-        put(URI.class, "varchar(4000)");
         put(Boolean.class, "bit");
         put(UUID.class, "varchar(36)");
+        put(String.class, "varchar(4000)");
     }};
 
     public static Function1<? super Keyword<?>, String> asColumn() {
         return new Function1<Keyword<?>, String>() {
             public String call(Keyword<?> keyword) throws Exception {
-                Class<?> aClass = keyword.forClass();
-                if (!mappings.containsKey(aClass)) {
-                    throw new UnsupportedOperationException("Unsupported SQL data type" + aClass.getName());
-                }
-                return format("%s %s", keyword, mappings.get(aClass));
+                return format("%s %s", keyword, type(keyword.forClass()));
             }
         };
+    }
+
+    private static String type(Class<?> aClass) {
+        if (!mappings.containsKey(aClass)) {
+            return mappings.get(String.class);
+        }
+        return mappings.get(aClass);
     }
 
     public static CompoundExpression dropTable(Definition definition) {
