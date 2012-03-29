@@ -8,11 +8,12 @@ import java.util.Date;
 
 public class DateMapping implements SqlMapping<Date> {
     public Date getValue(ResultSet resultSet, Integer index) throws SQLException {
-        return new Date(resultSet.getTimestamp(index).getTime());
+        Timestamp timestamp = resultSet.getTimestamp(index);
+        return timestamp == null ? null : new Date(timestamp.getTime());
     }
 
     public void setValue(PreparedStatement statement, Integer index, Date date) throws SQLException {
-        statement.setTimestamp(index, new Timestamp(date.getTime()));
+        statement.setTimestamp(index, date == null ? null : new Timestamp(date.getTime()));
     }
 
     public String type() {

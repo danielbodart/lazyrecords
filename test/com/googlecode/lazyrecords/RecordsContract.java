@@ -171,7 +171,7 @@ public abstract class RecordsContract<T extends Records> {
 
     @Test
     public void supportsIsNullAndNotNull() throws Exception {
-        assertThat(records.add(people, record().set(firstName, "null age").set(lastName, "").set(age, null).set(dob, date(1974, 1, 10))), NumberMatcher.is(1));
+        assertThat(records.add(people, record().set(firstName, "null age and dob").set(lastName, "").set(age, null).set(dob, null)), NumberMatcher.is(1));
         assertThat(records.get(people).filter(where(age, is(notNullValue()))).toList().size(), NumberMatcher.is(3));
         Sequence<Record> recordSequence = records.get(people);
         assertThat(recordSequence.filter(where(age, is(nullValue()))).toList().size(), NumberMatcher.is(1));
