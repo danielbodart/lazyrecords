@@ -12,16 +12,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
+import static com.googlecode.totallylazy.Maps.map;
 import static com.googlecode.totallylazy.Sequences.sequence;
-import static com.googlecode.totallylazy.numbers.Numbers.numbers;
-import static com.googlecode.totallylazy.numbers.Numbers.range;
-import static com.googlecode.totallylazy.numbers.Numbers.sum;
+import static com.googlecode.totallylazy.numbers.Numbers.*;
 
 public class SqlMappings {
-    private final Map<Class, SqlMapping<Object>> map = new HashMap<Class, SqlMapping<Object>>();
+    private final Map<Class, SqlMapping<Object>> map = map();
     private final StringMappings stringMappings;
 
     public SqlMappings(StringMappings stringMappings) {

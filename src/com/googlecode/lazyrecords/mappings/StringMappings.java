@@ -4,14 +4,14 @@ import com.googlecode.totallylazy.Unchecked;
 
 import java.net.URI;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.googlecode.totallylazy.Maps.map;
 import static com.googlecode.totallylazy.Unchecked.cast;
 
 public class StringMappings {
-    private final Map<Class, StringMapping<Object>> map = new HashMap<Class, StringMapping<Object>>();
+    private final Map<Class, StringMapping<Object>> map = map();
 
     public StringMappings() {
         add(Date.class, new DateMapping());
@@ -30,7 +30,7 @@ public class StringMappings {
     @SuppressWarnings("unchecked")
     public <T> StringMapping<T> get(final Class<? extends T> aClass) {
         if (!map.containsKey(aClass)) {
-            if(aClass.isEnum()){
+            if (aClass.isEnum()) {
                 return new EnumMapping(aClass);
             }
             return new ObjectMapping<T>(aClass);
@@ -53,7 +53,6 @@ public class StringMappings {
             throw new UnsupportedOperationException();
         }
     }
-
 
 
 }

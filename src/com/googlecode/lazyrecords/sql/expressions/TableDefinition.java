@@ -5,10 +5,7 @@ import com.googlecode.totallylazy.Function1;
 import com.googlecode.lazyrecords.Keyword;
 
 import java.sql.Timestamp;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.name;
 import static com.googlecode.totallylazy.Sequences.sequence;
@@ -24,7 +21,7 @@ public class TableDefinition extends TextOnlyExpression {
         return new TableDefinition(definition);
     }
 
-    public static final Map<Class, String> mappings = new HashMap<Class, String>() {{
+    public static final Map<Class, String> mappings = new LinkedHashMap<Class, String>() {{
         put(Date.class, "timestamp");
         put(Integer.class, "integer");
         put(Long.class, "bigint");

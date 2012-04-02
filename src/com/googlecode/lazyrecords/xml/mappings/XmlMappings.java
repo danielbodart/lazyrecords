@@ -5,11 +5,12 @@ import com.googlecode.lazyrecords.mappings.LongMapping;
 import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.Unchecked;
 
-import java.util.HashMap;
 import java.util.Map;
 
+import static com.googlecode.totallylazy.Maps.map;
+
 public class XmlMappings {
-    private final Map<Class, XmlMapping<Object>> map = new HashMap<Class, XmlMapping<Object>>();
+    private final Map<Class, XmlMapping<Object>> map = map();
     private final StringMappings stringMappings;
 
     public XmlMappings(StringMappings stringMappings) {
