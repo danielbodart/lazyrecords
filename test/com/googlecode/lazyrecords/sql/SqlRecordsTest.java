@@ -6,6 +6,9 @@ import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
 import org.junit.Test;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import static com.googlecode.lazyrecords.Definition.constructors.definition;
 import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.lazyrecords.Record.constructors.record;

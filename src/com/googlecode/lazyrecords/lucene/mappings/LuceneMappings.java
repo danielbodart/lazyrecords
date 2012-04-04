@@ -16,6 +16,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Fieldable;
 
+import static com.googlecode.lazyrecords.Definition.methods.sortFields;
 import static com.googlecode.lazyrecords.Record.functions.updateValues;
 import static com.googlecode.lazyrecords.Record.methods.getKeyword;
 import static com.googlecode.totallylazy.Predicates.is;
@@ -76,7 +77,7 @@ public class LuceneMappings {
     public Function1<? super Record, Document> asDocument(final Definition definition) {
         return new Function1<Record, Document>() {
             public Document call(Record record) throws Exception {
-                return record.fields().
+                return sortFields(definition, record).fields().
                         add(Pair.<Keyword<?>, Object>pair(Lucene.RECORD_KEY, definition)).
                         map(asField(definition.fields())).
                         filter(notNullValue()).

@@ -1,15 +1,18 @@
 package com.googlecode.lazyrecords.memory;
 
-import com.googlecode.lazyrecords.AbstractRecords;
-import com.googlecode.lazyrecords.Definition;
-import com.googlecode.lazyrecords.Record;
+import com.googlecode.lazyrecords.*;
+import com.googlecode.totallylazy.Callable1;
+import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import static com.googlecode.lazyrecords.Definition.methods.sortFields;
+import static com.googlecode.lazyrecords.Record.constructors.record;
 import static com.googlecode.totallylazy.Maps.map;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.numbers.Numbers.increment;
@@ -28,7 +31,7 @@ public class MemoryRecords extends AbstractRecords {
         return memory.get(definition);
     }
 
-    public Number add(Definition definition, Sequence<Record> records) {
+    public Number add(final Definition definition, Sequence<Record> records) {
         if (records.isEmpty()) {
             return 0;
         }
@@ -36,7 +39,7 @@ public class MemoryRecords extends AbstractRecords {
         List<Record> list = recordsFor(definition);
         Number count = 0;
         for (Record record : records) {
-            list.add(record);
+            list.add(sortFields(definition, record));
             count = increment(count);
         }
         return count;
