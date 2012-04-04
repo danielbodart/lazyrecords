@@ -1,12 +1,11 @@
 package com.googlecode.lazyrecords;
 
-import com.googlecode.totallylazy.Callable1;
-import com.googlecode.totallylazy.Pair;
-import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.*;
 
 import java.util.List;
 
 import static com.googlecode.lazyrecords.Record.constructors.record;
+import static com.googlecode.totallylazy.Sequences.indexIn;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
 public interface Definition extends Named {
@@ -24,18 +23,11 @@ public interface Definition extends Named {
 
     class methods {
         public static Record sortFields(Definition definition, Record record) {
-            final List<Keyword<?>> keywords = definition.fields().toList();
-            Sequence<Pair<Keyword<?>, Object>> sortedFields = record.fields().sortBy(sameOrderAs(keywords));
-            return record(sortedFields);
+            return record(record.fields().sortBy(sameOrderAs(definition)));
         }
 
-        private static Callable1<Pair<Keyword<?>, Object>, Integer> sameOrderAs(final List<Keyword<?>> keywords) {
-            return new Callable1<Pair<Keyword<?>, Object>, Integer>() {
-                @Override
-                public Integer call(Pair<Keyword<?>, Object> keywordObjectPair) throws Exception {
-                    return keywords.indexOf(keywordObjectPair.first());
-                }
-            };
+        private static Function1<First<Keyword<?>>, Integer> sameOrderAs(final Definition definition) {
+            return Callables.<Keyword<?>>first().then(indexIn(definition.fields()));
         }
     }
 }
