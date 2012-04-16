@@ -32,7 +32,7 @@ public class RecoveringSearcher implements Searcher {
     private synchronized void replaceBrokenSearcher() {
         try {
             searcher.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
             // don-t care as it's already broken
         }
         this.searcher = Callers.call(newSearcher);
