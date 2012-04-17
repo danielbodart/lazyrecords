@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.parser;
 
+import com.googlecode.lazyrecords.mappings.LongMapping;
 import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequences;
@@ -369,6 +370,17 @@ public class StandardParserTest {
         assertLuceneSyntax(predicate);
         assertSqlSyntax(predicate);
     }
+
+    @Test
+    public void shouldWorkWithLongs() throws Exception {
+        PredicateParser predicateParser = new StandardParser();
+
+        Keyword<Long> keyword = keyword("longKeyword", Long.class);
+        Predicate<Record> predicate = predicateParser.parse("longKeyword:13", Sequences.<Keyword<?>>sequence(keyword));
+
+        assertThat(predicate.matches(record().set(keyword, 13L)), is(true));
+    }
+
 
     private void assertSqlSyntax(Predicate<Record> predicate) {
         String sql = WhereClause.toSql(predicate).toString();
