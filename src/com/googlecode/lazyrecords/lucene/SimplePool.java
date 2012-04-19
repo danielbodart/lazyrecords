@@ -33,20 +33,20 @@ public class SimplePool implements SearcherPool {
     @Override
     public synchronized Searcher searcher() throws IOException {
         if (readerIsStale()) {
-            return createAndSwap();
+            createAndSwap();
         }
-        return clean;
+        return new IgnoreCloseSearcher(clean);
     }
 
-    private Searcher createAndSwap() throws IOException {
+    private void createAndSwap() throws IOException {
         close(dirty);
         dirty = clean;
-        return clean = create();
+        clean = create();
     }
 
     private Searcher create() throws IOException {
         created = clock.now();
-        return new IgnoreCloseSearcher(new LuceneSearcher(new IndexSearcher(directory)));
+        return new LuceneSearcher(new IndexSearcher(directory));
     }
 
     private boolean readerIsStale() {
@@ -61,7 +61,9 @@ public class SimplePool implements SearcherPool {
     @Override
     public synchronized void close() throws IOException {
         close(dirty);
+        dirty = null;
         close(clean);
+        clean = null;
     }
 
     private void close(Closeable closeable) {
