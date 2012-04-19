@@ -12,7 +12,7 @@ import java.io.IOException;
 public class LucenePool implements SearcherPool {
     private final Value<SearcherManager> manager;
 
-    public LucenePool(final Directory directory) throws IOException {
+    public LucenePool(final Directory directory) {
         this.manager = createSearchManagerLazily(directory);
     }
 
