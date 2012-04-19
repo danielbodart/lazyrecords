@@ -26,20 +26,19 @@ public class OptimisedStorage implements LuceneStorage {
     private final IndexWriterConfig.OpenMode mode;
     private final Object lock = new Object();
 
-    private SearcherPool pool;
+    private final SearcherPool pool;
     private IndexWriter writer;
-    private final Clock clock;
 
-    public OptimisedStorage(Directory directory, Clock clock) {
-        this(directory, Version.LUCENE_33, new KeywordAnalyzer(), IndexWriterConfig.OpenMode.CREATE_OR_APPEND, clock);
+    public OptimisedStorage(Directory directory, SearcherPool searcherPool) {
+        this(directory, Version.LUCENE_33, new KeywordAnalyzer(), IndexWriterConfig.OpenMode.CREATE_OR_APPEND, searcherPool);
     }
 
-    public OptimisedStorage(Directory directory, Version version, Analyzer analyzer, IndexWriterConfig.OpenMode mode, Clock clock) {
+    public OptimisedStorage(Directory directory, Version version, Analyzer analyzer, IndexWriterConfig.OpenMode mode, SearcherPool pool) {
         this.directory = directory;
         this.version = version;
         this.analyzer = analyzer;
         this.mode = mode;
-        this.clock = clock;
+        this.pool = pool;
     }
 
     @Override
@@ -93,7 +92,6 @@ public class OptimisedStorage implements LuceneStorage {
     @Override
     public void close() throws IOException {
         try {
-            Closeables.close(pool);
             Closeables.close(writer);
         } catch (Throwable ignoredException) {}
         finally {
@@ -114,7 +112,6 @@ public class OptimisedStorage implements LuceneStorage {
             if (writer == null) {
                 writer = new IndexWriter(directory, new IndexWriterConfig(version, analyzer).setOpenMode(mode));
                 writer.commit();
-                pool = new SimplePool(directory, clock, new SimplePool.StaleSearcherSeconds());
             }
         }
     }

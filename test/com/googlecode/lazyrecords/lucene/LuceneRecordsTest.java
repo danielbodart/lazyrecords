@@ -30,16 +30,11 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
     private LuceneStorage storage;
     private File file;
 
-    @Before
-    public void forceStale() {
-        System.setProperty(SimplePool.StaleSearcherSeconds.PROPERTY, "0");
-    }
-
     @Override
     protected LuceneRecords createRecords() throws Exception {
         file = temporaryDirectory("totallylazy");
         directory = new NIOFSDirectory(file);
-        storage = new OptimisedStorage(directory, new SystemClock());
+        storage = new OptimisedStorage(directory, new LucenePool(directory));
         return new LuceneRecords(storage, new LuceneMappings(), logger);
     }
 

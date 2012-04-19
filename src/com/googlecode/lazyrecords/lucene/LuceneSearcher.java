@@ -29,4 +29,8 @@ public class LuceneSearcher implements Searcher {
     public void close() throws IOException {
         searcher.close();
     }
+
+    public IndexSearcher searcher() {
+        return searcher;
+    }
 }
