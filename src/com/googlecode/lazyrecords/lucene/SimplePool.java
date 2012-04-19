@@ -11,9 +11,9 @@ import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.Date;
-import java.util.Properties;
 
 public class SimplePool implements SearcherPool {
     private final Directory directory;
@@ -39,7 +39,7 @@ public class SimplePool implements SearcherPool {
     }
 
     private Searcher createAndSwap() throws IOException {
-        Closeables.close(dirty);
+        close(dirty);
         dirty = clean;
         return clean = create();
     }
@@ -60,8 +60,15 @@ public class SimplePool implements SearcherPool {
 
     @Override
     public synchronized void close() throws IOException {
-        Closeables.close(dirty);
-        Closeables.close(clean);
+        close(dirty);
+        close(clean);
+    }
+
+    private void close(Closeable closeable) {
+        try {
+            Closeables.close(closeable);
+        } catch (Exception ignored) {
+        }
     }
 
     public static class StaleSearcherSeconds implements Value<Integer> {
