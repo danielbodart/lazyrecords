@@ -52,7 +52,7 @@ public interface Record {
     public static final class methods{
         private methods(){}
 
-        public static Keyword<Object> getKeyword(String name, Sequence<? extends Keyword<?>> definitions) {
+        public static Keyword<Object> getKeyword(String name, Sequence<Keyword<?>> definitions) {
             return definitions.<Keyword<Object>>unsafeCast().find(where(name(), equalIgnoringCase(name))).getOrElse(keyword(name));
         }
 
