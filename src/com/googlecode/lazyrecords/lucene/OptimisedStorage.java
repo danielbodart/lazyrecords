@@ -3,6 +3,7 @@ package com.googlecode.lazyrecords.lucene;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Closeables;
 import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.time.Clock;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.KeywordAnalyzer;
 import org.apache.lucene.document.Document;
@@ -27,16 +28,18 @@ public class OptimisedStorage implements LuceneStorage {
 
     private SearcherPool pool;
     private IndexWriter writer;
+    private final Clock clock;
 
-    public OptimisedStorage(Directory directory) {
-        this(directory, Version.LUCENE_33, new KeywordAnalyzer(), IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
+    public OptimisedStorage(Directory directory, Clock clock) {
+        this(directory, Version.LUCENE_33, new KeywordAnalyzer(), IndexWriterConfig.OpenMode.CREATE_OR_APPEND, clock);
     }
 
-    public OptimisedStorage(Directory directory, Version version, Analyzer analyzer, IndexWriterConfig.OpenMode mode) {
+    public OptimisedStorage(Directory directory, Version version, Analyzer analyzer, IndexWriterConfig.OpenMode mode, Clock clock) {
         this.directory = directory;
         this.version = version;
         this.analyzer = analyzer;
         this.mode = mode;
+        this.clock = clock;
     }
 
     @Override
@@ -111,7 +114,7 @@ public class OptimisedStorage implements LuceneStorage {
             if (writer == null) {
                 writer = new IndexWriter(directory, new IndexWriterConfig(version, analyzer).setOpenMode(mode));
                 writer.commit();
-                pool = new OptimisedPool(directory);
+                pool = new SimplePool(directory, clock, new SimplePool.StaleSearcherSeconds());
             }
         }
     }

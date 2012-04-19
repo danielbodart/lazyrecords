@@ -1,12 +1,12 @@
 package com.googlecode.lazyrecords.lucene;
 
-import com.googlecode.lazyrecords.PrintStreamLogger;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
 import com.googlecode.lazyrecords.RecordsContract;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
+import com.googlecode.totallylazy.time.SystemClock;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.queryParser.QueryParser;
@@ -14,6 +14,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.NIOFSDirectory;
 import org.apache.lucene.util.Version;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -29,11 +30,16 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
     private LuceneStorage storage;
     private File file;
 
+    @Before
+    public void forceStale() {
+        System.setProperty(SimplePool.StaleSearcherSeconds.PROPERTY, "0");
+    }
+
     @Override
     protected LuceneRecords createRecords() throws Exception {
         file = temporaryDirectory("totallylazy");
         directory = new NIOFSDirectory(file);
-        storage = new OptimisedStorage(directory);
+        storage = new OptimisedStorage(directory, new SystemClock());
         return new LuceneRecords(storage, new LuceneMappings(), logger);
     }
 
