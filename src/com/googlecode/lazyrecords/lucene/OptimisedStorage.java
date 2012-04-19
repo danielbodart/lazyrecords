@@ -30,7 +30,7 @@ public class OptimisedStorage implements LuceneStorage {
     private IndexWriter writer;
 
     public OptimisedStorage(Directory directory, SearcherPool searcherPool) {
-        this(directory, Version.LUCENE_33, new KeywordAnalyzer(), IndexWriterConfig.OpenMode.CREATE_OR_APPEND, searcherPool);
+        this(directory, Version.LUCENE_36, new KeywordAnalyzer(), IndexWriterConfig.OpenMode.CREATE_OR_APPEND, searcherPool);
     }
 
     public OptimisedStorage(Directory directory, Version version, Analyzer analyzer, IndexWriterConfig.OpenMode mode, SearcherPool pool) {
