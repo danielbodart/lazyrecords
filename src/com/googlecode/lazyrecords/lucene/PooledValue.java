@@ -2,11 +2,14 @@ package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.totallylazy.Function1;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.googlecode.totallylazy.Closeables.safeClose;
 import static com.googlecode.totallylazy.Runnables.VOID;
 
-public class PooledValue {
+public class PooledValue implements Closeable {
     private final Searcher searcher;
     private final LuceneSearcher luceneSearcher;
     private volatile boolean dirty = false;
@@ -25,10 +28,6 @@ public class PooledValue {
                 return value.dirty();
             }
         };
-    }
-
-    public LuceneSearcher luceneSearcher() {
-        return luceneSearcher;
     }
 
     public boolean dirty() {
@@ -87,5 +86,10 @@ public class PooledValue {
                 return VOID;
             }
         };
+    }
+
+    @Override
+    public void close() throws IOException {
+        safeClose(luceneSearcher);
     }
 }

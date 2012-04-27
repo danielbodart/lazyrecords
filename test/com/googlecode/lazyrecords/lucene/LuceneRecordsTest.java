@@ -6,19 +6,15 @@ import com.googlecode.lazyrecords.RecordsContract;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
-import com.googlecode.totallylazy.time.SystemClock;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.NIOFSDirectory;
 import org.apache.lucene.util.Version;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
 
 import static com.googlecode.totallylazy.Files.temporaryDirectory;
 import static com.googlecode.totallylazy.matchers.IterableMatcher.hasExactly;
@@ -34,12 +30,7 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
     @Override
     protected LuceneRecords createRecords() throws Exception {
         file = temporaryDirectory("totallylazy");
-        directory = new NIOFSDirectory(file) {
-            @Override
-            protected void fsync(String name) throws IOException {
-                // This is called on every commit by Lucene. We don't care in tests, so overriding this method makes performance 25x faster
-            }
-        };
+        directory = new NoSyncDirectory(file);
         storage = new OptimisedStorage(directory, new LucenePool(directory));
         return new LuceneRecords(storage, new LuceneMappings(), logger);
     }
@@ -47,6 +38,7 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
     @After
     public void cleanUp() throws Exception {
         super.cleanUp();
+        records.close();
         storage.close();
         directory.close();
     }

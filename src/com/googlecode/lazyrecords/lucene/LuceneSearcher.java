@@ -8,6 +8,8 @@ import org.apache.lucene.search.TopDocs;
 
 import java.io.IOException;
 
+import static com.googlecode.totallylazy.Closeables.safeClose;
+
 public class LuceneSearcher implements Searcher {
     private final IndexSearcher searcher;
 
@@ -27,7 +29,7 @@ public class LuceneSearcher implements Searcher {
 
     @Override
     public void close() throws IOException {
-        searcher.close();
+        safeClose(searcher);
     }
 
     public IndexSearcher searcher() {

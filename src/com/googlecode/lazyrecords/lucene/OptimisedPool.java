@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static com.googlecode.totallylazy.Closeables.safeClose;
 import static com.googlecode.totallylazy.Predicates.is;
 import static com.googlecode.totallylazy.Predicates.not;
 import static com.googlecode.totallylazy.Predicates.where;
@@ -98,7 +99,6 @@ public class OptimisedPool implements SearcherPool {
                 each(closeAndRemove());
         sequence(pool).filter(where(theCheckoutCount(), is(not(0)))).
                 each(PooledValue.markAsDirty());
-
     }
 
     private Function1<PooledValue, Void> closeAndRemove() {
@@ -112,15 +112,16 @@ public class OptimisedPool implements SearcherPool {
     }
 
     private void closeAndRemove(PooledValue pooledValue) throws IOException {
-        pooledValue.luceneSearcher().close();
+        safeClose(pooledValue);
         pool.remove(pooledValue);
     }
 
     @Override
     public void close() throws IOException {
         for (PooledValue pooledValue : pool) {
-            pooledValue.luceneSearcher().close();
+            safeClose(pooledValue);
         }
+        pool.clear();
     }
 
 }

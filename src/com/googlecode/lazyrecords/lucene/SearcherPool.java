@@ -6,5 +6,5 @@ import java.io.IOException;
 public interface SearcherPool extends Closeable{
     Searcher searcher() throws IOException;
 
-    void markAsDirty();
+    void markAsDirty() throws IOException;
 }

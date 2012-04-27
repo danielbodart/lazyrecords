@@ -43,7 +43,7 @@ public class LuceneSequence extends Sequence<Record> {
     }
 
     public Iterator<Record> iterator() {
-        return closeables.manage(new LuceneIterator(storage, query, sort, documentToRecord, logger));
+        return new LuceneIterator(storage, query, sort, documentToRecord, closeables, logger);
     }
 
     @Override

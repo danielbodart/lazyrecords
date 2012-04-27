@@ -10,6 +10,8 @@ import org.apache.lucene.search.TopDocs;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
+import static com.googlecode.totallylazy.Closeables.safeClose;
+
 public class RecoveringSearcher implements Searcher {
     private Searcher searcher;
     private final Callable<Searcher> newSearcher;
@@ -30,11 +32,7 @@ public class RecoveringSearcher implements Searcher {
     }
 
     private synchronized void replaceBrokenSearcher() {
-        try {
-            searcher.close();
-        } catch (Exception e) {
-            // don-t care as it's already broken
-        }
+        safeClose(searcher);
         this.searcher = Callers.call(newSearcher);
     }
 

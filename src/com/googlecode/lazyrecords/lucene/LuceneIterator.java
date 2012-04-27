@@ -3,6 +3,7 @@ package com.googlecode.lazyrecords.lucene;
 import com.googlecode.lazyrecords.Logger;
 import com.googlecode.lazyrecords.Loggers;
 import com.googlecode.totallylazy.Callable1;
+import com.googlecode.totallylazy.CloseableList;
 import com.googlecode.totallylazy.Closeables;
 import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.iterators.StatefulIterator;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import static com.googlecode.totallylazy.Arrays.containsIndex;
+import static com.googlecode.totallylazy.Closeables.safeClose;
 import static com.googlecode.totallylazy.Pair.pair;
 import static com.googlecode.totallylazy.callables.TimeCallable.calculateMilliseconds;
 
@@ -26,17 +28,19 @@ public class LuceneIterator extends StatefulIterator<Record> implements Closeabl
     private final Query query;
     private final Sort sort;
     private final Callable1<? super Document, Record> documentToRecord;
+    private final CloseableList closeables;
     private final Logger logger;
     private ScoreDoc[] scoreDocs;
     private int index = 0;
     private Searcher searcher;
     private boolean closed = false;
 
-    public LuceneIterator(LuceneStorage storage, Query query, Sort sort, Callable1<? super Document, Record> documentToRecord, Logger logger) {
+    public LuceneIterator(LuceneStorage storage, Query query, Sort sort, Callable1<? super Document, Record> documentToRecord, CloseableList closeables, Logger logger) {
         this.storage = storage;
         this.query = query;
         this.sort = sort;
         this.documentToRecord = documentToRecord;
+        this.closeables = closeables;
         this.logger = logger;
     }
 
@@ -44,6 +48,7 @@ public class LuceneIterator extends StatefulIterator<Record> implements Closeabl
     protected Record getNext() throws Exception {
         if(!containsIndex(scoreDocs(), index)){
             close();
+            closeables.remove(this);
             return finished();
         }
         Document document = searcher().document(scoreDocs()[index++].doc);
@@ -68,6 +73,7 @@ public class LuceneIterator extends StatefulIterator<Record> implements Closeabl
         }
 
         if( searcher == null){
+            closeables.manage(this);
             searcher = storage.searcher();
         }
         return searcher;
@@ -75,8 +81,9 @@ public class LuceneIterator extends StatefulIterator<Record> implements Closeabl
 
     @Override
     public void close() throws IOException {
-        Closeables.close(searcher);
+        safeClose(searcher);
         searcher = null;
+        scoreDocs = null;
         closed = true;
     }
 }

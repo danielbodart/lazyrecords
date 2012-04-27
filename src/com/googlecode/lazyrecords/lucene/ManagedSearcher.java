@@ -1,21 +1,20 @@
 package com.googlecode.lazyrecords.lucene;
 
-import com.googlecode.totallylazy.Callable1;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.TopDocs;
 
 import java.io.IOException;
 
-public class PooledSearcher implements Searcher {
-    private final Searcher searcher;
-    private final Callable1<Searcher, Void> checkin;
+public class ManagedSearcher implements Searcher {
+    private final SearcherManager manager;
+    public final LuceneSearcher searcher;
 
-    public PooledSearcher(Searcher searcher, Callable1<Searcher, Void> checkin) {
-        this.searcher = searcher;
-        this.checkin = checkin;
+    public ManagedSearcher(SearcherManager manager) {
+        this.manager = manager;
+        this.searcher = new LuceneSearcher(manager.acquire());
     }
 
     @Override
@@ -30,9 +29,6 @@ public class PooledSearcher implements Searcher {
 
     @Override
     public void close() throws IOException {
-        try {
-            checkin.call(this);
-        } catch (Exception ignored) {
-        }
+        manager.release(searcher.searcher());
     }
 }
