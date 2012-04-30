@@ -3,6 +3,7 @@ package com.googlecode.lazyrecords.parser;
 import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Predicates;
+import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
@@ -283,12 +284,12 @@ public class StandardParserTest {
 
     @Test
     public void supportsImplicitDateBasedQueries() throws Exception {
-        Keyword<Date> dob = keyword("dob", Date.class);
         PredicateParser predicateParser = new StandardParser();
-        Predicate<Record> predicate = predicateParser.parse("2001/1/10", sequence(dob));
+        Sequence<Keyword<?>> keywords = Sequences.<Keyword<?>>sequence(keyword("dob", Date.class));
+        Predicate<Record> predicate = predicateParser.parse("2001/1/10", keywords);
 
-        assertThat(predicate.matches(record().set(dob, date(2001, 1, 10))), is(true));
-        assertThat(predicate.matches(record().set(dob, date(2001, 10, 1))), is(false));
+        assertThat(predicate.matches(record().set(keyword("dob", Date.class), date(2001, 1, 10))), is(true));
+        assertThat(predicate.matches(record().set(keyword("dob", Date.class), date(2001, 10, 1))), is(false));
 
         assertLuceneSyntax(predicate);
         assertSqlSyntax(predicate);
@@ -297,7 +298,8 @@ public class StandardParserTest {
     @Test
     public void supportsGreaterThanQueries() throws Exception {
         PredicateParser predicateParser = new StandardParser();
-        Predicate<Record> predicate = predicateParser.parse("dob > 2001/1/10", Sequences.<Keyword<?>>empty());
+        Sequence<Keyword<?>> keywords = Sequences.<Keyword<?>>sequence(keyword("dob", Date.class));
+        Predicate<Record> predicate = predicateParser.parse("dob > 2001/1/10", keywords);
 
         Keyword<Date> dob = keyword("dob", Date.class);
         assertThat(predicate.matches(record().set(dob, date(2001, 1, 11))), is(true));
@@ -311,7 +313,8 @@ public class StandardParserTest {
     @Test
     public void supportsLowerThanDateQueries() throws Exception {
         PredicateParser predicateParser = new StandardParser();
-        Predicate<Record> predicate = predicateParser.parse("dob < 2001/1/10", Sequences.<Keyword<?>>empty());
+        Sequence<Keyword<?>> keywords = Sequences.<Keyword<?>>sequence(keyword("dob", Date.class));
+        Predicate<Record> predicate = predicateParser.parse("dob < 2001/1/10", keywords);
 
         Keyword<Date> dob = keyword("dob", Date.class);
         assertThat(predicate.matches(record().set(dob, date(2001, 1, 9))), is(true));

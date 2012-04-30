@@ -16,7 +16,9 @@ public class StandardParser implements PredicateParser {
     private final StringMappings mappings;
 
     public StandardParser() {
-        mappings = new StringMappings().add(Integer.class, new IntegerMapping()).add(Long.class, new LongMapping());
+        mappings = new StringMappings().
+                add(Integer.class, new IntegerMapping()).
+                add(Long.class, new LongMapping());
     }
 
     public Predicate<Record> parse(String raw, Sequence<? extends Keyword<?>> implicits) throws IllegalArgumentException{
