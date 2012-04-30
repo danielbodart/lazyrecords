@@ -35,7 +35,7 @@ public class ParametrizedParser implements PredicateParser {
     private Callable1<Date, String> formatDate() {
         return new Callable1<Date, String>() {
             public String call(Date date) throws Exception {
-                return Grammar.DATE_FORMAT.format(date);
+                return StandardParser.DATE_FORMAT.format(date);
             }
         };
     }

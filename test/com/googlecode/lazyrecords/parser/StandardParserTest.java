@@ -271,9 +271,9 @@ public class StandardParserTest {
     @Test
     public void supportsExplicitDateBasedQueries() throws Exception {
         PredicateParser predicateParser = new StandardParser();
-        Predicate<Record> predicate = predicateParser.parse("dob:2001/1/10", Sequences.<Keyword<?>>empty());
-
         Keyword<Date> dob = keyword("dob", Date.class);
+        Predicate<Record> predicate = predicateParser.parse("dob:2001/1/10", Sequences.sequence(dob));
+
         assertThat(predicate.matches(record().set(dob, date(2001, 1, 10))), is(true));
         assertThat(predicate.matches(record().set(dob, date(2001, 10, 1))), is(false));
         assertThat(predicate.matches(record().set(dob, date(2001, 1, 10, 3, 15, 59, 123))), is(true));

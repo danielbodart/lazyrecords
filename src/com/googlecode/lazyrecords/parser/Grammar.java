@@ -34,7 +34,6 @@ public class Grammar {
         return pattern(regex(String.format("\\s*%s\\s*", value)), value);
     }
 
-    public static final DateFormat DATE_FORMAT = Dates.format("yyyy/MM/dd");
     public static final Parser<String> DATE = pattern(regex("\\d{4}/\\d{1,2}/\\d{1,2}"), "date").source();
     public static final Parser<String> TEXT = isChar(CharacterPredicates.IS_ALPHA_NUMERIC).many1().source();
     public static final Parser<String> QUOTED_TEXT = notChar('"').many1().source().between(isChar('"'), isChar('"'));
