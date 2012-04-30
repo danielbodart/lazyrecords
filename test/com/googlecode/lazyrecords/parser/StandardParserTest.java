@@ -392,7 +392,6 @@ public class StandardParserTest {
     }
 
     @Test
-    @Ignore("WIP")
     public void shouldCreateOnlyOnePredicateForExplicitQuery() throws Exception {
         PredicateParser predicateParser = new StandardParser();
 
@@ -404,7 +403,6 @@ public class StandardParserTest {
     }
 
     @Test
-    @Ignore("WIP")
     public void shouldCreateNPredicatesForImplicitQuery() throws Exception {
         PredicateParser predicateParser = new StandardParser();
 
