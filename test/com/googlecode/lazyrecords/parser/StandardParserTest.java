@@ -2,21 +2,29 @@ package com.googlecode.lazyrecords.parser;
 
 import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.Predicate;
+import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequences;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.lucene.Lucene;
 import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
 import com.googlecode.lazyrecords.sql.expressions.WhereClause;
+import com.googlecode.totallylazy.predicates.EqualsPredicate;
+import com.googlecode.totallylazy.predicates.LogicalPredicate;
+import com.googlecode.totallylazy.predicates.WherePredicate;
+import org.hamcrest.Matchers;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Date;
 
+import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.lazyrecords.Record.constructors.record;
 import static com.googlecode.totallylazy.time.Dates.date;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
@@ -380,6 +388,31 @@ public class StandardParserTest {
         String luceneQuery = new Lucene(new StringMappings()).query(predicate).toString();
         System.out.println("LUCENE = " + luceneQuery);
         assertThat(luceneQuery, is(notNullValue()));
+//        assertThat(predicate.matches(record().set(keyword, 13L)), is(true));
     }
 
+    @Test
+    @Ignore("WIP")
+    public void shouldCreateOnlyOnePredicateForExplicitQuery() throws Exception {
+        PredicateParser predicateParser = new StandardParser();
+
+        Keyword<Long> keyword = keyword("longKeyword", Long.class);
+        Predicate<Record> predicate = predicateParser.parse("longKeyword:13", Sequences.<Keyword<?>>sequence(keyword, keyword("unrelatedKeyword", String.class)));
+        Predicate<Record> expected = where(keyword, Predicates.is(13L));
+
+        assertThat(predicate, is(expected));
+    }
+
+    @Test
+    @Ignore("WIP")
+    public void shouldCreateNPredicatesForImplicitQuery() throws Exception {
+        PredicateParser predicateParser = new StandardParser();
+
+        Keyword<Long> longKeyword = keyword("longKeyword", Long.class);
+        Keyword<String> stringKeyword = keyword("stringKeyword", String.class);
+        Predicate<Record> predicate = predicateParser.parse("13", Sequences.<Keyword<?>>sequence(longKeyword, stringKeyword));
+        Predicate<Record> expected = Predicates.or(Predicates.where(longKeyword, Predicates.is(13L)), Predicates.where(stringKeyword, Predicates.is("13")));
+
+        assertThat(predicate, is(expected));
+    }
 }
