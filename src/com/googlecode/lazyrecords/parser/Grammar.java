@@ -2,6 +2,7 @@ package com.googlecode.lazyrecords.parser;
 
 import com.googlecode.lazyparsec.Parser;
 import com.googlecode.lazyparsec.Parsers;
+import com.googlecode.lazyparsec.Scanners;
 import com.googlecode.lazyparsec.pattern.CharacterPredicates;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
@@ -37,8 +38,9 @@ public class Grammar {
     public static final Parser<String> DATE = pattern(regex("\\d{4}/\\d{1,2}/\\d{1,2}"), "date").source();
     public static final Parser<String> TEXT = isChar(CharacterPredicates.IS_ALPHA_NUMERIC).many1().source();
     public static final Parser<String> QUOTED_TEXT = notChar('"').many1().source().between(isChar('"'), isChar('"'));
+    public static final Parser<String> NULL = Scanners.string("null").retn(null);
     public static final Parser<String> TEXT_ONLY = Parsers.or(QUOTED_TEXT, TEXT);
-    public static final Parser<String> VALUES = Parsers.or(DATE, TEXT_ONLY);
+    public static final Parser<String> VALUES = Parsers.or(DATE, NULL, TEXT_ONLY);
     public static final Parser<String> NAME = TEXT_ONLY;
     public static final Parser<Void> WILDCARD = isChar('*');
     public static final Parser<Void> GT = ws('>');
@@ -134,6 +136,13 @@ public class Grammar {
         }
     });
 
+    public static final Parser<Pair<String, Callable1<Object, Predicate>>> IS_NULL = NULL.map(valueAndPredicateCreator(new Callable1<Object, Predicate>() {
+        @Override
+        public Predicate call(Object value) throws Exception {
+            return Predicates.nullValue();
+        }
+    }));
+
     public static final Parser<Pair<String, Callable1<Object, Predicate>>> TEXT_IS = TEXT_ONLY.map(valueAndPredicateCreator(new Callable1<Object, Predicate>() {
         @Override
         public Predicate call(Object value) throws Exception {
@@ -154,7 +163,7 @@ public class Grammar {
         };
     }
 
-    public static Parser<Pair<String, Callable1<Object, Predicate>>> VALUE_PREDICATE = Parsers.or(GREATER_THAN_OR_EQUALS, LESS_THAN_OR_EQUALS, GREATER_THAN, LESS_THAN, DATE_IS, TEXT_CONTAINS, TEXT_STARTS_WITH, TEXT_ENDS_WITH, TEXT_IS);
+    public static Parser<Pair<String, Callable1<Object, Predicate>>> VALUE_PREDICATE = Parsers.or(GREATER_THAN_OR_EQUALS, LESS_THAN_OR_EQUALS, GREATER_THAN, LESS_THAN, DATE_IS, TEXT_CONTAINS, TEXT_STARTS_WITH, TEXT_ENDS_WITH, IS_NULL, TEXT_IS);
 
     public static Parser<List<Pair<String, Callable1<Object, Predicate>>>> VALUE_PREDICATES = VALUE_PREDICATE.sepBy(ws(','));
 
@@ -192,12 +201,11 @@ public class Grammar {
     }
 
     private static Predicate<Record> toPredicate(final StringMappings mappings, final Keyword<?> keyword, final List<Pair<String, Callable1<Object, Predicate>>> values) throws Exception {
-        final StringMapping<?> mapping = mappings.get(keyword.forClass());
 
         List<Predicate<Record>> valuesPredicates = new ArrayList<Predicate<Record>>();
         for (Pair<String, Callable1<Object, Predicate>> pair : values) {
             try {
-                Object actualValue = mapping.toValue(pair.first());
+                Object actualValue = mappings.toValue(keyword.forClass(), pair.first());
                 Predicate<Record> where = where(keyword, pair.second().call(actualValue));
                 valuesPredicates.add(where);
             } catch (Exception ignored) {
