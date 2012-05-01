@@ -54,7 +54,10 @@ public class SqlIterator extends StatefulIterator<Record> implements Closeable {
         for (Integer index : range(1).take(metaData.getColumnCount()).safeCast(Integer.class)) {
             final String name = metaData.getColumnLabel(index);
             Keyword<Object> keyword = getKeyword(name, definitions);
-            record.set(keyword, mappings.getValue(resultSet, index, keyword.forClass()));
+            Object value = mappings.getValue(resultSet, index, keyword.forClass());
+            if(value != null){
+                record.set(keyword, value);
+            }
         }
 
         return record;
