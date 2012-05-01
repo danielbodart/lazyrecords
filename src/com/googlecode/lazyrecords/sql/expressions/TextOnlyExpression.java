@@ -6,8 +6,12 @@ import com.googlecode.totallylazy.Sequences;
 public class TextOnlyExpression extends AbstractExpression {
     private final String text;
 
-    public TextOnlyExpression(String text) {
+    protected TextOnlyExpression(String text) {
         this.text = text;
+    }
+
+    public static TextOnlyExpression textOnly(Object expression) {
+        return new TextOnlyExpression(expression.toString());
     }
 
     public String text() {

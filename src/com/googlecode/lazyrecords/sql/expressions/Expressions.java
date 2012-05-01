@@ -33,7 +33,7 @@ public class Expressions {
     }
 
     public static TextOnlyExpression textOnly(Object expression) {
-        return new TextOnlyExpression(expression.toString());
+        return TextOnlyExpression.textOnly(expression.toString());
     }
 
     public static TextOnlyExpression name(Named named) {
@@ -82,4 +82,7 @@ public class Expressions {
         return new CompoundExpression(expressions, start, separator, end);
     }
 
+    public static boolean isEmpty(Expression expression) {
+        return empty().text().equals(expression.text());
+    }
 }

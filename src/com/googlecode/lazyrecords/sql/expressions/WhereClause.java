@@ -27,7 +27,6 @@ import com.googlecode.totallylazy.predicates.StartsWithPredicate;
 import com.googlecode.totallylazy.predicates.WherePredicate;
 import com.googlecode.lazyrecords.Record;
 
-import static com.googlecode.totallylazy.Predicates.instanceOf;
 import static com.googlecode.totallylazy.Predicates.not;
 import static com.googlecode.totallylazy.Sequences.repeat;
 import static com.googlecode.totallylazy.Sequences.sequence;
@@ -37,8 +36,15 @@ import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
 import static com.googlecode.lazyrecords.sql.expressions.SelectList.derivedColumn;
 
 public class WhereClause extends CompoundExpression{
-    public WhereClause(Predicate<? super Record> predicate) {
-        super(new TextOnlyExpression("where"), toSql(predicate));
+    private WhereClause(Predicate<? super Record> predicate) {
+        super(prefixWhere(toSql(predicate)));
+    }
+
+    private static Expression prefixWhere(Expression expression) {
+        if(Expressions.isEmpty(expression)){
+            return expression;
+        }
+        return textOnly("where").join(expression);
     }
 
     public static WhereClause whereClause(Predicate<? super Record> predicate) {
@@ -46,14 +52,21 @@ public class WhereClause extends CompoundExpression{
     }
 
     public static Expression whereClause(Option<Predicate<? super Record>> predicate) {
-        return sequence(predicate).find(not(instanceOf(AllPredicate.class))).map(new Callable1<Predicate<? super Record>, Expression>() {
+        return predicate.map(whereClause()).getOrElse(empty());
+    }
+
+    public static Function1<Predicate<? super Record>, Expression> whereClause() {
+        return new Function1<Predicate<? super Record>, Expression>() {
             public Expression call(Predicate<? super Record> predicate) throws Exception {
                 return whereClause(predicate);
             }
-        }).getOrElse(empty());
+        };
     }
 
     public static Expression toSql(Predicate<?> predicate) {
+        if(predicate instanceof AllPredicate){
+            return empty();
+        }
         if (predicate instanceof WherePredicate) {
             WherePredicate<Record,?> wherePredicate = Unchecked.cast(predicate);
             Callable1<? super Record, ?> callable = wherePredicate.callable();
