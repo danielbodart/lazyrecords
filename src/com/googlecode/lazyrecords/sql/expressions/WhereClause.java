@@ -74,11 +74,13 @@ public class WhereClause extends CompoundExpression{
         }
         if (predicate instanceof AndPredicate) {
             AndPredicate<?> andPredicate = (AndPredicate) predicate;
+            if(andPredicate.predicates().isEmpty()) return empty();
             return Expressions.join(toExpressions(andPredicate.predicates()), "(", " and ", ")");
         }
         if (predicate instanceof OrPredicate) {
-            OrPredicate<?> andPredicate = (OrPredicate) predicate;
-            return Expressions.join(toExpressions(andPredicate.predicates()), "(", " or ", ")");
+            OrPredicate<?> orPredicate = (OrPredicate) predicate;
+            if(orPredicate.predicates().isEmpty()) return empty();
+            return Expressions.join(toExpressions(orPredicate.predicates()), "(", " or ", ")");
         }
         if (predicate instanceof NullPredicate) {
             return textOnly("is null");
