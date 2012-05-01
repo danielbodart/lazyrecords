@@ -24,8 +24,10 @@ public class SqlRecordsTest extends RecordsContract<Records> {
     private SqlSchema schema;
 
     public Records createRecords() throws Exception {
+
         SqlRecords sqlRecords = new SqlRecords(
                 getConnection("jdbc:h2:mem:totallylazy", "SA", ""),
+//                getConnection("jdbc:hsqldb:mem:totallylazy", "SA", ""),
                 new SqlMappings(),
                 logger);
         return new SchemaGeneratingRecords(sqlRecords, schema = new SqlSchema(sqlRecords));

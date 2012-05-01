@@ -6,6 +6,7 @@ import com.googlecode.lazyrecords.Keyword;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.name;
 import static com.googlecode.totallylazy.Sequences.sequence;
@@ -21,7 +22,7 @@ public class TableDefinition extends TextOnlyExpression {
         return new TableDefinition(definition);
     }
 
-    public static final Map<Class, String> mappings = new LinkedHashMap<Class, String>() {{
+    public static final Map<Class, String> mappings = new ConcurrentHashMap<Class, String>() {{
         put(Date.class, "timestamp");
         put(Integer.class, "integer");
         put(Long.class, "bigint");
@@ -29,6 +30,7 @@ public class TableDefinition extends TextOnlyExpression {
         put(Boolean.class, "bit");
         put(UUID.class, "varchar(36)");
         put(String.class, "varchar(4000)");
+        put(Object.class, "clob");
     }};
 
     public static Function1<? super Keyword<?>, String> asColumn() {
@@ -39,9 +41,9 @@ public class TableDefinition extends TextOnlyExpression {
         };
     }
 
-    private static String type(Class<?> aClass) {
+    public static String type(Class<?> aClass) {
         if (!mappings.containsKey(aClass)) {
-            return mappings.get(String.class);
+            return mappings.get(Object.class);
         }
         return mappings.get(aClass);
     }
