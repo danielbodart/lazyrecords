@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.parser;
 
+import com.googlecode.lazyrecords.ImmutableKeyword;
 import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Predicates;
@@ -18,7 +19,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Date;
+import java.util.UUID;
 
+import static com.googlecode.totallylazy.Predicates.and;
 import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.lazyrecords.Keywords.keyword;
@@ -413,6 +416,17 @@ public class StandardParserTest {
         Keyword<String> stringKeyword = keyword("stringKeyword", String.class);
         Predicate<Record> predicate = predicateParser.parse("13", Sequences.<Keyword<?>>sequence(longKeyword, stringKeyword));
         Predicate<Record> expected = Predicates.or(Predicates.where(longKeyword, Predicates.is(13L)), Predicates.where(stringKeyword, Predicates.is("13")));
+
+        assertThat(predicate, is(expected));
+    }
+
+    @Test
+    public void supportsIsNull() throws Exception {
+        PredicateParser predicateParser = new StandardParser();
+
+        ImmutableKeyword<String> keyword = keyword("stringKeyword", String.class);
+        Predicate<Record> predicate = predicateParser.parse("stringKeyword:null", Sequences.<Keyword<?>>sequence(keyword));
+        Predicate<Record> expected = where(keyword, Predicates.nullValue());
 
         assertThat(predicate, is(expected));
     }
