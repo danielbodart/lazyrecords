@@ -52,7 +52,7 @@ public interface Record {
     public static final class methods{
         private methods(){}
 
-        @Deprecated // please use Keywords.matchKeyword directly);
+        @Deprecated // please use Keywords.matchKeyword);
         public static Keyword<Object> getKeyword(String name, Sequence<? extends Keyword<?>> definitions) {
             return Keywords.matchKeyword(name, definitions);
         }
