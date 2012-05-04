@@ -1,12 +1,10 @@
 package com.googlecode.lazyrecords.sql;
 
 import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.Logger;
 import com.googlecode.lazyrecords.Loggers;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
-import com.googlecode.lazyrecords.sql.expressions.SelectList;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
 import com.googlecode.totallylazy.LazyException;
 import com.googlecode.totallylazy.Maps;
@@ -25,8 +23,6 @@ import java.util.Map;
 import static com.googlecode.lazyrecords.Keywords.matchKeyword;
 import static com.googlecode.lazyrecords.sql.expressions.SelectList.shortName;
 import static com.googlecode.totallylazy.Pair.pair;
-import static com.googlecode.totallylazy.Predicates.where;
-import static com.googlecode.totallylazy.Strings.equalIgnoringCase;
 import static com.googlecode.totallylazy.callables.TimeCallable.calculateMilliseconds;
 import static com.googlecode.totallylazy.numbers.Numbers.range;
 
@@ -62,7 +58,7 @@ public class SqlIterator extends StatefulIterator<Record> implements Closeable {
             final String name = metaData.getColumnLabel(index);
             Keyword<Object> keyword = matchKeyword(name, definitions, shortName());
             Object value = mappings.getValue(resultSet, index, keyword.forClass());
-            if(value != null){
+            if (value != null) {
                 record.set(keyword, value);
             }
         }
@@ -76,9 +72,9 @@ public class SqlIterator extends StatefulIterator<Record> implements Closeable {
             long start = System.nanoTime();
             try {
                 preparedStatement = connection.prepareStatement(expression.text());
-            mappings.addValues(preparedStatement, expression.parameters());
-            resultSet = preparedStatement.executeQuery();
-            } catch (SQLException e) {
+                mappings.addValues(preparedStatement, expression.parameters());
+                resultSet = preparedStatement.executeQuery();
+            } catch (Exception e) {
                 log.put(Loggers.MESSAGE, e.getMessage());
                 throw LazyException.lazyException(e);
             } finally {

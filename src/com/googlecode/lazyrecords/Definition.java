@@ -30,4 +30,15 @@ public interface Definition extends Named {
             return Callables.<Keyword<?>>first().then(indexIn(definition.fields()));
         }
     }
+
+    class functions {
+        public static Callable1<Record, Record> sortFields(final Definition definition) {
+            return new Callable1<Record, Record>() {
+                @Override
+                public Record call(Record record) throws Exception {
+                    return Definition.methods.sortFields(definition, record);
+                }
+            };
+        }
+    }
 }
