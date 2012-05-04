@@ -1,8 +1,10 @@
 package com.googlecode.lazyrecords;
 
-import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Sequence;
+
+import static com.googlecode.totallylazy.Predicates.where;
+import static com.googlecode.totallylazy.Strings.equalIgnoringCase;
 
 public class Keywords {
 
@@ -15,6 +17,14 @@ public class Keywords {
                 return keyword.name();
             }
         };
+    }
+
+    public static Keyword<Object> matchKeyword(String name, Sequence<? extends Keyword<?>> definitions) {
+        return matchKeyword(name, definitions, name());
+    }
+
+    public static Keyword<Object> matchKeyword(String shortName, Sequence<? extends Keyword<?>> definitions, Function1<Keyword<?>, String> extractor) {
+        return definitions.<Keyword<Object>>unsafeCast().find(where(extractor, equalIgnoringCase(shortName))).getOrElse(Keywords.keyword(shortName));
     }
 
     public static ImmutableKeyword<Object> keyword(String value) {

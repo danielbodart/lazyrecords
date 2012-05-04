@@ -28,7 +28,7 @@ public class TableDefinition extends TextOnlyExpression {
         put(Integer.class, "integer");
         put(Long.class, "bigint");
         put(Timestamp.class, "timestamp");
-        put(Boolean.class, "char(5)");
+        put(Boolean.class, "varchar(5)");
         put(UUID.class, "varchar(36)");
         put(URI.class, "varchar(4000)");
         put(String.class, "varchar(4000)");

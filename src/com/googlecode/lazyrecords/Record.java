@@ -52,8 +52,9 @@ public interface Record {
     public static final class methods{
         private methods(){}
 
+        @Deprecated // please use Keywords.matchKeyword directly);
         public static Keyword<Object> getKeyword(String name, Sequence<? extends Keyword<?>> definitions) {
-            return definitions.<Keyword<Object>>unsafeCast().find(where(name(), equalIgnoringCase(name))).getOrElse(keyword(name));
+            return Keywords.matchKeyword(name, definitions);
         }
 
         public static Record filter(Record original, Keyword<?>... fields) {

@@ -5,22 +5,19 @@ import com.googlecode.lazyparsec.Parsers;
 import com.googlecode.lazyparsec.Scanners;
 import com.googlecode.lazyparsec.pattern.CharacterPredicates;
 import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.mappings.StringMapping;
 import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.*;
 import com.googlecode.totallylazy.predicates.OrPredicate;
-import com.googlecode.totallylazy.time.Dates;
 import com.googlecode.totallylazy.time.Seconds;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import static com.googlecode.lazyparsec.Scanners.*;
 import static com.googlecode.lazyparsec.pattern.Patterns.regex;
-import static com.googlecode.lazyrecords.Record.methods.getKeyword;
 import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Strings.*;
 
@@ -195,7 +192,7 @@ public class Grammar {
             public Predicate<Record> call(Triple<String, Void, List<Pair<String, Callable1<Object, Predicate>>>> triple) throws Exception {
                 final String name = triple.first();
                 final List<Pair<String, Callable1<Object, Predicate>>> values = triple.third();
-                return toPredicate(mappings, getKeyword(name, keywords), values);
+                return toPredicate(mappings, Keywords.matchKeyword(name, keywords), values);
             }
         });
     }

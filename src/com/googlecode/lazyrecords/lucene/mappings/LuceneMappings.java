@@ -2,6 +2,7 @@ package com.googlecode.lazyrecords.lucene.mappings;
 
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.SourceRecord;
 import com.googlecode.lazyrecords.lucene.Lucene;
@@ -18,7 +19,6 @@ import org.apache.lucene.document.Fieldable;
 
 import static com.googlecode.lazyrecords.Definition.methods.sortFields;
 import static com.googlecode.lazyrecords.Record.functions.updateValues;
-import static com.googlecode.lazyrecords.Record.methods.getKeyword;
 import static com.googlecode.totallylazy.Predicates.is;
 import static com.googlecode.totallylazy.Predicates.notNullValue;
 import static com.googlecode.totallylazy.Predicates.where;
@@ -54,7 +54,7 @@ public class LuceneMappings {
         return new Function1<Fieldable, Pair<Keyword<?>, Object>>() {
             public Pair<Keyword<?>, Object> call(Fieldable fieldable) throws Exception {
                 String name = fieldable.name();
-                Keyword<?> keyword = getKeyword(name, definitions);
+                Keyword<?> keyword = Keywords.matchKeyword(name, definitions);
                 return Pair.<Keyword<?>, Object>pair(keyword, stringMappings.toValue(keyword.forClass(), fieldable.stringValue()));
             }
         };
@@ -68,7 +68,7 @@ public class LuceneMappings {
                 }
 
                 String name = pair.first().name();
-                Keyword<?> keyword = getKeyword(name, definitions);
+                Keyword<?> keyword = Keywords.matchKeyword(name, definitions);
                 return new Field(name, LuceneMappings.this.stringMappings.toString(keyword.forClass(), pair.second()), Field.Store.YES, Field.Index.NOT_ANALYZED);
             }
         };

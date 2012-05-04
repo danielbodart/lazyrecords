@@ -17,6 +17,7 @@ import java.sql.Connection;
 import java.util.Properties;
 
 import static com.googlecode.lazyrecords.Definition.constructors.definition;
+import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
 import static com.googlecode.totallylazy.Closeables.safeClose;
 import static java.sql.DriverManager.getConnection;
@@ -63,11 +64,15 @@ public class OracleRecordsTest extends RecordsContract<Records> {
 
     @Test
     public void supportsDBSequences() throws Exception {
-        sqlRecords.update(textOnly("drop sequence foo"));
+        try {
+            sqlRecords.update(textOnly("drop sequence foo"));
+        } catch (Exception ignore) {
+        }
         sqlRecords.update(textOnly("create sequence foo"));
-        Keyword<Integer> nextVal = SqlKeywords.keyword("foo.nextval", Integer.class);
+        Keyword<Integer> nextVal = keyword("foo.nextval", Integer.class);
         Definition definition = definition("dual", nextVal);
         Integer integer = records.get(definition).head().get(nextVal);
         assertThat(integer, is(1));
+
     }
 }
