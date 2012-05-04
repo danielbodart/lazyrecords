@@ -18,7 +18,7 @@ import static com.googlecode.totallylazy.matchers.NumberMatcher.is;
 import static com.googlecode.lazyrecords.Record.constructors.record;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@Ignore("Manual Test")
+@Ignore
 public class SimpleDBRecordsTest extends SchemaBasedRecordContract<SimpleDBRecords> {
     @Override
     protected SimpleDBRecords createRecords() throws Exception {

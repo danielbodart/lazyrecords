@@ -10,13 +10,17 @@ import com.googlecode.totallylazy.Unchecked;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Map;
 
 import static com.googlecode.totallylazy.Maps.map;
 import static com.googlecode.totallylazy.Sequences.sequence;
-import static com.googlecode.totallylazy.numbers.Numbers.*;
+import static com.googlecode.totallylazy.numbers.Numbers.not;
+import static com.googlecode.totallylazy.numbers.Numbers.numbers;
+import static com.googlecode.totallylazy.numbers.Numbers.range;
+import static com.googlecode.totallylazy.numbers.Numbers.sum;
 
 public class SqlMappings {
     private final Map<Class, SqlMapping<Object>> map = map();
@@ -71,7 +75,7 @@ public class SqlMappings {
                     addValues(statement, sequence(values));
                     statement.addBatch();
                 }
-                return numbers(statement.executeBatch()).reduce(sum());
+                return numbers(statement.executeBatch()).filter(not(Statement.SUCCESS_NO_INFO)).fold(0, sum());
             }
         };
     }

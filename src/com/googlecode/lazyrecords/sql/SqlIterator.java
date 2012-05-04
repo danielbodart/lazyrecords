@@ -6,6 +6,7 @@ import com.googlecode.lazyrecords.Loggers;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
+import com.googlecode.totallylazy.LazyException;
 import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.iterators.StatefulIterator;
@@ -16,6 +17,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.Map;
 
 import static com.googlecode.lazyrecords.Record.methods.getKeyword;
@@ -63,15 +65,21 @@ public class SqlIterator extends StatefulIterator<Record> implements Closeable {
         return record;
     }
 
-    private ResultSet resultSet() throws Exception {
+    private ResultSet resultSet() {
         if (resultSet == null) {
             Map<String, Object> log = Maps.<String, Object>map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.EXPRESSION, expression));
             long start = System.nanoTime();
-            preparedStatement = connection.prepareStatement(expression.text());
+            try {
+                preparedStatement = connection.prepareStatement(expression.text());
             mappings.addValues(preparedStatement, expression.parameters());
             resultSet = preparedStatement.executeQuery();
-            log.put(Loggers.MILLISECONDS, calculateMilliseconds(start, System.nanoTime()));
-            logger.log(log);
+            } catch (SQLException e) {
+                log.put(Loggers.MESSAGE, e.getMessage());
+                throw LazyException.lazyException(e);
+            } finally {
+                log.put(Loggers.MILLISECONDS, calculateMilliseconds(start, System.nanoTime()));
+                logger.log(log);
+            }
         }
         return resultSet;
     }

@@ -97,7 +97,7 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
                 Map<String,Object> log = Maps.<String,Object>map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.EXPRESSION, expressions));
                 Number rowCount = using(connection.prepareStatement(group.key()),
                         mappings.addValuesInBatch(group.map(Expressions.parameters())).time(milliseconds(log)));
-                log.put(Loggers.COUNT, rowCount);
+                log.put(Loggers.ROWS, rowCount);
                 logger.log(log);
                 return rowCount;
             }

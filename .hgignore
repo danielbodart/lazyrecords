@@ -10,3 +10,4 @@ lib/runtime
 lib/optional
 test/com/googlecode/totallylazy/records/simpledb/AwsCredentials.properties
 .DS_Store
+test/com/googlecode/lazyrecords/sql/oracle.properties

@@ -5,6 +5,7 @@ import com.googlecode.totallylazy.matchers.IterableMatcher;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
 import com.googlecode.totallylazy.numbers.Numbers;
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Assert;
@@ -70,6 +71,7 @@ public abstract class RecordsContract<T extends Records> {
 
     protected Logger logger;
     private ByteArrayOutputStream stream;
+    protected boolean supportsRowCount = true;
 
     protected abstract T createRecords() throws Exception;
 
@@ -94,6 +96,14 @@ public abstract class RecordsContract<T extends Records> {
     public String log() {
         return stream.toString();
     }
+
+    public void assertCount(Number actual, Number expected) {
+        if(supportsRowCount){
+            assertThat(actual, NumberMatcher.is(expected));
+        }
+    }
+
+
 
     private void setupPeople() {
         records.remove(people);
@@ -153,7 +163,7 @@ public abstract class RecordsContract<T extends Records> {
 
     @Test
     public void supportsIsNullAndNotNull() throws Exception {
-        assertThat(records.add(people, record().set(firstName, "null age and dob").set(lastName, "").set(age, null).set(dob, null)), NumberMatcher.is(1));
+        assertCount(records.add(people, record().set(firstName, "null age and dob").set(lastName, "").set(age, null).set(dob, null)), 1);
         assertThat(records.get(people).filter(where(age, is(notNullValue()))).toList().size(), NumberMatcher.is(3));
         Sequence<Record> recordSequence = records.get(people);
         assertThat(recordSequence.filter(where(age, is(nullValue()))).toList().size(), NumberMatcher.is(1));
@@ -202,11 +212,10 @@ public abstract class RecordsContract<T extends Records> {
 
     @Test
     public void supportsUpdating() throws Exception {
-        Number count = records.set(people, sequence(
+        assertCount(records.set(people, sequence(
                 pair(where(age, is(12)), record().set(isbn, zenIsbn)),
                 pair(where(age, is(11)), record().set(isbn, zenIsbn))
-        ));
-        assertThat(count, NumberMatcher.is(2));
+        )), 2);
         assertThat(records.get(people).filter(where(age, is(12))).map(isbn), hasExactly(zenIsbn));
         assertThat(records.get(people).filter(where(age, is(11))).map(isbn), hasExactly(zenIsbn));
     }
@@ -217,12 +226,11 @@ public abstract class RecordsContract<T extends Records> {
         String updatedTitle = "Zen And The Art Of Motorcycle Maintenance: 25th Anniversary Edition: An Inquiry into Values";
         String newTitle = "The Emperor's New Mind: Concerning Computers, Minds, and the Laws of Physics";
         Callable1<Record, Predicate<Record>> using = using(isbn);
-        Number count = records.put(books,
+        assertCount(records.put(books,
                 update(using,
                         record().set(isbn, zenIsbn).set(title, updatedTitle),
                         record().set(isbn, newIsbn).set(title, newTitle))
-        );
-        assertThat(count, NumberMatcher.is(2));
+        ), 2);
         assertThat(records.get(books).filter(where(isbn, is(zenIsbn))).map(title), hasExactly(updatedTitle));
         assertThat(records.get(books).filter(where(isbn, is(newIsbn))).map(title), hasExactly(newTitle));
     }
@@ -389,13 +397,13 @@ public abstract class RecordsContract<T extends Records> {
 
     @Test
     public void supportsRemove() throws Exception {
-        assertThat(records.remove(people, where(age, is(greaterThan(10)))), equalTo(2));
+        assertCount(records.remove(people, where(age, is(greaterThan(10)))), 2);
         assertThat(records.get(people).size(), equalTo(1));
-        assertThat(records.remove(people, where(age, is(greaterThan(10)))), equalTo(0));
+        assertCount(records.remove(people, where(age, is(greaterThan(10)))), 0);
 
         assertThat(records.get(people).size(), equalTo(1));
 
-        assertThat(records.remove(people), equalTo(1));
+        assertCount(records.remove(people), 1);
         assertThat(records.get(people).size(), equalTo(0));
     }
 

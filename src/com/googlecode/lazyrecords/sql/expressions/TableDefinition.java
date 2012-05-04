@@ -4,6 +4,7 @@ import com.googlecode.lazyrecords.Definition;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.lazyrecords.Keyword;
 
+import java.net.URI;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,8 +28,9 @@ public class TableDefinition extends TextOnlyExpression {
         put(Integer.class, "integer");
         put(Long.class, "bigint");
         put(Timestamp.class, "timestamp");
-        put(Boolean.class, "bit");
+        put(Boolean.class, "char(5)");
         put(UUID.class, "varchar(36)");
+        put(URI.class, "varchar(4000)");
         put(String.class, "varchar(4000)");
         put(Object.class, "clob");
     }};

@@ -4,7 +4,6 @@ import com.googlecode.lazyrecords.Logger;
 import com.googlecode.lazyrecords.Loggers;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.CloseableList;
-import com.googlecode.totallylazy.Closeables;
 import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.iterators.StatefulIterator;
 import com.googlecode.lazyrecords.Record;
@@ -61,7 +60,7 @@ public class LuceneIterator extends StatefulIterator<Record> implements Closeabl
             long start = System.nanoTime();
             scoreDocs = searcher().search(query, sort).scoreDocs;
             log.put(Loggers.MILLISECONDS, calculateMilliseconds(start, System.nanoTime()));
-            log.put(Loggers.COUNT, scoreDocs.length);
+            log.put(Loggers.ROWS, scoreDocs.length);
             logger.log(log);
         }
         return scoreDocs;

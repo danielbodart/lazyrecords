@@ -30,7 +30,7 @@ public final class Loggers implements Logger {
     public static final String TYPE = "type";
     public static final String EXPRESSION = "expression";
     public static final String MILLISECONDS = "milliseconds";
-    public static final String COUNT = "count";
+    public static final String ROWS = "rows";
     public static final String MESSAGE = "message";
     public static final String COMPARATOR = "comparator";
     public static final String PREDICATE = "predicate";
