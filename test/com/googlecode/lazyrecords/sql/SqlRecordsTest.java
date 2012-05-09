@@ -4,10 +4,14 @@ import com.googlecode.lazyrecords.*;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
 import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
+import org.h2.jdbcx.JdbcConnectionPool;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 import static com.googlecode.lazyrecords.Definition.constructors.definition;
 import static com.googlecode.lazyrecords.Keywords.keyword;
@@ -16,21 +20,45 @@ import static com.googlecode.lazyrecords.Record.methods.update;
 import static com.googlecode.lazyrecords.Using.using;
 import static com.googlecode.totallylazy.Predicates.always;
 import static com.googlecode.totallylazy.Predicates.where;
-import static java.sql.DriverManager.getConnection;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 public class SqlRecordsTest extends RecordsContract<Records> {
+    private static JdbcConnectionPool dataSource;
+    private Connection connection;
+
+    @BeforeClass
+    public static void createDataSource() {
+    // HyperSonic: jdbc:hsqldb:mem:totallylazy", "SA", ""
+        dataSource = JdbcConnectionPool.create("jdbc:h2:mem:totallylazy", "SA", "");
+    }
+
+    @AfterClass
+    public static void closeDataSource() {
+        dataSource.dispose();
+    }
+
+    @After
+    public void closeConnection() throws SQLException {
+        connection.close();
+    }
     private SqlSchema schema;
 
     public Records createRecords() throws Exception {
-
-        SqlRecords sqlRecords = new SqlRecords(
-                getConnection("jdbc:h2:mem:totallylazy", "SA", ""),
-//                getConnection("jdbc:hsqldb:mem:totallylazy", "SA", ""),
-                new SqlMappings(),
-                logger);
+        connection = dataSource.getConnection();
+        SqlRecords sqlRecords = new SqlRecords(connection,
+                new SqlMappings(), logger);
         return new SchemaGeneratingRecords(sqlRecords, schema = new SqlSchema(sqlRecords));
+    }
+
+    @Test
+    public void supportsReadOnlyConnection() throws Exception {
+        Connection readOnlyConnection = new ReadOnlyConnection(dataSource);
+        Transaction transaction = new SqlTransaction(readOnlyConnection);
+        SqlRecords readOnlyRecords = new SqlRecords(readOnlyConnection);
+        assertThat(readOnlyRecords.get(people).size(), NumberMatcher.is(3));
+        readOnlyRecords.close();
+        transaction.commit();
     }
 
     @Test
