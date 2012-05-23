@@ -1,6 +1,8 @@
 package com.googlecode.lazyrecords;
 
 import com.googlecode.totallylazy.Callable2;
+import com.googlecode.totallylazy.comparators.Maximum;
+import com.googlecode.totallylazy.comparators.Minimum;
 import com.googlecode.totallylazy.numbers.Numbers;
 
 import static java.lang.String.format;

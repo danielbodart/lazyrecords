@@ -1,10 +1,10 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
 import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.lazyrecords.Maximum;
-import com.googlecode.lazyrecords.Minimum;
 import com.googlecode.totallylazy.Callable2;
 import com.googlecode.totallylazy.callables.CountNotNull;
+import com.googlecode.totallylazy.comparators.Maximum;
+import com.googlecode.totallylazy.comparators.Minimum;
 import com.googlecode.totallylazy.numbers.Average;
 import com.googlecode.totallylazy.numbers.Sum;
 

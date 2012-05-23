@@ -1,11 +1,12 @@
 package com.googlecode.lazyrecords;
 
 import com.googlecode.totallylazy.*;
+import com.googlecode.totallylazy.comparators.Maximum;
+import com.googlecode.totallylazy.comparators.Minimum;
 import com.googlecode.totallylazy.matchers.IterableMatcher;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
 import com.googlecode.totallylazy.numbers.Numbers;
 import org.hamcrest.CoreMatchers;
-import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Assert;
