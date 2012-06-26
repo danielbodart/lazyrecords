@@ -226,9 +226,8 @@ public abstract class RecordsContract<T extends Records> {
         URI newIsbn = uri("urn:isbn:0192861980");
         String updatedTitle = "Zen And The Art Of Motorcycle Maintenance: 25th Anniversary Edition: An Inquiry into Values";
         String newTitle = "The Emperor's New Mind: Concerning Computers, Minds, and the Laws of Physics";
-        Callable1<Record, Predicate<Record>> using = using(isbn);
         assertCount(records.put(books,
-                update(using,
+                update(using(isbn),
                         record().set(isbn, zenIsbn).set(title, updatedTitle),
                         record().set(isbn, newIsbn).set(title, newTitle))
         ), 2);

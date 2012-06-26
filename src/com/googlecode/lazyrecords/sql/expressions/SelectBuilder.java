@@ -1,6 +1,10 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
+import com.googlecode.lazyrecords.Aggregate;
+import com.googlecode.lazyrecords.Aggregates;
 import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.Record;
 import com.googlecode.totallylazy.Callable2;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Predicate;
@@ -8,19 +12,15 @@ import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
 import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.callables.CountNotNull;
-import com.googlecode.lazyrecords.Aggregate;
-import com.googlecode.lazyrecords.Aggregates;
-import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.lazyrecords.Record;
 
 import java.util.Comparator;
 import java.util.concurrent.Callable;
 
-import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.lazyrecords.sql.expressions.SelectExpression.selectExpression;
 import static com.googlecode.lazyrecords.sql.expressions.SetQuantifier.ALL;
 import static com.googlecode.lazyrecords.sql.expressions.SetQuantifier.DISTINCT;
+import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class SelectBuilder implements Expressible, Callable<Expression> {
     public static final Keyword<Object> STAR = keyword("*");
@@ -81,8 +81,8 @@ public class SelectBuilder implements Expressible, Callable<Expression> {
     }
 
     public SelectBuilder count() {
-        Aggregate<Long, Number> aggregate = Aggregate.aggregate(CountNotNull.count(), keyword("*", Long.class));
-        Sequence<Keyword<?>> sequence = Sequences.<Keyword<?>>sequence(aggregate.as(keyword("record_count", Long.class)));
+        Aggregate<Long, Number> recordCount = Aggregate.aggregate(CountNotNull.count(), keyword("*", Long.class)).as("record_count");
+        Sequence<Keyword<?>> sequence = Sequences.<Keyword<?>>sequence(recordCount);
         return new SelectBuilder(setQuantifier, sequence, table, where, Option.<Comparator<? super Record>>none());
     }
 

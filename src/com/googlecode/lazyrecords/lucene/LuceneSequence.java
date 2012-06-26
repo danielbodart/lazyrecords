@@ -52,7 +52,7 @@ public class LuceneSequence extends Sequence<Record> {
     }
 
     @Override
-    public Number size() {
+    public int size() {
         try {
             return storage.count(query);
         } catch (IOException e) {

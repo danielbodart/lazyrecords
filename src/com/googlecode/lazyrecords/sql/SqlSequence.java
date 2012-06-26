@@ -83,9 +83,9 @@ public class SqlSequence extends Sequence<Record> implements Expressible {
     }
 
     @Override
-    public Number size() {
+    public int size() {
         SelectBuilder count = builder.count();
-        return (Number) sqlRecords.query(count.build(), count.select()).head().fields().head().second();
+        return ((Number) sqlRecords.query(count.build(), count.select()).head().fields().head().second()).intValue();
     }
 
     @Override

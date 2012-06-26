@@ -56,6 +56,10 @@ public class Aggregate<T, R> extends AliasedKeyword<T> implements Callable2<T, T
     }
 
     public Aggregate<T, R> as(Keyword<T> keyword) {
-        return new Aggregate<T, R>(callable, source(), keyword.name());
+        return as(keyword.name());
+    }
+
+    public Aggregate<T, R> as(String name) {
+        return new Aggregate<T, R>(callable, source(), name);
     }
 }
