@@ -110,6 +110,15 @@ public interface Record {
             };
         }
 
+        public static <T> Function1<Record, T> get(final Keyword<T> keyword) {
+            return new Function1<Record, T>() {
+                @Override
+                public T call(Record record) throws Exception {
+                    return record.get(keyword);
+                }
+            };
+        }
+
         public static Function1<Record, Pair<Predicate<Record>, Record>> toPair(final Callable1<? super Record, Predicate<Record>> callable) {
             return new Function1<Record, Pair<Predicate<Record>, Record>>() {
                 public Pair<Predicate<Record>, Record> call(Record record) throws Exception {
