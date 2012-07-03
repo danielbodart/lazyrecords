@@ -30,7 +30,7 @@ public class CompoundExpression extends AbstractExpression {
     public String text() {
         return expressions.filter(not(instanceOf(EmptyExpression.class))).
                 map(Expressions.text()).
-                toString(start, separator, end, Integer.MAX_VALUE).trim();
+                toString(start, separator, end).trim();
     }
 
     public Sequence<Object> parameters() {
