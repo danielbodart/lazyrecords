@@ -2,7 +2,6 @@ package com.googlecode.lazyrecords;
 
 import com.googlecode.totallylazy.Sequence;
 
-import static com.googlecode.totallylazy.Sequences.first;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class RecordDefinition implements Definition {
@@ -23,6 +22,18 @@ public class RecordDefinition implements Definition {
     @Override
     public String toString() {
         return name;
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode() * fields.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return (obj instanceof Definition) &&
+                (name.equals(((Definition) obj).name())) &&
+                (fields().equals(((Definition) obj).fields()));
     }
 
     @Override
