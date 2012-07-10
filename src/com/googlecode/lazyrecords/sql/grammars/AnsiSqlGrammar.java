@@ -14,9 +14,25 @@ import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 
+import java.net.URI;
+import java.sql.Timestamp;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AnsiSqlGrammar implements SqlGrammar {
+    private final Map<Class, String> mappings;
+
+    public AnsiSqlGrammar(Map<Class, String> mappings) {
+        this.mappings = mappings;
+    }
+
+    public AnsiSqlGrammar() {
+        this(defaultMappings());
+    }
+
     @Override
     public Expression selectExpression(Definition definition, Sequence<Keyword<?>> select, SetQuantifier setQuantifier, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> orderBy) {
         return SelectExpression.selectExpression(definition, select, setQuantifier, where, orderBy);
@@ -39,11 +55,25 @@ public class AnsiSqlGrammar implements SqlGrammar {
 
     @Override
     public Expression createTable(Definition definition) {
-        return TableDefinition.createTable(definition);
+        return TableDefinition.createTable(definition, mappings);
     }
 
     @Override
     public Expression dropTable(Definition definition) {
         return TableDefinition.dropTable(definition);
+    }
+
+    public static Map<Class, String> defaultMappings() {
+        return new ConcurrentHashMap<Class, String>() {{
+            put(Date.class, "timestamp");
+            put(Integer.class, "integer");
+            put(Long.class, "bigint");
+            put(Timestamp.class, "timestamp");
+            put(Boolean.class, "varchar(5)");
+            put(UUID.class, "varchar(36)");
+            put(URI.class, "varchar(4000)");
+            put(String.class, "varchar(4000)");
+            put(Object.class, "clob");
+        }};
     }
 }

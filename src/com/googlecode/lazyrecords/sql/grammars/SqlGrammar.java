@@ -26,7 +26,6 @@ public interface SqlGrammar {
 
     Expression dropTable(Definition definition);
 
-
     class functions {
         public static Function1<Record, Expression> insertStatement(final SqlGrammar grammar, final Definition definition) {
             return new Function1<Record, Expression>() {
