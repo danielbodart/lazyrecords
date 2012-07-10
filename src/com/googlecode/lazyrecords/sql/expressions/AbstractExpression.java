@@ -14,6 +14,6 @@ public abstract class AbstractExpression implements Expression {
     }
 
     public String toString(Callable1<Object, Object> valueConverter) {
-        return String.format(text().replace("?", "'%s'"), parameters().map(valueConverter).toArray(Object.class));
+        return Expressions.toString(this, valueConverter);
     }
 }

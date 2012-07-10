@@ -13,6 +13,8 @@ import com.googlecode.lazyrecords.Logger;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.Schema;
 import com.googlecode.lazyrecords.simpledb.mappings.SimpleDBMappings;
+import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
+import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
@@ -20,12 +22,10 @@ import com.googlecode.totallylazy.Sequences;
 import com.googlecode.totallylazy.Value;
 import com.googlecode.totallylazy.numbers.Numbers;
 
-import java.io.PrintStream;
 import java.util.List;
 
 import static com.googlecode.lazyrecords.SelectCallable.select;
 import static com.googlecode.lazyrecords.sql.expressions.SelectBuilder.from;
-import static com.googlecode.totallylazy.Streams.nullPrintStream;
 import static com.googlecode.totallylazy.numbers.Numbers.sum;
 
 public class SimpleDBRecords extends AbstractRecords {
@@ -34,6 +34,7 @@ public class SimpleDBRecords extends AbstractRecords {
     private final Logger logger;
     private final boolean consistentRead;
     private final Schema schema;
+    private final SqlGrammar grammar;
 
     public SimpleDBRecords(final AmazonSimpleDB sdb, boolean consistentRead, final SimpleDBMappings mappings, final Logger logger, final Schema schema) {
         this.consistentRead = consistentRead;
@@ -41,6 +42,7 @@ public class SimpleDBRecords extends AbstractRecords {
         this.sdb = sdb;
         this.logger = logger;
         this.schema = schema;
+        grammar = new AnsiSqlGrammar();
     }
 
     public SimpleDBRecords(final AmazonSimpleDB sdb, boolean consistentRead) {
@@ -48,7 +50,7 @@ public class SimpleDBRecords extends AbstractRecords {
     }
 
     public Sequence<Record> get(Definition definition) {
-        return new SimpleDBSequence<Record>(sdb, from(definition), mappings.stringMappings(), mappings.asRecord(definition.fields()), logger, consistentRead);
+        return new SimpleDBSequence<Record>(sdb, from(grammar, definition), mappings.stringMappings(), mappings.asRecord(definition.fields()), logger, consistentRead);
     }
 
     public Number add(final Definition definition, Sequence<Record> records) {

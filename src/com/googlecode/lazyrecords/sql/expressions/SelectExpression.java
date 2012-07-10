@@ -28,18 +28,11 @@ public class SelectExpression extends CompoundExpression {
         );
     }
 
-    public static SelectExpression selectExpression(final SetQuantifier setQuantifier, final Sequence<Keyword<?>> select, final Definition table, final Option<Predicate<? super Record>> where, final Option<Comparator<? super Record>> sort) {
+    public static SelectExpression selectExpression(final Definition table, final Sequence<Keyword<?>> select, final SetQuantifier setQuantifier, final Option<Predicate<? super Record>> where, final Option<Comparator<? super Record>> sort) {
         return new SelectExpression(setQuantifier, select, table, where, sort);
     }
 
     public static Expression querySpecification(SetQuantifier setQuantifier, final Sequence<Keyword<?>> select) {
-        return Expressions.join(SELECT, setQuantifier(setQuantifier), selectList(select));
-    }
-
-    public static Expression setQuantifier(SetQuantifier setQuantifier) {
-        if(setQuantifier.equals(SetQuantifier.ALL)){
-            return empty();
-        }
-        return textOnly(setQuantifier);
+        return Expressions.join(SELECT, SetQuantifier.setQuantifier(setQuantifier), selectList(select));
     }
 }

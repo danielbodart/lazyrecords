@@ -5,6 +5,7 @@ import com.googlecode.lazyrecords.Aggregates;
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
+import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.totallylazy.Callable2;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Predicate;
@@ -17,7 +18,6 @@ import java.util.Comparator;
 import java.util.concurrent.Callable;
 
 import static com.googlecode.lazyrecords.Keywords.keyword;
-import static com.googlecode.lazyrecords.sql.expressions.SelectExpression.selectExpression;
 import static com.googlecode.lazyrecords.sql.expressions.SetQuantifier.ALL;
 import static com.googlecode.lazyrecords.sql.expressions.SetQuantifier.DISTINCT;
 import static com.googlecode.totallylazy.Sequences.sequence;
@@ -25,13 +25,15 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 public class SelectBuilder implements Expressible, Callable<Expression> {
     public static final Keyword<Object> STAR = keyword("*");
     public static final Sequence<Keyword<?>> ALL_COLUMNS = Sequences.<Keyword<?>>sequence(STAR);
+    private final SqlGrammar grammar;
     private final SetQuantifier setQuantifier;
     private final Sequence<Keyword<?>> select;
     private final Definition table;
     private final Option<Predicate<? super Record>> where;
     private final Option<Comparator<? super Record>> comparator;
 
-    private SelectBuilder(SetQuantifier setQuantifier, Sequence<Keyword<?>> select, Definition table, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> comparator) {
+    private SelectBuilder(SqlGrammar grammar, SetQuantifier setQuantifier, Sequence<Keyword<?>> select, Definition table, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> comparator) {
+        this.grammar = grammar;
         this.setQuantifier = setQuantifier;
         this.select = select.isEmpty() ? ALL_COLUMNS : select;
         this.table = table;
@@ -39,16 +41,16 @@ public class SelectBuilder implements Expressible, Callable<Expression> {
         this.comparator = comparator;
     }
 
-    public SelectExpression call() throws Exception {
+    public Expression call() throws Exception {
         return build();
     }
 
-    public SelectExpression express() {
+    public Expression express() {
         return build();
     }
 
-    public SelectExpression build() {
-        return selectExpression(setQuantifier, select, table, where, comparator);
+    public Expression build() {
+        return grammar.selectExpression(table, select, setQuantifier, where, comparator);
     }
 
     @Override
@@ -60,8 +62,8 @@ public class SelectBuilder implements Expressible, Callable<Expression> {
         return select;
     }
 
-    public static SelectBuilder from(Definition table) {
-        return new SelectBuilder(ALL, table.fields(), table, Option.<Predicate<? super Record>>none(), Option.<Comparator<? super Record>>none());
+    public static SelectBuilder from(SqlGrammar grammar, Definition table) {
+        return new SelectBuilder(grammar, ALL, table.fields(), table, Option.<Predicate<? super Record>>none(), Option.<Comparator<? super Record>>none());
     }
 
     public SelectBuilder select(Keyword<?>... columns) {
@@ -69,34 +71,34 @@ public class SelectBuilder implements Expressible, Callable<Expression> {
     }
 
     public SelectBuilder select(Sequence<Keyword<?>> columns) {
-        return new SelectBuilder(setQuantifier, columns, table, where, comparator);
+        return new SelectBuilder(grammar, setQuantifier, columns, table, where, comparator);
     }
 
     public SelectBuilder where(Predicate<? super Record> predicate) {
-        return new SelectBuilder(setQuantifier, select, table, Option.<Predicate<? super Record>>some(predicate), comparator);
+        return new SelectBuilder(grammar, setQuantifier, select, table, Option.<Predicate<? super Record>>some(predicate), comparator);
     }
 
     public SelectBuilder orderBy(Comparator<? super Record> comparator) {
-        return new SelectBuilder(setQuantifier, select, table, where, Option.<Comparator<? super Record>>some(comparator));
+        return new SelectBuilder(grammar, setQuantifier, select, table, where, Option.<Comparator<? super Record>>some(comparator));
     }
 
     public SelectBuilder count() {
         Aggregate<Long, Number> recordCount = Aggregate.aggregate(CountNotNull.count(), keyword("*", Long.class)).as("record_count");
         Sequence<Keyword<?>> sequence = Sequences.<Keyword<?>>sequence(recordCount);
-        return new SelectBuilder(setQuantifier, sequence, table, where, Option.<Comparator<? super Record>>none());
+        return new SelectBuilder(grammar, setQuantifier, sequence, table, where, Option.<Comparator<? super Record>>none());
     }
 
     public SelectBuilder distinct() {
-        return new SelectBuilder(DISTINCT, select, table, where, comparator);
+        return new SelectBuilder(grammar, DISTINCT, select, table, where, comparator);
     }
 
     public SelectBuilder reduce(Callable2<?, ?, ?> callable) {
         if (callable instanceof Aggregates) {
             Aggregates aggregates = (Aggregates) callable;
-            return new SelectBuilder(setQuantifier, aggregates.value().<Keyword<?>>unsafeCast(), table, where, comparator);
+            return new SelectBuilder(grammar, setQuantifier, aggregates.value().<Keyword<?>>unsafeCast(), table, where, comparator);
         }
         Keyword<?> head = select().head();
         Aggregate<Object, Object> aggregate = Aggregate.aggregate(Unchecked.<Callable2<Object, Object, Object>>cast(callable), Unchecked.<Keyword<Object>>cast(head));
-        return new SelectBuilder(setQuantifier, Sequences.<Keyword<?>>sequence(aggregate), table, where, comparator);
+        return new SelectBuilder(grammar, setQuantifier, Sequences.<Keyword<?>>sequence(aggregate), table, where, comparator);
     }
 }

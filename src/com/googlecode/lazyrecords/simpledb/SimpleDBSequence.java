@@ -5,6 +5,8 @@ import com.amazonaws.services.simpledb.model.Item;
 import com.amazonaws.services.simpledb.model.SelectRequest;
 import com.amazonaws.services.simpledb.model.SelectResult;
 import com.googlecode.lazyrecords.*;
+import com.googlecode.lazyrecords.sql.expressions.Expression;
+import com.googlecode.lazyrecords.sql.expressions.Expressions;
 import com.googlecode.totallylazy.*;
 import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.lazyrecords.sql.expressions.AbstractExpression;
@@ -38,8 +40,8 @@ public class SimpleDBSequence<T> extends Sequence<T> {
         return iterator(builder.express());
     }
 
-    private Iterator<T> iterator(final AbstractExpression expression) {
-        String selectExpression = expression.toString(value());
+    private Iterator<T> iterator(final Expression expression) {
+        String selectExpression = Expressions.toString(expression, value());
         logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SIMPLE_DB), pair(Loggers.EXPRESSION, selectExpression)));
         return iterator(new SelectRequest(selectExpression, consistentRead)).map(itemToRecord).iterator();
     }

@@ -1,6 +1,7 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
 import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.lazyrecords.Record;
@@ -33,14 +34,6 @@ public class InsertStatement extends CompoundExpression {
 
     public static String formatList(final Sequence<?> values) {
         return values.toString("(", ",", ")");
-    }
-
-    public static Function1<Record, Expression> insertStatement(final Definition definition) {
-        return new Function1<Record, Expression>() {
-            public Expression call(Record record) throws Exception {
-                return insertStatement(definition, record);
-            }
-        };
     }
 
     public static InsertStatement insertStatement(final Definition definition, final Record record) {

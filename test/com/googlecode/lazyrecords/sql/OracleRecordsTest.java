@@ -5,14 +5,14 @@ import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Records;
 import com.googlecode.lazyrecords.RecordsContract;
 import com.googlecode.lazyrecords.SchemaGeneratingRecords;
+import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
+import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
 import com.googlecode.totallylazy.Option;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.util.Properties;
 
@@ -36,9 +36,7 @@ public class OracleRecordsTest extends RecordsContract<Records> {
 
     @AfterClass
     public static void shutDown() {
-        for (Connection oracle : connection) {
-            safeClose(oracle);
-        }
+        for (Connection oracle : connection) safeClose(oracle);
     }
 
     private static Option<Connection> createConnection() {
@@ -54,8 +52,9 @@ public class OracleRecordsTest extends RecordsContract<Records> {
 
     public Records createRecords() throws Exception {
         supportsRowCount = false;
-        sqlRecords = new SqlRecords(connection.get(), new SqlMappings(), logger);
-        SqlSchema sqlSchema = new SqlSchema(sqlRecords);
+        SqlGrammar grammar = new AnsiSqlGrammar();
+        sqlRecords = new SqlRecords(connection.get(), new SqlMappings(), grammar, logger);
+        SqlSchema sqlSchema = new SqlSchema(sqlRecords, grammar);
         sqlSchema.undefine(people);
         sqlSchema.undefine(books);
 

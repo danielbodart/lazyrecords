@@ -51,7 +51,7 @@ public class WhereClause extends CompoundExpression{
         return new WhereClause(predicate);
     }
 
-    public static Expression whereClause(Option<Predicate<? super Record>> predicate) {
+    public static Expression whereClause(Option<? extends Predicate<? super Record>> predicate) {
         return predicate.map(whereClause()).getOrElse(empty());
     }
 

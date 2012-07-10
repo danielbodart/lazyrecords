@@ -19,7 +19,7 @@ public class TableDefinition extends TextOnlyExpression {
         super(format("create table %s (%s)", name(definition), definition.fields().map(asColumn())));
     }
 
-    public static TableDefinition tableDefinition(Definition definition) {
+    public static TableDefinition createTable(Definition definition) {
         return new TableDefinition(definition);
     }
 

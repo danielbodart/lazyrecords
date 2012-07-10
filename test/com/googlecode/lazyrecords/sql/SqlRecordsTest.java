@@ -1,6 +1,8 @@
 package com.googlecode.lazyrecords.sql;
 
 import com.googlecode.lazyrecords.*;
+import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
+import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
 import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
@@ -46,9 +48,10 @@ public class SqlRecordsTest extends RecordsContract<Records> {
 
     public Records createRecords() throws Exception {
         connection = dataSource.getConnection();
+        SqlGrammar grammar = new AnsiSqlGrammar();
         SqlRecords sqlRecords = new SqlRecords(connection,
-                new SqlMappings(), logger);
-        return new SchemaGeneratingRecords(sqlRecords, schema = new SqlSchema(sqlRecords));
+                new SqlMappings(), grammar, logger);
+        return new SchemaGeneratingRecords(sqlRecords, schema = new SqlSchema(sqlRecords, grammar));
     }
 
     @Test

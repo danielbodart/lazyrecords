@@ -1,6 +1,7 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
 import com.googlecode.lazyrecords.Named;
+import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Function;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Sequence;
@@ -84,5 +85,9 @@ public class Expressions {
 
     public static boolean isEmpty(Expression expression) {
         return empty().text().equals(expression.text());
+    }
+
+    public static String toString(Expression expression, Callable1<Object, Object> valueConverter) {
+        return String.format(expression.text().replace("?", "'%s'"), expression.parameters().map(valueConverter).toArray(Object.class));
     }
 }

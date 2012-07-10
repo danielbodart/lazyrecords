@@ -11,7 +11,7 @@ public class FromClause extends CompoundExpression{
         super(textOnly("from"), name(table));
     }
 
-    public static Expression fromClause(Definition table) {
-        return new FromClause(table);
+    public static Expression fromClause(Definition definition) {
+        return new FromClause(definition);
     }
 }

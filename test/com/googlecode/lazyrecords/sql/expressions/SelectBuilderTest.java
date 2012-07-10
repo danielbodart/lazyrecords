@@ -1,7 +1,8 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
 import com.googlecode.lazyrecords.Definition;
-import com.googlecode.lazyrecords.RecordDefinition;
+import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
+import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.totallylazy.Sequences;
 import com.googlecode.lazyrecords.Keyword;
 import org.junit.Test;
@@ -17,28 +18,29 @@ public class SelectBuilderTest {
     private final Keyword<String> model = keyword("model", String.class);
     private final Keyword<Integer> one = keyword("1", Integer.class);
     private final Definition cars = definition("cars", make, model, one);
+    private final SqlGrammar grammar = new AnsiSqlGrammar();
 
     @Test
     public void ifColumnsSelectedIsEmptyUseStar() throws Exception {
-        SelectExpression build = from(cars).select(Sequences.<Keyword<?>>empty()).build();
+        Expression build = from(grammar, cars).select(Sequences.<Keyword<?>>empty()).build();
         assertThat(build.text(), is("select * from cars"));
     }
 
     @Test
     public void selectASingleColumn() throws Exception {
-        SelectExpression build = from(cars).select(make).build();
+        Expression build = from(grammar, cars).select(make).build();
         assertThat(build.text(), is("select make from cars"));
     }
 
     @Test
     public void selectMultipleColumns() throws Exception {
-        SelectExpression build = from(cars).select(make, model).build();
+        Expression build = from(grammar, cars).select(make, model).build();
         assertThat(build.text(), is("select make,model from cars"));
     }
 
     @Test
     public void canBeUsedToTestForATable() throws Exception {
-        SelectExpression build = from(cars).select(one).build();
+        Expression build = from(grammar, cars).select(one).build();
         assertThat(build.text(), is("select 1 from cars"));
     }
 }

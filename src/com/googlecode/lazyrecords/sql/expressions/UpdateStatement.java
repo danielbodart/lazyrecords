@@ -32,11 +32,4 @@ public class UpdateStatement extends CompoundExpression {
         return new UpdateStatement(definition, predicate, record);
     }
 
-    public static Function1<Pair<? extends Predicate<? super Record>, Record>, Expression> updateStatement(final Definition definition) {
-        return new Function1<Pair<? extends Predicate<? super Record>, Record>, Expression>() {
-            public Expression call(Pair<? extends Predicate<? super Record>, Record> recordPair) throws Exception {
-                return updateStatement(definition, recordPair.first(), recordPair.second());
-            }
-        };
-    }
 }
