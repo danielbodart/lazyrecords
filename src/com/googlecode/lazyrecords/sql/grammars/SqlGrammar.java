@@ -1,6 +1,7 @@
 package com.googlecode.lazyrecords.sql.grammars;
 
 import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.Join;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
@@ -14,7 +15,7 @@ import com.googlecode.totallylazy.Sequence;
 import java.util.Comparator;
 
 public interface SqlGrammar {
-    Expression selectExpression(Definition definition, Sequence<Keyword<?>> select, SetQuantifier setQuantifier, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> orderBy);
+    Expression selectExpression(Definition definition, Sequence<Keyword<?>> select, SetQuantifier setQuantifier, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> orderBy, Option<Join> join);
 
     Expression insertStatement(Definition definition, Record record);
 

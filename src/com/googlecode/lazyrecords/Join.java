@@ -24,4 +24,12 @@ public class Join implements Callable1<Record, Iterable<Record>> {
                                                            final Callable1<Record, Predicate<Record>> using) {
         return new Join(records, using);
     }
+
+    public Sequence<Record> records() {
+        return records;
+    }
+
+    public Callable1<Record, Predicate<Record>> using() {
+        return using;
+    }
 }

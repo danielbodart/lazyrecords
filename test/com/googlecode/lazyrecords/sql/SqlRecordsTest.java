@@ -1,14 +1,18 @@
 package com.googlecode.lazyrecords.sql;
 
-import com.googlecode.lazyrecords.*;
+import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.ImmutableKeyword;
+import com.googlecode.lazyrecords.Records;
+import com.googlecode.lazyrecords.RecordsContract;
+import com.googlecode.lazyrecords.SchemaGeneratingRecords;
+import com.googlecode.lazyrecords.Transaction;
 import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
 import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
-import org.h2.jdbcx.JdbcConnectionPool;
+import org.hsqldb.jdbc.JDBCDataSource;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -26,24 +30,24 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 public class SqlRecordsTest extends RecordsContract<Records> {
-    private static JdbcConnectionPool dataSource;
+    private static JDBCDataSource dataSource;
     private Connection connection;
 
     @BeforeClass
-    public static void createDataSource() {
-    // HyperSonic: jdbc:hsqldb:mem:totallylazy", "SA", ""
-        dataSource = JdbcConnectionPool.create("jdbc:h2:mem:totallylazy", "SA", "");
-    }
-
-    @AfterClass
-    public static void closeDataSource() {
-        dataSource.dispose();
+    public static void createDataSource() throws SQLException {
+        // HyperSonic: jdbc:hsqldb:mem:totallylazy", "SA", ""
+        // H2: jdbc:h2:mem:totallylazy", "SA", ""
+        dataSource = new JDBCDataSource();
+        dataSource.setUrl("jdbc:hsqldb:mem:totallylazy");
+        dataSource.setUser("SA");
+        dataSource.setPassword("");
     }
 
     @After
     public void closeConnection() throws SQLException {
         connection.close();
     }
+
     private SqlSchema schema;
 
     public Records createRecords() throws Exception {

@@ -1,8 +1,8 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
+import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Named;
 import com.googlecode.totallylazy.Callable1;
-import com.googlecode.totallylazy.Function;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.regex.Regex;
@@ -33,6 +33,10 @@ public class Expressions {
         return new TextAndParametersExpression(expression, sequence(parameters));
     }
 
+    public static TextOnlyExpression textOnly(String expression, Object... args) {
+        return textOnly(String.format(expression, args));
+    }
+
     public static TextOnlyExpression textOnly(Object expression) {
         return TextOnlyExpression.textOnly(expression.toString());
     }
@@ -40,7 +44,7 @@ public class Expressions {
     public static TextOnlyExpression name(Named named) {
         return textOnly(quote(named.name()));
     }
-    
+
     public static Function1<Named, TextOnlyExpression> name() {
         return new Function1<Named, TextOnlyExpression>() {
             @Override
@@ -50,14 +54,22 @@ public class Expressions {
         };
     }
 
+    public static String names(Sequence<Keyword<?>> keywords) {
+        return formatList(keywords.map(name()));
+    }
+
+    public static String formatList(final Sequence<?> values) {
+        return values.toString("(", ",", ")");
+    }
+
     private static final Regex legal = Regex.regex("[a-zA-Z0-9_$*#.@]+");
+
     public static String quote(String name) {
-        if(legal.matches(name)){
+        if (legal.matches(name)) {
             return name;
         }
         return '"' + name + '"';
     }
-
 
 
     public static AbstractExpression expression(String expression, Sequence<Object> parameters) {

@@ -43,7 +43,7 @@ class SingleValueSequence<T> extends Sequence<T> implements Expressible {
     }
 
     public Expression express() {
-        return builder.express();
+        return builder;
     }
 
     @Override

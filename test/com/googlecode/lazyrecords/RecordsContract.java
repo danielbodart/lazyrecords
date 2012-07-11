@@ -135,7 +135,7 @@ public abstract class RecordsContract<T extends Records> {
     }
 
     @Test
-    public void supportsJoin() throws Exception {
+    public void supportsJoinUsing() throws Exception {
         assertThat(records.get(people).filter(where(age, is(lessThan(12)))).
                 flatMap(join(records.get(books), using(isbn))).
                 map(title), containsInAnyOrder("Zen And The Art Of Motorcycle Maintenance", "Clean Code: A Handbook of Agile Software Craftsmanship"));

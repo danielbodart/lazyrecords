@@ -16,6 +16,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Set;
 
+import static com.googlecode.totallylazy.Option.some;
 import static com.googlecode.totallylazy.Pair.pair;
 import static java.lang.String.format;
 
@@ -49,6 +50,16 @@ public class SqlSequence extends Sequence<Record> implements Expressible {
         }
         logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.MESSAGE, "Unsupported function passed to 'map', moving computation to client"), pair(Loggers.FUNCTION, callable)));
         return super.map(callable);
+    }
+
+    @Override
+    public <S> Sequence<S> flatMap(Callable1<? super Record, ? extends Iterable<? extends S>> callable) {
+        Callable1 raw = (Callable1) callable;
+        if(raw instanceof Join){
+            return Unchecked.cast(new SqlSequence(sqlRecords, builder.join(some((Join) raw)), logger));
+        }
+        logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.MESSAGE, "Unsupported function passed to 'flatMap', moving computation to client"), pair(Loggers.FUNCTION, callable)));
+        return super.flatMap(callable);
     }
 
     @Override
@@ -104,6 +115,6 @@ public class SqlSequence extends Sequence<Record> implements Expressible {
     }
 
     public Expression express() {
-        return builder.build();
+        return builder;
     }
 }
