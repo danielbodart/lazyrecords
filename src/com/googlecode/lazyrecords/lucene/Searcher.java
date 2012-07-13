@@ -12,4 +12,6 @@ public interface Searcher extends Closeable{
     TopDocs search(Query query, Sort sort) throws IOException;
 
     Document document(int id) throws IOException;
+
+    int count(Query query) throws IOException;
 }

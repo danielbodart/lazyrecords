@@ -73,7 +73,7 @@ public class OptimisedStorage implements LuceneStorage {
         return search(new Callable1<Searcher, Integer>() {
             @Override
             public Integer call(Searcher searcher) throws Exception {
-                return searcher.search(query, new Sort()).totalHits;
+                return searcher.count(query);
             }
         });
     }
@@ -93,11 +93,11 @@ public class OptimisedStorage implements LuceneStorage {
     public void close() throws IOException {
         try {
             Closeables.close(writer);
-        } catch (Throwable ignoredException) {}
+        } catch (Throwable ignored) {}
         finally {
             try {
                 ensureDirectoryUnlocked();
-            } catch(Throwable ignoredException) {}
+            } catch(Throwable ignored) {}
         }
     }
 

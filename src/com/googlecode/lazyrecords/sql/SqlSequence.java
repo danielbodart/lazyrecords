@@ -3,6 +3,9 @@ package com.googlecode.lazyrecords.sql;
 import com.googlecode.lazyrecords.*;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Callable2;
+import com.googlecode.totallylazy.Computation;
+import com.googlecode.totallylazy.Function;
+import com.googlecode.totallylazy.Iterators;
 import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
@@ -11,6 +14,7 @@ import com.googlecode.lazyrecords.sql.expressions.Expressible;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.expressions.SelectBuilder;
 import com.googlecode.totallylazy.Unchecked;
+import com.googlecode.totallylazy.Value;
 
 import java.util.Comparator;
 import java.util.Iterator;
@@ -24,15 +28,22 @@ public class SqlSequence extends Sequence<Record> implements Expressible {
     private final SqlRecords sqlRecords;
     private final SelectBuilder builder;
     private final Logger logger;
+    private final Value<Iterator<Record>> iterator;
 
     public SqlSequence(final SqlRecords records, final SelectBuilder builder, final Logger logger) {
         this.sqlRecords = records;
         this.builder = builder;
         this.logger = logger;
+        this.iterator = new Function<Iterator<Record>>() {
+            @Override
+            public Iterator<Record> call() throws Exception {
+                return Iterators.memorise(execute(builder));
+            }
+        }.lazy();
     }
 
     public Iterator<Record> iterator() {
-        return execute(builder);
+        return iterator.value();
     }
 
     private Iterator<Record> execute(final SelectBuilder builder) {

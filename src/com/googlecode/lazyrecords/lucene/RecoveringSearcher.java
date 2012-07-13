@@ -47,6 +47,16 @@ public class RecoveringSearcher implements Searcher {
     }
 
     @Override
+    public int count(Query query) throws IOException {
+        try {
+            return searcher.count(query);
+        } catch (Exception e) {
+            replaceBrokenSearcher();
+            return count(query);
+        }
+    }
+
+    @Override
     public void close() throws IOException {
         Closeables.close(searcher);
     }

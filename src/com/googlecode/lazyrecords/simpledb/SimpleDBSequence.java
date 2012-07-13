@@ -26,18 +26,25 @@ public class SimpleDBSequence<T> extends Sequence<T> {
     private final Callable1<? super Item, T> itemToRecord;
     private final Logger logger;
     private final boolean consistentRead;
+    private final Value<Iterator<T>> iterator;
 
-    public SimpleDBSequence(AmazonSimpleDB sdb, SelectBuilder builder, StringMappings mappings, Callable1<? super Item, T> itemToRecord, Logger logger, boolean consistentRead) {
+    public SimpleDBSequence(AmazonSimpleDB sdb, final SelectBuilder builder, StringMappings mappings, Callable1<? super Item, T> itemToRecord, Logger logger, boolean consistentRead) {
         this.sdb = sdb;
         this.builder = builder;
         this.mappings = mappings;
         this.itemToRecord = itemToRecord;
         this.logger = logger;
         this.consistentRead = consistentRead;
+        this.iterator = new Function<Iterator<T>>() {
+            @Override
+            public Iterator<T> call() throws Exception {
+                return Iterators.memorise(iterator(builder.express()));
+            }
+        }.lazy();
     }
 
     public Iterator<T> iterator() {
-        return iterator(builder.express());
+        return iterator.value();
     }
 
     private Iterator<T> iterator(final Expression expression) {

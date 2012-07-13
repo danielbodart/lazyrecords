@@ -5,6 +5,7 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.TotalHitCountCollector;
 
 import java.io.IOException;
 
@@ -25,6 +26,13 @@ public class LuceneSearcher implements Searcher {
     @Override
     public Document document(int id) throws IOException {
         return searcher.doc(id);
+    }
+
+    @Override
+    public int count(Query query) throws IOException {
+        TotalHitCountCollector results = new TotalHitCountCollector();
+        searcher().search(query, results);
+        return results.getTotalHits();
     }
 
     @Override

@@ -28,6 +28,11 @@ public class ManagedSearcher implements Searcher {
     }
 
     @Override
+    public int count(Query query) throws IOException {
+        return searcher.count(query);
+    }
+
+    @Override
     public void close() throws IOException {
         manager.release(searcher.searcher());
     }

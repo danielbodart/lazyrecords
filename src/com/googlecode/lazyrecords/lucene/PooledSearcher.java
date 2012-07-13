@@ -29,6 +29,11 @@ public class PooledSearcher implements Searcher {
     }
 
     @Override
+    public int count(Query query) throws IOException {
+        return searcher.count(query);
+    }
+
+    @Override
     public void close() throws IOException {
         try {
             checkin.call(this);

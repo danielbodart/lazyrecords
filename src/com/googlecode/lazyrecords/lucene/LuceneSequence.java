@@ -4,9 +4,12 @@ import com.googlecode.lazyrecords.Logger;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.CloseableList;
+import com.googlecode.totallylazy.Function;
+import com.googlecode.totallylazy.Iterators;
 import com.googlecode.totallylazy.LazyException;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Value;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Sort;
@@ -25,6 +28,7 @@ public class LuceneSequence extends Sequence<Record> {
     private final Callable1<? super Document, Record> documentToRecord;
     private final CloseableList closeables;
     private final Sort sort;
+    private final Value<Iterator<Record>> iterator;
 
     public LuceneSequence(final Lucene lucene, final LuceneStorage storage, final Query query,
                           final Callable1<? super Document, Record> documentToRecord, final Logger logger, CloseableList closeables) {
@@ -32,7 +36,7 @@ public class LuceneSequence extends Sequence<Record> {
     }
 
     public LuceneSequence(final Lucene lucene, final LuceneStorage storage, final Query query,
-                          final Callable1<? super Document, Record> documentToRecord, final Logger logger, CloseableList closeables, Sort sort) {
+                          final Callable1<? super Document, Record> documentToRecord, final Logger logger, final CloseableList closeables, final Sort sort) {
         this.lucene = lucene;
         this.storage = storage;
         this.query = query;
@@ -40,10 +44,16 @@ public class LuceneSequence extends Sequence<Record> {
         this.logger = logger;
         this.closeables = closeables;
         this.sort = sort;
+        this.iterator = new Function<Iterator<Record>>() {
+            @Override
+            public Iterator<Record> call() throws Exception {
+                return Iterators.memorise(new LuceneIterator(storage, query, sort, documentToRecord, closeables, logger));
+            }
+        }.lazy();
     }
 
     public Iterator<Record> iterator() {
-        return new LuceneIterator(storage, query, sort, documentToRecord, closeables, logger);
+        return iterator.value();
     }
 
     @Override
