@@ -3,6 +3,8 @@ package com.googlecode.lazyrecords.sql;
 import com.googlecode.lazyrecords.Logger;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Callable2;
+import com.googlecode.totallylazy.Computation;
+import com.googlecode.totallylazy.Function;
 import com.googlecode.totallylazy.Iterators;
 import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.Sequence;
@@ -12,6 +14,7 @@ import com.googlecode.lazyrecords.sql.expressions.Expressible;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.expressions.SelectBuilder;
 import com.googlecode.totallylazy.Unchecked;
+import com.googlecode.totallylazy.Value;
 
 import java.io.PrintStream;
 import java.util.Iterator;
@@ -26,20 +29,27 @@ class SingleValueSequence<T> extends Sequence<T> implements Expressible {
     private final Logger logger;
     private final SqlRecords sqlRecords;
     private final SelectBuilder builder;
+    private final Value<Iterable<T>> data;
 
     public SingleValueSequence(final SqlRecords sqlRecords, final SelectBuilder builder, final Callable1<? super Record, ? extends T> callable, final Logger logger) {
         this.sqlRecords = sqlRecords;
         this.builder = builder;
         this.callable = callable;
         this.logger = logger;
+        this.data = new Function<Iterable<T>>() {
+            @Override
+            public Iterable<T> call() throws Exception {
+                return execute(builder);
+            }
+        }.lazy();
     }
 
     public Iterator<T> iterator() {
-        return execute(builder);
+        return data.value().iterator();
     }
 
-    private Iterator<T> execute(final SelectBuilder builder) {
-        return Iterators.map(sqlRecords.iterator(builder.build(), builder.select()), callable);
+    private Iterable<T> execute(final SelectBuilder builder) {
+        return sqlRecords.query(builder.build(), builder.select()).map(callable);
     }
 
     public Expression express() {

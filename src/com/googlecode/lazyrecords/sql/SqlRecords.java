@@ -15,6 +15,7 @@ import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.CloseableList;
+import com.googlecode.totallylazy.Computation;
 import com.googlecode.totallylazy.Group;
 import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.Option;
@@ -66,15 +67,7 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
     }
 
     public Sequence<Record> query(final Expression expression, final Sequence<Keyword<?>> definitions) {
-        return new Sequence<Record>() {
-            public Iterator<Record> iterator() {
-                return closeables.manage(new SqlIterator(connection, mappings, expression, definitions, logger));
-            }
-        };
-    }
-
-    public Iterator<Record> iterator(Expression expression, Sequence<Keyword<?>> definitions) {
-        return query(expression, definitions).iterator();
+        return Computation.memorise(closeables.manage(new SqlIterator(connection, mappings, expression, definitions, logger)));
     }
 
     public Number add(final Definition definition, final Sequence<Record> records) {

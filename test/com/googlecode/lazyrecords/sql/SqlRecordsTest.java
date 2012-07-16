@@ -2,6 +2,9 @@ package com.googlecode.lazyrecords.sql;
 
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.ImmutableKeyword;
+import com.googlecode.lazyrecords.Logger;
+import com.googlecode.lazyrecords.MemoryLogger;
+import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.Records;
 import com.googlecode.lazyrecords.RecordsContract;
 import com.googlecode.lazyrecords.SchemaGeneratingRecords;
@@ -10,6 +13,8 @@ import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
 import com.googlecode.totallylazy.Predicates;
+import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.matchers.Matchers;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
 import org.hsqldb.jdbc.JDBCDataSource;
 import org.junit.After;
@@ -18,6 +23,7 @@ import org.junit.Test;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Map;
 
 import static com.googlecode.lazyrecords.Definition.constructors.definition;
 import static com.googlecode.lazyrecords.Keywords.keyword;
@@ -32,6 +38,7 @@ import static org.hamcrest.Matchers.is;
 public class SqlRecordsTest extends RecordsContract<Records> {
     private static JDBCDataSource dataSource;
     private Connection connection;
+    private SqlGrammar grammar;
 
     @BeforeClass
     public static void createDataSource() throws SQLException {
@@ -52,10 +59,13 @@ public class SqlRecordsTest extends RecordsContract<Records> {
 
     public Records createRecords() throws Exception {
         connection = dataSource.getConnection();
-        SqlGrammar grammar = new AnsiSqlGrammar();
-        SqlRecords sqlRecords = new SqlRecords(connection,
-                new SqlMappings(), grammar, logger);
+        grammar = new AnsiSqlGrammar();
+        SqlRecords sqlRecords = sqlRecords(logger);
         return new SchemaGeneratingRecords(sqlRecords, schema = new SqlSchema(sqlRecords, grammar));
+    }
+
+    private SqlRecords sqlRecords(Logger logger) {
+        return new SqlRecords(connection, new SqlMappings(), grammar, logger);
     }
 
     @Test
@@ -103,4 +113,25 @@ public class SqlRecordsTest extends RecordsContract<Records> {
     public void supportsCountOnSortedRecords() throws Exception {
         assertThat(records.get(people).sortBy(age).size(), NumberMatcher.is(3));
     }
+
+    @Test
+    public void memorisesAndThereforeOnlyExecutesSqlOnce() throws Exception {
+        MemoryLogger logger = new MemoryLogger();
+        Sequence<Record> result = sqlRecords(logger).get(people).sortBy(age);
+        Record head = result.head();
+        Sequence<Map<String,?>> logs = logger.data();
+        assertThat(head, Matchers.is(result.head())); // Check iterator
+        assertThat(logs, Matchers.is(logger.data())); // Check queries
+    }
+
+    @Test
+    public void memorisesAndThereforeOnlyExecutesSqlOnceEvenWhenYouMapToAKeyword() throws Exception {
+        MemoryLogger logger = new MemoryLogger();
+        Sequence<String> result = sqlRecords(logger).get(people).map(firstName);
+        String head = result.head();
+        Sequence<Map<String,?>> logs = logger.data();
+        assertThat(head, Matchers.is(result.head())); // Check iterator
+        assertThat(logs, Matchers.is(logger.data())); // Check queries
+    }
+
 }

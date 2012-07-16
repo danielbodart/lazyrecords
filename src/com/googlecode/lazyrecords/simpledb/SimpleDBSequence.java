@@ -9,10 +9,8 @@ import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.expressions.Expressions;
 import com.googlecode.totallylazy.*;
 import com.googlecode.lazyrecords.mappings.StringMappings;
-import com.googlecode.lazyrecords.sql.expressions.AbstractExpression;
 import com.googlecode.lazyrecords.sql.expressions.SelectBuilder;
 
-import java.io.PrintStream;
 import java.util.Comparator;
 import java.util.Iterator;
 
@@ -26,7 +24,7 @@ public class SimpleDBSequence<T> extends Sequence<T> {
     private final Callable1<? super Item, T> itemToRecord;
     private final Logger logger;
     private final boolean consistentRead;
-    private final Value<Iterator<T>> iterator;
+    private final Value<Iterable<T>> data;
 
     public SimpleDBSequence(AmazonSimpleDB sdb, final SelectBuilder builder, StringMappings mappings, Callable1<? super Item, T> itemToRecord, Logger logger, boolean consistentRead) {
         this.sdb = sdb;
@@ -35,16 +33,16 @@ public class SimpleDBSequence<T> extends Sequence<T> {
         this.itemToRecord = itemToRecord;
         this.logger = logger;
         this.consistentRead = consistentRead;
-        this.iterator = new Function<Iterator<T>>() {
+        this.data = new Function<Iterable<T>>() {
             @Override
-            public Iterator<T> call() throws Exception {
-                return Iterators.memorise(iterator(builder.express()));
+            public Iterable<T> call() throws Exception {
+                return Computation.memorise(iterator(builder));
             }
         }.lazy();
     }
 
     public Iterator<T> iterator() {
-        return iterator.value();
+        return data.value().iterator();
     }
 
     private Iterator<T> iterator(final Expression expression) {

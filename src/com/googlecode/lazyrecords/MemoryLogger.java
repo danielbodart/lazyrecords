@@ -3,6 +3,7 @@ package com.googlecode.lazyrecords;
 import com.googlecode.totallylazy.Sequence;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +18,7 @@ public class MemoryLogger implements Logger {
         return this;
     }
 
-    public Sequence<Map<String, ?>> getData() {
-        return sequence(data);
+    public Sequence<Map<String, ?>> data() {
+        return sequence(data).realise();
     }
 }

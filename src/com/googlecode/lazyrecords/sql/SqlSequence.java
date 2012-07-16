@@ -5,7 +5,6 @@ import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Callable2;
 import com.googlecode.totallylazy.Computation;
 import com.googlecode.totallylazy.Function;
-import com.googlecode.totallylazy.Iterators;
 import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
@@ -28,26 +27,26 @@ public class SqlSequence extends Sequence<Record> implements Expressible {
     private final SqlRecords sqlRecords;
     private final SelectBuilder builder;
     private final Logger logger;
-    private final Value<Iterator<Record>> iterator;
+    private final Value<Iterable<Record>> data;
 
     public SqlSequence(final SqlRecords records, final SelectBuilder builder, final Logger logger) {
         this.sqlRecords = records;
         this.builder = builder;
         this.logger = logger;
-        this.iterator = new Function<Iterator<Record>>() {
+        this.data = new Function<Iterable<Record>>() {
             @Override
-            public Iterator<Record> call() throws Exception {
-                return Iterators.memorise(execute(builder));
+            public Iterable<Record> call() throws Exception {
+                return execute(builder);
             }
         }.lazy();
     }
 
     public Iterator<Record> iterator() {
-        return iterator.value();
+        return data.value().iterator();
     }
 
-    private Iterator<Record> execute(final SelectBuilder builder) {
-        return sqlRecords.iterator(builder.build(), builder.select());
+    private Iterable<Record> execute(final SelectBuilder builder) {
+        return sqlRecords.query(builder.build(), builder.select());
     }
 
     @Override

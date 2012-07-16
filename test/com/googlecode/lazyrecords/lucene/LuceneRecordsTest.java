@@ -1,11 +1,14 @@
 package com.googlecode.lazyrecords.lucene;
 
+import com.googlecode.lazyrecords.Logger;
+import com.googlecode.lazyrecords.MemoryLogger;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
 import com.googlecode.lazyrecords.RecordsContract;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
+import com.googlecode.totallylazy.matchers.Matchers;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.queryParser.QueryParser;
@@ -15,6 +18,8 @@ import org.junit.After;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Map;
 
 import static com.googlecode.totallylazy.Files.temporaryDirectory;
 import static com.googlecode.totallylazy.matchers.IterableMatcher.hasExactly;
@@ -32,7 +37,11 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
         file = temporaryDirectory("totallylazy");
         directory = new NoSyncDirectory(file);
         storage = new OptimisedStorage(directory, new LucenePool(directory));
-        return new LuceneRecords(storage, new LuceneMappings(), logger);
+        return luceneRecords(logger);
+    }
+
+    private LuceneRecords luceneRecords(Logger logger1) throws IOException {
+        return new LuceneRecords(storage, new LuceneMappings(), logger1);
     }
 
     @After
@@ -49,4 +58,16 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
         Sequence<Record> results = records.query(parser.parse("type:people +firstName:da*"), Sequences.<Keyword<?>>sequence(lastName));
         assertThat(results.map(lastName), hasExactly("bodart"));
     }
+
+    @Test
+    public void memorisesAndThereforeOnlyExecutesQueryOnce() throws Exception {
+        MemoryLogger logger = new MemoryLogger();
+        Sequence<Record> result = luceneRecords(logger).get(people).sortBy(age);
+        Record head = result.head();
+        Sequence<Map<String,?>> logs = logger.data();
+        assertThat(head, Matchers.is(result.head())); // Check iterator
+        assertThat(logs, Matchers.is(logger.data())); // Check queries
+    }
+
+
 }

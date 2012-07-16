@@ -4,8 +4,8 @@ import com.googlecode.lazyrecords.Logger;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.CloseableList;
+import com.googlecode.totallylazy.Computation;
 import com.googlecode.totallylazy.Function;
-import com.googlecode.totallylazy.Iterators;
 import com.googlecode.totallylazy.LazyException;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
@@ -28,7 +28,7 @@ public class LuceneSequence extends Sequence<Record> {
     private final Callable1<? super Document, Record> documentToRecord;
     private final CloseableList closeables;
     private final Sort sort;
-    private final Value<Iterator<Record>> iterator;
+    private final Value<Iterable<Record>> data;
 
     public LuceneSequence(final Lucene lucene, final LuceneStorage storage, final Query query,
                           final Callable1<? super Document, Record> documentToRecord, final Logger logger, CloseableList closeables) {
@@ -44,16 +44,16 @@ public class LuceneSequence extends Sequence<Record> {
         this.logger = logger;
         this.closeables = closeables;
         this.sort = sort;
-        this.iterator = new Function<Iterator<Record>>() {
+        this.data = new Function<Iterable<Record>>() {
             @Override
-            public Iterator<Record> call() throws Exception {
-                return Iterators.memorise(new LuceneIterator(storage, query, sort, documentToRecord, closeables, logger));
+            public Iterable<Record> call() throws Exception {
+                return Computation.memorise(new LuceneIterator(storage, query, sort, documentToRecord, closeables, logger));
             }
         }.lazy();
     }
 
     public Iterator<Record> iterator() {
-        return iterator.value();
+        return data.value().iterator();
     }
 
     @Override
