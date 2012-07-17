@@ -6,6 +6,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.search.Query;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 
 public interface LuceneStorage extends Closeable{
@@ -20,4 +21,8 @@ public interface LuceneStorage extends Closeable{
     <T> T search(Callable1<Searcher, T> callable) throws IOException;
 
     Searcher searcher() throws IOException;
+
+    void backup(File destination) throws Exception;
+
+    void restore(File file) throws Exception;
 }

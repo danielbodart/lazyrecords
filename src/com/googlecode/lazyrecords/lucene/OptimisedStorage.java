@@ -2,22 +2,33 @@ package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Closeables;
+import com.googlecode.totallylazy.Files;
+import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.time.Clock;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.KeywordAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.IndexCommit;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.KeepOnlyLastCommitDeletionPolicy;
+import org.apache.lucene.index.SnapshotDeletionPolicy;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.Sort;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.NIOFSDirectory;
 import org.apache.lucene.util.Version;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import static com.googlecode.totallylazy.Closeables.using;
+import static com.googlecode.totallylazy.Lists.list;
+import static com.googlecode.totallylazy.Runnables.VOID;
+import static com.googlecode.totallylazy.Zip.unzip;
+import static com.googlecode.totallylazy.Zip.zip;
 
 public class OptimisedStorage implements LuceneStorage {
     private final Directory directory;
@@ -28,6 +39,7 @@ public class OptimisedStorage implements LuceneStorage {
 
     private final SearcherPool pool;
     private IndexWriter writer;
+    private SnapshotDeletionPolicy snapShotter;
 
     public OptimisedStorage(Directory directory, SearcherPool searcherPool) {
         this(directory, Version.LUCENE_36, new KeywordAnalyzer(), IndexWriterConfig.OpenMode.CREATE_OR_APPEND, searcherPool);
@@ -90,19 +102,95 @@ public class OptimisedStorage implements LuceneStorage {
     }
 
     @Override
+    public void backup(final File file) throws Exception {
+        File folder = unzippedName(file);
+        Files.delete(folder);
+        String id = UUID.randomUUID().toString();
+        try {
+            IndexCommit indexCommit = snapShotter.snapshot(id);
+            using(directoryFor(folder), copy(indexCommit.getFileNames()).apply(directory));
+        } finally {
+            snapShotter.release(id);
+        }
+
+        zip(folder, file);
+        Files.delete(folder);
+    }
+
+    private Directory directoryFor(File file) throws IOException {
+        return new NIOFSDirectory(file);
+    }
+
+    public static Function2<Directory, Directory, Void> copy(final Collection<String> strings) {
+        return new Function2<Directory, Directory, Void>() {
+            @Override
+            public Void call(Directory source, Directory destination) throws Exception {
+                copy(source, destination, strings);
+                return VOID;
+            }
+        };
+    }
+
+    public static void copy(Directory source, Directory destination, Collection<String> strings) throws IOException {
+        for (String segment : strings) {
+            source.copy(destination, segment, segment);
+        }
+    }
+
+
+    private File unzippedName(File file) {
+        return new File(file.toString() + ".unzipped");
+    }
+
+
+    @Override
+    public void restore(File source) throws Exception {
+        synchronized (lock) {
+            ensureIndexIsSetup();
+            deleteAll();
+            deleteAllSegments(directory);
+            Directory sourceDirectory = directoryFor(unzipIfNeeded(source));
+            using(sourceDirectory, copy(list(sourceDirectory.listAll())).flip().apply(directory));
+            resetReadersAndWriters();
+        }
+    }
+
+    private void resetReadersAndWriters() throws IOException {
+        close();
+        writer = null;
+        pool.markAsDirty();
+    }
+
+    private void deleteAllSegments(Directory directory) throws IOException {
+        for (String segment : directory.listAll()) {
+            directory.deleteFile(segment);
+        }
+    }
+
+    private File unzipIfNeeded(File source) throws IOException {
+        if (source.isFile()) {
+            File unzipped = unzippedName(source);
+            unzip(source, unzipped);
+            return unzipped;
+        }
+        return source;
+    }
+
+    @Override
     public void close() throws IOException {
         try {
             Closeables.close(writer);
-        } catch (Throwable ignored) {}
-        finally {
+        } catch (Throwable ignored) {
+        } finally {
             try {
                 ensureDirectoryUnlocked();
-            } catch(Throwable ignored) {}
+            } catch (Throwable ignored) {
+            }
         }
     }
 
     private void ensureDirectoryUnlocked() throws IOException {
-        if(IndexWriter.isLocked(directory)) {
+        if (IndexWriter.isLocked(directory)) {
             IndexWriter.unlock(directory);
         }
     }
@@ -110,7 +198,8 @@ public class OptimisedStorage implements LuceneStorage {
     private void ensureIndexIsSetup() throws IOException {
         synchronized (lock) {
             if (writer == null) {
-                writer = new IndexWriter(directory, new IndexWriterConfig(version, analyzer).setOpenMode(mode));
+                snapShotter = new SnapshotDeletionPolicy(new KeepOnlyLastCommitDeletionPolicy());
+                writer = new IndexWriter(directory, new IndexWriterConfig(version, analyzer).setOpenMode(mode).setIndexDeletionPolicy(snapShotter));
                 writer.commit();
             }
         }
