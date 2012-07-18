@@ -6,20 +6,20 @@ import org.junit.Test;
 import static com.googlecode.totallylazy.matchers.Matchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class TransactionalMemoryRecordsTest extends RecordsContract<TransactionalMemoryRecords> {
-    private TransactionalMemory datastore;
+public class STMRecordsTest extends RecordsContract<STMRecords> {
+    private STM stm;
 
-    public TransactionalMemoryRecords createRecords() {
-        datastore = new TransactionalMemory();
-        return new TransactionalMemoryRecords(datastore);
+    public STMRecords createRecords() {
+        stm = new STM();
+        return new STMRecords(stm);
     }
 
     @Test
     public void canCommit() throws Exception {
         assertThat(records.get(people).isEmpty(), is(false));
-        assertThat(datastore.value().get(people).isEmpty(), is(true));
+        assertThat(stm.value().get(people).isEmpty(), is(true));
         records.commit();
-        assertThat(datastore.value().get(people).isEmpty(), is(false));
+        assertThat(stm.value().get(people).isEmpty(), is(false));
     }
 
     @Test

@@ -20,27 +20,28 @@ import com.googlecode.totallylazy.collections.ImmutableMap;
 import com.googlecode.totallylazy.collections.ImmutableSortedMap;
 
 import static com.googlecode.lazyrecords.Definition.functions.sortFields;
+import static com.googlecode.totallylazy.Sequences.reverse;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
-public class TransactionalMemoryRecords extends AbstractRecords implements Transaction {
+public class STMRecords extends AbstractRecords implements Transaction {
     private final StringMappings mappings;
-    private final TransactionalMemory transactionalMemory;
-    private TransactionalMemory snapShot;
-    private ImmutableList<Callable1<ImmutableSortedMap<Definition, ImmutableList<ImmutableMap<String, String>>>,
-            ImmutableSortedMap<Definition, ImmutableList<ImmutableMap<String, String>>>>> modifications = ImmutableList.constructors.empty();
+    private final STM stm;
+    private STM snapshot;
+    private ImmutableList<Callable1<ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>,
+            ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>>> modifications = ImmutableList.constructors.empty();
 
-    public TransactionalMemoryRecords(TransactionalMemory transactionalMemory, StringMappings mappings) {
-        this.transactionalMemory = transactionalMemory;
+    public STMRecords(STM stm, StringMappings mappings) {
+        this.stm = stm;
         this.mappings = mappings;
-        snapShot = transactionalMemory.snapShot();
+        createSnapshot();
     }
 
-    public TransactionalMemoryRecords(TransactionalMemory transactionalMemory) {
-        this(transactionalMemory, new StringMappings());
+    public STMRecords(STM stm) {
+        this(stm, new StringMappings());
     }
 
     public Sequence<Record> get(Definition definition) {
-        return sequence(recordsFor(snapShot.value(), definition)).map(asRecord(definition));
+        return sequence(recordsFor(snapshot.value(), definition)).map(asRecord(definition));
     }
 
     public Number add(final Definition definition, final Sequence<Record> records) {
@@ -49,23 +50,14 @@ public class TransactionalMemoryRecords extends AbstractRecords implements Trans
         }
 
         final ImmutableList<ImmutableMap<String, String>> newRecords = records.map(sortFields(definition)).map(asImmutableMap(definition)).toImmutableList();
-        snapShot.modify(put(definition, newRecords));
+        snapshot.modify(put(definition, newRecords));
         modifications = modifications.cons(put(definition, newRecords));
 
         return newRecords.size();
     }
 
-    private static ImmutableList<ImmutableMap<String, String>> recordsFor(ImmutableSortedMap<Definition, ImmutableList<ImmutableMap<String, String>>> data, Definition definition) {
+    private static ImmutableList<ImmutableMap<String, String>> recordsFor(ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>> data, Definition definition) {
         return data.get(definition).getOrElse(ImmutableList.constructors.<ImmutableMap<String, String>>empty());
-    }
-
-    private static Function1<ImmutableSortedMap<Definition, ImmutableList<ImmutableMap<String, String>>>, ImmutableSortedMap<Definition, ImmutableList<ImmutableMap<String, String>>>> put(final Definition definition, final ImmutableList<ImmutableMap<String, String>> newRecords) {
-        return new Function1<ImmutableSortedMap<Definition, ImmutableList<ImmutableMap<String, String>>>, ImmutableSortedMap<Definition, ImmutableList<ImmutableMap<String, String>>>>() {
-            @Override
-            public ImmutableSortedMap<Definition, ImmutableList<ImmutableMap<String, String>>> call(ImmutableSortedMap<Definition, ImmutableList<ImmutableMap<String, String>>> data) throws Exception {
-                return data.put(definition, newRecords.joinTo(recordsFor(data, definition)));
-            }
-        };
     }
 
     public Number remove(final Definition definition, Predicate<? super Record> predicate) {
@@ -75,19 +67,10 @@ public class TransactionalMemoryRecords extends AbstractRecords implements Trans
                 map(Callables.<ImmutableMap<String, String>>value()).
                 toImmutableList();
 
-        snapShot.modify(remove(definition, matches));
+        snapshot.modify(remove(definition, matches));
         modifications = modifications.cons(remove(definition, matches));
 
         return matches.size();
-    }
-
-    private static Function1<ImmutableSortedMap<Definition, ImmutableList<ImmutableMap<String, String>>>, ImmutableSortedMap<Definition, ImmutableList<ImmutableMap<String, String>>>> remove(final Definition definition, final ImmutableList<ImmutableMap<String, String>> matches) {
-        return new Function1<ImmutableSortedMap<Definition, ImmutableList<ImmutableMap<String, String>>>, ImmutableSortedMap<Definition, ImmutableList<ImmutableMap<String, String>>>>() {
-            @Override
-            public ImmutableSortedMap<Definition, ImmutableList<ImmutableMap<String, String>>> call(ImmutableSortedMap<Definition, ImmutableList<ImmutableMap<String, String>>> data) throws Exception {
-                return data.put(definition, recordsFor(data, definition).removeAll(matches));
-            }
-        };
     }
 
     private Callable1<ImmutableMap<String, String>, Record> asRecord(final Definition definition) {
@@ -128,14 +111,23 @@ public class TransactionalMemoryRecords extends AbstractRecords implements Trans
 
     @Override
     public void commit() {
-        transactionalMemory.modify(callAll(modifications));
+        stm.modify(applyAll(reverse(modifications)));
     }
 
-    private static <T> Function1<T, T> callAll(final Iterable<Callable1<T, T>> callables) {
+    @Override
+    public void rollback() {
+        createSnapshot();
+    }
+
+    private void createSnapshot() {
+        snapshot = stm.snapshot();
+    }
+
+    private static <T> Function1<T, T> applyAll(final Iterable<? extends Callable1<T, T>> callables) {
         return new Function1<T, T>() {
             @Override
             public T call(T data) throws Exception {
-                return sequence(callables).fold(data, TransactionalMemoryRecords.<T>andCall());
+                return sequence(callables).fold(data, STMRecords.<T>andCall());
             }
         };
     }
@@ -149,8 +141,21 @@ public class TransactionalMemoryRecords extends AbstractRecords implements Trans
         };
     }
 
-    @Override
-    public void rollback() {
-        snapShot = transactionalMemory.snapShot();
+    private static Function1<ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>, ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>> put(final Definition definition, final ImmutableList<ImmutableMap<String, String>> newRecords) {
+        return new Function1<ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>, ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>>() {
+            @Override
+            public ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>> call(ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>> data) throws Exception {
+                return data.put(definition, newRecords.joinTo(recordsFor(data, definition)));
+            }
+        };
+    }
+
+    private static Function1<ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>, ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>> remove(final Definition definition, final ImmutableList<ImmutableMap<String, String>> matches) {
+        return new Function1<ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>, ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>>() {
+            @Override
+            public ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>> call(ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>> data) throws Exception {
+                return data.put(definition, recordsFor(data, definition).removeAll(matches));
+            }
+        };
     }
 }

@@ -11,29 +11,29 @@ import java.util.Comparator;
 
 import static com.googlecode.totallylazy.Atomic.constructors.atomic;
 
-public class TransactionalMemory implements Atomic<ImmutableSortedMap<Definition, ImmutableList<ImmutableMap<String, String>>>> {
-    private final Atomic<ImmutableSortedMap<Definition, ImmutableList<ImmutableMap<String, String>>>> value;
+public class STM implements Atomic<ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>> {
+    private final Atomic<ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>> value;
 
-    public TransactionalMemory(ImmutableSortedMap<Definition, ImmutableList<ImmutableMap<String, String>>> value) {
+    public STM(ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>> value) {
         this.value = atomic(value);
     }
 
-    public TransactionalMemory() {
+    public STM() {
         this(ImmutableSortedMap.constructors.<Definition, ImmutableList<ImmutableMap<String, String>>>sortedMap(definitionComparator));
     }
 
     @Override
-    public Atomic<ImmutableSortedMap<Definition, ImmutableList<ImmutableMap<String, String>>>> modify(Callable1<? super ImmutableSortedMap<Definition, ImmutableList<ImmutableMap<String, String>>>, ? extends ImmutableSortedMap<Definition, ImmutableList<ImmutableMap<String, String>>>> callable) {
+    public Atomic<ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>> modify(Callable1<? super ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>, ? extends ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>> callable) {
         return value.modify(callable);
     }
 
     @Override
-    public ImmutableSortedMap<Definition, ImmutableList<ImmutableMap<String, String>>> value() {
+    public ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>> value() {
         return value.value();
     }
 
-    public TransactionalMemory snapShot() {
-        return new TransactionalMemory(value.value());
+    public STM snapshot() {
+        return new STM(value.value());
     }
 
     private static final Comparator<Definition> definitionComparator = new Comparator<Definition>() {
