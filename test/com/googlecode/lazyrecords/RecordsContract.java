@@ -60,7 +60,7 @@ public abstract class RecordsContract<T extends Records> {
     protected static Keyword<Boolean> inPrint = keyword("inPrint", Boolean.class);
     protected static Keyword<UUID> uuid = keyword("uuid", UUID.class);
 
-    protected static Definition people = definition("people", age, dob, firstName, lastName, isbn);
+    protected static Definition people = definition("people", isbn, age, dob, firstName, lastName);
     protected static Definition books = definition("books", isbn, title, inPrint, uuid);
 
     public static final URI zenIsbn = uri("urn:isbn:0099322617");
