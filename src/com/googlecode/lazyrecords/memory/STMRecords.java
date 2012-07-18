@@ -28,7 +28,7 @@ public class STMRecords extends AbstractRecords implements Transaction {
     private final STM stm;
     private STM snapshot;
     private ImmutableList<Callable1<ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>,
-            ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>>> modifications = ImmutableList.constructors.empty();
+            ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>>> modifications;
 
     public STMRecords(STM stm, StringMappings mappings) {
         this.stm = stm;
@@ -49,28 +49,48 @@ public class STMRecords extends AbstractRecords implements Transaction {
             return 0;
         }
 
-        final ImmutableList<ImmutableMap<String, String>> newRecords = records.map(sortFields(definition)).map(asImmutableMap(definition)).toImmutableList();
-        snapshot.modify(put(definition, newRecords));
-        modifications = modifications.cons(put(definition, newRecords));
+        ImmutableList<ImmutableMap<String, String>> newRecords = records.
+                map(asImmutableMap(definition)).
+                toImmutableList();
+        modify(put(definition, newRecords));
 
         return newRecords.size();
     }
 
-    private static ImmutableList<ImmutableMap<String, String>> recordsFor(ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>> data, Definition definition) {
-        return data.get(definition).getOrElse(ImmutableList.constructors.<ImmutableMap<String, String>>empty());
-    }
-
     public Number remove(final Definition definition, Predicate<? super Record> predicate) {
-        final ImmutableList<ImmutableMap<String, String>> matches = get(definition).
+        ImmutableList<ImmutableMap<String, String>> matches = get(definition).
                 filter(predicate).
                 <Value<ImmutableMap<String, String>>>unsafeCast().
                 map(Callables.<ImmutableMap<String, String>>value()).
                 toImmutableList();
 
-        snapshot.modify(remove(definition, matches));
-        modifications = modifications.cons(remove(definition, matches));
+        modify(remove(definition, matches));
 
         return matches.size();
+    }
+
+    @Override
+    public void commit() {
+        stm.modify(applyAll(reverse(modifications)));
+    }
+
+    @Override
+    public void rollback() {
+        createSnapshot();
+    }
+
+    private void createSnapshot() {
+        snapshot = stm.snapshot();
+        modifications = ImmutableList.constructors.empty();
+    }
+
+    private void modify(Callable1<ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>, ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>> callable) {
+        snapshot.modify(callable);
+        modifications = modifications.cons(callable);
+    }
+
+    private static ImmutableList<ImmutableMap<String, String>> recordsFor(ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>> data, Definition definition) {
+        return data.get(definition).getOrElse(ImmutableList.constructors.<ImmutableMap<String, String>>empty());
     }
 
     private Callable1<ImmutableMap<String, String>, Record> asRecord(final Definition definition) {
@@ -107,20 +127,6 @@ public class STMRecords extends AbstractRecords implements Transaction {
                 return Pair.pair(keyword.name(), mappings.toString(keyword.forClass(), record.get(keyword)));
             }
         };
-    }
-
-    @Override
-    public void commit() {
-        stm.modify(applyAll(reverse(modifications)));
-    }
-
-    @Override
-    public void rollback() {
-        createSnapshot();
-    }
-
-    private void createSnapshot() {
-        snapshot = stm.snapshot();
     }
 
     private static <T> Function1<T, T> applyAll(final Iterable<? extends Callable1<T, T>> callables) {
