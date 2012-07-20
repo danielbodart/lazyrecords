@@ -41,11 +41,23 @@ public interface Record {
         }
 
         public static Record record(final Pair<Keyword<?>, Object>... fields) {
-            return Sequences.sequence(fields).fold(record(), functions.updateValues());
+            return record(sequence(fields));
         }
 
         public static Record record(final Sequence<Pair<Keyword<?>, Object>> fields) {
             return fields.fold(record(), functions.updateValues());
+        }
+
+        public static Record immutableRecord() {
+            return new ImmutableMapRecord();
+        }
+
+        public static Record immutableRecord(final Pair<Keyword<?>, Object>... fields) {
+            return immutableRecord(sequence(fields));
+        }
+
+        public static Record immutableRecord(final Sequence<Pair<Keyword<?>, Object>> fields) {
+            return fields.fold(immutableRecord(), functions.updateValues());
         }
     }
 
