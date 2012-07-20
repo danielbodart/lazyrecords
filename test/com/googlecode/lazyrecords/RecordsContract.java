@@ -1,6 +1,10 @@
 package com.googlecode.lazyrecords;
 
-import com.googlecode.totallylazy.*;
+import com.googlecode.totallylazy.Callables;
+import com.googlecode.totallylazy.Closeables;
+import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Sequences;
+import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.comparators.Maximum;
 import com.googlecode.totallylazy.comparators.Minimum;
 import com.googlecode.totallylazy.matchers.IterableMatcher;
@@ -22,7 +26,10 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.UUID;
 
-import static com.googlecode.lazyrecords.Aggregate.*;
+import static com.googlecode.lazyrecords.Aggregate.average;
+import static com.googlecode.lazyrecords.Aggregate.maximum;
+import static com.googlecode.lazyrecords.Aggregate.minimum;
+import static com.googlecode.lazyrecords.Aggregate.sum;
 import static com.googlecode.lazyrecords.Aggregates.to;
 import static com.googlecode.lazyrecords.Definition.constructors.definition;
 import static com.googlecode.lazyrecords.Join.join;
@@ -34,11 +41,23 @@ import static com.googlecode.lazyrecords.Using.using;
 import static com.googlecode.totallylazy.Callables.ascending;
 import static com.googlecode.totallylazy.Callables.descending;
 import static com.googlecode.totallylazy.Pair.pair;
-import static com.googlecode.totallylazy.Predicates.*;
+import static com.googlecode.totallylazy.Predicates.all;
+import static com.googlecode.totallylazy.Predicates.between;
+import static com.googlecode.totallylazy.Predicates.greaterThan;
+import static com.googlecode.totallylazy.Predicates.greaterThanOrEqualTo;
+import static com.googlecode.totallylazy.Predicates.in;
+import static com.googlecode.totallylazy.Predicates.is;
+import static com.googlecode.totallylazy.Predicates.lessThan;
+import static com.googlecode.totallylazy.Predicates.lessThanOrEqualTo;
+import static com.googlecode.totallylazy.Predicates.not;
+import static com.googlecode.totallylazy.Predicates.notNullValue;
+import static com.googlecode.totallylazy.Predicates.nullValue;
+import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.Streams.streams;
 import static com.googlecode.totallylazy.Strings.contains;
-import static com.googlecode.totallylazy.Strings.*;
+import static com.googlecode.totallylazy.Strings.endsWith;
+import static com.googlecode.totallylazy.Strings.startsWith;
 import static com.googlecode.totallylazy.URLs.uri;
 import static com.googlecode.totallylazy.callables.CountNotNull.count;
 import static com.googlecode.totallylazy.matchers.IterableMatcher.hasExactly;
@@ -99,11 +118,10 @@ public abstract class RecordsContract<T extends Records> {
     }
 
     public void assertCount(Number actual, Number expected) {
-        if(supportsRowCount){
+        if (supportsRowCount) {
             assertThat(actual, NumberMatcher.is(expected));
         }
     }
-
 
 
     private void setupPeople() {
@@ -424,7 +442,7 @@ public abstract class RecordsContract<T extends Records> {
             try {
                 results.next();
                 fail("We should get some kind of already closed exception");
-            }catch (Exception e){
+            } catch (Exception e) {
                 // all good
             }
         }
@@ -433,6 +451,6 @@ public abstract class RecordsContract<T extends Records> {
     @Test
     public void fieldsOfRecordAddedAndRetrievedInSameOrder() throws Exception {
         Sequence<Record> dan = records.get(people).filter(where(firstName, is("dan")));
-        Assert.assertThat(dan.head().fields().map(Callables.<Keyword<?>>first()), IterableMatcher.<Keyword<?>> hasExactly(people.fields()));
+        Assert.assertThat(dan.head().fields().map(Callables.<Keyword<?>>first()), IterableMatcher.<Keyword<?>>hasExactly(people.fields()));
     }
 }

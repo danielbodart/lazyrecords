@@ -1,7 +1,6 @@
 package com.googlecode.lazyrecords.parser;
 
 import com.googlecode.totallylazy.Predicate;
-import com.googlecode.totallylazy.Sequences;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.totallylazy.time.Dates;
@@ -24,9 +23,9 @@ public class ParametrizedParserTest {
 
         Predicate<Record> predicate = parser.parse("Created > $now$", sequence(created));
 
-        assertThat(predicate.matches(record().set(created, date(2001, 2, 4))), is(true));
-        assertThat(predicate.matches(record().set(created, date(2001, 2, 3))), is(false));
-        assertThat(predicate.matches(record().set(created, date(2001, 2, 2))), is(false));
+        assertThat(predicate.matches(Record.constructors.record().set(created, date(2001, 2, 4))), is(true));
+        assertThat(predicate.matches(Record.constructors.record().set(created, date(2001, 2, 3))), is(false));
+        assertThat(predicate.matches(Record.constructors.record().set(created, date(2001, 2, 2))), is(false));
 
     }
 }

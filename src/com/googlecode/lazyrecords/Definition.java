@@ -2,8 +2,6 @@ package com.googlecode.lazyrecords;
 
 import com.googlecode.totallylazy.*;
 
-import java.util.List;
-
 import static com.googlecode.lazyrecords.Record.constructors.record;
 import static com.googlecode.totallylazy.Sequences.indexIn;
 import static com.googlecode.totallylazy.Sequences.sequence;

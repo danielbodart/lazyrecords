@@ -1,19 +1,18 @@
 package com.googlecode.lazyrecords.memory;
 
 import com.googlecode.lazyrecords.Definition;
-import com.googlecode.lazyrecords.RecordDefinition;
+import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.SchemaBasedRecordContract;
 import com.googlecode.lazyrecords.Schemaless;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
-import com.googlecode.lazyrecords.RecordsContract;
-import com.googlecode.lazyrecords.Keyword;
 import org.junit.Test;
 
 import static com.googlecode.lazyrecords.Definition.constructors.definition;
-import static com.googlecode.totallylazy.Predicates.is;
-import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.lazyrecords.Record.constructors.record;
+import static com.googlecode.totallylazy.Predicates.is;
+import static com.googlecode.totallylazy.Predicates.where;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class MemoryRecordsTest extends SchemaBasedRecordContract<MemoryRecords> {
@@ -36,7 +35,7 @@ public class MemoryRecordsTest extends SchemaBasedRecordContract<MemoryRecords> 
     @Test
     public void allowsAddingWithoutDefiningAKeyword() throws Exception {
         MemoryRecords records = new MemoryRecords();
-        records.add(TREES, record().set(LEAFINESS, "a very leafy tree"));
+        records.add(TREES, Record.constructors.record().set(LEAFINESS, "a very leafy tree"));
         assertThat(records.get(TREES).filter(where(LEAFINESS, is("a very leafy tree"))).size(), NumberMatcher.is(1));
     }
 

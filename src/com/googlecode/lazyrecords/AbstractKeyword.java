@@ -1,7 +1,11 @@
 package com.googlecode.lazyrecords;
 
 public abstract class AbstractKeyword<T> implements Keyword<T> {
-    private Record metadata = Record.constructors.record();
+    private final Record metadata;
+
+    protected AbstractKeyword(Record metadata) {
+        this.metadata = metadata;
+    }
 
     @Override
     public boolean equals(Object other) {
@@ -26,13 +30,14 @@ public abstract class AbstractKeyword<T> implements Keyword<T> {
         return metadata;
     }
 
-    public Keyword<T> metadata(Record metadata) {
-        this.metadata  = metadata;
-        return this;
-    }
-
     @Override
     public int compareTo(Keyword<T> keyword) {
         return name().compareTo(keyword.name());
     }
+
+    @Override
+    public <M> Keyword<T> setMetadata(Keyword<M> name, M value) {
+        return metadata(metadata().set(name, value));
+    }
+
 }

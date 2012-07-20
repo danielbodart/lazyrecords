@@ -91,9 +91,9 @@ public class SqlRecordsTest extends RecordsContract<Records> {
     @Test
     public void supportsSpacesInTableNames() throws Exception {
         Definition tableWithSpace = definition("some table", age, firstName);
-        records.add(tableWithSpace, record().set(firstName, "dan").set(age, 12));
+        records.add(tableWithSpace, Record.constructors.record().set(firstName, "dan").set(age, 12));
         assertThat(records.get(tableWithSpace).map(age).head(), is(12));
-        records.set(tableWithSpace, update(using(firstName), record().set(firstName, "dan").set(age, 11)));
+        records.set(tableWithSpace, update(using(firstName), Record.constructors.record().set(firstName, "dan").set(age, 11)));
         assertThat(records.get(tableWithSpace).map(age).head(), is(11));
         records.remove(tableWithSpace);
     }
@@ -102,9 +102,9 @@ public class SqlRecordsTest extends RecordsContract<Records> {
     public void supportsSpacesInColumnNames() throws Exception {
         ImmutableKeyword<Integer> age = keyword("my age", Integer.class);
         Definition columnWithSpace = definition("foo", age, firstName);
-        records.add(columnWithSpace, record().set(firstName, "dan").set(age, 12));
+        records.add(columnWithSpace, Record.constructors.record().set(firstName, "dan").set(age, 12));
         assertThat(records.get(columnWithSpace).map(age).head(), is(12));
-        records.set(columnWithSpace, update(using(firstName), record().set(firstName, "dan").set(age, 11)));
+        records.set(columnWithSpace, update(using(firstName), Record.constructors.record().set(firstName, "dan").set(age, 11)));
         assertThat(records.get(columnWithSpace).filter(where(age, Predicates.is(11))).map(firstName).head(), is("dan"));
         records.remove(columnWithSpace, always());
     }

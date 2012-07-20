@@ -32,7 +32,7 @@ public class XmlSequence extends Sequence<Record> {
     private Function1<? super Node, Record> asRecord() {
         return new Function1<Node, Record>() {
             public Record call(final Node node) throws Exception {
-                return definitions.fold(new SourceRecord<Node>(node), populateFrom(node));
+                return definitions.fold(SourceRecord.record(node), populateFrom(node));
             }
         };
     }

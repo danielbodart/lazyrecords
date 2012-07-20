@@ -45,7 +45,7 @@ public class LuceneMappings {
                 return sequence(document.getFields()).
                         map(asPair(definitions)).
                         filter(where(Callables.<Keyword<?>>first(), is(Predicates.<Keyword<?>>not(Lucene.RECORD_KEY)))).
-                        fold(new SourceRecord<Document>(document), updateValues());
+                        fold(SourceRecord.record(document), updateValues());
             }
         };
     }

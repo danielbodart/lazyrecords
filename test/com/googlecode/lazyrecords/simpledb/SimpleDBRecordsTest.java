@@ -47,7 +47,7 @@ public class SimpleDBRecordsTest extends SchemaBasedRecordContract<SimpleDBRecor
     @Test
     public void canAddMoreThat25RecordsAtATimeAndReceiveMoreThanAHundred() throws Exception {
         assertThat(records.get(books).size(), is(3));
-        Sequence<Record> newBooks = repeat(record().set(isbn, zenIsbn)).take(100);
+        Sequence<Record> newBooks = repeat(Record.constructors.record().set(isbn, zenIsbn)).take(100);
         assertThat(newBooks.size(), NumberMatcher.is(100));
         records.add(books, newBooks);
         assertThat(records.get(books).size(), is(103));

@@ -17,7 +17,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.util.Map;
 
 import static com.googlecode.lazyrecords.Keywords.matchKeyword;
@@ -52,14 +51,14 @@ public class SqlIterator extends StatefulIterator<Record> implements Closeable {
             return finished();
         }
 
-        final Record record = Record.constructors.record();
+        Record record = Record.constructors.record();
         final ResultSetMetaData metaData = resultSet.getMetaData();
         for (Integer index : range(1).take(metaData.getColumnCount()).safeCast(Integer.class)) {
             final String name = metaData.getColumnLabel(index);
             Keyword<Object> keyword = matchKeyword(name, definitions, shortName());
             Object value = mappings.getValue(resultSet, index, keyword.forClass());
             if (value != null) {
-                record.set(keyword, value);
+                record = record.set(keyword, value);
             }
         }
 

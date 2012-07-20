@@ -15,7 +15,7 @@ public class RecordTest {
 
     @Test
     public void canEasilyFilterFields() throws Exception {
-        Record original = record().set(age, 12).set(firstName, "dan");
+        Record original = Record.constructors.record().set(age, 12).set(firstName, "dan");
         Record newRecord = filter(original, age);
         assertThat(newRecord.fields(), hasExactly(Pair.<Keyword<?>, Object>pair(age, 12)));
     }

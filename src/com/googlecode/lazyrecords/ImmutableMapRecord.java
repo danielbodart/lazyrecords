@@ -26,7 +26,7 @@ public class ImmutableMapRecord implements Record {
     }
 
     public <T> T get(Keyword<T> keyword) {
-        Object value = fields.get(keyword).get();
+        Object value = fields.get(keyword).getOrNull();
         Class<T> aClass = keyword.forClass();
         return aClass.cast(value);
     }

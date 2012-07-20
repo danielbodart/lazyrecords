@@ -13,7 +13,6 @@ import com.googlecode.totallylazy.Unchecked;
 import java.util.Map;
 
 import static com.googlecode.lazyrecords.Keywords.keyword;
-import static com.googlecode.lazyrecords.Keywords.name;
 import static com.googlecode.totallylazy.Callables.asString;
 import static com.googlecode.totallylazy.Maps.map;
 import static com.googlecode.totallylazy.Predicates.in;
@@ -37,7 +36,7 @@ public interface Record {
         private constructors(){}
 
         public static Record record() {
-            return new MapRecord();
+            return new ImmutableMapRecord();
         }
 
         public static Record record(final Pair<Keyword<?>, Object>... fields) {
@@ -46,18 +45,6 @@ public interface Record {
 
         public static Record record(final Sequence<Pair<Keyword<?>, Object>> fields) {
             return fields.fold(record(), functions.updateValues());
-        }
-
-        public static Record immutableRecord() {
-            return new ImmutableMapRecord();
-        }
-
-        public static Record immutableRecord(final Pair<Keyword<?>, Object>... fields) {
-            return immutableRecord(sequence(fields));
-        }
-
-        public static Record immutableRecord(final Sequence<Pair<Keyword<?>, Object>> fields) {
-            return fields.fold(immutableRecord(), functions.updateValues());
         }
     }
 

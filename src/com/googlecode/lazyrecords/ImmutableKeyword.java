@@ -7,6 +7,11 @@ public class ImmutableKeyword<T> extends AbstractKeyword<T> {
     private final Class<T> aClass;
 
     public ImmutableKeyword(String name, Class<? extends T> aClass) {
+        this(name, aClass, Record.constructors.record());
+    }
+
+    public ImmutableKeyword(String name, Class<? extends T> aClass, Record metadata) {
+        super(metadata);
         if(name == null){
             throw new IllegalArgumentException("name");
         }
@@ -33,7 +38,6 @@ public class ImmutableKeyword<T> extends AbstractKeyword<T> {
 
     @Override
     public ImmutableKeyword<T> metadata(Record metadata) {
-        super.metadata(metadata);
-        return this;
+        return new ImmutableKeyword<T>(name, aClass, metadata);
     }
 }

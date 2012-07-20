@@ -1,6 +1,7 @@
 package com.googlecode.lazyrecords;
 
 import com.googlecode.totallylazy.Callable1;
+import com.googlecode.totallylazy.Callable2;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Unchecked;
 
@@ -13,12 +14,13 @@ public class SelectCallable implements Callable1<Record, Record> {
         this.keywords = keywords;
     }
 
-    public Record call(Record source) throws Exception {
-        Record result = Record.constructors.record();
-        for (Keyword<?> keyword : keywords) {
-            result.set(Unchecked.<Keyword<Object>>cast(keyword), keyword.call(source));
-        }
-        return result;
+    public Record call(final Record source) throws Exception {
+        return keywords.fold(Record.constructors.record(), new Callable2<Record, Keyword<?>, Record>() {
+            @Override
+            public Record call(Record record, Keyword<?> keyword) throws Exception {
+                return record.set(Unchecked.<Keyword<Object>>cast(keyword), keyword.call(source));
+            }
+        });
     }
 
     public Sequence<Keyword<?>> keywords() {

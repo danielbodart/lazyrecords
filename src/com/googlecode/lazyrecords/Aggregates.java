@@ -16,14 +16,15 @@ public class Aggregates implements Callable2<Record, Record, Record>, Value<Sequ
     }
 
     public Record call(final Record accumulator, final Record nextRecord) throws Exception {
-        Record result = record();
-        for (Aggregate<?,?> aggregate : aggregates) {
-            Object current = accumulatorValue(accumulator, aggregate);
-            Object next = nextRecord.get(aggregate.source());
-            Aggregate<Object, Object> cast = Unchecked.cast(aggregate);
-            result.set(cast, cast.call(current, next));
-        }
-        return result;
+        return aggregates.fold(Record.constructors.record(), new Callable2<Record, Aggregate<?, ?>, Record>() {
+            @Override
+            public Record call(Record record, Aggregate<?, ?> aggregate) throws Exception {
+                Object current = accumulatorValue(accumulator, aggregate);
+                Object next = nextRecord.get(aggregate.source());
+                Aggregate<Object, Object> cast = Unchecked.cast(aggregate);
+                return record.set(cast, cast.call(current, next));
+            }
+        });
     }
 
     private Object accumulatorValue(Record record, Aggregate<?,?> aggregate) {
