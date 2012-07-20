@@ -40,4 +40,9 @@ public class RecordDefinition implements Definition {
     public Sequence<Keyword<?>> fields() {
         return fields;
     }
+
+    @Override
+    public int compareTo(Definition definition) {
+        return name().compareTo(definition.name());
+    }
 }

@@ -8,7 +8,7 @@ import static com.googlecode.lazyrecords.Record.constructors.record;
 import static com.googlecode.totallylazy.Sequences.indexIn;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
-public interface Definition extends Named {
+public interface Definition extends Named, Comparable<Definition> {
     Sequence<Keyword<?>> fields();
 
     class constructors {

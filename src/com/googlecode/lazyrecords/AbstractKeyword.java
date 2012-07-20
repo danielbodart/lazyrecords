@@ -30,4 +30,9 @@ public abstract class AbstractKeyword<T> implements Keyword<T> {
         this.metadata  = metadata;
         return this;
     }
+
+    @Override
+    public int compareTo(Keyword<T> keyword) {
+        return name().compareTo(keyword.name());
+    }
 }
