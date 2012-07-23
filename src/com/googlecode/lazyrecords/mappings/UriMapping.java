@@ -1,15 +1,13 @@
 package com.googlecode.lazyrecords.mappings;
 
-import java.net.URI;
+import com.googlecode.totallylazy.Uri;
 
-import static com.googlecode.totallylazy.URLs.uri;
-
-public class UriMapping implements StringMapping<URI> {
-    public URI toValue(String value) {
-        return uri(value);
+public class UriMapping implements StringMapping<Uri> {
+    public Uri toValue(String value) {
+        return Uri.uri(value);
     }
 
-    public String toString(URI value) {
+    public String toString(Uri value) {
         return value.toString();
     }
 }

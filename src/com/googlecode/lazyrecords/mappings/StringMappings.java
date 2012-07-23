@@ -1,6 +1,7 @@
 package com.googlecode.lazyrecords.mappings;
 
 import com.googlecode.totallylazy.Unchecked;
+import com.googlecode.totallylazy.Uri;
 
 import java.net.URI;
 import java.util.Date;
@@ -17,7 +18,8 @@ public class StringMappings {
         add(Date.class, new DateMapping());
         add(Integer.class, new LexicalIntegerMapping());
         add(Long.class, new LexicalLongMapping());
-        add(URI.class, new UriMapping());
+        add(URI.class, new URIMapping());
+        add(Uri.class, new UriMapping());
         add(Boolean.class, new BooleanMapping());
         add(UUID.class, new UUIDMapping());
     }
