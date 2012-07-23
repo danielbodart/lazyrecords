@@ -456,7 +456,7 @@ public abstract class RecordsContract<T extends Records> {
 
     @Test
     public void supportsDrop() throws Exception {
-//        assertThat(records.get(people).drop(2).size(), NumberMatcher.is(1));
+        assertThat(records.get(people).sortBy(firstName).drop(2).size(), NumberMatcher.is(1));
         assertThat(records.get(people).sortBy(firstName).drop(2).map(firstName), hasExactly("matt"));
     }
 }

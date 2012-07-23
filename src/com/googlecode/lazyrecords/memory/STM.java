@@ -7,8 +7,6 @@ import com.googlecode.totallylazy.collections.ImmutableList;
 import com.googlecode.totallylazy.collections.ImmutableMap;
 import com.googlecode.totallylazy.collections.ImmutableSortedMap;
 
-import java.util.Comparator;
-
 import static com.googlecode.totallylazy.Atomic.constructors.atomic;
 
 public class STM implements Atomic<ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>> {
@@ -19,7 +17,7 @@ public class STM implements Atomic<ImmutableMap<Definition, ImmutableList<Immuta
     }
 
     public STM() {
-        this(ImmutableSortedMap.constructors.<Definition, ImmutableList<ImmutableMap<String, String>>>sortedMap(definitionComparator));
+        this(ImmutableSortedMap.constructors.<Definition, ImmutableList<ImmutableMap<String, String>>>sortedMap());
     }
 
     @Override
@@ -35,11 +33,4 @@ public class STM implements Atomic<ImmutableMap<Definition, ImmutableList<Immuta
     public STM snapshot() {
         return new STM(value.value());
     }
-
-    private static final Comparator<Definition> definitionComparator = new Comparator<Definition>() {
-        @Override
-        public int compare(Definition a, Definition b) {
-            return a.name().compareTo(b.name());
-        }
-    };
 }
