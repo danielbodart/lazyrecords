@@ -1,16 +1,23 @@
 package com.googlecode.lazyrecords.sql;
 
-import com.googlecode.lazyrecords.*;
+import com.googlecode.lazyrecords.Aggregates;
+import com.googlecode.lazyrecords.Join;
+import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.Logger;
+import com.googlecode.lazyrecords.Loggers;
+import com.googlecode.lazyrecords.Record;
+import com.googlecode.lazyrecords.SelectCallable;
+import com.googlecode.lazyrecords.sql.expressions.Expressible;
+import com.googlecode.lazyrecords.sql.expressions.Expression;
+import com.googlecode.lazyrecords.sql.expressions.SelectBuilder;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Callable2;
 import com.googlecode.totallylazy.Function;
+import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sets;
-import com.googlecode.lazyrecords.sql.expressions.Expressible;
-import com.googlecode.lazyrecords.sql.expressions.Expression;
-import com.googlecode.lazyrecords.sql.expressions.SelectBuilder;
 import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.Value;
 
@@ -20,44 +27,53 @@ import java.util.Set;
 
 import static com.googlecode.totallylazy.Option.some;
 import static com.googlecode.totallylazy.Pair.pair;
-import static java.lang.String.format;
 
-public class SqlSequence extends Sequence<Record> implements Expressible {
+public class SqlSequence<T> extends Sequence<T> implements Expressible {
     private final SqlRecords sqlRecords;
     private final SelectBuilder select;
     private final Logger logger;
-    private final Value<Iterable<Record>> data;
+    private final Value<Sequence<T>> data;
+    private final Callable1<? super Record, ? extends T> callable;
 
-    public SqlSequence(final SqlRecords records, final SelectBuilder select, final Logger logger) {
+    public SqlSequence(final SqlRecords records, final SelectBuilder select, final Logger logger, Callable1<? super Record, ? extends T> callable) {
         this.sqlRecords = records;
         this.select = select;
         this.logger = logger;
-        this.data = new Function<Iterable<Record>>() {
+        this.callable = callable;
+        this.data = new Function<Sequence<T>>() {
             @Override
-            public Iterable<Record> call() throws Exception {
+            public Sequence<T> call() throws Exception {
                 return execute(select);
             }
         }.lazy();
     }
 
-    public Iterator<Record> iterator() {
+    public Iterator<T> iterator() {
         return data.value().iterator();
     }
 
-    private Iterable<Record> execute(final SelectBuilder select) {
-        return sqlRecords.query(select.build(), select.select());
+    private Sequence<T> execute(final SelectBuilder select) {
+        return sqlRecords.query(select.build(), select.select()).map(callable);
     }
 
-    private SqlSequence build(final SelectBuilder builder){
-        return new SqlSequence(sqlRecords, builder, logger);
+    private SqlSequence<T> build(final SelectBuilder builder){
+        return new SqlSequence<T>(sqlRecords, builder, logger, callable);
+    }
+
+    private <S> SqlSequence<S> build(final Keyword<S> keyword) {
+        return new SqlSequence<S>(sqlRecords, select.select(keyword), logger, new Function1<Record, S>() {
+            public S call(Record record) throws Exception {
+                return record.get(keyword);
+            }
+        });
     }
 
     @Override
-    public <S> Sequence<S> map(final Callable1<? super Record, ? extends S> callable) {
-        if (callable instanceof Keyword) {
-            return new SingleValueSequence<S>(sqlRecords, select.select((Keyword) callable), callable, logger);
-        }
+    public <S> Sequence<S> map(Callable1<? super T, ? extends S> callable) {
         Callable1 raw = (Callable1) callable;
+        if (raw instanceof Keyword) {
+            return build(Unchecked.<Keyword<S>>cast(raw));
+        }
         if (raw instanceof SelectCallable) {
             return Unchecked.cast(build(select.select(((SelectCallable) raw).keywords())));
         }
@@ -66,7 +82,7 @@ public class SqlSequence extends Sequence<Record> implements Expressible {
     }
 
     @Override
-    public <S> Sequence<S> flatMap(Callable1<? super Record, ? extends Iterable<? extends S>> callable) {
+    public <S> Sequence<S> flatMap(Callable1<? super T, ? extends Iterable<? extends S>> callable) {
         Callable1 raw = (Callable1) callable;
         if(raw instanceof Join){
             return Unchecked.cast(build(select.join(some((Join) raw))));
@@ -76,9 +92,9 @@ public class SqlSequence extends Sequence<Record> implements Expressible {
     }
 
     @Override
-    public Sequence<Record> filter(Predicate<? super Record> predicate) {
+    public Sequence<T> filter(Predicate<? super T> predicate) {
         try {
-            return build(select.where(predicate));
+            return build(select.where(Unchecked.<Predicate<Record>>cast(predicate)));
         } catch (UnsupportedOperationException ex) {
             logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.MESSAGE, "Unsupported predicate passed to 'filter', moving computation to client"), pair(Loggers.PREDICATE, predicate)));
             return super.filter(predicate);
@@ -86,9 +102,9 @@ public class SqlSequence extends Sequence<Record> implements Expressible {
     }
 
     @Override
-    public Sequence<Record> sortBy(Comparator<? super Record> comparator) {
+    public Sequence<T> sortBy(Comparator<? super T> comparator) {
         try {
-            return build(select.orderBy(comparator));
+            return build(select.orderBy(Unchecked.<Comparator<Record>>cast(comparator)));
         } catch (UnsupportedOperationException ex) {
             logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.MESSAGE, "Unsupported comparator passed to 'sortBy', moving computation to client"), pair(Loggers.COMPARATOR, comparator)));
             return super.sortBy(comparator);
@@ -96,9 +112,16 @@ public class SqlSequence extends Sequence<Record> implements Expressible {
     }
 
     @Override
-    public <S> S reduce(Callable2<? super S, ? super Record, ? extends S> callable) {
+    @SuppressWarnings("unchecked")
+    public <S> S reduce(Callable2<? super S, ? super T, ? extends S> callable) {
         try {
-            return Unchecked.cast(build(select.reduce(callable)).head());
+            Callable2 raw = callable;
+            SelectBuilder reduce = select.reduce(callable);
+            if (raw instanceof Aggregates) {
+                return Unchecked.cast(build(reduce).head());
+            }
+            SqlSequence<Record> records = new SqlSequence<Record>(sqlRecords, reduce, logger, Function1.<Record>identity());
+            return (S) records.head().fields().head().second();
         } catch (UnsupportedOperationException ex) {
             logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.MESSAGE, "Unsupported function passed to 'reduce', moving computation to client"), pair(Loggers.FUNCTION, callable)));
             return super.reduce(callable);
@@ -107,16 +130,18 @@ public class SqlSequence extends Sequence<Record> implements Expressible {
 
     @Override
     public int size() {
-        return ((Number) build(select.count()).head().fields().head().second()).intValue();
+        T head = build(select.count()).head();
+        Record record = (Record) head;
+        return ((Number) record.fields().head().second()).intValue();
     }
 
     @Override
-    public <S extends Set<Record>> S toSet(S set) {
+    public <S extends Set<T>> S toSet(S set) {
         return Sets.set(set, execute(select.distinct()));
     }
 
     @Override
-    public Sequence<Record> unique() {
+    public Sequence<T> unique() {
         return build(select.distinct());
     }
 

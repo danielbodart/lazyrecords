@@ -109,13 +109,17 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
     }
 
     public SelectBuilder reduce(Callable2<?, ?, ?> callable) {
+        return select(aggregates(callable));
+    }
+
+    private Sequence<Keyword<?>> aggregates(Callable2<?, ?, ?> callable) {
         if (callable instanceof Aggregates) {
             Aggregates aggregates = (Aggregates) callable;
-            return new SelectBuilder(grammar, setQuantifier, aggregates.value().<Keyword<?>>unsafeCast(), table, where, comparator, join);
+            return aggregates.value().unsafeCast();
         }
         Keyword<?> head = select().head();
         Aggregate<Object, Object> aggregate = Aggregate.aggregate(Unchecked.<Callable2<Object, Object, Object>>cast(callable), Unchecked.<Keyword<Object>>cast(head));
-        return new SelectBuilder(grammar, setQuantifier, Sequences.<Keyword<?>>sequence(aggregate), table, where, comparator, join);
+        return Sequences.<Keyword<?>>sequence(aggregate);
     }
 
     public SelectBuilder join(Option<Join> join) {

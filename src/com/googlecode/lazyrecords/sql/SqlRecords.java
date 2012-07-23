@@ -16,6 +16,7 @@ import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.CloseableList;
 import com.googlecode.totallylazy.Computation;
+import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Group;
 import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.Option;
@@ -27,11 +28,9 @@ import com.googlecode.totallylazy.numbers.Numbers;
 import java.io.Closeable;
 import java.io.IOException;
 import java.sql.Connection;
-import java.util.Iterator;
 import java.util.Map;
 
 import static com.googlecode.lazyrecords.Loggers.milliseconds;
-import static com.googlecode.lazyrecords.sql.expressions.DeleteStatement.deleteStatement;
 import static com.googlecode.lazyrecords.sql.expressions.SelectBuilder.from;
 import static com.googlecode.lazyrecords.sql.grammars.SqlGrammar.functions.insertStatement;
 import static com.googlecode.lazyrecords.sql.grammars.SqlGrammar.functions.updateStatement;
@@ -62,8 +61,8 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
     }
 
 
-    public SqlSequence get(Definition definition) {
-        return new SqlSequence(this, from(grammar, definition), logger);
+    public SqlSequence<Record> get(Definition definition) {
+        return new SqlSequence<Record>(this, from(grammar, definition), logger, Function1.<Record>identity());
     }
 
     public Sequence<Record> query(final Expression expression, final Sequence<Keyword<?>> definitions) {
