@@ -30,15 +30,16 @@ public class LuceneIterator extends StatefulIterator<Record> implements Closeabl
     private final CloseableList closeables;
     private final Logger logger;
     private ScoreDoc[] scoreDocs;
-    private int index = 0;
+    private int index;
     private Searcher searcher;
     private boolean closed = false;
 
-    public LuceneIterator(LuceneStorage storage, Query query, Sort sort, Callable1<? super Document, Record> documentToRecord, CloseableList closeables, Logger logger) {
+    public LuceneIterator(LuceneStorage storage, Query query, Sort sort, Callable1<? super Document, Record> documentToRecord, int start, CloseableList closeables, Logger logger) {
         this.storage = storage;
         this.query = query;
         this.sort = sort;
         this.documentToRecord = documentToRecord;
+        this.index = start;
         this.closeables = closeables;
         this.logger = logger;
     }

@@ -29,14 +29,15 @@ public class LuceneSequence extends Sequence<Record> {
     private final CloseableList closeables;
     private final Sort sort;
     private final Value<Iterable<Record>> data;
+    private final int start;
 
     public LuceneSequence(final Lucene lucene, final LuceneStorage storage, final Query query,
                           final Callable1<? super Document, Record> documentToRecord, final Logger logger, CloseableList closeables) {
-        this(lucene, storage, query, documentToRecord, logger, closeables, new Sort());
+        this(lucene, storage, query, documentToRecord, logger, closeables, new Sort(), 0);
     }
 
     public LuceneSequence(final Lucene lucene, final LuceneStorage storage, final Query query,
-                          final Callable1<? super Document, Record> documentToRecord, final Logger logger, final CloseableList closeables, final Sort sort) {
+                          final Callable1<? super Document, Record> documentToRecord, final Logger logger, final CloseableList closeables, final Sort sort, final int start) {
         this.lucene = lucene;
         this.storage = storage;
         this.query = query;
@@ -44,10 +45,11 @@ public class LuceneSequence extends Sequence<Record> {
         this.logger = logger;
         this.closeables = closeables;
         this.sort = sort;
+        this.start = start;
         this.data = new Function<Iterable<Record>>() {
             @Override
             public Iterable<Record> call() throws Exception {
-                return Computation.memorise(new LuceneIterator(storage, query, sort, documentToRecord, closeables, logger));
+                return Computation.memorise(new LuceneIterator(storage, query, sort, documentToRecord, start, closeables, logger));
             }
         }.lazy();
     }
@@ -58,13 +60,13 @@ public class LuceneSequence extends Sequence<Record> {
 
     @Override
     public Sequence<Record> filter(Predicate<? super Record> predicate) {
-        return new LuceneSequence(lucene, storage, and(query, lucene.query(predicate)), documentToRecord, logger, closeables, sort);
+        return new LuceneSequence(lucene, storage, and(query, lucene.query(predicate)), documentToRecord, logger, closeables, sort, start);
     }
 
     @Override
     public int size() {
         try {
-            return storage.count(query);
+            return storage.count(query) - start;
         } catch (IOException e) {
             throw LazyException.lazyException(e);
         }
@@ -72,6 +74,11 @@ public class LuceneSequence extends Sequence<Record> {
 
     @Override
     public Sequence<Record> sortBy(Comparator<? super Record> comparator) {
-        return new LuceneSequence(lucene, storage, query, documentToRecord, logger, closeables, Lucene.sort(comparator));
+        return new LuceneSequence(lucene, storage, query, documentToRecord, logger, closeables, Lucene.sort(comparator), start);
+    }
+
+    @Override
+    public Sequence<Record> drop(int count) {
+        return new LuceneSequence(lucene, storage, query, documentToRecord, logger, closeables, sort, start + count);
     }
 }
