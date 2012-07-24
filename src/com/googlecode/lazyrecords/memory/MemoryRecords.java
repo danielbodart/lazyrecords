@@ -24,7 +24,7 @@ import static com.googlecode.totallylazy.Maps.map;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class MemoryRecords extends AbstractRecords {
-    private final ConcurrentMap<Definition, List<Map<String, String>>> data = new ConcurrentHashMap<Definition, List<Map<String, String>>>();
+    private final ConcurrentMap<String, List<Map<String, String>>> data = new ConcurrentHashMap<String, List<Map<String, String>>>();
     private final StringMappings mappings;
 
     public MemoryRecords(StringMappings mappings) {
@@ -40,8 +40,8 @@ public class MemoryRecords extends AbstractRecords {
     }
 
     private List<Map<String, String>> recordsFor(Definition definition) {
-        data.putIfAbsent(definition, new CopyOnWriteArrayList<Map<String, String>>());
-        return data.get(definition);
+        data.putIfAbsent(definition.name(), new CopyOnWriteArrayList<Map<String, String>>());
+        return data.get(definition.name());
     }
 
     public Number add(final Definition definition, Sequence<Record> records) {

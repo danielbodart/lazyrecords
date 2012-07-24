@@ -19,6 +19,7 @@ import org.apache.lucene.document.Fieldable;
 
 import static com.googlecode.lazyrecords.Definition.methods.sortFields;
 import static com.googlecode.lazyrecords.Record.functions.updateValues;
+import static com.googlecode.totallylazy.Predicates.in;
 import static com.googlecode.totallylazy.Predicates.is;
 import static com.googlecode.totallylazy.Predicates.notNullValue;
 import static com.googlecode.totallylazy.Predicates.where;
@@ -44,7 +45,7 @@ public class LuceneMappings {
             public Record call(Document document) throws Exception {
                 return sequence(document.getFields()).
                         map(asPair(definitions)).
-                        filter(where(Callables.<Keyword<?>>first(), is(Predicates.<Keyword<?>>not(Lucene.RECORD_KEY)))).
+                        filter(where(Callables.<Keyword<?>>first(), is(Predicates.<Keyword<?>>not(Lucene.RECORD_KEY)).and(in(definitions)))).
                         fold(SourceRecord.record(document), updateValues());
             }
         };

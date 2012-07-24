@@ -156,7 +156,16 @@ public abstract class RecordsContract<T extends Records> {
     public void supportsJoinUsing() throws Exception {
         assertThat(records.get(people).filter(where(age, is(lessThan(12)))).
                 flatMap(join(records.get(books), using(isbn))).
-                map(title), containsInAnyOrder("Zen And The Art Of Motorcycle Maintenance", "Clean Code: A Handbook of Agile Software Craftsmanship"));
+                head().fields().size(), NumberMatcher.is(8));
+
+        assertThat(records.get(people).filter(where(age, is(lessThan(12)))).
+                flatMap(join(records.get(books), using(isbn))).
+                map(select(firstName, isbn)).
+                head().fields().size(), NumberMatcher.is(2));
+
+        assertThat(records.get(people).map(select(isbn, age)).filter(where(age, is(lessThan(12)))).
+                flatMap(join(records.get(books).map(select(title, isbn)), using(isbn))).
+                head().fields().size(), NumberMatcher.is(3));
     }
 
     @Test
@@ -256,6 +265,7 @@ public abstract class RecordsContract<T extends Records> {
     @Test
     public void supportsSelectingAllKeywords() throws Exception {
         assertThat(records.get(people).first().fields().size(), NumberMatcher.is(5));
+        assertThat(records.get(definition(people.name(), age)).first().fields().size(), NumberMatcher.is(1));
     }
 
     @Test

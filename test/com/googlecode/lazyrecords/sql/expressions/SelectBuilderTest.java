@@ -21,9 +21,9 @@ public class SelectBuilderTest {
     private final SqlGrammar grammar = new AnsiSqlGrammar();
 
     @Test
-    public void ifColumnsSelectedIsEmptyUseStar() throws Exception {
+    public void ifColumnsSelectedIsEmptyUseDefinitionFields() throws Exception {
         Expression build = from(grammar, cars).select(Sequences.<Keyword<?>>empty()).build();
-        assertThat(build.text(), is("select * from cars"));
+        assertThat(build.text(), is("select make,model,1 from cars"));
     }
 
     @Test

@@ -9,6 +9,7 @@ import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.totallylazy.Callable2;
 import com.googlecode.totallylazy.Function;
+import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
@@ -27,7 +28,6 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class SelectBuilder implements Expressible, Callable<Expression>, Expression {
     public static final Keyword<Object> STAR = keyword("*");
-    public static final Sequence<Keyword<?>> ALL_COLUMNS = Sequences.<Keyword<?>>sequence(STAR);
     private final SqlGrammar grammar;
     private final SetQuantifier setQuantifier;
     private final Sequence<Keyword<?>> select;
@@ -41,7 +41,7 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
         this.grammar = grammar;
         this.setQuantifier = setQuantifier;
         this.join = join;
-        this.select = select.isEmpty() ? ALL_COLUMNS : select;
+        this.select = select.isEmpty() ? table.fields() : select;
         this.table = table;
         this.where = where;
         this.comparator = comparator;
@@ -123,8 +123,21 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
     }
 
     public SelectBuilder join(Option<Join> join) {
-        return new SelectBuilder(grammar, setQuantifier, select, table, where, comparator, join);
+        return new SelectBuilder(grammar, setQuantifier, select.join(joinedKeywords(join)).unique().realise(), table, where, comparator, join);
     }
+
+    private static Sequence<Keyword<?>> joinedKeywords(Option<Join> join) {
+        return join.toSequence().flatMap(new Function1<Join, Sequence<Keyword<?>>>() {
+            @Override
+            public Sequence<Keyword<?>> call(Join join) throws Exception {
+                Expressible records = (Expressible) join.records();
+                SelectBuilder select = (SelectBuilder) records.express();
+                return select.select();
+            }
+        });
+    }
+
+
 
     @Override
     public String text() {
