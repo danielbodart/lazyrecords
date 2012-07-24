@@ -37,11 +37,12 @@ public abstract class AbstractRecords implements Records {
             public Number call(Pair<? extends Predicate<? super Record>, Record> pair) throws Exception {
                 Predicate<? super Record> predicate = pair.first();
                 Sequence<Record> matched = get(definition).filter(predicate).realise();
+                Record updatedFields = Record.methods.filter(pair.second(), definition.fields());
                 if (add && matched.isEmpty()) {
-                    return add(definition, pair.second());
+                    return add(definition, updatedFields);
                 }
                 remove(definition, predicate);
-                return add(definition, matched.map(merge(pair.second())));
+                return add(definition, matched.map(merge(updatedFields)));
             }
         };
     }

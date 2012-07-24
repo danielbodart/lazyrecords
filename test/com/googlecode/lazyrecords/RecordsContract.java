@@ -263,6 +263,23 @@ public abstract class RecordsContract<T extends Records> {
     }
 
     @Test
+    public void doesNotPutExtraFields() throws Exception {
+        assertCount(records.put(books, update(using(isbn),
+                        record().set(isbn, zenIsbn).set(firstName, "shouldBeIgnored"))
+        ), 1);
+        assertThat(records.get(books).filter(where(isbn, is(zenIsbn))).head().keywords().contains(firstName), CoreMatchers.is(false));
+    }
+
+    @Test
+    public void doesNotSetExtraFields() throws Exception {
+        assertCount(records.set(books, update(using(isbn),
+                        record().set(isbn, zenIsbn).set(firstName, "shouldBeIgnored"))
+        ), 1);
+        assertThat(records.get(books).filter(where(isbn, is(zenIsbn))).head().keywords().contains(firstName), CoreMatchers.is(false));
+    }
+
+
+    @Test
     public void supportsSelectingAllKeywords() throws Exception {
         assertThat(records.get(people).first().fields().size(), NumberMatcher.is(5));
         assertThat(records.get(definition(people.name(), age)).first().fields().size(), NumberMatcher.is(1));
