@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.mappings;
 
+import com.googlecode.totallylazy.Strings;
 import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.Uri;
 
@@ -50,7 +51,7 @@ public class StringMappings {
 
     public <T> T toValue(final Class<T> aClass, String value) {
         try {
-            return value == null ? null : aClass.cast(get(aClass).toValue(value));
+            return Strings.isEmpty(value) ? null : aClass.cast(get(aClass).toValue(value));
         } catch (Exception e) {
             throw new UnsupportedOperationException();
         }
