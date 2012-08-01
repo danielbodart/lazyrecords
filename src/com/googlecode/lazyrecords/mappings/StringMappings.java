@@ -18,8 +18,8 @@ public class StringMappings {
         add(Date.class, new DateMapping());
         add(Integer.class, new LexicalIntegerMapping());
         add(Long.class, new LexicalLongMapping());
-        add(URI.class, new UriMappings.URIMapping());
-        add(Uri.class, new UriMappings.UriMapping());
+        add(URI.class, new JavaURIMapping());
+        add(Uri.class, new UriMapping());
         add(Boolean.class, new BooleanMapping());
         add(UUID.class, new UUIDMapping());
     }

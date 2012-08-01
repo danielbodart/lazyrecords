@@ -12,14 +12,12 @@ import com.googlecode.totallylazy.Unchecked;
 
 import java.util.Map;
 
-import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.totallylazy.Callables.asString;
 import static com.googlecode.totallylazy.Maps.map;
 import static com.googlecode.totallylazy.Predicates.in;
 import static com.googlecode.totallylazy.Predicates.is;
 import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Sequences.sequence;
-import static com.googlecode.totallylazy.Strings.equalIgnoringCase;
 
 public interface Record {
     <T> T get(Keyword<T> keyword);
@@ -32,8 +30,9 @@ public interface Record {
 
     Sequence<Object> getValuesFor(Sequence<Keyword<?>> keywords);
 
-    public static final class constructors{
-        private constructors(){}
+    public static final class constructors {
+        private constructors() {
+        }
 
         public static Record record() {
             return new ImmutableMapRecord();
@@ -48,8 +47,9 @@ public interface Record {
         }
     }
 
-    public static final class methods{
-        private methods(){}
+    public static final class methods {
+        private methods() {
+        }
 
         @Deprecated // please use Keywords.matchKeyword);
         public static Keyword<Object> getKeyword(String name, Sequence<? extends Keyword<?>> definitions) {
@@ -74,12 +74,13 @@ public interface Record {
         }
 
         public static Map<String, Object> toMap(Record record) {
-            return map(record.fields().map(Callables.<Keyword<?>, Object, String>first(asString(Keyword.class))));
+            return map(record.fields().map(Callables.<Keyword<?>, Object, String>first(asString())));
         }
     }
 
-    public static final class functions{
-        private functions(){}
+    public static final class functions {
+        private functions() {
+        }
 
         public static Function2<Record, Pair<Keyword<?>, Object>, Record> updateValues() {
             return new Function2<Record, Pair<Keyword<?>, Object>, Record>() {
