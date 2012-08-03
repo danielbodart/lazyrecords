@@ -4,43 +4,35 @@ import com.googlecode.lazyrecords.AliasedKeyword;
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Keywords;
-import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.Records;
 import com.googlecode.lazyrecords.RecordsContract;
 import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Sequences;
 import com.googlecode.totallylazy.Xml;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
 import org.junit.Test;
-import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 import static com.googlecode.lazyrecords.Definition.constructors.definition;
 import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.totallylazy.Xml.document;
-import static com.googlecode.totallylazy.Xml.sequence;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
 public class XmlRecordsTest extends RecordsContract<XmlRecords> {
-    private Document document;
-
-    public XmlRecordsTest() {
-        people = definition("/data/user", people.fields());
-        books = definition("/data/book", books.fields());
-    }
+    private Node root;
 
     @Override
     protected XmlRecords createRecords() throws Exception {
-        document = document("<data/>");
-        return new XmlRecords(document);
+        root = document("<data/>");
+        return new XmlRecords(root);
     }
 
     @Test
     public void showGeneratedXml() throws Exception {
-        System.out.println(Xml.format(document.getDocumentElement()));
+        System.out.println(Xml.format(root));
     }
 
     @Test
