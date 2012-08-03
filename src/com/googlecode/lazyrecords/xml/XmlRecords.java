@@ -6,7 +6,6 @@ import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Sequences;
 import com.googlecode.totallylazy.Value;
 import com.googlecode.totallylazy.Xml;
 import com.googlecode.lazyrecords.AbstractRecords;
@@ -17,42 +16,30 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import javax.xml.xpath.XPath;
-
-import static com.googlecode.totallylazy.Xml.xpath;
-
 public class XmlRecords extends AbstractRecords {
-    private final XPath xpath = xpath();
-    private final Document document;
+    private final Node root;
     private final XmlMappings mappings;
 
-    public XmlRecords(Document document, XmlMappings mappings) {
-        this.document = document;
+    public XmlRecords(Node root, XmlMappings mappings) {
+        this.root = root instanceof Document ? ((Document) root).getDocumentElement() : root;
         this.mappings = mappings;
     }
 
-    public XmlRecords(Document document) {
-        this(document, new XmlMappings());
+    public XmlRecords(Node node) {
+        this(node, new XmlMappings());
     }
 
     public Sequence<Record> get(Definition definition) {
-        Sequence<Node> nodes = Xml.selectNodes(document, definition.name());
+        Sequence<Node> nodes = Xml.selectNodes(root, definition.name());
         return new XmlSequence(nodes, mappings, definition.fields());
     }
 
     public Number add(Definition definition, Sequence<Record> records) {
         for (Record record : records) {
-            Element newElement = record.keywords().fold(document.createElement(toTagName(definition.name())), addNodes(record));
-            Node parent = Xml.selectNodes(document, toParent(definition)).head();
-            parent.appendChild(newElement);
+            Element newElement = record.keywords().fold(root.getOwnerDocument().createElement(toTagName(definition.name())), addNodes(record));
+            root.appendChild(newElement);
         }
         return records.size();
-    }
-
-    private String toParent(Definition definition) {
-        String xpath = definition.name();
-        String[] parts = xpath.split("/");
-        return Sequences.sequence(parts).take(parts.length - 1).toString("/");
     }
 
     private Function2<Element, Keyword<?>, Element> addNodes(final Record record) {
@@ -61,7 +48,7 @@ public class XmlRecords extends AbstractRecords {
                 Object value = record.get(field);
                 if (value != null) {
                     XmlMapping<Object> objectMapping = mappings.get(field.forClass());
-                    Sequence<Node> nodes = objectMapping.to(document, field.toString(), value);
+                    Sequence<Node> nodes = objectMapping.to(root, field.toString(), value);
                     for (Node node : nodes) {
                         container.appendChild(node);
                     }
@@ -82,6 +69,6 @@ public class XmlRecords extends AbstractRecords {
     }
 
     public Number remove(Definition definition) {
-        return Xml.remove(document, definition.name()).size();
+        return Xml.remove(root, definition.name()).size();
     }
 }
