@@ -1,20 +1,22 @@
 package com.googlecode.lazyrecords;
 
+import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Sequences;
 
 import java.io.Writer;
 
+import static com.googlecode.totallylazy.Callables.toString;
+
 public class CsvWriter {
-    private static final String FIELD_SEPARATOR = ",";
+    private static final String FIELD_SEPARATOR = ", ";
     private static final char ROW_SEPARATOR = '\n';
 
-    public static void writeTo(Sequence<Record> records, Writer writer, Sequence<Keyword<?>> requiredfields) {
-        records.map(fieldsToString(requiredfields)).cons(requiredfields.map(Callables.asString()).toString()).fold(writer, writeLine());
+    public static void writeTo(Sequence<Record> records, Writer writer, Sequence<Keyword<?>> fields) {
+        records.map(rowToString(fields)).cons(headers(fields)).fold(writer, writeLine());
     }
 
     private static Function2<Writer, String, Writer> writeLine() {
@@ -26,16 +28,20 @@ public class CsvWriter {
         };
     }
 
-    private static Function1<Record, String> fieldsToString(final Sequence<Keyword<?>> requiredFields) {
+    private static Function1<Record, String> rowToString(final Sequence<Keyword<?>> fields) {
         return new Function1<Record, String>() {
             @Override
-            public String call(Record record) throws Exception {
-                Sequence<String> stringSequence = Sequences.sequence();
-                for (Keyword<?> requiredField : requiredFields) {
-                    Option<Object> option = Option.option(record.get(requiredField));
-                    stringSequence = stringSequence.add(option.getOrElse("").toString());
-                }
-                return stringSequence.map(escapeSpecialCharacters()).toString(FIELD_SEPARATOR);
+            public String call(final Record record) throws Exception {
+                return fields.map(fieldToString(record)).map(escapeSpecialCharacters()).toString(FIELD_SEPARATOR);
+            }
+        };
+    }
+
+    private static Callable1<Keyword<?>, String> fieldToString(final Record record) {
+        return new Callable1<Keyword<?>, String>() {
+            @Override
+            public String call(Keyword<?> keyword) throws Exception {
+                return Option.option(record.get(keyword)).map(toString).getOrElse("");
             }
         };
     }
@@ -51,5 +57,9 @@ public class CsvWriter {
                 return recordValue;
             }
         };
+    }
+
+    private static String headers(Sequence<Keyword<?>> fields) {
+        return fields.map(toString).toString(FIELD_SEPARATOR);
     }
 }

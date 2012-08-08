@@ -135,5 +135,14 @@ public interface Record {
             };
         }
 
+        public static Function1<Record, Object> valueFor(final Keyword<?> field) {
+            return new Function1<Record, Object>() {
+                @Override
+                public Object call(Record record) throws Exception {
+                    return record.get(field);
+                }
+            };
+        }
+
     }
 }
