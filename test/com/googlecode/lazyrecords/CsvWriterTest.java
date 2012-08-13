@@ -31,7 +31,7 @@ public class CsvWriterTest {
                 "1, , , \n" +
                 ", 2, , \n";
 
-        CsvWriter.writeTo(recordSequence, writer, keywords);
+        CsvWriter.writeTo(recordSequence.iterator(), writer, keywords);
 
         assertEquals(expected, writer.toString());
     }

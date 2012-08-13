@@ -4,10 +4,12 @@ import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
+import com.googlecode.totallylazy.Iterators;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Sequence;
 
 import java.io.Writer;
+import java.util.Iterator;
 
 import static com.googlecode.totallylazy.Callables.toString;
 
@@ -15,8 +17,8 @@ public class CsvWriter {
     private static final String FIELD_SEPARATOR = ", ";
     private static final char ROW_SEPARATOR = '\n';
 
-    public static void writeTo(Sequence<Record> records, Writer writer, Sequence<Keyword<?>> fields) {
-        records.map(rowToString(fields)).cons(headers(fields)).fold(writer, writeLine());
+    public static void writeTo(Iterator<Record> records, Writer writer, Sequence<Keyword<?>> fields) {
+        Iterators.fold(Iterators.cons(headers(fields), Iterators.map(records, rowToString(fields))), writer, writeLine());
     }
 
     private static Function2<Writer, String, Writer> writeLine() {
