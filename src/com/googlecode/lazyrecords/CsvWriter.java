@@ -1,7 +1,6 @@
 package com.googlecode.lazyrecords;
 
 import com.googlecode.totallylazy.Callable1;
-import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Iterators;
@@ -52,9 +51,9 @@ public class CsvWriter {
         return new Function1<String, String>() {
             @Override
             public String call(String recordValue) throws Exception {
-                recordValue = recordValue.replace("\n", " ");
+                recordValue = recordValue.replace('\n', ' ');
                 if (recordValue.contains(",")) {
-                    recordValue = "\"" + recordValue + "\"";
+                    return '"' + recordValue + '"';
                 }
                 return recordValue;
             }
