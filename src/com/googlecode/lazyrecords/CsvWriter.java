@@ -13,7 +13,7 @@ import java.util.Iterator;
 import static com.googlecode.totallylazy.Callables.toString;
 
 public class CsvWriter {
-    private static final String FIELD_SEPARATOR = ", ";
+    private static final String FIELD_SEPARATOR = ",";
     private static final char ROW_SEPARATOR = '\n';
 
     public static void writeTo(Iterator<Record> records, Writer writer, Sequence<Keyword<?>> fields) {
