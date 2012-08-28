@@ -17,6 +17,7 @@ import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.CloseableList;
 import com.googlecode.totallylazy.Computation;
 import com.googlecode.totallylazy.Function1;
+import com.googlecode.totallylazy.Functions;
 import com.googlecode.totallylazy.Group;
 import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.Option;
@@ -62,7 +63,7 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
 
 
     public SqlSequence<Record> get(Definition definition) {
-        return new SqlSequence<Record>(this, from(grammar, definition), logger, Function1.<Record>identity());
+        return new SqlSequence<Record>(this, from(grammar, definition), logger, Functions.<Record>identity());
     }
 
     public Sequence<Record> query(final Expression expression, final Sequence<Keyword<?>> definitions) {

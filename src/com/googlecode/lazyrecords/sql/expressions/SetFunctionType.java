@@ -2,7 +2,7 @@ package com.googlecode.lazyrecords.sql.expressions;
 
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.totallylazy.Callable2;
-import com.googlecode.totallylazy.callables.CountNotNull;
+import com.googlecode.totallylazy.callables.Count;
 import com.googlecode.totallylazy.comparators.Maximum;
 import com.googlecode.totallylazy.comparators.Minimum;
 import com.googlecode.totallylazy.numbers.Average;
@@ -16,7 +16,7 @@ import static java.lang.String.format;
 
 public class SetFunctionType extends TextOnlyExpression {
     private static final Map<Class<?>, String> names = new LinkedHashMap<Class<?>, String>() {{
-        put(CountNotNull.class, "count");
+        put(Count.class, "count");
         put(Average.class, "avg");
         put(Sum.class, "sum");
         put(Minimum.class, "min");

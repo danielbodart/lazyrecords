@@ -59,7 +59,7 @@ import static com.googlecode.totallylazy.Strings.contains;
 import static com.googlecode.totallylazy.Strings.endsWith;
 import static com.googlecode.totallylazy.Strings.startsWith;
 import static com.googlecode.totallylazy.URLs.uri;
-import static com.googlecode.totallylazy.callables.CountNotNull.count;
+import static com.googlecode.totallylazy.callables.Count.count;
 import static com.googlecode.totallylazy.matchers.IterableMatcher.hasExactly;
 import static com.googlecode.totallylazy.matchers.NumberMatcher.equalTo;
 import static com.googlecode.totallylazy.time.Dates.date;
@@ -203,10 +203,10 @@ public abstract class RecordsContract<T extends Records> {
         assertThat(records.get(people).map(dob).reduce(Minimum.<Date>minimum()), CoreMatchers.is(date(1975, 1, 10)));
         assertThat(records.get(people).map(age).reduce(Numbers.sum()), NumberMatcher.is(33));
         assertThat(records.get(people).map(age).reduce(Numbers.average()), NumberMatcher.is(11));
-        assertThat(records.get(people).fold(0, count()), NumberMatcher.is(3));
 
+        assertThat(records.get(people).reduce(count()), NumberMatcher.is(3));
         records.add(people, record().set(firstName, "null age").set(lastName, "").set(age, null).set(dob, date(1974, 1, 10)));
-        assertThat(records.get(people).map(age).fold(0, count()), NumberMatcher.is(3));
+        assertThat(records.get(people).map(age).reduce(count()), NumberMatcher.is(3));
     }
 
     @Test

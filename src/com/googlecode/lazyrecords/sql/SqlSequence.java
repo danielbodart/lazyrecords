@@ -14,6 +14,7 @@ import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Callable2;
 import com.googlecode.totallylazy.Function;
 import com.googlecode.totallylazy.Function1;
+import com.googlecode.totallylazy.Functions;
 import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
@@ -120,7 +121,7 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
             if (raw instanceof Aggregates) {
                 return Unchecked.cast(build(reduce).head());
             }
-            SqlSequence<Record> records = new SqlSequence<Record>(sqlRecords, reduce, logger, Function1.<Record>identity());
+            SqlSequence<Record> records = new SqlSequence<Record>(sqlRecords, reduce, logger, Functions.<Record>identity());
             return (S) records.head().fields().head().second();
         } catch (UnsupportedOperationException ex) {
             logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.MESSAGE, "Unsupported function passed to 'reduce', moving computation to client"), pair(Loggers.FUNCTION, callable)));

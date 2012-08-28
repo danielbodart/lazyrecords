@@ -16,7 +16,7 @@ import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
 import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.Value;
-import com.googlecode.totallylazy.callables.CountNotNull;
+import com.googlecode.totallylazy.callables.Count;
 
 import java.util.Comparator;
 import java.util.concurrent.Callable;
@@ -25,6 +25,7 @@ import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.lazyrecords.sql.expressions.SetQuantifier.ALL;
 import static com.googlecode.lazyrecords.sql.expressions.SetQuantifier.DISTINCT;
 import static com.googlecode.totallylazy.Sequences.sequence;
+import static com.googlecode.totallylazy.Unchecked.cast;
 
 public class SelectBuilder implements Expressible, Callable<Expression>, Expression {
     public static final Keyword<Object> STAR = keyword("*");
@@ -99,7 +100,7 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
     }
 
     public SelectBuilder count() {
-        Aggregate<Long, Number> recordCount = Aggregate.aggregate(CountNotNull.count(), keyword("*", Long.class)).as("record_count");
+        Aggregate<Number, Number> recordCount = Aggregate.count(keyword("*", Long.class)).as("record_count");
         Sequence<Keyword<?>> sequence = Sequences.<Keyword<?>>sequence(recordCount);
         return new SelectBuilder(grammar, setQuantifier, sequence, table, where, Option.<Comparator<? super Record>>none(), join);
     }
@@ -117,9 +118,15 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
             Aggregates aggregates = (Aggregates) callable;
             return aggregates.value().unsafeCast();
         }
-        Keyword<?> head = select().head();
-        Aggregate<Object, Object> aggregate = Aggregate.aggregate(Unchecked.<Callable2<Object, Object, Object>>cast(callable), Unchecked.<Keyword<Object>>cast(head));
+        Keyword<Object> cast = column();
+        Aggregate<Object, Object> aggregate = Aggregate.aggregate(Unchecked.<Callable2<Object, Object, Object>>cast(callable), cast);
         return Sequences.<Keyword<?>>sequence(aggregate);
+    }
+
+    private Keyword<Object> column() {
+        Sequence<Keyword<?>> columns = select();
+        if(columns.size() == 1 ) return cast(columns.head());
+        return cast(keyword("*", Long.class)) ;
     }
 
     public SelectBuilder join(Option<Join> join) {
