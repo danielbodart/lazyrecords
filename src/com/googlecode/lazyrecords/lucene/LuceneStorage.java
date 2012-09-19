@@ -7,9 +7,10 @@ import org.apache.lucene.search.Query;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.Flushable;
 import java.io.IOException;
 
-public interface LuceneStorage extends Closeable{
+public interface LuceneStorage extends Closeable, Flushable{
     Number add(Sequence<Document> documents) throws IOException;
 
     Number delete(Query query) throws IOException;

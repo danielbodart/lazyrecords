@@ -58,8 +58,6 @@ public class OptimisedStorage implements LuceneStorage {
         ensureIndexIsSetup();
         List<Document> docs = documents.toList();
         writer.addDocuments(docs);
-        writer.commit();
-        pool.markAsDirty();
         return docs.size();
     }
 
@@ -68,16 +66,13 @@ public class OptimisedStorage implements LuceneStorage {
         ensureIndexIsSetup();
         int count = count(query);
         writer.deleteDocuments(query);
-        writer.commit();
-        pool.markAsDirty();
         return count;
     }
 
     @Override
     public void deleteAll() throws IOException {
         writer.deleteAll();
-        writer.commit();
-        pool.markAsDirty();
+        flush();
     }
 
     @Override
@@ -137,7 +132,6 @@ public class OptimisedStorage implements LuceneStorage {
         }
     }
 
-
     private File unzippedName(File file) {
         return new File(file.toString() + ".unzipped");
     }
@@ -154,6 +148,7 @@ public class OptimisedStorage implements LuceneStorage {
             resetReadersAndWriters();
         }
     }
+
 
     private void resetReadersAndWriters() throws IOException {
         close();
@@ -187,6 +182,12 @@ public class OptimisedStorage implements LuceneStorage {
             } catch (Throwable ignored) {
             }
         }
+    }
+
+    @Override
+    public void flush() throws IOException {
+        writer.commit();
+        pool.markAsDirty();
     }
 
     private void ensureDirectoryUnlocked() throws IOException {

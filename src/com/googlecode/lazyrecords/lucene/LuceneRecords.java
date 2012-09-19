@@ -1,32 +1,38 @@
 package com.googlecode.lazyrecords.lucene;
 
+import com.googlecode.lazyrecords.AbstractRecords;
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.IgnoreLogger;
-import com.googlecode.lazyrecords.Logger;
-import com.googlecode.totallylazy.CloseableList;
-import com.googlecode.totallylazy.LazyException;
-import com.googlecode.totallylazy.Predicate;
-import com.googlecode.totallylazy.Sequence;
-import com.googlecode.lazyrecords.AbstractRecords;
 import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.Logger;
 import com.googlecode.lazyrecords.Queryable;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
+import com.googlecode.totallylazy.CloseableList;
+import com.googlecode.totallylazy.Function;
+import com.googlecode.totallylazy.Function1;
+import com.googlecode.totallylazy.LazyException;
+import com.googlecode.totallylazy.Pair;
+import com.googlecode.totallylazy.Predicate;
+import com.googlecode.totallylazy.Sequence;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.Sort;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.concurrent.Callable;
 
+import static com.googlecode.lazyrecords.Record.functions.merge;
 import static com.googlecode.lazyrecords.lucene.Lucene.and;
 import static com.googlecode.lazyrecords.lucene.Lucene.record;
+import static com.googlecode.totallylazy.Sequences.one;
+import static com.googlecode.totallylazy.numbers.Numbers.sum;
 
 public class LuceneRecords extends AbstractRecords implements Queryable<Query>, Closeable {
     private final LuceneStorage storage;
     private final LuceneMappings mappings;
     private final Logger logger;
     private final Lucene lucene;
-    private CloseableList closeables;
+    private final CloseableList closeables;
 
     public LuceneRecords(final LuceneStorage storage, final LuceneMappings mappings, final Logger logger) throws IOException {
         this.storage = storage;
@@ -48,28 +54,64 @@ public class LuceneRecords extends AbstractRecords implements Queryable<Query>, 
         return query(record(definition), definition.fields());
     }
 
-    public Number add(Definition definition, Sequence<Record> records) {
-        try {
-            return storage.add(records.map(mappings.asDocument(definition)));
-        } catch (IOException e) {
-            throw LazyException.lazyException(e);
-        }
+    public Number add(final Definition definition, final Sequence<Record> records) {
+        return process(new Function<Number>() {
+            @Override
+            public Number call() throws Exception {
+                return internalAdd(definition, records);
+            }
+        });
     }
 
-    public Number remove(Definition definition, Predicate<? super Record> predicate) {
-        return remove(and(record(definition), lucene.query(predicate)));
+    private Number internalAdd(Definition definition, Sequence<Record> records) throws IOException {
+        return storage.add(records.map(mappings.asDocument(definition)));
     }
 
-    public Number remove(Definition definition) {
-        return remove(record(definition));
+    public Number remove(final Definition definition, final Predicate<? super Record> predicate) {
+        return process(new Function<Number>() {
+            @Override
+            public Number call() throws Exception {
+                return internalRemove(definition, predicate);
+            }
+        });
     }
 
-    public Number remove(Query query) {
-        try {
-            return storage.delete(query);
-        } catch (IOException e) {
-            throw LazyException.lazyException(e);
-        }
+    private Number internalRemove(Definition definition, Predicate<? super Record> predicate) throws IOException {
+        return storage.delete(and(record(definition), lucene.query(predicate)));
+    }
+
+    public Number remove(final Definition definition) {
+        return process(new Function<Number>() {
+            @Override
+            public Number call() throws Exception {
+                return storage.delete(record(definition));
+            }
+        });
+    }
+
+    @Override
+    public Number put(final Definition definition, final Sequence<? extends Pair<? extends Predicate<? super Record>, Record>> records) {
+        return process(new Function<Number>() {
+            @Override
+            public Number call() throws Exception {
+                return records.map(update(definition)).reduce(sum());
+            }
+        });
+    }
+
+    private Function1<Pair<? extends Predicate<? super Record>, Record>, Number> update(final Definition definition) {
+        return new Function1<Pair<? extends Predicate<? super Record>, Record>, Number>() {
+            public Number call(Pair<? extends Predicate<? super Record>, Record> pair) throws Exception {
+                Predicate<? super Record> predicate = pair.first();
+                Sequence<Record> matched = get(definition).filter(predicate).realise();
+                Record updatedFields = Record.methods.filter(pair.second(), definition.fields());
+                if (matched.isEmpty()) {
+                    return internalAdd(definition, one(updatedFields));
+                }
+                internalRemove(definition, predicate);
+                return internalAdd(definition, matched.map(merge(updatedFields)));
+            }
+        };
     }
 
     public int count(final Query query) {
@@ -83,5 +125,17 @@ public class LuceneRecords extends AbstractRecords implements Queryable<Query>, 
     @Override
     public void close() throws IOException {
         closeables.close();
+    }
+
+    private Number process(Callable<Number> callable) {
+        try {
+            try {
+                return callable.call();
+            } finally {
+                storage.flush();
+            }
+        } catch (Exception e) {
+            throw LazyException.lazyException(e);
+        }
     }
 }

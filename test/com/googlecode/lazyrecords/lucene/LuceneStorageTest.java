@@ -21,6 +21,7 @@ public class LuceneStorageTest {
     public void canBackupAndRestore() throws Exception {
         LuceneStorage source = storage();
         source.add(sequence(new Document()));
+        source.flush();
         assertThat(source.count(new MatchAllDocsQuery()), is(1));
 
         File backup = Files.temporaryFile();
@@ -43,6 +44,7 @@ public class LuceneStorageTest {
         LuceneStorage storage = storage();
         storage.add(sequence(new Document()));
         storage.add(sequence(new Document()));
+        storage.flush();
         assertThat(storage.count(new MatchAllDocsQuery()), is(2));
         storage.deleteAll();
         assertThat(storage.count(new MatchAllDocsQuery()), is(0));
