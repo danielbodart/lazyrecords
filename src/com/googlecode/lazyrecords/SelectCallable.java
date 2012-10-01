@@ -10,7 +10,7 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 public class SelectCallable implements Callable1<Record, Record> {
     private final Sequence<Keyword<?>> keywords;
 
-    public SelectCallable(Sequence<Keyword<?>> keywords) {
+    protected SelectCallable(Sequence<Keyword<?>> keywords) {
         this.keywords = keywords;
     }
 

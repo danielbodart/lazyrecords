@@ -5,11 +5,8 @@ import com.googlecode.totallylazy.Closeables;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
 import com.googlecode.totallylazy.Unchecked;
-import com.googlecode.totallylazy.comparators.Maximum;
-import com.googlecode.totallylazy.comparators.Minimum;
 import com.googlecode.totallylazy.matchers.IterableMatcher;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
-import com.googlecode.totallylazy.numbers.Numbers;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.junit.After;
@@ -26,40 +23,40 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.UUID;
 
-import static com.googlecode.lazyrecords.Aggregate.average;
-import static com.googlecode.lazyrecords.Aggregate.maximum;
-import static com.googlecode.lazyrecords.Aggregate.minimum;
-import static com.googlecode.lazyrecords.Aggregate.sum;
-import static com.googlecode.lazyrecords.Aggregates.to;
-import static com.googlecode.lazyrecords.Definition.constructors.definition;
-import static com.googlecode.lazyrecords.Join.join;
-import static com.googlecode.lazyrecords.Keywords.keyword;
-import static com.googlecode.lazyrecords.Record.constructors.record;
-import static com.googlecode.lazyrecords.Record.methods.update;
-import static com.googlecode.lazyrecords.SelectCallable.select;
-import static com.googlecode.lazyrecords.Using.using;
-import static com.googlecode.totallylazy.Callables.ascending;
-import static com.googlecode.totallylazy.Callables.descending;
+import static com.googlecode.lazyrecords.Grammar.all;
+import static com.googlecode.lazyrecords.Grammar.ascending;
+import static com.googlecode.lazyrecords.Grammar.average;
+import static com.googlecode.lazyrecords.Grammar.between;
+import static com.googlecode.lazyrecords.Grammar.contains;
+import static com.googlecode.lazyrecords.Grammar.count;
+import static com.googlecode.lazyrecords.Grammar.definition;
+import static com.googlecode.lazyrecords.Grammar.descending;
+import static com.googlecode.lazyrecords.Grammar.endsWith;
+import static com.googlecode.lazyrecords.Grammar.greaterThan;
+import static com.googlecode.lazyrecords.Grammar.greaterThanOrEqualTo;
+import static com.googlecode.lazyrecords.Grammar.in;
+import static com.googlecode.lazyrecords.Grammar.is;
+import static com.googlecode.lazyrecords.Grammar.join;
+import static com.googlecode.lazyrecords.Grammar.keyword;
+import static com.googlecode.lazyrecords.Grammar.lessThan;
+import static com.googlecode.lazyrecords.Grammar.lessThanOrEqualTo;
+import static com.googlecode.lazyrecords.Grammar.maximum;
+import static com.googlecode.lazyrecords.Grammar.minimum;
+import static com.googlecode.lazyrecords.Grammar.not;
+import static com.googlecode.lazyrecords.Grammar.notNullValue;
+import static com.googlecode.lazyrecords.Grammar.nullValue;
+import static com.googlecode.lazyrecords.Grammar.record;
+import static com.googlecode.lazyrecords.Grammar.select;
+import static com.googlecode.lazyrecords.Grammar.startsWith;
+import static com.googlecode.lazyrecords.Grammar.sum;
+import static com.googlecode.lazyrecords.Grammar.to;
+import static com.googlecode.lazyrecords.Grammar.update;
+import static com.googlecode.lazyrecords.Grammar.using;
+import static com.googlecode.lazyrecords.Grammar.where;
 import static com.googlecode.totallylazy.Pair.pair;
-import static com.googlecode.totallylazy.Predicates.all;
-import static com.googlecode.totallylazy.Predicates.between;
-import static com.googlecode.totallylazy.Predicates.greaterThan;
-import static com.googlecode.totallylazy.Predicates.greaterThanOrEqualTo;
-import static com.googlecode.totallylazy.Predicates.in;
-import static com.googlecode.totallylazy.Predicates.is;
-import static com.googlecode.totallylazy.Predicates.lessThan;
-import static com.googlecode.totallylazy.Predicates.lessThanOrEqualTo;
-import static com.googlecode.totallylazy.Predicates.not;
-import static com.googlecode.totallylazy.Predicates.notNullValue;
-import static com.googlecode.totallylazy.Predicates.nullValue;
-import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.Streams.streams;
-import static com.googlecode.totallylazy.Strings.contains;
-import static com.googlecode.totallylazy.Strings.endsWith;
-import static com.googlecode.totallylazy.Strings.startsWith;
 import static com.googlecode.totallylazy.URLs.uri;
-import static com.googlecode.totallylazy.callables.Count.count;
 import static com.googlecode.totallylazy.matchers.IterableMatcher.hasExactly;
 import static com.googlecode.totallylazy.matchers.NumberMatcher.equalTo;
 import static com.googlecode.totallylazy.time.Dates.date;
@@ -199,10 +196,10 @@ public abstract class RecordsContract<T extends Records> {
 
     @Test
     public void supportsReduce() throws Exception {
-        assertThat(records.get(people).map(age).reduce(Maximum.<Integer>maximum()), CoreMatchers.is(12));
-        assertThat(records.get(people).map(dob).reduce(Minimum.<Date>minimum()), CoreMatchers.is(date(1975, 1, 10)));
-        assertThat(records.get(people).map(age).reduce(Numbers.sum()), NumberMatcher.is(33));
-        assertThat(records.get(people).map(age).reduce(Numbers.average()), NumberMatcher.is(11));
+        assertThat(records.get(people).map(age).reduce(maximum(Integer.class)), CoreMatchers.is(12));
+        assertThat(records.get(people).map(dob).reduce(minimum(Date.class)), CoreMatchers.is(date(1975, 1, 10)));
+        assertThat(records.get(people).map(age).reduce(sum()), NumberMatcher.is(33));
+        assertThat(records.get(people).map(age).reduce(average()), NumberMatcher.is(11));
 
         assertThat(records.get(people).reduce(count()), NumberMatcher.is(3));
         records.add(people, record().set(firstName, "null age").set(lastName, "").set(age, null).set(dob, date(1974, 1, 10)));
@@ -265,7 +262,7 @@ public abstract class RecordsContract<T extends Records> {
     @Test
     public void doesNotPutExtraFields() throws Exception {
         assertCount(records.put(books, update(using(isbn),
-                        record().set(isbn, zenIsbn).set(firstName, "shouldBeIgnored"))
+                record().set(isbn, zenIsbn).set(firstName, "shouldBeIgnored"))
         ), 1);
         assertThat(records.get(books).filter(where(isbn, is(zenIsbn))).head().keywords().contains(firstName), CoreMatchers.is(false));
     }
@@ -273,7 +270,7 @@ public abstract class RecordsContract<T extends Records> {
     @Test
     public void doesNotSetExtraFields() throws Exception {
         assertCount(records.set(books, update(using(isbn),
-                        record().set(isbn, zenIsbn).set(firstName, "shouldBeIgnored"))
+                record().set(isbn, zenIsbn).set(firstName, "shouldBeIgnored"))
         ), 1);
         assertThat(records.get(books).filter(where(isbn, is(zenIsbn))).head().keywords().contains(firstName), CoreMatchers.is(false));
     }

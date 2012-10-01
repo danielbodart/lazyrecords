@@ -13,7 +13,7 @@ import static com.googlecode.totallylazy.Predicates.where;
 public class Using implements Callable1<Record, Predicate<Record>> {
     private final Sequence<Keyword<?>> keywords;
 
-    public Using(Sequence<Keyword<?>> keywords) {
+    protected Using(Sequence<Keyword<?>> keywords) {
         this.keywords = keywords;
     }
 
