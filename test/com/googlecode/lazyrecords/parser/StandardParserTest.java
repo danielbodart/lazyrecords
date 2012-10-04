@@ -6,10 +6,13 @@ import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.lucene.Lucene;
 import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.lazyrecords.sql.expressions.WhereClause;
+import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
+import com.googlecode.totallylazy.predicates.LogicalPredicate;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import java.util.Date;
@@ -149,6 +152,17 @@ public class StandardParserTest {
         assertThat(predicate.matches(Record.constructors.record().set(name, "bob")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "mat")), is(false));
 
+        assertLuceneSyntax(predicate);
+        assertSqlSyntax(predicate);
+    }
+
+    @Test
+    public void explicitOrRequiresSpace() throws Exception {
+        PredicateParser predicateParser = new StandardParser();
+        Keyword<String> name = keyword("name", String.class);
+        Predicate<Record> predicate = predicateParser.parse("ORangutan ORangutan", sequence(name));
+        assertThat(predicate.matches(Record.constructors.record().set(name, "angutan")), is(false));
+        assertThat(predicate.matches(Record.constructors.record().set(name, "ORangutan")), is(true));
         assertLuceneSyntax(predicate);
         assertSqlSyntax(predicate);
     }
@@ -415,7 +429,7 @@ public class StandardParserTest {
     public void supportsIsNull() throws Exception {
         PredicateParser predicateParser = new StandardParser();
 
-        ImmutableKeyword<String> keyword = keyword("stringKeyword", String.class);
+        Keyword<String> keyword = keyword("stringKeyword", String.class);
         Predicate<Record> predicate = predicateParser.parse("stringKeyword:null", Sequences.<Keyword<?>>sequence(keyword));
         Predicate<Record> expected = where(keyword, Predicates.nullValue());
 

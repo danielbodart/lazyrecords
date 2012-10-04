@@ -46,7 +46,7 @@ public class Grammar {
     public static final Parser<Void> LTE = ws("<=");
     public static final Parser<Void> OPERATORS = Parsers.or(GTE, GT, LTE, LT);
 
-    public static final Parser<Callable2<Predicate<Record>, Predicate<Record>, Predicate<Record>>> OR = ws("OR").map(new Callable1<Void, Callable2<Predicate<Record>, Predicate<Record>, Predicate<Record>>>() {
+    public static final Parser<Callable2<Predicate<Record>, Predicate<Record>, Predicate<Record>>> OR = ws("OR ").map(new Callable1<Void, Callable2<Predicate<Record>, Predicate<Record>, Predicate<Record>>>() {
         public Callable2<Predicate<Record>, Predicate<Record>, Predicate<Record>> call(Void aVoid) throws Exception {
             return new Callable2<Predicate<Record>, Predicate<Record>, Predicate<Record>>() {
                 public Predicate<Record> call(Predicate<Record> p1, Predicate<Record> p2) throws Exception {
