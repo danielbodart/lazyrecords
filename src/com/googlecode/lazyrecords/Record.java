@@ -4,6 +4,7 @@ import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
+import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
@@ -21,6 +22,8 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 
 public interface Record {
     <T> T get(Keyword<T> keyword);
+
+    <T> Option<T> getOption(Keyword<T> keyword);
 
     <T> Record set(Keyword<T> name, T value);
 

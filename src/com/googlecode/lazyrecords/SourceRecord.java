@@ -1,9 +1,11 @@
 package com.googlecode.lazyrecords;
 
+import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Value;
 
+import static com.googlecode.totallylazy.Option.option;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class SourceRecord<T> implements Record, Value<T> {
@@ -15,11 +17,11 @@ public class SourceRecord<T> implements Record, Value<T> {
         this.record = record;
     }
 
-    public static <T> SourceRecord<T> record(T value){
+    public static <T> SourceRecord<T> record(T value) {
         return record(value, new ImmutableMapRecord());
     }
 
-    public static <T> SourceRecord<T> record(T value, Record record){
+    public static <T> SourceRecord<T> record(T value, Record record) {
         return new SourceRecord<T>(value, record);
     }
 
@@ -38,6 +40,11 @@ public class SourceRecord<T> implements Record, Value<T> {
     @Override
     public <T> T get(Keyword<T> keyword) {
         return record.get(keyword);
+    }
+
+    @Override
+    public <T> Option<T> getOption(Keyword<T> keyword) {
+        return option(get(keyword));
     }
 
     @Override

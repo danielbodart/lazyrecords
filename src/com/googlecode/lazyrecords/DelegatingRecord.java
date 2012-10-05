@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords;
 
+import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Sequence;
 
@@ -13,6 +14,11 @@ public class DelegatingRecord implements Record {
     @Override
     public <T> T get(Keyword<T> keyword) {
         return record.get(keyword);
+    }
+
+    @Override
+    public <T> Option<T> getOption(Keyword<T> keyword) {
+        return record.getOption(keyword);
     }
 
     @Override

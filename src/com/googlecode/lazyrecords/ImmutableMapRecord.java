@@ -1,17 +1,17 @@
 package com.googlecode.lazyrecords;
 
 import com.googlecode.totallylazy.Callables;
+import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.collections.ImmutableMap;
 import com.googlecode.totallylazy.collections.ListMap;
 
 import static com.googlecode.totallylazy.Callables.second;
-import static com.googlecode.totallylazy.Maps.pairs;
+import static com.googlecode.totallylazy.Option.option;
 import static com.googlecode.totallylazy.Predicates.in;
 import static com.googlecode.totallylazy.Predicates.is;
 import static com.googlecode.totallylazy.Predicates.where;
-import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class ImmutableMapRecord implements Record {
     private final ImmutableMap<Keyword<?>, Object> fields;
@@ -29,6 +29,11 @@ public class ImmutableMapRecord implements Record {
         Object value = fields.get(keyword).getOrNull();
         Class<T> aClass = keyword.forClass();
         return aClass.cast(value);
+    }
+
+    @Override
+    public <T> Option<T> getOption(Keyword<T> keyword) {
+        return option(get(keyword));
     }
 
     public <T> Record set(Keyword<T> name, T value) {
