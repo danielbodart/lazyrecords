@@ -1,6 +1,7 @@
 package com.googlecode.lazyrecords.lucene.mappings;
 
 import com.googlecode.lazyrecords.lucene.LuceneStorage;
+import com.googlecode.totallylazy.Runnables;
 import com.googlecode.totallylazy.Sequence;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.Query;
@@ -25,7 +26,7 @@ public class BackgroundStorage extends DelegatingStorage {
             return service.submit(new Callable<Number>() {
                 @Override
                 public Number call() throws Exception {
-                    return storage.add(documents);
+                    return BackgroundStorage.super.add(documents);
                 }
             }).get();
         } catch (Exception e) {
@@ -39,7 +40,22 @@ public class BackgroundStorage extends DelegatingStorage {
             return service.submit(new Callable<Number>() {
                 @Override
                 public Number call() throws Exception {
-                    return storage.delete(query);
+                    return BackgroundStorage.super.delete(query);
+                }
+            }).get();
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
+    }
+
+    @Override
+    public void flush() throws IOException {
+        try {
+            service.submit(new Callable<Void>() {
+                @Override
+                public Void call() throws Exception {
+                    BackgroundStorage.super.flush();
+                    return Runnables.VOID;
                 }
             }).get();
         } catch (Exception e) {
