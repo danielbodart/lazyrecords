@@ -13,6 +13,7 @@ import com.googlecode.lazyrecords.SelectCallable;
 
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.expression;
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.name;
+import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
 import static com.googlecode.lazyrecords.sql.expressions.SetFunctionType.setFunctionType;
 
 public class SelectList extends CompoundExpression{
@@ -66,7 +67,7 @@ public class SelectList extends CompoundExpression{
     }
 
     public static AbstractExpression asClause(String name) {
-        return expression("as " + name);
+        return textOnly("as " + name);
     }
 
     public static Keyword<?> shortName(Keyword<?> keyword) {

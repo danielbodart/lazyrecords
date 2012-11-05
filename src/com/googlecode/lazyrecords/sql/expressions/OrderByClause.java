@@ -10,6 +10,7 @@ import com.googlecode.lazyrecords.Record;
 import java.util.Comparator;
 
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.expression;
+import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
 
 public class OrderByClause {
     public static Expression orderByClause(Option<Comparator<? super Record>> comparator) {
@@ -21,15 +22,15 @@ public class OrderByClause {
     }
 
     public static Expression orderByClause(Comparator<? super Record> comparator) {
-        return expression("order by").join(toSql(comparator));
+        return textOnly("order by").join(toSql(comparator));
     }
 
     public static Expression toSql(Comparator<? super Record> comparator) {
         if (comparator instanceof AscendingComparator) {
-            return SelectList.derivedColumn(Unchecked.<AscendingComparator<? super Record, ?>>cast(comparator).callable()).join(expression("asc"));
+            return SelectList.derivedColumn(Unchecked.<AscendingComparator<? super Record, ?>>cast(comparator).callable()).join(textOnly("asc"));
         }
         if (comparator instanceof DescendingComparator) {
-            return SelectList.derivedColumn(Unchecked.<DescendingComparator<? super Record, ?>>cast(comparator).callable()).join(expression("desc"));
+            return SelectList.derivedColumn(Unchecked.<DescendingComparator<? super Record, ?>>cast(comparator).callable()).join(textOnly("desc"));
         }
         throw new UnsupportedOperationException("Unsupported comparator " + comparator);
     }

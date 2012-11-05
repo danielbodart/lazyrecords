@@ -115,12 +115,12 @@ public class WhereClause extends CompoundExpression{
         }
         if (predicate instanceof InPredicate) {
             InPredicate<Object> inPredicate = Unchecked.cast(predicate);
-            Sequence<Object> sequence = inPredicate.values();
+            Sequence<Object> sequence = sequence(inPredicate.values());
             if (sequence instanceof Expressible) {
                 Expression pair = ((Expressible) sequence).express();
                 return expression("in ( " + pair.text() + ")", pair.parameters());
             }
-            return expression(repeat("?").take(inPredicate.values().size()).toString("in (", ",", ")"), sequence);
+            return expression(repeat("?").take(sequence.size()).toString("in (", ",", ")"), sequence);
         }
         if (predicate instanceof StartsWithPredicate) {
             return expression("like ?", sequence((Object) (((StartsWithPredicate) predicate).value() + "%")));

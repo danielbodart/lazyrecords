@@ -191,8 +191,8 @@ public class Lucene {
             return not(query(keyword, p));
         }
         if (predicate instanceof InPredicate) {
-            Sequence<?> values = ((InPredicate<?>) predicate).values();
-            return or(values.map(asQuery(keyword)));
+            Iterable<?> values = ((InPredicate<?>) predicate).values();
+            return or(sequence(values).map(asQuery(keyword)));
         }
         if (predicate instanceof StartsWithPredicate) {
             String value = ((StartsWithPredicate) predicate).value();

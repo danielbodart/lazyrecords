@@ -58,6 +58,7 @@ public class OptimisedPool implements SearcherPool {
         return searcher;
     }
 
+    @SuppressWarnings("deprecation")
     private LuceneSearcher createLuceneSearcher() throws IOException {
         return new LuceneSearcher(new IndexSearcher(directory));
     }

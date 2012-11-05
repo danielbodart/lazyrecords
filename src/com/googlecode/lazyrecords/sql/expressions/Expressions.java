@@ -26,13 +26,6 @@ public class Expressions {
         };
     }
 
-    public static AbstractExpression expression(String expression, Object... parameters) {
-        if (parameters.length == 0) {
-            return textOnly(expression);
-        }
-        return new TextAndParametersExpression(expression, sequence(parameters));
-    }
-
     public static TextOnlyExpression textOnly(String expression, Object... args) {
         return textOnly(String.format(expression, args));
     }
@@ -71,6 +64,9 @@ public class Expressions {
         return '"' + name + '"';
     }
 
+    public static AbstractExpression expression(String expression, Object head, Object... tail) {
+        return new TextAndParametersExpression(expression, sequence(tail).cons(head));
+    }
 
     public static AbstractExpression expression(String expression, Sequence<Object> parameters) {
         if (parameters.isEmpty()) {

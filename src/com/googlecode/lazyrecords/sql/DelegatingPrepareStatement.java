@@ -99,7 +99,7 @@ public class DelegatingPrepareStatement implements PreparedStatement {
         preparedStatement.setAsciiStream(parameterIndex, x, length);
     }
 
-    @Override
+    @Override @Deprecated @SuppressWarnings("deprecation")
     public void setUnicodeStream(int parameterIndex, InputStream x, int length) throws SQLException {
         preparedStatement.setUnicodeStream(parameterIndex, x, length);
     }
