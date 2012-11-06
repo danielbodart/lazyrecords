@@ -33,7 +33,7 @@ public class LuceneSequence extends Sequence<Record> {
 
     public LuceneSequence(final Lucene lucene, final LuceneStorage storage, final Query query,
                           final Callable1<? super Document, Record> documentToRecord, final Logger logger, CloseableList closeables) {
-        this(lucene, storage, query, documentToRecord, logger, closeables, new Sort(), 0);
+        this(lucene, storage, query, documentToRecord, logger, closeables, Lucene.NO_SORT, 0);
     }
 
     public LuceneSequence(final Lucene lucene, final LuceneStorage storage, final Query query,

@@ -1,11 +1,7 @@
 package com.googlecode.lazyrecords.lucene;
 
 import org.apache.lucene.document.Document;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.Sort;
-import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.search.TotalHitCountCollector;
+import org.apache.lucene.search.*;
 
 import java.io.IOException;
 
@@ -20,7 +16,21 @@ public class LuceneSearcher implements Searcher {
 
     @Override
     public TopDocs search(Query query, Sort sort) throws IOException {
-        return searcher.search(query, Integer.MAX_VALUE, sort);
+        if (sortSpecified(sort)) {
+            return searcher.search(query, Integer.MAX_VALUE, sort);
+        } else {
+            return searchWithoutSort(query);
+        }
+    }
+
+    private boolean sortSpecified(Sort sort) {
+        return sort != Lucene.NO_SORT;
+    }
+
+    private TopDocs searchWithoutSort(Query query) throws IOException {
+        NonScoringCollector results = new NonScoringCollector();
+        searcher.search(query, results);
+        return results.topDocs();
     }
 
     @Override
@@ -31,7 +41,7 @@ public class LuceneSearcher implements Searcher {
     @Override
     public int count(Query query) throws IOException {
         TotalHitCountCollector results = new TotalHitCountCollector();
-        searcher().search(query, results);
+        searcher.search(query, results);
         return results.getTotalHits();
     }
 

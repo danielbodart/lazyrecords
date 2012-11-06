@@ -4,46 +4,13 @@ import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Named;
 import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
 import com.googlecode.lazyrecords.mappings.StringMappings;
-import com.googlecode.totallylazy.Callable1;
-import com.googlecode.totallylazy.Function1;
-import com.googlecode.totallylazy.Function2;
-import com.googlecode.totallylazy.Predicate;
-import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Unchecked;
-import com.googlecode.totallylazy.Value;
+import com.googlecode.totallylazy.*;
 import com.googlecode.totallylazy.comparators.AscendingComparator;
 import com.googlecode.totallylazy.comparators.DescendingComparator;
-import com.googlecode.totallylazy.predicates.AllPredicate;
-import com.googlecode.totallylazy.predicates.AndPredicate;
-import com.googlecode.totallylazy.predicates.Between;
-import com.googlecode.totallylazy.predicates.ContainsPredicate;
-import com.googlecode.totallylazy.predicates.EndsWithPredicate;
-import com.googlecode.totallylazy.predicates.EqualsPredicate;
-import com.googlecode.totallylazy.predicates.GreaterThan;
-import com.googlecode.totallylazy.predicates.GreaterThanOrEqualTo;
-import com.googlecode.totallylazy.predicates.InPredicate;
-import com.googlecode.totallylazy.predicates.LessThan;
-import com.googlecode.totallylazy.predicates.LessThanOrEqualTo;
-import com.googlecode.totallylazy.predicates.Not;
-import com.googlecode.totallylazy.predicates.NotEqualsPredicate;
-import com.googlecode.totallylazy.predicates.NotNullPredicate;
-import com.googlecode.totallylazy.predicates.NullPredicate;
-import com.googlecode.totallylazy.predicates.OrPredicate;
-import com.googlecode.totallylazy.predicates.StartsWithPredicate;
-import com.googlecode.totallylazy.predicates.WherePredicate;
+import com.googlecode.totallylazy.predicates.*;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.MatchAllDocsQuery;
-import org.apache.lucene.search.PrefixQuery;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.Sort;
-import org.apache.lucene.search.SortField;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.TermRangeQuery;
-import org.apache.lucene.search.WildcardQuery;
+import org.apache.lucene.search.*;
 
 import java.util.Comparator;
 
@@ -52,6 +19,7 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class Lucene {
     public static final Keyword<String> RECORD_KEY = keyword("type", String.class);
+    static final Sort NO_SORT = new Sort();
 
     public static TermQuery record(Definition definition) {
         return new TermQuery(new Term(RECORD_KEY.toString(), definition.name()));
