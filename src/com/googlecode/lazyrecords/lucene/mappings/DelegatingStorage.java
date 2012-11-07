@@ -31,6 +31,9 @@ public abstract class DelegatingStorage implements LuceneStorage {
     public void deleteAll() throws IOException { storage.deleteAll(); }
 
     @Override
+    public void deleteNoCount(Query query) throws IOException {storage.deleteNoCount(query);}
+
+    @Override
     public int count(Query query) throws IOException {return storage.count(query);}
 
     @Override

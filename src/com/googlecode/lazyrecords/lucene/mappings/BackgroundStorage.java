@@ -26,7 +26,7 @@ public class BackgroundStorage extends DelegatingStorage {
             return service.submit(new Callable<Number>() {
                 @Override
                 public Number call() throws Exception {
-                    return BackgroundStorage.super.add(documents);
+                    return storage.add(documents);
                 }
             }).get();
         } catch (Exception e) {
@@ -40,7 +40,22 @@ public class BackgroundStorage extends DelegatingStorage {
             return service.submit(new Callable<Number>() {
                 @Override
                 public Number call() throws Exception {
-                    return BackgroundStorage.super.delete(query);
+                    return storage.delete(query);
+                }
+            }).get();
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
+    }
+
+    @Override
+    public void deleteNoCount(final Query query) throws IOException {
+        try {
+            service.submit(new Callable<Void>() {
+                @Override
+                public Void call() throws Exception {
+                    storage.deleteNoCount(query);
+                    return Runnables.VOID;
                 }
             }).get();
         } catch (Exception e) {
@@ -54,7 +69,7 @@ public class BackgroundStorage extends DelegatingStorage {
             service.submit(new Callable<Void>() {
                 @Override
                 public Void call() throws Exception {
-                    BackgroundStorage.super.flush();
+                    storage.flush();
                     return Runnables.VOID;
                 }
             }).get();

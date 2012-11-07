@@ -63,10 +63,15 @@ public class OptimisedStorage implements LuceneStorage {
 
     @Override
     public Number delete(Query query) throws IOException {
-        ensureIndexIsSetup();
         int count = count(query);
-        writer.deleteDocuments(query);
+        deleteNoCount(query);
         return count;
+    }
+
+    @Override
+    public void deleteNoCount(Query query) throws IOException {
+        ensureIndexIsSetup();
+        writer.deleteDocuments(query);
     }
 
     @Override

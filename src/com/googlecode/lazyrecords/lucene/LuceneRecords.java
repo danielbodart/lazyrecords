@@ -77,7 +77,7 @@ public class LuceneRecords extends AbstractRecords implements Queryable<Query>, 
     }
 
     private Number internalRemove(Definition definition, Predicate<? super Record> predicate) throws IOException {
-        return storage.delete(and(record(definition), lucene.query(predicate)));
+        return storage.delete(query(definition, predicate));
     }
 
     public Number remove(final Definition definition) {
@@ -108,10 +108,14 @@ public class LuceneRecords extends AbstractRecords implements Queryable<Query>, 
                 if (matched.isEmpty()) {
                     return internalAdd(definition, one(updatedFields));
                 }
-                internalRemove(definition, predicate);
+                storage.deleteNoCount(query(definition, predicate));
                 return internalAdd(definition, matched.map(merge(updatedFields)));
             }
         };
+    }
+
+    private Query query(Definition definition, Predicate<? super Record> predicate) {
+        return and(record(definition), lucene.query(predicate));
     }
 
     public int count(final Query query) {

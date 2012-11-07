@@ -15,6 +15,8 @@ public interface LuceneStorage extends Closeable, Flushable{
 
     Number delete(Query query) throws IOException;
 
+    void deleteNoCount(Query query) throws IOException;
+
     void deleteAll() throws IOException;
 
     int count(Query query) throws IOException;
