@@ -275,7 +275,6 @@ public abstract class RecordsContract<T extends Records> {
         assertThat(records.get(books).filter(where(isbn, is(zenIsbn))).head().keywords().contains(firstName), CoreMatchers.is(false));
     }
 
-
     @Test
     public void supportsSelectingAllKeywords() throws Exception {
         assertThat(records.get(people).first().fields().size(), NumberMatcher.is(5));
