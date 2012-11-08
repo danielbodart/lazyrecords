@@ -16,6 +16,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import static com.googlecode.lazyrecords.lucene.PartitionedIndex.functions.nioDirectory;
 import static com.googlecode.lazyrecords.lucene.PartitionedIndex.functions.ramDirectory;
@@ -24,7 +25,7 @@ import static com.googlecode.totallylazy.Closeables.safeClose;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class PartitionedIndex implements Closeable {
-    private final ConcurrentHashMap<String, Lazy<LuceneStorage>> partitions = new ConcurrentHashMap<String, Lazy<LuceneStorage>>();
+    private final ConcurrentMap<String, Lazy<LuceneStorage>> partitions = new ConcurrentHashMap<String, Lazy<LuceneStorage>>();
     private final CloseableList closeables = new CloseableList();
     private final Function1<String, Directory> directoryActivator;
 
@@ -48,6 +49,10 @@ public class PartitionedIndex implements Closeable {
     public void close() throws IOException {
         sequence(partitions.values()).map(value(LuceneStorage.class)).each(safeClose());
         closeables.close();
+    }
+
+    public ConcurrentMap<String, Lazy<LuceneStorage>> partitions() {
+        return partitions;
     }
 
     LuceneStorage partition(Definition definition) throws IOException {
