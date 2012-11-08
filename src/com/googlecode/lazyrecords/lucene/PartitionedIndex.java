@@ -1,9 +1,7 @@
 package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.lazyrecords.Definition;
-import com.googlecode.lazyrecords.Logger;
 import com.googlecode.lazyrecords.lucene.mappings.BackgroundStorage;
-import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
 import com.googlecode.totallylazy.CloseableList;
 import com.googlecode.totallylazy.Files;
 import com.googlecode.totallylazy.Function1;
@@ -15,6 +13,7 @@ import org.apache.lucene.store.RAMDirectory;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -22,9 +21,12 @@ import static com.googlecode.lazyrecords.lucene.PartitionedIndex.functions.nioDi
 import static com.googlecode.lazyrecords.lucene.PartitionedIndex.functions.ramDirectory;
 import static com.googlecode.totallylazy.Callables.value;
 import static com.googlecode.totallylazy.Closeables.safeClose;
+import static com.googlecode.totallylazy.Files.directory;
 import static com.googlecode.totallylazy.Sequences.sequence;
+import static com.googlecode.totallylazy.Zip.unzip;
+import static com.googlecode.totallylazy.Zip.zip;
 
-public class PartitionedIndex implements Closeable {
+public class PartitionedIndex implements Closeable, Persistence {
     private final ConcurrentMap<String, Lazy<LuceneStorage>> partitions = new ConcurrentHashMap<String, Lazy<LuceneStorage>>();
     private final CloseableList closeables = new CloseableList();
     private final Function1<String, Directory> directoryActivator;
@@ -51,10 +53,6 @@ public class PartitionedIndex implements Closeable {
         closeables.close();
     }
 
-    public ConcurrentMap<String, Lazy<LuceneStorage>> partitions() {
-        return partitions;
-    }
-
     LuceneStorage partition(Definition definition) throws IOException {
         return partition(definition.name());
     }
@@ -73,6 +71,54 @@ public class PartitionedIndex implements Closeable {
             }
         };
     }
+
+    @Override
+    public void deleteAll() throws IOException {
+        for (Lazy<LuceneStorage> storageLazy : partitions.values()) {
+            storageLazy.value().deleteAll();
+        }
+    }
+
+    @Override
+    public void backup(File bgb) throws Exception {
+        File destination = tempUnzipLocation();
+        Files.delete(destination);
+
+        for (Map.Entry<String, Lazy<LuceneStorage>> entry : partitions.entrySet()) {
+            String name = entry.getKey();
+            LuceneStorage luceneStorage = entry.getValue().value();
+            luceneStorage.backup(directory(destination, name));
+        }
+
+        zip(destination, bgb);
+        Files.delete(destination);
+    }
+
+    @Override
+    public void restore(File file) throws Exception {
+        File sourceDirectory = unzipIfNeeded(file);
+        deleteAll();
+
+        for (Map.Entry<String, Lazy<LuceneStorage>> entry : partitions.entrySet()) {
+            String name = entry.getKey();
+            LuceneStorage luceneStorage = entry.getValue().value();
+            luceneStorage.restore(directory(sourceDirectory, name));
+        }
+    }
+
+    private File tempUnzipLocation() {
+        return Files.emptyTemporaryDirectory("lucene-index-unzipped");
+    }
+
+    private File unzipIfNeeded(File source) throws IOException {
+        if (source.isFile()) {
+            File unzipped = tempUnzipLocation();
+            unzip(source, unzipped);
+            return unzipped;
+        }
+        return source;
+    }
+
 
     public static class functions {
         public static Function1<String, Directory> ramDirectory() {

@@ -78,6 +78,7 @@ public class OptimisedStorage implements LuceneStorage {
     public void deleteAll() throws IOException {
         writer.deleteAll();
         flush();
+        deleteAllSegments(directory);
     }
 
     @Override
@@ -102,8 +103,7 @@ public class OptimisedStorage implements LuceneStorage {
     }
 
     @Override
-    public void backup(final File file) throws Exception {
-        File folder = unzippedName(file);
+    public void backup(final File folder) throws Exception {
         Files.delete(folder);
         String id = UUID.randomUUID().toString();
         try {
@@ -112,9 +112,6 @@ public class OptimisedStorage implements LuceneStorage {
         } finally {
             snapShotter.release(id);
         }
-
-        zip(folder, file);
-        Files.delete(folder);
     }
 
     private Directory directoryFor(File file) throws IOException {
@@ -137,18 +134,13 @@ public class OptimisedStorage implements LuceneStorage {
         }
     }
 
-    private File unzippedName(File file) {
-        return new File(file.toString() + ".unzipped");
-    }
-
 
     @Override
     public void restore(File source) throws Exception {
         synchronized (lock) {
             ensureIndexIsSetup();
             deleteAll();
-            deleteAllSegments(directory);
-            Directory sourceDirectory = directoryFor(unzipIfNeeded(source));
+            Directory sourceDirectory = directoryFor(source);
             using(sourceDirectory, copy(list(sourceDirectory.listAll())).flip().apply(directory));
             resetReadersAndWriters();
         }
@@ -167,14 +159,6 @@ public class OptimisedStorage implements LuceneStorage {
         }
     }
 
-    private File unzipIfNeeded(File source) throws IOException {
-        if (source.isFile()) {
-            File unzipped = unzippedName(source);
-            unzip(source, unzipped);
-            return unzipped;
-        }
-        return source;
-    }
 
     @Override
     public void close() throws IOException {

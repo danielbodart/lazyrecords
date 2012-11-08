@@ -6,18 +6,15 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.search.Query;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.Flushable;
 import java.io.IOException;
 
-public interface LuceneStorage extends Closeable, Flushable{
+public interface LuceneStorage extends Closeable, Flushable, Persistence {
     Number add(Sequence<Document> documents) throws IOException;
 
     Number delete(Query query) throws IOException;
 
     void deleteNoCount(Query query) throws IOException;
-
-    void deleteAll() throws IOException;
 
     int count(Query query) throws IOException;
 
@@ -25,7 +22,4 @@ public interface LuceneStorage extends Closeable, Flushable{
 
     Searcher searcher() throws IOException;
 
-    void backup(File destination) throws Exception;
-
-    void restore(File file) throws Exception;
 }
