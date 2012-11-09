@@ -7,9 +7,8 @@ import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.SourceRecord;
 import com.googlecode.lazyrecords.Transaction;
 import com.googlecode.lazyrecords.mappings.StringMappings;
-import com.googlecode.totallylazy.Callable1;
-import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Function1;
+import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicate;
@@ -19,15 +18,17 @@ import com.googlecode.totallylazy.collections.ImmutableList;
 import com.googlecode.totallylazy.collections.ImmutableMap;
 import com.googlecode.totallylazy.collections.ImmutableSortedMap;
 
-import static com.googlecode.lazyrecords.Definition.functions.sortFields;
+import static com.googlecode.lazyrecords.Record.functions.merge;
+import static com.googlecode.lazyrecords.Record.methods.filter;
 import static com.googlecode.totallylazy.Sequences.reverse;
 import static com.googlecode.totallylazy.Sequences.sequence;
+import static com.googlecode.totallylazy.numbers.Numbers.sum;
 
 public class STMRecords extends AbstractRecords implements Transaction {
     private final StringMappings mappings;
     private final STM stm;
     private STM snapshot;
-    private ImmutableList<Callable1<ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>,
+    private ImmutableList<Function1<ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>,
             ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>>> modifications;
 
     public STMRecords(STM stm, StringMappings mappings) {
@@ -41,7 +42,7 @@ public class STMRecords extends AbstractRecords implements Transaction {
     }
 
     public Sequence<Record> get(Definition definition) {
-        return sequence(recordsFor(snapshot.value(), definition)).map(asRecord(definition));
+        return sequence(listFor(snapshot.value(), definition)).map(asRecord(definition));
     }
 
     public Number add(final Definition definition, final Sequence<Record> records) {
@@ -58,15 +59,42 @@ public class STMRecords extends AbstractRecords implements Transaction {
     }
 
     public Number remove(final Definition definition, Predicate<? super Record> predicate) {
-        ImmutableList<ImmutableMap<String, String>> matches = get(definition).
-                filter(predicate).
-                <Value<ImmutableMap<String, String>>>unsafeCast().
-                map(Callables.<ImmutableMap<String, String>>value()).
-                toImmutableList();
+        ImmutableList<ImmutableMap<String, String>> matches = matches(predicate, get(definition));
 
-        modify(remove(definition, matches));
+        modify(removeAll(definition, predicate));
 
         return matches.size();
+    }
+
+
+    private static ImmutableList<ImmutableMap<String, String>> matches(Predicate<? super Record> predicate, Sequence<Record> records) {
+        return records.filter(predicate).
+                    <Value<ImmutableMap<String, String>>>unsafeCast().
+                    map(Callables.<ImmutableMap<String, String>>value()).
+                    toImmutableList();
+    }
+
+    @Override
+    public Number set(final Definition definition, final Sequence<? extends Pair<? extends Predicate<? super Record>, Record>> records) {
+        modify(new Function1<ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>, ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>>() {
+            @Override
+            public ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>> call(ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>> data) throws Exception {
+                return data.put(definition, listFor(data, definition).map(new Function1<ImmutableMap<String, String>, ImmutableMap<String, String>>() {
+                    @Override
+                    public ImmutableMap<String, String> call(ImmutableMap<String, String> row) throws Exception {
+                        return records.fold(row, new Function2<ImmutableMap<String, String>, Pair<? extends Predicate<? super Record>, Record>, ImmutableMap<String, String>>() {
+                            @Override
+                            public ImmutableMap<String, String> call(ImmutableMap<String, String> fields, Pair<? extends Predicate<? super Record>, Record> pair) throws Exception {
+                                Record original = asRecord(definition, fields);
+                                if (pair.first().matches(original)) return asImmutableMap(definition, merge(filter(pair.second(), definition.fields())).call(original));
+                                return fields;
+                            }
+                        });
+                    }
+                }));
+            }
+        });
+        return super.set(definition, records);
     }
 
     @Override
@@ -84,26 +112,30 @@ public class STMRecords extends AbstractRecords implements Transaction {
         modifications = ImmutableList.constructors.empty();
     }
 
-    private void modify(Callable1<ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>, ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>> callable) {
+    private void modify(Function1<ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>, ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>> callable) {
         snapshot.modify(callable);
         modifications = modifications.cons(callable);
     }
 
-    private static ImmutableList<ImmutableMap<String, String>> recordsFor(ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>> data, Definition definition) {
-        return data.get(definition).getOrElse(ImmutableList.constructors.<ImmutableMap<String, String>>empty());
+    private static <M extends ImmutableMap<String, String>> ImmutableList<M> listFor(ImmutableMap<Definition, ImmutableList<M>> data, Definition definition) {
+        return data.get(definition).getOrElse(ImmutableList.constructors.<M>empty());
     }
 
-    private Callable1<ImmutableMap<String, String>, Record> asRecord(final Definition definition) {
-        return new Callable1<ImmutableMap<String, String>, Record>() {
+    private Function1<ImmutableMap<String, String>, Record> asRecord(final Definition definition) {
+        return new Function1<ImmutableMap<String, String>, Record>() {
             @Override
             public Record call(ImmutableMap<String, String> data) throws Exception {
-                return SourceRecord.record(data, definition.fields().map(values(data)));
+                return asRecord(definition, data);
             }
         };
     }
 
-    private Callable1<Keyword<?>, Pair<Keyword<?>, Object>> values(final ImmutableMap<String, String> map) {
-        return new Callable1<Keyword<?>, Pair<Keyword<?>, Object>>() {
+    private Record asRecord(Definition definition, ImmutableMap<String, String> data) {
+        return SourceRecord.record(data, definition.fields().map(values(data)));
+    }
+
+    private Function1<Keyword<?>, Pair<Keyword<?>, Object>> values(final ImmutableMap<String, String> map) {
+        return new Function1<Keyword<?>, Pair<Keyword<?>, Object>>() {
             @Override
             public Pair<Keyword<?>, Object> call(Keyword<?> keyword) throws Exception {
                 return Pair.<Keyword<?>, Object>pair(keyword, mappings.toValue(keyword.forClass(), map.get(keyword.name()).getOrNull()));
@@ -111,17 +143,21 @@ public class STMRecords extends AbstractRecords implements Transaction {
         };
     }
 
-    private Callable1<Record, ImmutableMap<String, String>> asImmutableMap(final Definition definition) {
-        return new Callable1<Record, ImmutableMap<String, String>>() {
+    private Function1<Record, ImmutableMap<String, String>> asImmutableMap(final Definition definition) {
+        return new Function1<Record, ImmutableMap<String, String>>() {
             @Override
             public ImmutableMap<String, String> call(Record record) throws Exception {
-                return ImmutableSortedMap.constructors.sortedMap(definition.fields().map(values(record)));
+                return STMRecords.this.asImmutableMap(definition, record);
             }
         };
     }
 
-    private Callable1<Keyword<?>, Pair<String, String>> values(final Record record) {
-        return new Callable1<Keyword<?>, Pair<String, String>>() {
+    private ImmutableMap<String, String> asImmutableMap(Definition definition, Record record) {
+        return ImmutableSortedMap.constructors.sortedMap(definition.fields().map(values(record)));
+    }
+
+    private Function1<Keyword<?>, Pair<String, String>> values(final Record record) {
+        return new Function1<Keyword<?>, Pair<String, String>>() {
             @Override
             public Pair<String, String> call(Keyword<?> keyword) throws Exception {
                 return Pair.pair(keyword.name(), mappings.toString(keyword.forClass(), record.get(keyword)));
@@ -129,7 +165,7 @@ public class STMRecords extends AbstractRecords implements Transaction {
         };
     }
 
-    private static <T> Function1<T, T> applyAll(final Iterable<? extends Callable1<T, T>> callables) {
+    private static <T> Function1<T, T> applyAll(final Iterable<? extends Function1<T, T>> callables) {
         return new Function1<T, T>() {
             @Override
             public T call(T data) throws Exception {
@@ -138,30 +174,34 @@ public class STMRecords extends AbstractRecords implements Transaction {
         };
     }
 
-    private static <T> Function2<T, Callable1<T, T>, T> andCall() {
-        return new Function2<T, Callable1<T, T>, T>() {
+    private static <T> Function2<T, Function1<T, T>, T> andCall() {
+        return new Function2<T, Function1<T, T>, T>() {
             @Override
-            public T call(T data, Callable1<T, T> callable) throws Exception {
+            public T call(T data, Function1<T, T> callable) throws Exception {
                 return callable.call(data);
             }
         };
     }
 
-    private static Function1<ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>, ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>> put(final Definition definition, final ImmutableList<ImmutableMap<String, String>> newRecords) {
-        return new Function1<ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>, ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>>() {
+    private static <Fields extends ImmutableMap<String, String>> Function1<ImmutableMap<Definition, ImmutableList<Fields>>, ImmutableMap<Definition, ImmutableList<Fields>>> put(final Definition definition, final ImmutableList<Fields> newRecords) {
+        return new Function1<ImmutableMap<Definition, ImmutableList<Fields>>, ImmutableMap<Definition, ImmutableList<Fields>>>() {
             @Override
-            public ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>> call(ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>> data) throws Exception {
-                return data.put(definition, newRecords.joinTo(recordsFor(data, definition)));
+            public ImmutableMap<Definition, ImmutableList<Fields>> call(ImmutableMap<Definition, ImmutableList<Fields>> data) throws Exception {
+                return data.put(definition, newRecords.joinTo(listFor(data, definition)));
             }
         };
     }
 
-    private static Function1<ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>, ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>> remove(final Definition definition, final ImmutableList<ImmutableMap<String, String>> matches) {
+    private Function1<ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>, ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>> removeAll(final Definition definition, final Predicate<? super Record> predicate) {
         return new Function1<ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>, ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>>>() {
             @Override
             public ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>> call(ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>> data) throws Exception {
-                return data.put(definition, recordsFor(data, definition).removeAll(matches));
+                return data.put(definition, listFor(data, definition).removeAll(matches(data, definition, predicate)));
             }
         };
+    }
+
+    private ImmutableList<ImmutableMap<String, String>> matches(ImmutableMap<Definition, ImmutableList<ImmutableMap<String, String>>> data, Definition definition, Predicate<? super Record> predicate) {
+        return matches(predicate, sequence(listFor(data, definition)).map(STMRecords.this.asRecord(definition)));
     }
 }
