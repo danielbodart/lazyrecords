@@ -27,8 +27,6 @@ import java.util.UUID;
 import static com.googlecode.totallylazy.Closeables.using;
 import static com.googlecode.totallylazy.Lists.list;
 import static com.googlecode.totallylazy.Runnables.VOID;
-import static com.googlecode.totallylazy.Zip.unzip;
-import static com.googlecode.totallylazy.Zip.zip;
 
 public class OptimisedStorage implements LuceneStorage {
     private final Directory directory;
@@ -76,9 +74,13 @@ public class OptimisedStorage implements LuceneStorage {
 
     @Override
     public void deleteAll() throws IOException {
+        if (writer == null) return;
+
         writer.deleteAll();
         flush();
         deleteAllSegments(directory);
+        close();
+        writer = null;
     }
 
     @Override

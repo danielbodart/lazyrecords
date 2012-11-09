@@ -77,6 +77,8 @@ public class PartitionedIndex implements Closeable, Persistence {
         for (Lazy<LuceneStorage> storageLazy : partitions.values()) {
             storageLazy.value().deleteAll();
         }
+        close();
+        partitions.clear();
     }
 
     @Override
@@ -99,9 +101,9 @@ public class PartitionedIndex implements Closeable, Persistence {
         File sourceDirectory = unzipIfNeeded(file);
         deleteAll();
 
-        for (Map.Entry<String, Lazy<LuceneStorage>> entry : partitions.entrySet()) {
-            String name = entry.getKey();
-            LuceneStorage luceneStorage = entry.getValue().value();
+        for (File partition : Files.files(sourceDirectory)) {
+            String name = partition.getName();
+            LuceneStorage luceneStorage = partition(name);
             luceneStorage.restore(directory(sourceDirectory, name));
         }
     }
