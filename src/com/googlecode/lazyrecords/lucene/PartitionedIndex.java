@@ -50,6 +50,7 @@ public class PartitionedIndex implements Closeable, Persistence {
 
     public void close() throws IOException {
         sequence(partitions.values()).map(value(LuceneStorage.class)).each(safeClose());
+        partitions.clear();
         closeables.close();
     }
 
@@ -78,7 +79,6 @@ public class PartitionedIndex implements Closeable, Persistence {
             storageLazy.value().deleteAll();
         }
         close();
-        partitions.clear();
     }
 
     @Override
