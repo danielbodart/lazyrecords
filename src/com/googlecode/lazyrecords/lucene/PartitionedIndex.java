@@ -68,7 +68,8 @@ public class PartitionedIndex implements Closeable, Persistence {
             @Override
             protected LuceneStorage get() throws Exception {
                 Directory directory = closeables.manage(directoryActivator.call(definition));
-                return new BackgroundStorage(new OptimisedStorage(directory, new LucenePool(directory)));
+                SearcherPool searcherPool = closeables.manage(new LucenePool(directory));
+                return new BackgroundStorage(new OptimisedStorage(directory, searcherPool));
             }
         };
     }

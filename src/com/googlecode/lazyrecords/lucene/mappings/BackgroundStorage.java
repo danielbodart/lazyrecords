@@ -9,6 +9,7 @@ import org.apache.lucene.search.Query;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 
@@ -81,6 +82,6 @@ public class BackgroundStorage extends DelegatingStorage {
     @Override
     public void close() throws IOException {
         super.close();
-        service.shutdown();
+        service.shutdownNow();
     }
 }
