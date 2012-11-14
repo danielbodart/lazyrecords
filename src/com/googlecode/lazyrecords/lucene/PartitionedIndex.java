@@ -1,7 +1,6 @@
 package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.lazyrecords.Definition;
-import com.googlecode.lazyrecords.lucene.mappings.BackgroundStorage;
 import com.googlecode.totallylazy.CloseableList;
 import com.googlecode.totallylazy.Files;
 import com.googlecode.totallylazy.Function1;
@@ -69,7 +68,7 @@ public class PartitionedIndex implements Closeable, Persistence {
             protected LuceneStorage get() throws Exception {
                 Directory directory = closeables.manage(directoryActivator.call(definition));
                 SearcherPool searcherPool = closeables.manage(new LucenePool(directory));
-                return new BackgroundStorage(new OptimisedStorage(directory, searcherPool));
+                return new OptimisedStorage(directory, searcherPool);
             }
         };
     }

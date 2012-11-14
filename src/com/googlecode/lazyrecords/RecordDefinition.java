@@ -26,13 +26,14 @@ public class RecordDefinition implements Definition {
 
     @Override
     public int hashCode() {
-        return name.hashCode();
+        return name.hashCode() * fields.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
         return (obj instanceof Definition) &&
-                (name.equals(((Definition) obj).name()));
+                (name.equals(((Definition) obj).name())) &&
+                (fields().equals(((Definition) obj).fields()));
     }
 
     @Override

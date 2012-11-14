@@ -2,7 +2,6 @@ package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.lazyrecords.Logger;
 import com.googlecode.lazyrecords.MemoryLogger;
-import com.googlecode.lazyrecords.lucene.mappings.BackgroundStorage;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
 import com.googlecode.lazyrecords.RecordsContract;
@@ -37,7 +36,7 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
     protected LuceneRecords createRecords() throws Exception {
         file = temporaryDirectory("totallylazy");
         directory = new NoSyncDirectory(file);
-        storage = new BackgroundStorage(new OptimisedStorage(directory, new LucenePool(directory)));
+        storage = new OptimisedStorage(directory, new LucenePool(directory));
         return luceneRecords(logger);
     }
 
