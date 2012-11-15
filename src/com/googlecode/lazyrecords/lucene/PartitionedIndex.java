@@ -10,7 +10,7 @@ import org.apache.lucene.store.RAMDirectory;
 import java.io.File;
 import java.io.IOException;
 
-public interface PartitionedIndex {
+public interface PartitionedIndex extends Persistence {
     LuceneStorage partition(Definition definition) throws IOException;
 
     LuceneStorage partition(String definition) throws IOException;

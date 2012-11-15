@@ -38,7 +38,7 @@ public class LucenePartitionedIndex implements Closeable, Persistence, Partition
         return partitionedIndex(nioDirectory(rootDirectory));
     }
 
-    public static PartitionedIndex partitionedIndex() {
+    public static LucenePartitionedIndex partitionedIndex() {
         return partitionedIndex(ramDirectory());
     }
 
