@@ -15,7 +15,7 @@ public class IndexMigrator {
         NIOFSDirectory oldDir = new NIOFSDirectory(old);
         OptimisedStorage oldStorage = new OptimisedStorage(oldDir, new LucenePool(oldDir));
 
-        PartitionedIndex partitionedIndex = PartitionedIndex.partitionedIndex(newStructure);
+        LucenePartitionedIndex partitionedIndex = LucenePartitionedIndex.partitionedIndex(newStructure);
 
         Searcher oldSeacher = oldStorage.searcher();
         ScoreDoc[] docs = oldSeacher.search(new MatchAllDocsQuery(), Lucene.NO_SORT).scoreDocs;

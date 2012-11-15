@@ -6,13 +6,13 @@ import org.junit.After;
 
 import java.io.File;
 
+import static com.googlecode.lazyrecords.lucene.LucenePartitionedIndex.partitionedIndex;
 import static com.googlecode.lazyrecords.lucene.PartitionedIndex.functions.noSyncDirectory;
-import static com.googlecode.lazyrecords.lucene.PartitionedIndex.partitionedIndex;
 import static com.googlecode.totallylazy.Files.emptyTemporaryDirectory;
 
 public class LucenePartitionedRecordsTest extends RecordsContract<LucenePartitionedRecords> {
     private File file;
-    private PartitionedIndex partitionedIndex;
+    private LucenePartitionedIndex partitionedIndex;
 
     @Override
     protected LucenePartitionedRecords createRecords() throws Exception {
