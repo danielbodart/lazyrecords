@@ -5,9 +5,10 @@ build/artifacts
 .idea/workspace.xml
 .ant-targets-build.xml
 *.orig
+.DS_Store
 lib/build
 lib/runtime
 lib/optional
 test/com/googlecode/totallylazy/records/simpledb/AwsCredentials.properties
-.DS_Store
 test/com/googlecode/lazyrecords/sql/oracle.properties
+test/com/googlecode/lazyrecords/sql/mysql.properties
