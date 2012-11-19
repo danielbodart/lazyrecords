@@ -11,18 +11,22 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ColumnDatatypeMappings {
 
 	public static Map<Class, String> mysql() {
-		Map<Class, String> mysql = defaultMappings();
-		mysql.put(Date.class, "datetime");
-		mysql.put(BigDecimal.class, "datetime");
-		return mysql;
+		Map<Class, String> map = defaultMappings();
+		map.put(Date.class, "datetime");
+		return map;
 	}
 
 	public static Map<Class, String> oracle() {
 		return defaultMappings();
 	}
 
+	public static Map<Class, String> hsql() {
+		return defaultMappings();
+	}
+
 	public static Map<Class, String> defaultMappings() {
 		return new ConcurrentHashMap<Class, String>() {{
+			put(BigDecimal.class, "decimal(20,6)");
 			put(Date.class, "timestamp");
 			put(Integer.class, "integer");
 			put(Long.class, "bigint");

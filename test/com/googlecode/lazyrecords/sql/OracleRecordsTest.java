@@ -7,6 +7,7 @@ import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
 import com.googlecode.totallylazy.Option;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.sql.Connection;
@@ -58,7 +59,13 @@ public class OracleRecordsTest extends RecordsContract<Records> {
         return new SchemaGeneratingRecords(sqlRecords, sqlSchema);
     }
 
-    @Test
+
+	@Override
+	@Ignore("Waiting for Dan to test against Oracle")
+	public void supportsBigDecimal() throws Exception {
+	}
+
+	@Test
     public void supportsDBSequences() throws Exception {
         try {
             sqlRecords.update(textOnly("drop sequence foo"));

@@ -18,6 +18,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.util.Date;
 import java.util.Iterator;
@@ -75,9 +76,10 @@ public abstract class RecordsContract<T extends Records> {
     protected static Keyword<String> title = keyword("title", String.class);
     protected static Keyword<Boolean> inPrint = keyword("inPrint", Boolean.class);
     protected static Keyword<UUID> uuid = keyword("uuid", UUID.class);
+    protected static Keyword<BigDecimal> rrp = keyword("rrp", BigDecimal.class);
 
     protected static Definition people = definition("people", isbn, age, dob, firstName, lastName);
-    protected static Definition books = definition("books", isbn, title, inPrint, uuid);
+    protected static Definition books = definition("books", isbn, title, inPrint, uuid, rrp);
 
     public static final URI zenIsbn = uri("urn:isbn:0099322617");
     public static final URI godelEsherBach = uri("urn:isbn:0140289208");
@@ -132,9 +134,9 @@ public abstract class RecordsContract<T extends Records> {
     private void setupBooks() {
         records.remove(books);
         records.add(books,
-                record().set(isbn, zenIsbn).set(title, "Zen And The Art Of Motorcycle Maintenance").set(inPrint, true).set(uuid, zenUuid),
-                record().set(isbn, godelEsherBach).set(title, "Godel, Escher, Bach: An Eternal Golden Braid").set(inPrint, false).set(uuid, randomUUID()),
-                record().set(isbn, cleanCode).set(title, "Clean Code: A Handbook of Agile Software Craftsmanship").set(inPrint, true).set(uuid, randomUUID()));
+                record().set(isbn, zenIsbn).set(title, "Zen And The Art Of Motorcycle Maintenance").set(inPrint, true).set(uuid, zenUuid).set(rrp, new BigDecimal("9.95")),
+                record().set(isbn, godelEsherBach).set(title, "Godel, Escher, Bach: An Eternal Golden Braid").set(inPrint, false).set(uuid, randomUUID()).set(rrp, new BigDecimal("20.00")),
+                record().set(isbn, cleanCode).set(title, "Clean Code: A Handbook of Agile Software Craftsmanship").set(inPrint, true).set(uuid, randomUUID()).set(rrp, new BigDecimal("34.99")));
     }
 
     @Test
@@ -152,8 +154,8 @@ public abstract class RecordsContract<T extends Records> {
     @Test
     public void supportsJoinUsing() throws Exception {
         assertThat(records.get(people).filter(where(age, is(lessThan(12)))).
-                flatMap(join(records.get(books), using(isbn))).
-                head().fields().size(), NumberMatcher.is(8));
+				flatMap(join(records.get(books), using(isbn))).
+				head().fields().size(), NumberMatcher.is(9));
 
         assertThat(records.get(people).filter(where(age, is(lessThan(12)))).
                 flatMap(join(records.get(books), using(isbn))).
@@ -177,6 +179,13 @@ public abstract class RecordsContract<T extends Records> {
         Record record = records.get(books).filter(where(inPrint, is(false))).head();
         assertThat(record.get(isbn), CoreMatchers.is(godelEsherBach));
         assertThat(record.get(inPrint), CoreMatchers.is(false));
+    }
+
+    @Test
+    public void supportsBigDecimal() throws Exception {
+        Record record = records.get(books).filter(where(rrp, greaterThan(new BigDecimal("20.00")))).head();
+        assertThat(record.get(isbn), CoreMatchers.is(cleanCode));
+        assertThat(record.get(rrp).setScale(2), CoreMatchers.is(new BigDecimal("34.99")));
     }
 
     @Test

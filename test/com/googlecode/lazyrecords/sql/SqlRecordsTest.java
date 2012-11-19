@@ -1,14 +1,6 @@
 package com.googlecode.lazyrecords.sql;
 
-import com.googlecode.lazyrecords.Definition;
-import com.googlecode.lazyrecords.ImmutableKeyword;
-import com.googlecode.lazyrecords.Logger;
-import com.googlecode.lazyrecords.MemoryLogger;
-import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.Records;
-import com.googlecode.lazyrecords.RecordsContract;
-import com.googlecode.lazyrecords.SchemaGeneratingRecords;
-import com.googlecode.lazyrecords.Transaction;
+import com.googlecode.lazyrecords.*;
 import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
@@ -27,9 +19,9 @@ import java.util.Map;
 
 import static com.googlecode.lazyrecords.Definition.constructors.definition;
 import static com.googlecode.lazyrecords.Keywords.keyword;
-import static com.googlecode.lazyrecords.Record.constructors.record;
 import static com.googlecode.lazyrecords.Record.methods.update;
 import static com.googlecode.lazyrecords.Using.using;
+import static com.googlecode.lazyrecords.sql.grammars.ColumnDatatypeMappings.hsql;
 import static com.googlecode.totallylazy.Predicates.always;
 import static com.googlecode.totallylazy.Predicates.where;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -59,7 +51,7 @@ public class SqlRecordsTest extends RecordsContract<Records> {
 
     public Records createRecords() throws Exception {
         connection = dataSource.getConnection();
-        grammar = new AnsiSqlGrammar();
+        grammar = new AnsiSqlGrammar(hsql());
         SqlRecords sqlRecords = sqlRecords(logger);
         return new SchemaGeneratingRecords(sqlRecords, schema = new SqlSchema(sqlRecords, grammar));
     }

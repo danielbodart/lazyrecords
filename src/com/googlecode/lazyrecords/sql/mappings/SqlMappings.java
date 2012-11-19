@@ -7,20 +7,14 @@ import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Unchecked;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
+import java.math.BigDecimal;
+import java.sql.*;
 import java.util.Date;
 import java.util.Map;
 
 import static com.googlecode.totallylazy.Maps.map;
 import static com.googlecode.totallylazy.Sequences.sequence;
-import static com.googlecode.totallylazy.numbers.Numbers.not;
-import static com.googlecode.totallylazy.numbers.Numbers.numbers;
-import static com.googlecode.totallylazy.numbers.Numbers.range;
-import static com.googlecode.totallylazy.numbers.Numbers.sum;
+import static com.googlecode.totallylazy.numbers.Numbers.*;
 
 public class SqlMappings {
     private final Map<Class, SqlMapping<Object>> map = map();
@@ -32,6 +26,7 @@ public class SqlMappings {
         add(Date.class, new DateMapping());
         add(Timestamp.class, new TimestampMapping());
         add(Integer.class, new IntegerMapping());
+        add(BigDecimal.class, new BigDecimalMapping());
         add(Long.class, new LongMapping());
     }
 
