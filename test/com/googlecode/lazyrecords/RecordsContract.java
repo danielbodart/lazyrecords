@@ -58,6 +58,7 @@ import static com.googlecode.totallylazy.Pair.pair;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.Streams.streams;
 import static com.googlecode.totallylazy.URLs.uri;
+import static com.googlecode.totallylazy.comparators.Comparators.comparators;
 import static com.googlecode.totallylazy.matchers.IterableMatcher.hasExactly;
 import static com.googlecode.totallylazy.matchers.NumberMatcher.equalTo;
 import static com.googlecode.totallylazy.time.Dates.date;
@@ -149,6 +150,14 @@ public abstract class RecordsContract<T extends Records> {
         records.add(people,
                 record().set(firstName, "great").set(lastName, "grandfather").set(age, 100).set(dob, date(1877, 1, 10)).set(isbn, zenIsbn));
         assertThat(records.get(people).filter(where(age, is(notNullValue(Integer.class)))).sortBy(descending(age)).map(age), hasExactly(100, 12, 11, 10));
+    }
+
+    @Test
+    public void supportsSortingByMultipleKeywords() throws Exception {
+        records.add(people, record().set(firstName, "aaaalfred").set(lastName, "bodart").set(age, 10).set(dob, date(1977, 1, 10)).set(isbn, zenIsbn));
+        assertThat(
+				records.get(people).filter(where(age, is(notNullValue(Integer.class)))).sortBy(comparators(descending(age), ascending(firstName))).map(firstName),
+				hasExactly("matt", "bob", "aaaalfred", "dan"));
     }
 
     @Test

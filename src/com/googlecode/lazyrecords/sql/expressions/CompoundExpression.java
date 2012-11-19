@@ -20,6 +20,10 @@ public class CompoundExpression extends AbstractExpression {
         this(expressions, "", " ", "");
     }
 
+    public CompoundExpression(final Sequence<Expression> expressions, String separator) {
+        this(expressions, "", separator, "");
+    }
+
     public CompoundExpression(final Sequence<Expression> expressions, final String start, final String separator, final String end) {
         this.expressions = expressions;
         this.start = start;

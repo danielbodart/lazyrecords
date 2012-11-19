@@ -44,6 +44,11 @@ public class SimpleDBRecordsTest extends SchemaBasedRecordContract<SimpleDBRecor
 	}
 
 	@Override
+	@Ignore("Not implemented yet")
+	public void supportsSortingByMultipleKeywords() throws Exception {
+	}
+
+	@Override
     @Ignore("Not Supported by AWS")
     public void supportsAliasingAKeyword() throws Exception {
     }
