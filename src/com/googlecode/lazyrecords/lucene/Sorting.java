@@ -23,7 +23,7 @@ public class Sorting {
 			return sortBy(name(((DescendingComparator) comparator).callable()), true);
 		}
 		if (comparator instanceof CompositeComparator) {
-			Sequence<SortField> sortFields = ((CompositeComparator<Record>) comparator).comparators().map(sort()).flatMap(sortFields());
+			Sequence<SortField> sortFields = ((CompositeComparator<? super Record>) comparator).comparators().map(sort()).flatMap(sortFields());
 			return new Sort(sortFields.toArray(SortField.class));
 		}
 		throw new UnsupportedOperationException("Unsupported comparator " + comparator);
