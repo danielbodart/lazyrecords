@@ -2,14 +2,7 @@ package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.lazyrecords.Logger;
 import com.googlecode.lazyrecords.Record;
-import com.googlecode.totallylazy.Callable1;
-import com.googlecode.totallylazy.CloseableList;
-import com.googlecode.totallylazy.Computation;
-import com.googlecode.totallylazy.Function;
-import com.googlecode.totallylazy.LazyException;
-import com.googlecode.totallylazy.Predicate;
-import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Value;
+import com.googlecode.totallylazy.*;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Sort;
@@ -74,7 +67,7 @@ public class LuceneSequence extends Sequence<Record> {
 
     @Override
     public Sequence<Record> sortBy(Comparator<? super Record> comparator) {
-        return new LuceneSequence(lucene, storage, query, documentToRecord, logger, closeables, Lucene.sort(comparator), start);
+        return new LuceneSequence(lucene, storage, query, documentToRecord, logger, closeables, Sorting.sort(comparator), start);
     }
 
     @Override

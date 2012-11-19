@@ -59,11 +59,6 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
 	public void supportsBigDecimal() throws Exception {
 	}
 
-	@Override
-	@Ignore("Not implemented yet")
-	public void supportsSortingByMultipleKeywords() throws Exception {
-	}
-
 	@Test
     public void canQueryIndexDirectly() throws Exception {
         QueryParser parser = new QueryParser(VERSION, null, ANALYZER);

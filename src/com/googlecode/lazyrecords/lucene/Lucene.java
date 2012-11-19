@@ -2,17 +2,12 @@ package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.lazyrecords.Named;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.*;
-import com.googlecode.totallylazy.comparators.AscendingComparator;
-import com.googlecode.totallylazy.comparators.DescendingComparator;
 import com.googlecode.totallylazy.predicates.*;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
-
-import java.util.Comparator;
 
 import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.totallylazy.Sequences.sequence;
@@ -72,28 +67,7 @@ public class Lucene {
         this.mappings = mappings;
     }
 
-    public static Sort sort(Comparator<? super Record> comparator) {
-        if (comparator instanceof AscendingComparator) {
-            return sortBy(name(((AscendingComparator) comparator).callable()), false);
-        }
-        if (comparator instanceof DescendingComparator) {
-            return sortBy(name(((DescendingComparator) comparator).callable()), true);
-        }
-        throw new UnsupportedOperationException("Unsupported comparator " + comparator);
-    }
-
-    private static Sort sortBy(String name, boolean reverse) {
-        return new Sort(new SortField(name, SortField.STRING, reverse));
-    }
-
-    private static String name(Callable1<?, ?> callable) {
-        if(callable instanceof Named){
-            return ((Named) callable).name();
-        }
-        throw new UnsupportedOperationException("Unsupported callable " + callable);
-    }
-
-    public Query query(Predicate<? super Record> predicate) {
+	public Query query(Predicate<? super Record> predicate) {
         if (predicate instanceof WherePredicate) {
             return where(Unchecked.<WherePredicate<Record, ?>>cast(predicate));
         }
