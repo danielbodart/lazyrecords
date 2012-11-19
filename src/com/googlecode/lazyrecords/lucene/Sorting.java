@@ -4,6 +4,7 @@ import com.googlecode.lazyrecords.Named;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.comparators.AscendingComparator;
 import com.googlecode.totallylazy.comparators.CompositeComparator;
 import com.googlecode.totallylazy.comparators.DescendingComparator;
@@ -23,7 +24,7 @@ public class Sorting {
 			return sortBy(name(((DescendingComparator) comparator).callable()), true);
 		}
 		if (comparator instanceof CompositeComparator) {
-			Sequence<SortField> sortFields = ((CompositeComparator<? super Record>) comparator).comparators().map(sort()).flatMap(sortFields());
+			Sequence<SortField> sortFields = Unchecked.<CompositeComparator<? super Record>>cast(comparator).comparators().map(sort()).flatMap(sortFields());
 			return new Sort(sortFields.toArray(SortField.class));
 		}
 		throw new UnsupportedOperationException("Unsupported comparator " + comparator);
