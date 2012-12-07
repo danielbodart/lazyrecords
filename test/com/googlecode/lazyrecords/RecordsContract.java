@@ -7,6 +7,7 @@ import com.googlecode.totallylazy.Sequences;
 import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.matchers.IterableMatcher;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
+import com.googlecode.totallylazy.numbers.Numbers;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.junit.After;
@@ -61,6 +62,7 @@ import static com.googlecode.totallylazy.URLs.uri;
 import static com.googlecode.totallylazy.comparators.Comparators.comparators;
 import static com.googlecode.totallylazy.matchers.IterableMatcher.hasExactly;
 import static com.googlecode.totallylazy.matchers.NumberMatcher.equalTo;
+import static com.googlecode.totallylazy.numbers.Numbers.divide;
 import static com.googlecode.totallylazy.time.Dates.date;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -230,7 +232,11 @@ public abstract class RecordsContract<T extends Records> {
         assertThat(result.get(maximum(age)), NumberMatcher.is(12));
         assertThat(result.get(minimum(dob)), CoreMatchers.is(date(1975, 1, 10)));
         assertThat(result.get(sum(age)), NumberMatcher.is(33));
-        assertThat(result.get(average(age)), NumberMatcher.is(11));
+        assertThat(result.get(average(age)), NumberMatcher.is(precision(divide(23, 2))));
+    }
+
+    protected Number precision(Number number) {
+        return number;
     }
 
     @Test

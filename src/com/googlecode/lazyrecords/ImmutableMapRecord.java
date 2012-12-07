@@ -12,6 +12,7 @@ import static com.googlecode.totallylazy.Option.option;
 import static com.googlecode.totallylazy.Predicates.in;
 import static com.googlecode.totallylazy.Predicates.is;
 import static com.googlecode.totallylazy.Predicates.where;
+import static com.googlecode.totallylazy.Unchecked.cast;
 
 public class ImmutableMapRecord implements Record {
     private final ImmutableMap<Keyword<?>, Object> fields;

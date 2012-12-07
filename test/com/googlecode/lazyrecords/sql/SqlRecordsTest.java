@@ -37,7 +37,7 @@ public class SqlRecordsTest extends RecordsContract<Records> {
         // HyperSonic: jdbc:hsqldb:mem:totallylazy", "SA", ""
         // H2: jdbc:h2:mem:totallylazy", "SA", ""
         dataSource = new JDBCDataSource();
-        dataSource.setUrl("jdbc:hsqldb:mem:totallylazy");
+        dataSource.setUrl("jdbc:h2:mem:totallylazy");
         dataSource.setUser("SA");
         dataSource.setPassword("");
     }
@@ -45,6 +45,11 @@ public class SqlRecordsTest extends RecordsContract<Records> {
     @After
     public void closeConnection() throws SQLException {
         connection.close();
+    }
+
+    @Override
+    protected Number precision(Number number) {
+        return number.intValue();
     }
 
     private SqlSchema schema;

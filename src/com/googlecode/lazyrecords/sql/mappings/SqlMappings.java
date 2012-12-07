@@ -27,6 +27,7 @@ public class SqlMappings {
         add(Timestamp.class, new TimestampMapping());
         add(Integer.class, new IntegerMapping());
         add(BigDecimal.class, new BigDecimalMapping());
+        add(Number.class, new BigDecimalMapping());
         add(Long.class, new LongMapping());
     }
 
@@ -34,7 +35,7 @@ public class SqlMappings {
         this(new StringMappings());
     }
 
-    public <T> SqlMappings add(final Class<T> type, final SqlMapping<T> mapping) {
+    public <T> SqlMappings add(final Class<T> type, final SqlMapping<? extends T> mapping) {
         map.put(type, Unchecked.<SqlMapping<Object>>cast(mapping));
         return this;
     }

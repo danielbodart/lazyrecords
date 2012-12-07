@@ -9,12 +9,22 @@ import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Strings;
 import com.googlecode.totallylazy.callables.Count;
+import com.googlecode.totallylazy.collections.ImmutableMap;
+import com.googlecode.totallylazy.collections.ImmutableSortedMap;
+import com.googlecode.totallylazy.collections.ListMap;
 import com.googlecode.totallylazy.comparators.Maximum;
 import com.googlecode.totallylazy.comparators.Minimum;
+import com.googlecode.totallylazy.numbers.Integers;
+import com.googlecode.totallylazy.numbers.Longs;
 import com.googlecode.totallylazy.numbers.Numbers;
 import com.googlecode.totallylazy.predicates.LogicalPredicate;
+import com.googlecode.totallylazy.time.Dates;
 
 import java.util.Comparator;
+import java.util.Date;
+
+import static com.googlecode.totallylazy.Unchecked.cast;
+import static com.googlecode.totallylazy.collections.ListMap.listMap;
 
 
 public class Grammar {
@@ -58,24 +68,50 @@ public class Grammar {
         return Aggregate.average(keyword);
     }
 
-    public static <T extends Comparable<? super T>> Function2<T, T, T> maximum() {
-        return Maximum.<T>maximum();
+    public static Maximum.Function<Integer> maximumInteger() {
+        return Integers.maximum();
     }
 
-    public static <T extends Comparable<? super T>> Function2<T, T, T> maximum(Class<T> aClass) {
-        return Maximum.maximum(aClass);
+    public static Maximum.Function<Long> maximumLong() {
+        return Longs.maximum();
+    }
+
+    public static com.googlecode.totallylazy.numbers.Maximum maximumNumber() {
+        return Numbers.maximum();
+    }
+
+    public static Maximum.Function<Date> maximumDate() {
+        return Dates.maximum();
+    }
+
+    public static Minimum.Function<Integer> minimumInteger() {
+        return Integers.minimum();
+    }
+
+    public static Minimum.Function<Long> minimumLong() {
+        return Longs.minimum();
+    }
+
+    public static com.googlecode.totallylazy.numbers.Minimum minimumNumber() {
+        return Numbers.minimum();
+    }
+
+    public static Minimum.Function<Date> minimumDate() {
+        return Dates.minimum();
+    }
+
+    private static final ImmutableMap<Class<?>, Maximum> maximums = ListMap.<Class<?>, Maximum>listMap(Integer.class, maximumInteger(), Long.class, maximumLong(), Number.class, maximumNumber(), Date.class, maximumDate());
+    public static <T> Maximum<T> maximum(Class<T> aClass) {
+        return cast(maximums.get(aClass).get());
     }
 
     public static <T extends Comparable<? super T>> Aggregate<T, T> maximum(Keyword<T> keyword) {
         return Aggregate.maximum(keyword);
     }
 
-    public static <T extends Comparable<? super T>> Function2<T, T, T> minimum() {
-        return Minimum.<T>minimum();
-    }
-
-    public static <T extends Comparable<? super T>> Function2<T, T, T> minimum(Class<T> aClass) {
-        return Minimum.minimum(aClass);
+    private static final ImmutableMap<Class<?>, Minimum> minimums = ListMap.<Class<?>, Minimum>listMap(Integer.class, minimumInteger(), Long.class, minimumLong(), Number.class, minimumNumber(), Date.class, minimumDate());
+    public static <T> Minimum<T> minimum(Class<T> aClass) {
+        return cast(minimums.get(aClass).get());
     }
 
     public static <T extends Comparable<? super T>> Aggregate<T, T> minimum(Keyword<T> keyword) {

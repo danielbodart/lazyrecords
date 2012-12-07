@@ -42,12 +42,13 @@ public class Aggregate<T, R> extends AliasedKeyword<T> implements Callable2<T, T
         return new Aggregate<T, R>(callable, Unchecked.<Keyword<T>>cast(keyword));
     }
 
-    public static <T extends Comparable<? super T>> Aggregate<T, T> maximum(Keyword<T> keyword) {
-        return aggregate(Maximum.<T>maximum(), keyword);
+    @SuppressWarnings("unchecked")
+    public static <T> Aggregate<T, T> maximum(Keyword<T> keyword) {
+        return aggregate(Grammar.maximum(keyword.forClass()), keyword);
     }
 
-    public static <T extends Comparable<? super T>> Aggregate<T, T> minimum(Keyword<T> keyword) {
-        return aggregate(Minimum.<T>minimum(), keyword);
+    public static <T> Aggregate<T, T> minimum(Keyword<T> keyword) {
+        return aggregate(Grammar.minimum(keyword.forClass()), keyword);
     }
 
     public static <T extends Number> Aggregate<T, Number> sum(Keyword<T> keyword) {
@@ -55,7 +56,7 @@ public class Aggregate<T, R> extends AliasedKeyword<T> implements Callable2<T, T
     }
 
     public static <T extends Number> Aggregate<T, Number> average(Keyword<T> keyword) {
-        return aggregate(Numbers.average(), keyword);
+        return aggregate(Numbers.average(), Keywords.keyword(keyword.name(), Number.class));
     }
 
     public static Aggregate<Number, Number> count(Keyword<?> keyword) {
