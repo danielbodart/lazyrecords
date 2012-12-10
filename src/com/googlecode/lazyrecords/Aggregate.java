@@ -1,48 +1,61 @@
 package com.googlecode.lazyrecords;
 
-import com.googlecode.totallylazy.Callable2;
+import com.googlecode.totallylazy.Reducer;
 import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.callables.Count;
-import com.googlecode.totallylazy.comparators.Maximum;
-import com.googlecode.totallylazy.comparators.Minimum;
 import com.googlecode.totallylazy.numbers.Numbers;
 
-import static com.googlecode.totallylazy.Unchecked.cast;
 import static java.lang.String.format;
 
-public class Aggregate<T, R> extends AliasedKeyword<T> implements Callable2<T, T, R> {
-    private final Callable2<? super T, ? super T, R> callable;
+public class Aggregate<T, R> extends AliasedKeyword<R> implements Reducer<T, R> {
+    private final Reducer<T, R> reducer;
 
-    public Aggregate(final Callable2<? super T, ? super T, R> callable, final Keyword<T> keyword, final String name) {
+    private Aggregate(final Reducer<T, R> reducer, final Keyword<R> keyword, final String name) {
         super(keyword, name);
-        this.callable = callable;
+        this.reducer = reducer;
     }
 
-    public Aggregate(final Callable2<? super T, ? super T, R> callable, final Keyword<T> keyword) {
-        this(callable, keyword, generateName(callable, keyword));
+    public static <T, R> Aggregate<T, R> aggregate(Reducer<? super T, R> reducer, Keyword<? extends R> keyword, final String name) {
+        return new Aggregate<T, R>(Unchecked.<Reducer<T, R>>cast(reducer), Unchecked.<Keyword<R>>cast(keyword), name);
     }
 
-    private static <T, R> String generateName(final Callable2<? super T, ? super T, R> callable, final Keyword<?> keyword) {
-        return format("%s_%s", callable.getClass().getSimpleName(), replaceIllegalCharacters(keyword.name())).toLowerCase();
+    public static <T, R> Aggregate<T, R> aggregate(Reducer<? super T, R> reducer, Keyword<? extends R> keyword) {
+        return aggregate(reducer, keyword, generateName(reducer, keyword));
+    }
+
+    private static String generateName(final Reducer<?, ?> reducer, final Keyword<?> keyword) {
+        return format("%s_%s", reducer.getClass().getSimpleName(), replaceIllegalCharacters(keyword.name())).toLowerCase();
     }
 
     private static String replaceIllegalCharacters(String name) {
         return name.replace("*", "star");
     }
 
-    public R call(final T accumulator, final T next) throws Exception {
-        return callable.call(accumulator, next);
+    @Override
+    public R call(final R accumulator, final T next) throws Exception {
+        return reducer.call(accumulator, next);
     }
 
-    public Callable2<? super T, ? super T, R> callable() {
-        return callable;
+    @Override
+    public R identity() {
+        return reducer.identity();
     }
 
-    public static <T, R> Aggregate<T, R> aggregate(Callable2<? super T, ? super T, R> callable, Keyword<?> keyword) {
-        return new Aggregate<T, R>(callable, Unchecked.<Keyword<T>>cast(keyword));
+    public Reducer<T, R> reducer() {
+        return reducer;
     }
 
-    @SuppressWarnings("unchecked")
+    public Aggregate<T, R> as(Keyword<T> keyword) {
+        return as(keyword.name());
+    }
+
+    public Aggregate<T, R> as(String name) {
+        return aggregate(reducer, source(), name);
+    }
+
+
+
+    // Factory methods
     public static <T> Aggregate<T, T> maximum(Keyword<T> keyword) {
         return aggregate(Grammar.maximum(keyword.forClass()), keyword);
     }
@@ -52,22 +65,20 @@ public class Aggregate<T, R> extends AliasedKeyword<T> implements Callable2<T, T
     }
 
     public static <T extends Number> Aggregate<T, Number> sum(Keyword<T> keyword) {
-        return aggregate(Numbers.sum(), keyword);
+        return Aggregate.aggregate(Numbers.sum(), keyword);
     }
 
     public static <T extends Number> Aggregate<T, Number> average(Keyword<T> keyword) {
-        return aggregate(Numbers.average(), Keywords.keyword(keyword.name(), Number.class));
+        return aggregate(Numbers.average(), numberKeyword(keyword));
     }
 
-    public static Aggregate<Number, Number> count(Keyword<?> keyword) {
-        return aggregate(Count.count(), keyword);
+    public static Aggregate<Object, Number> count(Keyword<?> keyword) {
+        return aggregate(Count.count(), numberKeyword(keyword));
     }
 
-    public Aggregate<T, R> as(Keyword<T> keyword) {
-        return as(keyword.name());
+    private static Keyword<Number> numberKeyword(Keyword<?> keyword) {
+        return Keywords.keyword(keyword.name(), Number.class);
     }
 
-    public Aggregate<T, R> as(String name) {
-        return new Aggregate<T, R>(callable, source(), name);
-    }
+
 }

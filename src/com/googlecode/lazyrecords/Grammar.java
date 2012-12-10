@@ -1,16 +1,8 @@
 package com.googlecode.lazyrecords;
 
-import com.googlecode.totallylazy.Callable1;
-import com.googlecode.totallylazy.Callables;
-import com.googlecode.totallylazy.Function2;
-import com.googlecode.totallylazy.Pair;
-import com.googlecode.totallylazy.Predicate;
-import com.googlecode.totallylazy.Predicates;
-import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Strings;
+import com.googlecode.totallylazy.*;
 import com.googlecode.totallylazy.callables.Count;
 import com.googlecode.totallylazy.collections.ImmutableMap;
-import com.googlecode.totallylazy.collections.ImmutableSortedMap;
 import com.googlecode.totallylazy.collections.ListMap;
 import com.googlecode.totallylazy.comparators.Maximum;
 import com.googlecode.totallylazy.comparators.Minimum;
@@ -60,7 +52,7 @@ public class Grammar {
         return Record.constructors.record(fields);
     }
 
-    public static Function2<Number, Number, Number> average() {
+    public static CombinerFunction<Number> average() {
         return Numbers.average();
     }
 
@@ -118,12 +110,20 @@ public class Grammar {
         return Aggregate.minimum(keyword);
     }
 
-    public static Function2<Number, Number, Number> sum() {
+    public static CombinerFunction<Number> sum() {
         return Numbers.sum();
     }
 
     public static <T extends Number> Aggregate<T, Number> sum(Keyword<T> keyword) {
         return Aggregate.sum(keyword);
+    }
+
+    public static ReducerFunction<Object, Number> count() {
+        return Count.count();
+    }
+
+    public static Aggregate<Object, Number> count(Keyword<?> keyword) {
+        return Aggregate.count(keyword);
     }
 
     public static Aggregates to(final Aggregate<?, ?>... aggregates) {
@@ -249,10 +249,5 @@ public class Grammar {
     public static LogicalPredicate<String> endsWith(final String value) {
         return Strings.endsWith(value);
     }
-
-    public static Function2<Number, Object, Number> count() {
-        return Count.count();
-    }
-
 
 }

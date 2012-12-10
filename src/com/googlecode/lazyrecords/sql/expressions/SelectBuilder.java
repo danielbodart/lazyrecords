@@ -7,15 +7,7 @@ import com.googlecode.lazyrecords.Join;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
-import com.googlecode.totallylazy.Callable2;
-import com.googlecode.totallylazy.Function;
-import com.googlecode.totallylazy.Function1;
-import com.googlecode.totallylazy.Option;
-import com.googlecode.totallylazy.Predicate;
-import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Sequences;
-import com.googlecode.totallylazy.Unchecked;
-import com.googlecode.totallylazy.Value;
+import com.googlecode.totallylazy.*;
 import com.googlecode.totallylazy.callables.Count;
 
 import java.util.Comparator;
@@ -100,7 +92,7 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
     }
 
     public SelectBuilder count() {
-        Aggregate<Number, Number> recordCount = Aggregate.count(keyword("*", Long.class)).as("record_count");
+        Aggregate<?, Number> recordCount = Aggregate.count(keyword("*", Long.class)).as("record_count");
         Sequence<Keyword<?>> sequence = Sequences.<Keyword<?>>sequence(recordCount);
         return new SelectBuilder(grammar, setQuantifier, sequence, table, where, Option.<Comparator<? super Record>>none(), join);
     }
@@ -119,7 +111,7 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
             return aggregates.value().unsafeCast();
         }
         Keyword<Object> cast = column();
-        Aggregate<Object, Object> aggregate = Aggregate.aggregate(Unchecked.<Callable2<Object, Object, Object>>cast(callable), cast);
+        Aggregate<Object, Object> aggregate = Aggregate.aggregate(Unchecked.<Reducer<Object,Object>>cast(callable), cast);
         return Sequences.<Keyword<?>>sequence(aggregate);
     }
 

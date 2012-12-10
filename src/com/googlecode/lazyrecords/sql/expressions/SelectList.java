@@ -1,6 +1,5 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
-import com.googlecode.lazyrecords.ImmutableKeyword;
 import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Function1;
@@ -41,7 +40,7 @@ public class SelectList extends CompoundExpression{
     public static <T> AbstractExpression derivedColumn(Callable1<? super Record, T> callable) {
         if(callable instanceof Aggregate){
             Aggregate aggregate = (Aggregate) callable;
-            return setFunctionType(aggregate.callable(), aggregate.source()).join(asClause(aggregate));
+            return setFunctionType(aggregate.reducer(), aggregate.source()).join(asClause(aggregate));
         }
         if (callable instanceof AliasedKeyword) {
             AliasedKeyword aliasedKeyword = (AliasedKeyword) callable;
@@ -55,7 +54,7 @@ public class SelectList extends CompoundExpression{
             Sequence<Keyword<?>> keywords = ((SelectCallable) callable).keywords();
             return selectList(keywords);
         }
-        throw new UnsupportedOperationException("Unsupported callable " + callable);
+        throw new UnsupportedOperationException("Unsupported reducer " + callable);
     }
 
     public static boolean isLongName(Keyword<?> keyword) {

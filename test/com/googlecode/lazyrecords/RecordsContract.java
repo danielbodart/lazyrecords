@@ -1,13 +1,8 @@
 package com.googlecode.lazyrecords;
 
-import com.googlecode.totallylazy.Callables;
-import com.googlecode.totallylazy.Closeables;
-import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Sequences;
-import com.googlecode.totallylazy.Unchecked;
+import com.googlecode.totallylazy.*;
 import com.googlecode.totallylazy.matchers.IterableMatcher;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
-import com.googlecode.totallylazy.numbers.Numbers;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.junit.After;
@@ -25,36 +20,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.UUID;
 
-import static com.googlecode.lazyrecords.Grammar.all;
-import static com.googlecode.lazyrecords.Grammar.ascending;
-import static com.googlecode.lazyrecords.Grammar.average;
-import static com.googlecode.lazyrecords.Grammar.between;
-import static com.googlecode.lazyrecords.Grammar.contains;
-import static com.googlecode.lazyrecords.Grammar.count;
-import static com.googlecode.lazyrecords.Grammar.definition;
-import static com.googlecode.lazyrecords.Grammar.descending;
-import static com.googlecode.lazyrecords.Grammar.endsWith;
-import static com.googlecode.lazyrecords.Grammar.greaterThan;
-import static com.googlecode.lazyrecords.Grammar.greaterThanOrEqualTo;
-import static com.googlecode.lazyrecords.Grammar.in;
-import static com.googlecode.lazyrecords.Grammar.is;
-import static com.googlecode.lazyrecords.Grammar.join;
-import static com.googlecode.lazyrecords.Grammar.keyword;
-import static com.googlecode.lazyrecords.Grammar.lessThan;
-import static com.googlecode.lazyrecords.Grammar.lessThanOrEqualTo;
-import static com.googlecode.lazyrecords.Grammar.maximum;
-import static com.googlecode.lazyrecords.Grammar.minimum;
-import static com.googlecode.lazyrecords.Grammar.not;
-import static com.googlecode.lazyrecords.Grammar.notNullValue;
-import static com.googlecode.lazyrecords.Grammar.nullValue;
-import static com.googlecode.lazyrecords.Grammar.record;
-import static com.googlecode.lazyrecords.Grammar.select;
-import static com.googlecode.lazyrecords.Grammar.startsWith;
-import static com.googlecode.lazyrecords.Grammar.sum;
-import static com.googlecode.lazyrecords.Grammar.to;
-import static com.googlecode.lazyrecords.Grammar.update;
-import static com.googlecode.lazyrecords.Grammar.using;
-import static com.googlecode.lazyrecords.Grammar.where;
+import static com.googlecode.lazyrecords.Grammar.*;
 import static com.googlecode.totallylazy.Pair.pair;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.Streams.streams;
@@ -158,15 +124,15 @@ public abstract class RecordsContract<T extends Records> {
     public void supportsSortingByMultipleKeywords() throws Exception {
         records.add(people, record().set(firstName, "aaaalfred").set(lastName, "bodart").set(age, 10).set(dob, date(1977, 1, 10)).set(isbn, zenIsbn));
         assertThat(
-				records.get(people).filter(where(age, is(notNullValue(Integer.class)))).sortBy(comparators(descending(age), ascending(firstName))).map(firstName),
-				hasExactly("matt", "bob", "aaaalfred", "dan"));
+                records.get(people).filter(where(age, is(notNullValue(Integer.class)))).sortBy(comparators(descending(age), ascending(firstName))).map(firstName),
+                hasExactly("matt", "bob", "aaaalfred", "dan"));
     }
 
     @Test
     public void supportsJoinUsing() throws Exception {
         assertThat(records.get(people).filter(where(age, is(lessThan(12)))).
-				flatMap(join(records.get(books), using(isbn))).
-				head().fields().size(), NumberMatcher.is(9));
+                flatMap(join(records.get(books), using(isbn))).
+                head().fields().size(), NumberMatcher.is(9));
 
         assertThat(records.get(people).filter(where(age, is(lessThan(12)))).
                 flatMap(join(records.get(books), using(isbn))).
@@ -232,7 +198,7 @@ public abstract class RecordsContract<T extends Records> {
         assertThat(result.get(maximum(age)), NumberMatcher.is(12));
         assertThat(result.get(minimum(dob)), CoreMatchers.is(date(1975, 1, 10)));
         assertThat(result.get(sum(age)), NumberMatcher.is(33));
-        assertThat(result.get(average(age)), NumberMatcher.is(precision(divide(23, 2))));
+        assertThat(result.get(average(age)), NumberMatcher.is(precision(11)));
     }
 
     protected Number precision(Number number) {

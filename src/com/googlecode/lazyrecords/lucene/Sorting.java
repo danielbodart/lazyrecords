@@ -56,6 +56,6 @@ public class Sorting {
 		if(callable instanceof Named){
 			return ((Named) callable).name();
 		}
-		throw new UnsupportedOperationException("Unsupported callable " + callable);
+		throw new UnsupportedOperationException("Unsupported reducer " + callable);
 	}
 }
