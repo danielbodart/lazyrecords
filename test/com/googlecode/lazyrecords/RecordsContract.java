@@ -91,11 +91,10 @@ public abstract class RecordsContract<T extends Records> {
         }
     }
 
-
     private void setupPeople() {
         records.remove(people);
         records.add(people,
-                record().set(firstName, "dan").set(lastName, "bodart").set(age, 10).set(dob, date(1977, 1, 10)).set(isbn, zenIsbn),
+                record().set(firstName, "dan").set(lastName, "bodart").set(age, 9).set(dob, date(1977, 1, 10)).set(isbn, zenIsbn),
                 record().set(firstName, "matt").set(lastName, "savage").set(age, 12).set(dob, date(1975, 1, 10)).set(isbn, godelEsherBach),
                 record().set(firstName, "bob").set(lastName, "martin").set(age, 11).set(dob, date(1976, 1, 10)).set(isbn, cleanCode));
     }
@@ -117,7 +116,7 @@ public abstract class RecordsContract<T extends Records> {
     public void supportsCorrectlySortingNumbers() throws Exception {
         records.add(people,
                 record().set(firstName, "great").set(lastName, "grandfather").set(age, 100).set(dob, date(1877, 1, 10)).set(isbn, zenIsbn));
-        assertThat(records.get(people).filter(where(age, is(notNullValue(Integer.class)))).sortBy(descending(age)).map(age), hasExactly(100, 12, 11, 10));
+        assertThat(records.get(people).filter(where(age, is(notNullValue(Integer.class)))).sortBy(descending(age)).map(age), hasExactly(100, 12, 11, 9));
     }
 
     @Test
@@ -184,8 +183,8 @@ public abstract class RecordsContract<T extends Records> {
     public void supportsReduce() throws Exception {
         assertThat(records.get(people).map(age).reduce(maximum(Integer.class)), CoreMatchers.is(12));
         assertThat(records.get(people).map(dob).reduce(minimum(Date.class)), CoreMatchers.is(date(1975, 1, 10)));
-        assertThat(records.get(people).map(age).reduce(sum()), NumberMatcher.is(33));
-        assertThat(records.get(people).map(age).reduce(average()), NumberMatcher.is(11));
+        assertThat(records.get(people).map(age).reduce(sum()), NumberMatcher.is(32));
+        assertThat(records.get(people).map(age).reduce(average()), NumberMatcher.is(precision(divide(32,3))));
 
         assertThat(records.get(people).reduce(count()), NumberMatcher.is(3));
         records.add(people, record().set(firstName, "null age").set(lastName, "").set(age, null).set(dob, date(1974, 1, 10)));
@@ -197,8 +196,8 @@ public abstract class RecordsContract<T extends Records> {
         Record result = records.get(people).reduce(to(maximum(age), minimum(dob), sum(age), average(age)));
         assertThat(result.get(maximum(age)), NumberMatcher.is(12));
         assertThat(result.get(minimum(dob)), CoreMatchers.is(date(1975, 1, 10)));
-        assertThat(result.get(sum(age)), NumberMatcher.is(33));
-        assertThat(result.get(average(age)), NumberMatcher.is(precision(11)));
+        assertThat(result.get(sum(age)), NumberMatcher.is(32));
+        assertThat(result.get(average(age)), NumberMatcher.is(precision(divide(32,3))));
     }
 
     protected Number precision(Number number) {
@@ -393,13 +392,13 @@ public abstract class RecordsContract<T extends Records> {
     @Test
     public void supportsBetween() throws Exception {
         Sequence<Record> users = records.get(people);
-        assertThat(users.filter(where(age, is(between(10, 11)))).map(firstName), containsInAnyOrder("dan", "bob"));
+        assertThat(users.filter(where(age, is(between(9, 11)))).map(firstName), containsInAnyOrder("dan", "bob"));
     }
 
     @Test
     public void supportsIn() throws Exception {
         Sequence<Record> users = records.get(people);
-        assertThat(users.filter(where(age, is(in(10, 12)))).map(firstName), containsInAnyOrder("dan", "matt"));
+        assertThat(users.filter(where(age, is(in(9, 12)))).map(firstName), containsInAnyOrder("dan", "matt"));
     }
 
     @Test
