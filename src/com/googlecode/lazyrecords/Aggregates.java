@@ -5,53 +5,53 @@ import com.googlecode.totallylazy.*;
 import static com.googlecode.lazyrecords.Record.constructors.record;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
-public class Aggregates extends ReducerFunction<Record, Record> implements Value<Sequence<Aggregate<?,?>>> {
-    private final Sequence<Aggregate<?,?>> aggregates;
+public class Aggregates extends ReducerFunction<Record, Record> implements Value<Sequence<Aggregate<Object, Object>>> {
+    private final Sequence<Aggregate<Object, Object>> aggregates;
 
-    public Aggregates(final Sequence<Aggregate<?,?>> aggregates) {
+    private Aggregates(final Sequence<Aggregate<Object, Object>> aggregates) {
         this.aggregates = aggregates;
     }
 
-    public Record call(Record accumulator, final Record nextRecord) throws Exception {
-        return aggregates.fold(accumulator, new Callable2<Record, Aggregate<?, ?>, Record>() {
+    @Override
+    public Record call(final Record accumulator, final Record nextRecord) throws Exception {
+        return aggregateRecord(new Function1<Aggregate<Object, Object>, Object>() {
             @Override
-            public Record call(Record record, Aggregate<?, ?> aggregate) throws Exception {
-                Object current = accumulatorValue(record, aggregate);
+            public Object call(Aggregate<Object, Object> aggregate) throws Exception {
+                Object current = accumulator.get(aggregate);
                 Object next = nextRecord.get(aggregate.source());
-                Aggregate<Object, Object> cast = Unchecked.cast(aggregate);
-                return record.set(cast, cast.call(current, next));
+                return aggregate.call(current, next);
             }
         });
     }
 
-    private Object accumulatorValue(Record record, Aggregate<?,?> aggregate) {
-        Object value = record.get(aggregate.source());
-        if (value == null) {
-            return record.get(aggregate);
-        }
-        return value;
+    @Override
+    public Record identity() {
+        return aggregateRecord(new Function1<Aggregate<Object, Object>, Object>() {
+            @Override
+            public Object call(Aggregate<Object, Object> aggregate) throws Exception {
+                return aggregate.identity();
+            }
+        });
     }
 
+    private Record aggregateRecord(final Function1<Aggregate<Object, Object>, Object> valueFunc) {
+        return record(aggregates.map(new Function1<Aggregate<Object, Object>, Pair<Keyword<?>, Object>>() {
+            @Override
+            public Pair<Keyword<?>, Object> call(Aggregate<Object, Object> aggregate) throws Exception {
+                return Pair.<Keyword<?>, Object>pair(aggregate, valueFunc.call(aggregate));
+            }
+        }));
+    }
 
-    public Sequence<Aggregate<?,?>> value() {
+    public Sequence<Aggregate<Object, Object>> value() {
         return aggregates;
     }
 
-    public static Aggregates to(final Aggregate<?,?>... aggregates) {
+    public static Aggregates to(final Aggregate<?, ?>... aggregates) {
         return aggregates(sequence(aggregates));
     }
 
-    public static Aggregates aggregates(final Sequence<Aggregate<?,?>> sequence) {
-        return new Aggregates(sequence);
-    }
-
-    @Override
-    public Record identity() {
-        return Record.constructors.record(aggregates.map(new Function1<Aggregate<?, ?>, Pair<Keyword<?>, Object>>() {
-            @Override
-            public Pair<Keyword<?>, Object> call(Aggregate<?, ?> aggregate) throws Exception {
-                return Pair.<Keyword<?>, Object>pair(aggregate, aggregate.identity());
-            }
-        }));
+    public static Aggregates aggregates(final Sequence<Aggregate<?, ?>> sequence) {
+        return new Aggregates(sequence.<Aggregate<Object, Object>>unsafeCast());
     }
 }
