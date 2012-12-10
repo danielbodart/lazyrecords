@@ -10,6 +10,7 @@ import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
 import com.googlecode.totallylazy.Unchecked;
+import com.googlecode.totallylazy.collections.ListMap;
 
 import java.util.Map;
 
@@ -19,6 +20,7 @@ import static com.googlecode.totallylazy.Predicates.in;
 import static com.googlecode.totallylazy.Predicates.is;
 import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Sequences.sequence;
+import static com.googlecode.totallylazy.collections.ListMap.listMap;
 
 public interface Record {
     <T> T get(Keyword<T> keyword);
@@ -45,8 +47,8 @@ public interface Record {
             return record(sequence(fields));
         }
 
-        public static Record record(final Sequence<Pair<Keyword<?>, Object>> fields) {
-            return fields.fold(record(), functions.updateValues());
+        public static Record record(final Iterable<? extends Pair<Keyword<?>, Object>> fields) {
+            return new ImmutableMapRecord(listMap(fields));
         }
     }
 
