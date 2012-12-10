@@ -94,17 +94,17 @@ public abstract class RecordsContract<T extends Records> {
     private void setupPeople() {
         records.remove(people);
         records.add(people,
-                record().set(firstName, "dan").set(lastName, "bodart").set(age, 9).set(dob, date(1977, 1, 10)).set(isbn, zenIsbn),
-                record().set(firstName, "matt").set(lastName, "savage").set(age, 12).set(dob, date(1975, 1, 10)).set(isbn, godelEsherBach),
-                record().set(firstName, "bob").set(lastName, "martin").set(age, 11).set(dob, date(1976, 1, 10)).set(isbn, cleanCode));
+                record(firstName, "dan", lastName, "bodart", age, 9, dob, date(1977, 1, 10), isbn, zenIsbn),
+                record(firstName, "matt", lastName, "savage", age, 12, dob, date(1975, 1, 10), isbn, godelEsherBach),
+                record(firstName, "bob", lastName, "martin", age, 11, dob, date(1976, 1, 10), isbn, cleanCode));
     }
 
     private void setupBooks() {
         records.remove(books);
         records.add(books,
-                record().set(isbn, zenIsbn).set(title, "Zen And The Art Of Motorcycle Maintenance").set(inPrint, true).set(uuid, zenUuid).set(rrp, new BigDecimal("9.95")),
-                record().set(isbn, godelEsherBach).set(title, "Godel, Escher, Bach: An Eternal Golden Braid").set(inPrint, false).set(uuid, randomUUID()).set(rrp, new BigDecimal("20.00")),
-                record().set(isbn, cleanCode).set(title, "Clean Code: A Handbook of Agile Software Craftsmanship").set(inPrint, true).set(uuid, randomUUID()).set(rrp, new BigDecimal("34.99")));
+                record(isbn, zenIsbn, title, "Zen And The Art Of Motorcycle Maintenance", inPrint, true, uuid, zenUuid, rrp, new BigDecimal("9.95")),
+                record(isbn, godelEsherBach, title, "Godel, Escher, Bach: An Eternal Golden Braid", inPrint, false, uuid, randomUUID(), rrp, new BigDecimal("20.00")),
+                record(isbn, cleanCode, title, "Clean Code: A Handbook of Agile Software Craftsmanship", inPrint, true, uuid, randomUUID(), rrp, new BigDecimal("34.99")));
     }
 
     @Test
@@ -115,13 +115,14 @@ public abstract class RecordsContract<T extends Records> {
     @Test
     public void supportsCorrectlySortingNumbers() throws Exception {
         records.add(people,
-                record().set(firstName, "great").set(lastName, "grandfather").set(age, 100).set(dob, date(1877, 1, 10)).set(isbn, zenIsbn));
+                record(firstName, "great", lastName, "grandfather", age, 100, dob, date(1877, 1, 10), isbn, zenIsbn));
         assertThat(records.get(people).filter(where(age, is(notNullValue(Integer.class)))).sortBy(descending(age)).map(age), hasExactly(100, 12, 11, 9));
     }
 
     @Test
     public void supportsSortingByMultipleKeywords() throws Exception {
-        records.add(people, record().set(firstName, "aaaalfred").set(lastName, "bodart").set(age, 10).set(dob, date(1977, 1, 10)).set(isbn, zenIsbn));
+        records.add(people,
+                record(firstName, "aaaalfred", lastName, "bodart", age, 10, dob, date(1977, 1, 10), isbn, zenIsbn));
         assertThat(
                 records.get(people).filter(where(age, is(notNullValue(Integer.class)))).sortBy(comparators(descending(age), ascending(firstName))).map(firstName),
                 hasExactly("matt", "bob", "aaaalfred", "dan"));
@@ -173,7 +174,7 @@ public abstract class RecordsContract<T extends Records> {
 
     @Test
     public void supportsIsNullAndNotNull() throws Exception {
-        assertCount(records.add(people, record().set(firstName, "null age and dob").set(lastName, "").set(age, null).set(dob, null)), 1);
+        assertCount(records.add(people, record(firstName, "null age and dob", lastName, "", age, null, dob, null)), 1);
         assertThat(records.get(people).filter(where(age, is(notNullValue()))).toList().size(), NumberMatcher.is(3));
         Sequence<Record> recordSequence = records.get(people);
         assertThat(recordSequence.filter(where(age, is(nullValue()))).toList().size(), NumberMatcher.is(1));
@@ -184,10 +185,10 @@ public abstract class RecordsContract<T extends Records> {
         assertThat(records.get(people).map(age).reduce(maximum(Integer.class)), CoreMatchers.is(12));
         assertThat(records.get(people).map(dob).reduce(minimum(Date.class)), CoreMatchers.is(date(1975, 1, 10)));
         assertThat(records.get(people).map(age).reduce(sum()), NumberMatcher.is(32));
-        assertThat(records.get(people).map(age).reduce(average()), NumberMatcher.is(precision(divide(32,3))));
+        assertThat(records.get(people).map(age).reduce(average()), NumberMatcher.is(precision(divide(32, 3))));
 
         assertThat(records.get(people).reduce(count()), NumberMatcher.is(3));
-        records.add(people, record().set(firstName, "null age").set(lastName, "").set(age, null).set(dob, date(1974, 1, 10)));
+        records.add(people, record(firstName, "null age", lastName, "", age, null, dob, date(1974, 1, 10)));
         assertThat(records.get(people).map(age).reduce(count()), NumberMatcher.is(3));
     }
 
@@ -197,7 +198,7 @@ public abstract class RecordsContract<T extends Records> {
         assertThat(result.get(maximum(age)), NumberMatcher.is(12));
         assertThat(result.get(minimum(dob)), CoreMatchers.is(date(1975, 1, 10)));
         assertThat(result.get(sum(age)), NumberMatcher.is(32));
-        assertThat(result.get(average(age)), NumberMatcher.is(precision(divide(32,3))));
+        assertThat(result.get(average(age)), NumberMatcher.is(precision(divide(32, 3))));
     }
 
     protected Number precision(Number number) {
@@ -212,23 +213,23 @@ public abstract class RecordsContract<T extends Records> {
 
     @Test
     public void supportsSet() throws Exception {
-        records.add(people, record().set(firstName, "chris").set(lastName, "bodart").set(age, 13).set(dob, date(1974, 1, 10)));
-        assertThat(records.get(people).filter(where(lastName, startsWith("bod"))).map(select(lastName)).toSet(), hasExactly(record().set(lastName, "bodart")));
+        records.add(people, record(firstName, "chris", lastName, "bodart", age, 13, dob, date(1974, 1, 10)));
+        assertThat(records.get(people).filter(where(lastName, startsWith("bod"))).map(select(lastName)).toSet(), hasExactly(record(lastName, "bodart")));
         assertThat(records.get(people).map(lastName).toSet(), containsInAnyOrder("bodart", "savage", "martin"));
     }
 
     @Test
     public void supportsUnique() throws Exception {
-        records.add(people, record().set(firstName, "chris").set(lastName, "bodart").set(age, 13).set(dob, date(1974, 1, 10)));
-        assertThat(records.get(people).filter(where(lastName, startsWith("bod"))).map(select(lastName)).unique(), hasExactly(record().set(lastName, "bodart")));
+        records.add(people, record(firstName, "chris", lastName, "bodart", age, 13, dob, date(1974, 1, 10)));
+        assertThat(records.get(people).filter(where(lastName, startsWith("bod"))).map(select(lastName)).unique(), hasExactly(record(lastName, "bodart")));
         assertThat(records.get(people).map(lastName).unique(), containsInAnyOrder("bodart", "savage", "martin"));
     }
 
     @Test
     public void supportsUpdating() throws Exception {
         assertCount(records.set(people, sequence(
-                pair(where(age, is(12)), record().set(isbn, zenIsbn)),
-                pair(where(age, is(11)), record().set(isbn, zenIsbn))
+                pair(where(age, is(12)), record(isbn, zenIsbn)),
+                pair(where(age, is(11)), record(isbn, zenIsbn))
         )), 2);
         assertThat(records.get(people).filter(where(age, is(12))).map(isbn), hasExactly(zenIsbn));
         assertThat(records.get(people).filter(where(age, is(11))).map(isbn), hasExactly(zenIsbn));
@@ -241,8 +242,8 @@ public abstract class RecordsContract<T extends Records> {
         String newTitle = "The Emperor's New Mind: Concerning Computers, Minds, and the Laws of Physics";
         assertCount(records.put(books,
                 update(using(isbn),
-                        record().set(isbn, zenIsbn).set(title, updatedTitle),
-                        record().set(isbn, newIsbn).set(title, newTitle))
+                        record(isbn, zenIsbn, title, updatedTitle),
+                        record(isbn, newIsbn, title, newTitle))
         ), 2);
         assertThat(records.get(books).filter(where(isbn, is(zenIsbn))).map(title), hasExactly(updatedTitle));
         assertThat(records.get(books).filter(where(isbn, is(newIsbn))).map(title), hasExactly(newTitle));
@@ -251,7 +252,7 @@ public abstract class RecordsContract<T extends Records> {
     @Test
     public void doesNotPutExtraFields() throws Exception {
         assertCount(records.put(books, update(using(isbn),
-                record().set(isbn, zenIsbn).set(firstName, "shouldBeIgnored"))
+                record(isbn, zenIsbn, firstName, "shouldBeIgnored"))
         ), 1);
         assertThat(records.get(books).filter(where(isbn, is(zenIsbn))).head().keywords().contains(firstName), CoreMatchers.is(false));
     }
@@ -259,7 +260,7 @@ public abstract class RecordsContract<T extends Records> {
     @Test
     public void doesNotSetExtraFields() throws Exception {
         assertCount(records.set(books, update(using(isbn),
-                record().set(isbn, zenIsbn).set(firstName, "shouldBeIgnored"))
+                record(isbn, zenIsbn, firstName, "shouldBeIgnored"))
         ), 1);
         assertThat(records.get(books).filter(where(isbn, is(zenIsbn))).head().keywords().contains(firstName), CoreMatchers.is(false));
     }

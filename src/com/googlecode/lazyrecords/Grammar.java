@@ -44,6 +44,26 @@ public class Grammar {
         return Record.constructors.record();
     }
 
+    public static <A> Record record(Keyword<A> aKeyword, A a) {
+        return Record.constructors.record(aKeyword, a);
+    }
+
+    public static <A, B> Record record(Keyword<A> aKeyword, A a, Keyword<B> bKeyword, B b) {
+        return Record.constructors.record(aKeyword, a, bKeyword, b);
+    }
+
+    public static <A, B, C> Record record(Keyword<A> aKeyword, A a, Keyword<B> bKeyword, B b, Keyword<C> cKeyword, C c) {
+        return Record.constructors.record(aKeyword, a, bKeyword, b, cKeyword, c);
+    }
+
+    public static <A, B, C, D> Record record(Keyword<A> aKeyword, A a, Keyword<B> bKeyword, B b, Keyword<C> cKeyword, C c, Keyword<D> dKeyword, D d) {
+        return Record.constructors.record(aKeyword, a, bKeyword, b, cKeyword, c, dKeyword, d);
+    }
+
+    public static <A, B, C, D, E> Record record(Keyword<A> aKeyword, A a, Keyword<B> bKeyword, B b, Keyword<C> cKeyword, C c, Keyword<D> dKeyword, D d, Keyword<E> eKeyword, E e) {
+        return Record.constructors.record(aKeyword, a, bKeyword, b, cKeyword, c,dKeyword, d, eKeyword, e);
+    }
+
     public static Record record(final Pair<Keyword<?>, Object>... fields) {
         return Record.constructors.record(fields);
     }

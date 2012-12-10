@@ -43,6 +43,26 @@ public interface Record {
             return new ImmutableMapRecord();
         }
 
+        public static <A> Record record(Keyword<A> aKeyword, A a) {
+            return record().set(aKeyword, a);
+        }
+
+        public static <A, B> Record record(Keyword<A> aKeyword, A a, Keyword<B> bKeyword, B b) {
+            return record().set(aKeyword, a).set(bKeyword, b);
+        }
+
+        public static <A, B, C> Record record(Keyword<A> aKeyword, A a, Keyword<B> bKeyword, B b, Keyword<C> cKeyword, C c) {
+            return record().set(aKeyword, a).set(bKeyword, b).set(cKeyword, c);
+        }
+
+        public static <A, B, C, D> Record record(Keyword<A> aKeyword, A a, Keyword<B> bKeyword, B b, Keyword<C> cKeyword, C c, Keyword<D> dKeyword, D d) {
+            return record().set(aKeyword, a).set(bKeyword, b).set(cKeyword, c).set(dKeyword, d);
+        }
+
+        public static <A, B, C, D, E> Record record(Keyword<A> aKeyword, A a, Keyword<B> bKeyword, B b, Keyword<C> cKeyword, C c, Keyword<D> dKeyword, D d, Keyword<E> eKeyword, E e) {
+            return record().set(aKeyword, a).set(bKeyword, b).set(cKeyword, c).set(dKeyword, d).set(eKeyword, e);
+        }
+
         public static Record record(final Pair<Keyword<?>, Object>... fields) {
             return record(sequence(fields));
         }
