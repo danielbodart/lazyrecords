@@ -33,6 +33,10 @@ public class Aggregate<T, R> extends AbstractKeyword<R> implements Reducer<T, R>
         return aggregate(reducer, keyword, generateName(reducer, keyword), rClass);
     }
 
+    public static <T> Aggregate<T, T> aggregate(Reducer<? super T, T> reducer, Keyword<? extends T> keyword) {
+        return aggregate(reducer, keyword, generateName(reducer, keyword), Unchecked.<Class<T>>cast(keyword.forClass()));
+    }
+
     private static String generateName(final Reducer<?, ?> reducer, final Keyword<?> keyword) {
         return format("%s_%s", reducer.getClass().getSimpleName(), replaceIllegalCharacters(keyword.name())).toLowerCase();
     }
@@ -85,15 +89,15 @@ public class Aggregate<T, R> extends AbstractKeyword<R> implements Reducer<T, R>
 
     // Factory methods
     public static <T> Aggregate<T, T> maximum(Keyword<T> keyword) {
-        return aggregate(Grammar.maximum(keyword.forClass()), keyword, keyword.forClass());
+        return aggregate(Grammar.maximum(keyword.forClass()), keyword);
     }
 
     public static <T> Aggregate<T, T> minimum(Keyword<T> keyword) {
-        return aggregate(Grammar.minimum(keyword.forClass()), keyword, keyword.forClass());
+        return aggregate(Grammar.minimum(keyword.forClass()), keyword);
     }
 
     public static <T extends Number> Aggregate<T, Number> sum(Keyword<T> keyword) {
-        return Aggregate.aggregate(Numbers.sum(), keyword, Number.class);
+        return aggregate(Numbers.sum(), keyword, Number.class);
     }
 
     public static <T extends Number> Aggregate<T, Number> average(Keyword<T> keyword) {
