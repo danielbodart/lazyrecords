@@ -7,20 +7,30 @@ import com.googlecode.totallylazy.numbers.Numbers;
 
 import static java.lang.String.format;
 
-public class Aggregate<T, R> extends AliasedKeyword<R> implements Reducer<T, R> {
+public class Aggregate<T, R> extends AbstractKeyword<R> implements Reducer<T, R> {
     private final Reducer<T, R> reducer;
+    private final Keyword<T> source;
+    private final String name;
+    private final Class<R> rClass;
 
-    private Aggregate(final Reducer<T, R> reducer, final Keyword<R> keyword, final String name) {
-        super(keyword, name);
+    private Aggregate(final Reducer<T, R> reducer, final Keyword<T> source, final String name, final Class<R> rClass) {
+       this(reducer, source, name, rClass, Record.constructors.record());
+    }
+
+    private Aggregate(final Reducer<T, R> reducer, final Keyword<T> source, final String name, final Class<R> rClass, Record metadata) {
+        super(metadata);
         this.reducer = reducer;
+        this.source = source;
+        this.name = name;
+        this.rClass = rClass;
     }
 
-    public static <T, R> Aggregate<T, R> aggregate(Reducer<? super T, R> reducer, Keyword<? extends R> keyword, final String name) {
-        return new Aggregate<T, R>(Unchecked.<Reducer<T, R>>cast(reducer), Unchecked.<Keyword<R>>cast(keyword), name);
+    public static <T, R> Aggregate<T, R> aggregate(Reducer<? super T, R> reducer, Keyword<? extends T> keyword, final String name, final Class<R> rClass) {
+        return new Aggregate<T, R>(Unchecked.<Reducer<T, R>>cast(reducer), Unchecked.<Keyword<T>>cast(keyword), name, rClass);
     }
 
-    public static <T, R> Aggregate<T, R> aggregate(Reducer<? super T, R> reducer, Keyword<? extends R> keyword) {
-        return aggregate(reducer, keyword, generateName(reducer, keyword));
+    public static <T, R> Aggregate<T, R> aggregate(Reducer<? super T, R> reducer, Keyword<? extends T> keyword, final Class<R> rClass) {
+        return aggregate(reducer, keyword, generateName(reducer, keyword), rClass);
     }
 
     private static String generateName(final Reducer<?, ?> reducer, final Keyword<?> keyword) {
@@ -41,8 +51,27 @@ public class Aggregate<T, R> extends AliasedKeyword<R> implements Reducer<T, R> 
         return reducer.identity();
     }
 
+    @Override
+    public Aggregate<T, R> metadata(Record record) {
+        return new Aggregate<T, R>(reducer, source, name, rClass, record);
+    }
+
+    @Override
+    public Class<R> forClass() {
+        return rClass;
+    }
+
+    @Override
+    public String name() {
+        return name;
+    }
+
     public Reducer<T, R> reducer() {
         return reducer;
+    }
+
+    public Keyword<T> source() {
+        return source;
     }
 
     public Aggregate<T, R> as(Keyword<T> keyword) {
@@ -50,35 +79,29 @@ public class Aggregate<T, R> extends AliasedKeyword<R> implements Reducer<T, R> 
     }
 
     public Aggregate<T, R> as(String name) {
-        return aggregate(reducer, source(), name);
+        return aggregate(reducer, source(), name, forClass());
     }
-
 
 
     // Factory methods
     public static <T> Aggregate<T, T> maximum(Keyword<T> keyword) {
-        return aggregate(Grammar.maximum(keyword.forClass()), keyword);
+        return aggregate(Grammar.maximum(keyword.forClass()), keyword, keyword.forClass());
     }
 
     public static <T> Aggregate<T, T> minimum(Keyword<T> keyword) {
-        return aggregate(Grammar.minimum(keyword.forClass()), keyword);
+        return aggregate(Grammar.minimum(keyword.forClass()), keyword, keyword.forClass());
     }
 
     public static <T extends Number> Aggregate<T, Number> sum(Keyword<T> keyword) {
-        return Aggregate.aggregate(Numbers.sum(), keyword);
+        return Aggregate.aggregate(Numbers.sum(), keyword, Number.class);
     }
 
     public static <T extends Number> Aggregate<T, Number> average(Keyword<T> keyword) {
-        return aggregate(Numbers.average(), numberKeyword(keyword));
+        return aggregate(Numbers.average(), keyword, Number.class);
     }
 
     public static Aggregate<Object, Number> count(Keyword<?> keyword) {
-        return aggregate(Count.count(), numberKeyword(keyword));
+        return aggregate(Count.count(), keyword, Number.class);
     }
-
-    private static Keyword<Number> numberKeyword(Keyword<?> keyword) {
-        return Keywords.keyword(keyword.name(), Number.class);
-    }
-
 
 }

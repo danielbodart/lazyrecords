@@ -111,7 +111,7 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
             return aggregates.value().unsafeCast();
         }
         Keyword<Object> cast = column();
-        Aggregate<Object, Object> aggregate = Aggregate.aggregate(Unchecked.<Reducer<Object,Object>>cast(callable), cast);
+        Aggregate<Object, Object> aggregate = Aggregate.aggregate(Unchecked.<Reducer<Object,Object>>cast(callable), cast, cast.forClass());
         return Sequences.<Keyword<?>>sequence(aggregate);
     }
 

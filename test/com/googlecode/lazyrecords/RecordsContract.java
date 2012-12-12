@@ -194,11 +194,12 @@ public abstract class RecordsContract<T extends Records> {
 
     @Test
     public void supportsReducingMultipleValuesAtTheSameTime() throws Exception {
-        Record result = records.get(people).reduce(to(maximum(age), minimum(dob), sum(age), average(age)));
+        Record result = records.get(people).reduce(to(maximum(age), minimum(dob), sum(age), average(age), count(firstName)));
         assertThat(result.get(maximum(age)), NumberMatcher.is(12));
         assertThat(result.get(minimum(dob)), CoreMatchers.is(date(1975, 1, 10)));
         assertThat(result.get(sum(age)), NumberMatcher.is(32));
         assertThat(result.get(average(age)), NumberMatcher.is(precision(divide(32, 3))));
+        assertThat(result.get(count(firstName)), NumberMatcher.is(3));
     }
 
     protected Number precision(Number number) {
