@@ -136,7 +136,6 @@ public class OptimisedStorage implements LuceneStorage {
         }
     }
 
-
     @Override
     public void restore(File source) throws Exception {
         synchronized (lock) {

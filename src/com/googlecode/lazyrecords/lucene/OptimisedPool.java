@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.lucene;
 
+import com.googlecode.totallylazy.Block;
 import com.googlecode.totallylazy.Function;
 import com.googlecode.totallylazy.Function1;
 import org.apache.lucene.search.IndexSearcher;
@@ -63,12 +64,11 @@ public class OptimisedPool implements SearcherPool {
         return new LuceneSearcher(new IndexSearcher(directory));
     }
 
-    private Function1<Searcher, Void> checkIn() {
-        return new Function1<Searcher, Void>() {
+    private Block<Searcher> checkIn() {
+        return new Block<Searcher>() {
             @Override
-            public Void call(Searcher searcher) throws Exception {
+            public void execute(Searcher searcher) throws Exception {
                 checkin(searcher);
-                return VOID;
             }
         };
     }
@@ -102,12 +102,11 @@ public class OptimisedPool implements SearcherPool {
                 each(PooledValue.markAsDirty());
     }
 
-    private Function1<PooledValue, Void> closeAndRemove() {
-        return new Function1<PooledValue, Void>() {
+    private Block<PooledValue> closeAndRemove() {
+        return new Block<PooledValue>() {
             @Override
-            public Void call(PooledValue pooledValue) throws Exception {
+            public void execute(PooledValue pooledValue) throws Exception {
                 closeAndRemove(pooledValue);
-                return VOID;
             }
         };
     }
