@@ -1,18 +1,14 @@
 package com.googlecode.lazyrecords.parser;
 
-import com.googlecode.lazyrecords.ImmutableKeyword;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.lucene.Lucene;
 import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.lazyrecords.sql.expressions.WhereClause;
-import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
-import com.googlecode.totallylazy.predicates.LogicalPredicate;
-import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import java.util.Date;

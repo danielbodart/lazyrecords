@@ -11,9 +11,9 @@ import java.io.IOException;
 
 public class PooledSearcher implements Searcher {
     private final Searcher searcher;
-    private final Callable1<Searcher, Void> checkin;
+    private final Callable1<Searcher, ?> checkin;
 
-    public PooledSearcher(Searcher searcher, Callable1<Searcher, Void> checkin) {
+    public PooledSearcher(Searcher searcher, Callable1<Searcher, ?> checkin) {
         this.searcher = searcher;
         this.checkin = checkin;
     }

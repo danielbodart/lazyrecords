@@ -4,7 +4,7 @@ import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.collections.ImmutableMap;
+import com.googlecode.totallylazy.collections.PersistentMap;
 import com.googlecode.totallylazy.collections.ListMap;
 
 import static com.googlecode.totallylazy.Callables.second;
@@ -12,13 +12,12 @@ import static com.googlecode.totallylazy.Option.option;
 import static com.googlecode.totallylazy.Predicates.in;
 import static com.googlecode.totallylazy.Predicates.is;
 import static com.googlecode.totallylazy.Predicates.where;
-import static com.googlecode.totallylazy.Unchecked.cast;
 
 public class ImmutableMapRecord implements Record {
-    private final ImmutableMap<Keyword<?>, Object> fields;
+    private final PersistentMap<Keyword<?>, Object> fields;
 
-    // See Record.constructors.immutableRecord to create
-    ImmutableMapRecord(ImmutableMap<Keyword<?>, Object> fields) {
+    // See Record.constructors.PersistentRecord to create
+    ImmutableMapRecord(PersistentMap<Keyword<?>, Object> fields) {
         this.fields = fields;
     }
 
@@ -42,7 +41,7 @@ public class ImmutableMapRecord implements Record {
     }
 
     public Sequence<Pair<Keyword<?>, Object>> fields() {
-        return fields.immutableList().toSequence();
+        return fields.persistentList().toSequence();
     }
 
     public Sequence<Keyword<?>> keywords() {

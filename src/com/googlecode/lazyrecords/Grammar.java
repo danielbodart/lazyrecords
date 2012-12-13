@@ -2,8 +2,8 @@ package com.googlecode.lazyrecords;
 
 import com.googlecode.totallylazy.*;
 import com.googlecode.totallylazy.callables.Count;
-import com.googlecode.totallylazy.collections.ImmutableMap;
 import com.googlecode.totallylazy.collections.ListMap;
+import com.googlecode.totallylazy.collections.PersistentMap;
 import com.googlecode.totallylazy.comparators.Maximum;
 import com.googlecode.totallylazy.comparators.Minimum;
 import com.googlecode.totallylazy.numbers.Integers;
@@ -16,7 +16,6 @@ import java.util.Comparator;
 import java.util.Date;
 
 import static com.googlecode.totallylazy.Unchecked.cast;
-import static com.googlecode.totallylazy.collections.ListMap.listMap;
 
 
 public class Grammar {
@@ -61,7 +60,7 @@ public class Grammar {
     }
 
     public static <A, B, C, D, E> Record record(Keyword<A> aKeyword, A a, Keyword<B> bKeyword, B b, Keyword<C> cKeyword, C c, Keyword<D> dKeyword, D d, Keyword<E> eKeyword, E e) {
-        return Record.constructors.record(aKeyword, a, bKeyword, b, cKeyword, c,dKeyword, d, eKeyword, e);
+        return Record.constructors.record(aKeyword, a, bKeyword, b, cKeyword, c, dKeyword, d, eKeyword, e);
     }
 
     public static Record record(final Pair<Keyword<?>, Object>... fields) {
@@ -112,7 +111,8 @@ public class Grammar {
         return Dates.minimum();
     }
 
-    private static final ImmutableMap<Class<?>, Maximum> maximums = ListMap.<Class<?>, Maximum>listMap(Integer.class, maximumInteger(), Long.class, maximumLong(), Number.class, maximumNumber(), Date.class, maximumDate());
+    private static final PersistentMap<Class<?>, Maximum> maximums = ListMap.<Class<?>, Maximum>listMap(Integer.class, maximumInteger(), Long.class, maximumLong(), Number.class, maximumNumber(), Date.class, maximumDate());
+
     public static <T> Maximum<T> maximum(Class<T> aClass) {
         return cast(maximums.get(aClass).get());
     }
@@ -121,7 +121,8 @@ public class Grammar {
         return Aggregate.maximum(keyword);
     }
 
-    private static final ImmutableMap<Class<?>, Minimum> minimums = ListMap.<Class<?>, Minimum>listMap(Integer.class, minimumInteger(), Long.class, minimumLong(), Number.class, minimumNumber(), Date.class, minimumDate());
+    private static final PersistentMap<Class<?>, Minimum> minimums = ListMap.<Class<?>, Minimum>listMap(Integer.class, minimumInteger(), Long.class, minimumLong(), Number.class, minimumNumber(), Date.class, minimumDate());
+
     public static <T> Minimum<T> minimum(Class<T> aClass) {
         return cast(minimums.get(aClass).get());
     }
