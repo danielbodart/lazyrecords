@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.lucene;
 
+import com.googlecode.totallylazy.Block;
 import com.googlecode.totallylazy.Function1;
 
 import java.io.Closeable;
@@ -78,12 +79,11 @@ public class PooledValue implements Closeable {
         return checkoutCount.decrementAndGet();
     }
 
-    public static Function1<PooledValue, Void> markAsDirty() {
-        return new Function1<PooledValue, Void>() {
+    public static Block<PooledValue> markAsDirty() {
+        return new Block<PooledValue>() {
             @Override
-            public Void call(PooledValue pooledValue) throws Exception {
+            public void execute(PooledValue pooledValue) throws Exception {
                 pooledValue.dirty(true);
-                return VOID;
             }
         };
     }
