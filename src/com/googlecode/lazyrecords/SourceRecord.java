@@ -18,7 +18,7 @@ public class SourceRecord<T> implements Record, Value<T> {
     }
 
     public static <T> SourceRecord<T> record(T value) {
-        return record(value, new ImmutableMapRecord());
+        return record(value, new PersistentRecord());
     }
 
     public static <T> SourceRecord<T> record(T value, Record record) {

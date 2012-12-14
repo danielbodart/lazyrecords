@@ -39,7 +39,7 @@ public interface Record {
         }
 
         public static Record record() {
-            return new ImmutableMapRecord();
+            return new PersistentRecord();
         }
 
         public static <A> Record record(Keyword<A> aKeyword, A a) {
@@ -67,7 +67,7 @@ public interface Record {
         }
 
         public static Record record(final Iterable<? extends Pair<Keyword<?>, Object>> fields) {
-            return new ImmutableMapRecord(listMap(fields));
+            return new PersistentRecord(listMap(fields));
         }
     }
 

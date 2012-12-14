@@ -13,15 +13,15 @@ import static com.googlecode.totallylazy.Predicates.in;
 import static com.googlecode.totallylazy.Predicates.is;
 import static com.googlecode.totallylazy.Predicates.where;
 
-public class ImmutableMapRecord implements Record {
+public class PersistentRecord implements Record {
     private final PersistentMap<Keyword<?>, Object> fields;
 
-    // See Record.constructors.PersistentRecord to create
-    ImmutableMapRecord(PersistentMap<Keyword<?>, Object> fields) {
+    // See Record.constructors.record to create
+    PersistentRecord(PersistentMap<Keyword<?>, Object> fields) {
         this.fields = fields;
     }
 
-    ImmutableMapRecord() {
+    PersistentRecord() {
         this(ListMap.<Keyword<?>, Object>emptyListMap());
     }
 
@@ -37,7 +37,7 @@ public class ImmutableMapRecord implements Record {
     }
 
     public <T> Record set(Keyword<T> name, T value) {
-        return new ImmutableMapRecord(fields.put(name, value));
+        return new PersistentRecord(fields.put(name, value));
     }
 
     public Sequence<Pair<Keyword<?>, Object>> fields() {
