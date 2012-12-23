@@ -56,8 +56,8 @@ public class Aggregate<T, R> extends AbstractKeyword<R> implements Reducer<T, R>
     }
 
     @Override
-    public Aggregate<T, R> metadata(Record record) {
-        return new Aggregate<T, R>(reducer, source, name, rClass, record);
+    public Aggregate<T, R> metadata(Record metadata) {
+        return new Aggregate<T, R>(reducer, source, name, rClass, metadata);
     }
 
     @Override

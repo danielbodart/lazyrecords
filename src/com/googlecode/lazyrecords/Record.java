@@ -166,5 +166,13 @@ public interface Record {
                 }
             };
         }
-    }
+
+		public static Function1<Record, Sequence<Keyword<?>>> keywords() {
+			return new Function1<Record, Sequence<Keyword<?>>>() {
+				public Sequence<Keyword<?>> call(Record record) throws Exception {
+					return record.keywords();
+				}
+			};
+		}
+	}
 }
