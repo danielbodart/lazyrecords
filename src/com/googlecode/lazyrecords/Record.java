@@ -126,6 +126,14 @@ public interface Record {
             };
         }
 
+        public static <T> Function1<Record, Option<T>> getOption(final Keyword<T> keyword) {
+            return new Function1<Record, Option<T>>() {
+                public Option<T> call(Record record) throws Exception {
+                    return record.getOption(keyword);
+                }
+            };
+        }
+
         public static Function1<Record, Sequence<Object>> getValuesFor(final Sequence<Keyword<?>> fields) {
             return new Function1<Record, Sequence<Object>>() {
                 public Sequence<Object> call(Record record) throws Exception {
