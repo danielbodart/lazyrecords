@@ -4,13 +4,7 @@ import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Join;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.sql.expressions.DeleteStatement;
-import com.googlecode.lazyrecords.sql.expressions.Expression;
-import com.googlecode.lazyrecords.sql.expressions.InsertStatement;
-import com.googlecode.lazyrecords.sql.expressions.SelectExpression;
-import com.googlecode.lazyrecords.sql.expressions.SetQuantifier;
-import com.googlecode.lazyrecords.sql.expressions.TableDefinition;
-import com.googlecode.lazyrecords.sql.expressions.UpdateStatement;
+import com.googlecode.lazyrecords.sql.expressions.*;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
@@ -30,7 +24,7 @@ public class AnsiSqlGrammar implements SqlGrammar {
     }
 
     @Override
-    public Expression selectExpression(Definition definition, Sequence<Keyword<?>> select, SetQuantifier setQuantifier, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> orderBy, Option<Join> join) {
+    public Expression selectExpression(Definition definition, Sequence<Keyword<?>> select, SetQuantifier setQuantifier, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> orderBy, Option<? extends Join> join) {
         return SelectExpression.selectExpression(definition, select, setQuantifier, where, orderBy, join);
     }
 

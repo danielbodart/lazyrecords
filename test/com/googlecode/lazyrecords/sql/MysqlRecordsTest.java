@@ -41,6 +41,7 @@ public class MysqlRecordsTest extends RecordsContract<Records> {
             Class.forName(properties.getProperty("driver"));
             return Option.some(getConnection(properties.getProperty("url"), properties.getProperty("username"), properties.getProperty("password")));
         } catch (Exception e) {
+			e.printStackTrace();
             return none();
         }
     }

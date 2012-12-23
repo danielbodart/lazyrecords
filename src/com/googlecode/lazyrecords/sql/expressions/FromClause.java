@@ -1,18 +1,14 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
-import com.googlecode.lazyrecords.Definition;
-import com.googlecode.lazyrecords.Join;
-import com.googlecode.lazyrecords.Using;
+import com.googlecode.lazyrecords.*;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Option;
 
-import static com.googlecode.lazyrecords.sql.expressions.Expressions.name;
-import static com.googlecode.lazyrecords.sql.expressions.Expressions.names;
-import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
+import static com.googlecode.lazyrecords.sql.expressions.Expressions.*;
 import static java.lang.String.format;
 
 public class FromClause extends CompoundExpression{
-    public FromClause(Definition table, Option<Join> join) {
+    public FromClause(Definition table, Option<? extends Join> join) {
         super(textOnly("from"), name(table).join(join.map(asExpression()).getOrElse(Expressions.empty())));
     }
 
@@ -29,10 +25,18 @@ public class FromClause extends CompoundExpression{
         Expressible records = (Expressible) join.records();
         SelectBuilder select = (SelectBuilder) records.express();
         Using using = (Using) join.using();
-        return textOnly("inner join %s using %s", name(select.table()), names(using.keywords()));
+        return textOnly("%s %s using %s", joinExpression(join),name(select.table()), names(using.keywords()));
     }
 
-    public static Expression fromClause(Definition definition, Option<Join> join) {
+	private static String joinExpression(Join join) {
+		if(join instanceof InnerJoin)
+			return "inner join";
+		if(join instanceof LeftJoin)
+			return "left join";
+		throw new UnsupportedOperationException(format("Cannot created join expression for %s", join));
+	}
+
+	public static Expression fromClause(Definition definition, Option<? extends Join> join) {
         return new FromClause(definition, join);
     }
 

@@ -1,14 +1,8 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
-import com.googlecode.lazyrecords.Aggregate;
-import com.googlecode.lazyrecords.Aggregates;
-import com.googlecode.lazyrecords.Definition;
-import com.googlecode.lazyrecords.Join;
-import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.lazyrecords.Record;
+import com.googlecode.lazyrecords.*;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.totallylazy.*;
-import com.googlecode.totallylazy.callables.Count;
 
 import java.util.Comparator;
 import java.util.concurrent.Callable;
@@ -27,10 +21,10 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
     private final Definition table;
     private final Option<Predicate<? super Record>> where;
     private final Option<Comparator<? super Record>> comparator;
-    private final Option<Join> join;
+    private final Option<? extends Join> join;
     private final Value<Expression> value;
 
-    private SelectBuilder(SqlGrammar grammar, SetQuantifier setQuantifier, Sequence<Keyword<?>> select, Definition table, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> comparator, Option<Join> join) {
+    private SelectBuilder(SqlGrammar grammar, SetQuantifier setQuantifier, Sequence<Keyword<?>> select, Definition table, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> comparator, Option<? extends Join> join) {
         this.grammar = grammar;
         this.setQuantifier = setQuantifier;
         this.join = join;
@@ -125,7 +119,7 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
         return new SelectBuilder(grammar, setQuantifier, select.join(joinedKeywords(join)).unique().realise(), table, where, comparator, join);
     }
 
-    private static Sequence<Keyword<?>> joinedKeywords(Option<Join> join) {
+    private static Sequence<Keyword<?>> joinedKeywords(Option<? extends Join> join) {
         return join.toSequence().flatMap(new Function1<Join, Sequence<Keyword<?>>>() {
             @Override
             public Sequence<Keyword<?>> call(Join join) throws Exception {

@@ -47,12 +47,7 @@ public class SqlRecordsTest extends RecordsContract<Records> {
         connection.close();
     }
 
-    @Override
-    protected Number precision(Number number) {
-        return number.intValue();
-    }
-
-    private SqlSchema schema;
+	private SqlSchema schema;
 
     public Records createRecords() throws Exception {
         connection = dataSource.getConnection();

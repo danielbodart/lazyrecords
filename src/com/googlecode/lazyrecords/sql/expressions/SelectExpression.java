@@ -1,12 +1,9 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
-import com.googlecode.lazyrecords.Definition;
-import com.googlecode.lazyrecords.Join;
+import com.googlecode.lazyrecords.*;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
-import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.lazyrecords.Record;
 
 import java.util.Comparator;
 
@@ -19,7 +16,7 @@ import static com.googlecode.lazyrecords.sql.expressions.WhereClause.whereClause
 public class SelectExpression extends CompoundExpression {
     public static final TextOnlyExpression SELECT = textOnly("select");
 
-    private SelectExpression(final SetQuantifier setQuantifier, final Sequence<Keyword<?>> select, final Definition table, final Option<Predicate<? super Record>> where, final Option<Comparator<? super Record>> sort, Option<Join> join) {
+    private SelectExpression(final SetQuantifier setQuantifier, final Sequence<Keyword<?>> select, final Definition table, final Option<Predicate<? super Record>> where, final Option<Comparator<? super Record>> sort, Option<? extends Join> join) {
         super(
                 querySpecification(setQuantifier, select),
                 fromClause(table, join),
@@ -28,7 +25,7 @@ public class SelectExpression extends CompoundExpression {
         );
     }
 
-    public static SelectExpression selectExpression(final Definition table, final Sequence<Keyword<?>> select, final SetQuantifier setQuantifier, final Option<Predicate<? super Record>> where, final Option<Comparator<? super Record>> sort, Option<Join> join) {
+    public static SelectExpression selectExpression(final Definition table, final Sequence<Keyword<?>> select, final SetQuantifier setQuantifier, final Option<Predicate<? super Record>> where, final Option<Comparator<? super Record>> sort, Option<? extends Join> join) {
         return new SelectExpression(setQuantifier, select, table, where, sort, join);
     }
 

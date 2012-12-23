@@ -152,7 +152,11 @@ public class Grammar {
     }
 
     public static Callable1<Record, Iterable<Record>> join(final Sequence<Record> records, final Callable1<? super Record, Predicate<Record>> using) {
-        return Join.join(records, using);
+        return InnerJoin.innerJoin(records, using);
+    }
+
+    public static Callable1<Record, Iterable<Record>> leftJoin(final Sequence<Record> records, final Callable1<? super Record, Predicate<Record>> using) {
+        return LeftJoin.leftJoin(records, using);
     }
 
     public static Sequence<Pair<Predicate<Record>, Record>> update(final Callable1<? super Record, Predicate<Record>> callable, final Record... records) {
