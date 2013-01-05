@@ -33,7 +33,7 @@ public class Grammar {
     }
 
     public static final Parser<String> DATE = pattern(regex("\\d{4}/\\d{1,2}/\\d{1,2}"), "date").source();
-    public static final Parser<String> TEXT = isChar(CharacterPredicates.IS_ALPHA_NUMERIC).many1().source();
+    public static final Parser<String> TEXT = isChar(CharacterPredicates.IS_ALPHA_NUMERIC_).many1().source();
     public static final Parser<String> QUOTED_TEXT = notChar('"').many1().source().between(isChar('"'), isChar('"'));
     public static final Parser<String> NULL = Scanners.string("null").retn(null);
     public static final Parser<String> TEXT_ONLY = Parsers.or(QUOTED_TEXT, TEXT);
