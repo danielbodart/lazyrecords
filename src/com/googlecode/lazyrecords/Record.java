@@ -10,14 +10,14 @@ import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
 import com.googlecode.totallylazy.Unchecked;
+import com.googlecode.totallylazy.Reducer;
 
 import java.util.Map;
 
+import static com.googlecode.lazyrecords.Record.constructors.record;
 import static com.googlecode.totallylazy.Callables.asString;
 import static com.googlecode.totallylazy.Maps.map;
-import static com.googlecode.totallylazy.Predicates.in;
-import static com.googlecode.totallylazy.Predicates.is;
-import static com.googlecode.totallylazy.Predicates.where;
+import static com.googlecode.totallylazy.Predicates.*;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.collections.ListMap.listMap;
 
@@ -84,6 +84,14 @@ public interface Record {
             return filter(original, Sequences.sequence(fields));
         }
 
+		public static Record merge(Record first, Record second, Record... others) {
+			return merge(sequence(first, second).join(sequence(others)));
+		}
+
+		public static Record merge(Iterable<Record> records) {
+			return sequence(records).reduce(functions.merge());
+		}
+
         public static Record filter(Record original, Sequence<Keyword<?>> fields) {
             return constructors.record(original.fields().filter(where(Callables.<Keyword<?>>first(), is(in(fields)))));
         }
@@ -112,6 +120,20 @@ public interface Record {
                     return record.set(Unchecked.<Keyword<Object>>cast(field.first()), field.second());
                 }
             };
+        }
+
+        public static Reducer<Record, Record> merge() {
+            return new Reducer<Record, Record>() {
+				@Override
+				public Record call(Record first, Record second) throws Exception {
+					return second.fields().fold(first, updateValues());
+				}
+
+				@Override
+				public Record identity() {
+					return record();
+				}
+			};
         }
 
         public static Function1<Record, Record> merge(final Record other) {
