@@ -88,6 +88,14 @@ public class Aggregate<T, R> extends AbstractKeyword<R> implements Reducer<T, R>
 
 
     // Factory methods
+    public static <T> Aggregate<T, T> first(Keyword<T> keyword) {
+        return aggregate(Grammar.first(keyword.forClass()), keyword);
+    }
+
+    public static <T> Aggregate<T, T> last(Keyword<T> keyword) {
+        return aggregate(Grammar.last(keyword.forClass()), keyword);
+    }
+
     public static <T> Aggregate<T, T> maximum(Keyword<T> keyword) {
         return aggregate(Grammar.maximum(keyword.forClass()), keyword);
     }

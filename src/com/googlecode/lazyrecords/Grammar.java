@@ -139,6 +139,30 @@ public class Grammar {
         return Aggregate.minimum(keyword);
     }
 
+    public static <T> CombinerFunction<T> first() {
+        return FirstCombiner.first();
+    }
+
+    public static <T> CombinerFunction<T> first(Class<T> aClass) {
+        return FirstCombiner.first();
+    }
+
+    public static <T> Aggregate<T, T> first(Keyword<T> keyword) {
+        return Aggregate.last(keyword);
+    }
+
+    public static <T> CombinerFunction<T> last() {
+        return LastCombiner.last();
+    }
+
+    public static <T> CombinerFunction<T> last(Class<T> aClass) {
+        return LastCombiner.last();
+    }
+
+    public static <T> Aggregate<T, T> last(Keyword<T> keyword) {
+        return Aggregate.last(keyword);
+    }
+
     public static CombinerFunction<Number> sum() {
         return Numbers.sum();
     }
