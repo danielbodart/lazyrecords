@@ -96,6 +96,6 @@ public class Expressions {
     }
 
     public static String toString(Expression expression, Callable1<Object, Object> valueConverter) {
-        return String.format(expression.text().replace("?", "'%s'"), expression.parameters().map(valueConverter).toArray(Object.class));
+        return String.format(expression.text().replace("%", "%%").replace("?", "'%s'"), expression.parameters().map(valueConverter).toArray(Object.class));
     }
 }

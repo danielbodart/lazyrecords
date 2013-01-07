@@ -11,4 +11,10 @@ public class ExpressionsTest {
         assertThat(Expressions.quote("Some table"), is("\"Some table\""));
         assertThat(Expressions.quote("Sometable"), is("Sometable"));
     }
+
+    @Test
+    public void supportsLikePercent() throws Exception {
+        assertThat(Expressions.textOnly("like '%foo'").toString(), is("like '%foo'"));
+        assertThat(Expressions.textOnly("like '50\\%'").toString(), is("like '50\\%'"));
+    }
 }

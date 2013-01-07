@@ -207,6 +207,7 @@ public abstract class RecordsContract<T extends Records> {
 	public void supportsReduce() throws Exception {
 		assertThat(records.get(people).map(age).reduce(maximum(Integer.class)), CoreMatchers.is(12));
 		assertThat(records.get(people).map(dob).reduce(minimum(Date.class)), CoreMatchers.is(date(1975, 1, 10)));
+		assertThat(records.get(people).map(firstName).reduce(minimum(String.class)), CoreMatchers.is("bob"));
 		assertThat(records.get(people).map(age).reduce(sum()), NumberMatcher.is(32));
 		assertThat(records.get(people).map(age).reduce(average()).intValue(), NumberMatcher.is(10));
 
@@ -217,8 +218,8 @@ public abstract class RecordsContract<T extends Records> {
 
 	@Test
 	public void supportsReducingMultipleValuesAtTheSameTime() throws Exception {
-		Record result = records.get(people).reduce(to(maximum(age), minimum(dob), sum(age), average(age), count(firstName)));
-		assertThat(result.get(maximum(age)), NumberMatcher.is(12));
+		Record result = records.get(people).reduce(to(maximum(lastName), minimum(dob), sum(age), average(age), count(firstName)));
+		assertThat(result.get(maximum(lastName)), CoreMatchers.is("savage"));
 		assertThat(result.get(minimum(dob)), CoreMatchers.is(date(1975, 1, 10)));
 		assertThat(result.get(sum(age)), NumberMatcher.is(32));
 		assertThat(result.get(average(age)).intValue(), NumberMatcher.is(10));

@@ -95,6 +95,10 @@ public class Grammar {
         return Dates.maximum();
     }
 
+    public static Maximum.Function<String> maximumString() {
+        return Strings.maximum;
+    }
+
     public static Minimum.Function<Integer> minimumInteger() {
         return Integers.minimum();
     }
@@ -111,7 +115,11 @@ public class Grammar {
         return Dates.minimum();
     }
 
-    private static final PersistentMap<Class<?>, Maximum> maximums = ListMap.<Class<?>, Maximum>listMap(Integer.class, maximumInteger(), Long.class, maximumLong(), Number.class, maximumNumber(), Date.class, maximumDate());
+    public static Minimum.Function<String> minimumString() {
+        return Strings.minimum;
+    }
+
+    private static final PersistentMap<Class<?>, Maximum> maximums = ListMap.<Class<?>, Maximum>listMap(Integer.class, maximumInteger(), Long.class, maximumLong(), Number.class, maximumNumber(), Date.class, maximumDate(), String.class, maximumString());
 
     public static <T> Maximum<T> maximum(Class<T> aClass) {
         return cast(maximums.get(aClass).get());
@@ -121,7 +129,7 @@ public class Grammar {
         return Aggregate.maximum(keyword);
     }
 
-    private static final PersistentMap<Class<?>, Minimum> minimums = ListMap.<Class<?>, Minimum>listMap(Integer.class, minimumInteger(), Long.class, minimumLong(), Number.class, minimumNumber(), Date.class, minimumDate());
+    private static final PersistentMap<Class<?>, Minimum> minimums = ListMap.<Class<?>, Minimum>listMap(Integer.class, minimumInteger(), Long.class, minimumLong(), Number.class, minimumNumber(), Date.class, minimumDate(), String.class, minimumString());
 
     public static <T> Minimum<T> minimum(Class<T> aClass) {
         return cast(minimums.get(aClass).get());
