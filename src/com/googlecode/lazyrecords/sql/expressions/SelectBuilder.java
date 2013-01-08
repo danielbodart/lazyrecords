@@ -22,13 +22,13 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
     private final Definition table;
     private final Option<Predicate<? super Record>> where;
     private final Option<Comparator<? super Record>> comparator;
-    private final Option<? extends Join> join;
+    private final Sequence<Join> joins;
     private final Value<Expression> value;
 
-    private SelectBuilder(SqlGrammar grammar, SetQuantifier setQuantifier, Sequence<Keyword<?>> select, Definition table, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> comparator, Option<? extends Join> join) {
+    private SelectBuilder(SqlGrammar grammar, SetQuantifier setQuantifier, Sequence<Keyword<?>> select, Definition table, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> comparator, Iterable<? extends Join> joins) {
         this.grammar = grammar;
         this.setQuantifier = setQuantifier;
-        this.join = join;
+        this.joins = sequence(joins);
         this.select = select.isEmpty() ? table.fields() : select;
         this.table = table;
         this.where = where;
@@ -40,7 +40,7 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
         return new Function<Expression>() {
             @Override
             public Expression call() throws Exception {
-                return builder.grammar.selectExpression(builder.table, builder.select, builder.setQuantifier, builder.where, builder.comparator, builder.join);
+                return builder.grammar.selectExpression(builder.table, builder.select, builder.setQuantifier, builder.where, builder.comparator, builder.joins);
             }
         }.lazy();
     }
@@ -75,12 +75,12 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
     }
 
     public SelectBuilder select(Sequence<Keyword<?>> columns) {
-        return new SelectBuilder(grammar, setQuantifier, columns, table, where, comparator, join);
+        return new SelectBuilder(grammar, setQuantifier, columns, table, where, comparator, joins);
     }
 
     public SelectBuilder where(Predicate<? super Record> predicate) {
 		Predicate<? super Record> newWhere = combineWithWhereClause(predicate);
-		return new SelectBuilder(grammar, setQuantifier, select, table, Option.<Predicate<? super Record>>some(newWhere), comparator, join);
+		return new SelectBuilder(grammar, setQuantifier, select, table, Option.<Predicate<? super Record>>some(newWhere), comparator, joins);
     }
 
 	private Predicate<? super Record> combineWithWhereClause(Predicate<? super Record> predicate) {
@@ -90,17 +90,17 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
 	}
 
 	public SelectBuilder orderBy(Comparator<? super Record> comparator) {
-        return new SelectBuilder(grammar, setQuantifier, select, table, where, Option.<Comparator<? super Record>>some(comparator), join);
+        return new SelectBuilder(grammar, setQuantifier, select, table, where, Option.<Comparator<? super Record>>some(comparator), joins);
     }
 
     public SelectBuilder count() {
         Aggregate<?, Number> recordCount = Aggregate.count(keyword("*", Long.class)).as("record_count");
         Sequence<Keyword<?>> sequence = Sequences.<Keyword<?>>sequence(recordCount);
-        return new SelectBuilder(grammar, setQuantifier, sequence, table, where, Option.<Comparator<? super Record>>none(), join);
+        return new SelectBuilder(grammar, setQuantifier, sequence, table, where, Option.<Comparator<? super Record>>none(), joins);
     }
 
     public SelectBuilder distinct() {
-        return new SelectBuilder(grammar, DISTINCT, select, table, where, comparator, join);
+        return new SelectBuilder(grammar, DISTINCT, select, table, where, comparator, joins);
     }
 
     public SelectBuilder reduce(Callable2<?, ?, ?> callable) {
@@ -124,10 +124,19 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
     }
 
     public SelectBuilder join(Option<Join> join) {
-        return new SelectBuilder(grammar, setQuantifier, select.join(joinedKeywords(join)).unique().realise(), table, where, comparator, join);
+		if(join.isEmpty())
+			return this;
+		Sequence<Join> newJoins = this.joins.join(join);
+		return new SelectBuilder(grammar,
+				setQuantifier,
+				select.join(joinedKeywords(join)).unique().realise(),
+				table,
+				where,
+				comparator,
+				newJoins);
     }
 
-    private static Sequence<Keyword<?>> joinedKeywords(Option<? extends Join> join) {
+	private static Sequence<Keyword<?>> joinedKeywords(Option<? extends Join> join) {
         return join.toSequence().flatMap(new Function1<Join, Sequence<Keyword<?>>>() {
             @Override
             public Sequence<Keyword<?>> call(Join join) throws Exception {

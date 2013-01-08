@@ -24,8 +24,8 @@ public class AnsiSqlGrammar implements SqlGrammar {
     }
 
     @Override
-    public Expression selectExpression(Definition definition, Sequence<Keyword<?>> select, SetQuantifier setQuantifier, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> orderBy, Option<? extends Join> join) {
-        return SelectExpression.selectExpression(definition, select, setQuantifier, where, orderBy, join);
+    public Expression selectExpression(Definition definition, Sequence<Keyword<?>> select, SetQuantifier setQuantifier, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> orderBy, Sequence<? extends Join> joins) {
+        return SelectExpression.selectExpression(definition, select, setQuantifier, where, orderBy, joins);
     }
 
     @Override
