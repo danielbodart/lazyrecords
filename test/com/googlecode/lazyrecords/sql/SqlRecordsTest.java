@@ -22,9 +22,7 @@ import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.lazyrecords.Record.methods.update;
 import static com.googlecode.lazyrecords.Using.using;
 import static com.googlecode.lazyrecords.sql.grammars.ColumnDatatypeMappings.hsql;
-import static com.googlecode.totallylazy.Predicates.all;
-import static com.googlecode.totallylazy.Predicates.always;
-import static com.googlecode.totallylazy.Predicates.where;
+import static com.googlecode.totallylazy.Predicates.*;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -151,12 +149,18 @@ public class SqlRecordsTest extends RecordsContract<Records> {
 				is(3));
 	}
 
-
 	@Test
 	public void supportsWherePredicateUsingAllPredicate() {
 		assertThat(
 				records.get(people).filter(where(firstName, all())).size(),
 				is(3));
+	}
+
+	@Test
+	public void supportsEmptyInPredicates() {
+		assertThat(
+				records.get(people).filter(where(firstName, in())).size(),
+				is(0));
 	}
 
 	@Test
