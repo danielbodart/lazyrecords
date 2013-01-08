@@ -151,6 +151,14 @@ public class SqlRecordsTest extends RecordsContract<Records> {
 				is(3));
 	}
 
+
+	@Test
+	public void supportsWherePredicateUsingAllPredicate() {
+		assertThat(
+				records.get(people).filter(where(firstName, all())).size(),
+				is(3));
+	}
+
 	@Test
 	public void memorisesAndThereforeOnlyExecutesSqlOnceEvenWhenYouMapToAKeyword() throws Exception {
 		MemoryLogger logger = new MemoryLogger();

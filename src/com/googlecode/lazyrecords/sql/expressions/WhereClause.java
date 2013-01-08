@@ -43,6 +43,8 @@ public class WhereClause extends CompoundExpression{
         }
         if (predicate instanceof WherePredicate) {
             WherePredicate<Record,?> wherePredicate = Unchecked.cast(predicate);
+			if(wherePredicate.predicate() instanceof AllPredicate)
+				return empty();
             Callable1<? super Record, ?> callable = wherePredicate.callable();
             return derivedColumn(callable).join(toSql(wherePredicate.predicate()));
         }
