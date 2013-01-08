@@ -1,10 +1,12 @@
 package com.googlecode.lazyrecords.lucene.mappings;
 
 import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.FromRecord;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.SourceRecord;
+import com.googlecode.lazyrecords.ToRecord;
 import com.googlecode.lazyrecords.lucene.Lucene;
 import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.Callables;
@@ -40,8 +42,8 @@ public class LuceneMappings {
         return stringMappings;
     }
 
-    public Function1<Document, Record> asRecord(final Sequence<Keyword<?>> definitions) {
-        return new Function1<Document, Record>() {
+    public ToRecord<Document> asRecord(final Sequence<Keyword<?>> definitions) {
+        return new ToRecord<Document>() {
             public Record call(Document document) throws Exception {
                 return sequence(document.getFields()).
                         map(asPair(definitions)).
@@ -75,8 +77,8 @@ public class LuceneMappings {
         };
     }
 
-    public Function1<? super Record, Document> asDocument(final Definition definition) {
-        return new Function1<Record, Document>() {
+    public FromRecord<Document> asDocument(final Definition definition) {
+        return new FromRecord<Document>() {
             public Document call(Record record) throws Exception {
                 return sortFields(definition, record).fields().
                         add(Pair.<Keyword<?>, Object>pair(Lucene.RECORD_KEY, definition)).

@@ -2,9 +2,11 @@ package com.googlecode.lazyrecords.memory;
 
 import com.googlecode.lazyrecords.AbstractRecords;
 import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.FromRecord;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.SourceRecord;
+import com.googlecode.lazyrecords.ToRecord;
 import com.googlecode.lazyrecords.Transaction;
 import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.Function1;
@@ -121,8 +123,8 @@ public class STMRecords extends AbstractRecords implements Transaction {
         return data.get(definition).getOrElse(PersistentList.constructors.<M>empty());
     }
 
-    private Function1<PersistentMap<String, String>, Record> asRecord(final Definition definition) {
-        return new Function1<PersistentMap<String, String>, Record>() {
+    private ToRecord<PersistentMap<String, String>> asRecord(final Definition definition) {
+        return new ToRecord<PersistentMap<String, String>>() {
             @Override
             public Record call(PersistentMap<String, String> data) throws Exception {
                 return asRecord(definition, data);
@@ -143,8 +145,8 @@ public class STMRecords extends AbstractRecords implements Transaction {
         };
     }
 
-    private Function1<Record, PersistentMap<String, String>> asPersistentMap(final Definition definition) {
-        return new Function1<Record, PersistentMap<String, String>>() {
+    private FromRecord<PersistentMap<String, String>> asPersistentMap(final Definition definition) {
+        return new FromRecord<PersistentMap<String, String>>() {
             @Override
             public PersistentMap<String, String> call(Record record) throws Exception {
                 return STMRecords.this.asPersistentMap(definition, record);

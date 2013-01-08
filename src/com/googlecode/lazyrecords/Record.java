@@ -148,8 +148,8 @@ public interface Record {
             };
         }
 
-        public static <T> Function1<Record, Option<T>> getOption(final Keyword<T> keyword) {
-            return new Function1<Record, Option<T>>() {
+        public static <T> FromRecord<Option<T>> getOption(final Keyword<T> keyword) {
+            return new FromRecord<Option<T>>() {
                 public Option<T> call(Record record) throws Exception {
                     return record.getOption(keyword);
                 }
@@ -164,24 +164,24 @@ public interface Record {
             };
         }
 
-        public static Function1<Record, Sequence<Object>> getValuesFor(final Sequence<Keyword<?>> fields) {
-            return new Function1<Record, Sequence<Object>>() {
+        public static FromRecord<Sequence<Object>> getValuesFor(final Sequence<Keyword<?>> fields) {
+            return new FromRecord<Sequence<Object>>() {
                 public Sequence<Object> call(Record record) throws Exception {
                     return record.getValuesFor(fields);
                 }
             };
         }
 
-        public static Function1<Record, Pair<Predicate<Record>, Record>> toPair(final Callable1<? super Record, Predicate<Record>> callable) {
-            return new Function1<Record, Pair<Predicate<Record>, Record>>() {
+        public static FromRecord<Pair<Predicate<Record>, Record>> toPair(final Callable1<? super Record, Predicate<Record>> callable) {
+            return new FromRecord<Pair<Predicate<Record>, Record>>() {
                 public Pair<Predicate<Record>, Record> call(Record record) throws Exception {
                     return Pair.pair(callable.call(record), record);
                 }
             };
         }
 
-        public static Function1<Record, Map<String, Object>> asMap() {
-            return new Function1<Record, Map<String, Object>>() {
+        public static FromRecord<Map<String, Object>> asMap() {
+            return new FromRecord<Map<String, Object>>() {
                 public Map<String, Object> call(Record record) throws Exception {
                     return methods.toMap(record);
                 }
@@ -197,8 +197,8 @@ public interface Record {
             };
         }
 
-		public static Function1<Record, Sequence<Keyword<?>>> keywords() {
-			return new Function1<Record, Sequence<Keyword<?>>>() {
+		public static FromRecord<Sequence<Keyword<?>>> keywords() {
+			return new FromRecord<Sequence<Keyword<?>>>() {
 				public Sequence<Keyword<?>> call(Record record) throws Exception {
 					return record.keywords();
 				}

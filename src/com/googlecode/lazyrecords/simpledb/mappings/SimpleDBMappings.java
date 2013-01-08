@@ -4,9 +4,11 @@ import com.amazonaws.services.simpledb.model.Attribute;
 import com.amazonaws.services.simpledb.model.Item;
 import com.amazonaws.services.simpledb.model.ReplaceableAttribute;
 import com.amazonaws.services.simpledb.model.ReplaceableItem;
+import com.googlecode.lazyrecords.FromRecord;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.Record;
+import com.googlecode.lazyrecords.ToRecord;
 import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
@@ -38,8 +40,8 @@ public class SimpleDBMappings {
         return stringMappings;
     }
 
-    public Function1<Item, Record> asRecord(final Sequence<Keyword<?>> definitions) {
-        return new Function1<Item, Record>() {
+    public ToRecord<Item> asRecord(final Sequence<Keyword<?>> definitions) {
+        return new ToRecord<Item>() {
             public Record call(Item item) throws Exception {
                 return sequence(item.getAttributes()).fold(record(item), asField(definitions));
             }
@@ -55,8 +57,8 @@ public class SimpleDBMappings {
         };
     }
 
-    public Function1<Record, ReplaceableItem> toReplaceableItem() {
-        return new Function1<Record, ReplaceableItem>() {
+    public FromRecord<ReplaceableItem> toReplaceableItem() {
+        return new FromRecord<ReplaceableItem>() {
             public ReplaceableItem call(Record record) throws Exception {
                 return new ReplaceableItem(UUID.randomUUID().toString(), record.fields().
                         filter(where(second(Object.class), is(notNullValue()))).
