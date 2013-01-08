@@ -156,6 +156,14 @@ public interface Record {
             };
         }
 
+        public static Function1<Keyword<?>, Object> getFrom(final Record record) {
+            return new Function1<Keyword<?>, Object>() {
+                public Object call(Keyword<?> keyword) throws Exception {
+                    return record.get(keyword);
+                }
+            };
+        }
+
         public static Function1<Record, Sequence<Object>> getValuesFor(final Sequence<Keyword<?>> fields) {
             return new Function1<Record, Sequence<Object>>() {
                 public Sequence<Object> call(Record record) throws Exception {
