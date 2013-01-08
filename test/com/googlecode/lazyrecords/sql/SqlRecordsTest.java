@@ -6,6 +6,7 @@ import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
 import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Sequences;
 import com.googlecode.totallylazy.matchers.Matchers;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
 import org.hsqldb.jdbc.JDBCDataSource;
@@ -22,9 +23,7 @@ import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.lazyrecords.Record.methods.update;
 import static com.googlecode.lazyrecords.Using.using;
 import static com.googlecode.lazyrecords.sql.grammars.ColumnDatatypeMappings.hsql;
-import static com.googlecode.totallylazy.Predicates.all;
-import static com.googlecode.totallylazy.Predicates.always;
-import static com.googlecode.totallylazy.Predicates.where;
+import static com.googlecode.totallylazy.Predicates.*;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -151,12 +150,18 @@ public class SqlRecordsTest extends RecordsContract<Records> {
 				is(3));
 	}
 
-
 	@Test
 	public void supportsWherePredicateUsingAllPredicate() {
 		assertThat(
 				records.get(people).filter(where(firstName, all())).size(),
 				is(3));
+	}
+
+	@Test
+	public void supportsEmptyInPredicates() {
+		assertThat(
+				records.get(people).filter(where(firstName, in(Sequences.empty(String.class)))).size(),
+				is(0));
 	}
 
 	@Test
