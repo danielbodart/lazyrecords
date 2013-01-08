@@ -10,6 +10,7 @@ import java.util.concurrent.Callable;
 import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.lazyrecords.sql.expressions.SetQuantifier.ALL;
 import static com.googlecode.lazyrecords.sql.expressions.SetQuantifier.DISTINCT;
+import static com.googlecode.totallylazy.Predicates.and;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.Unchecked.cast;
 
@@ -78,10 +79,17 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
     }
 
     public SelectBuilder where(Predicate<? super Record> predicate) {
-        return new SelectBuilder(grammar, setQuantifier, select, table, Option.<Predicate<? super Record>>some(predicate), comparator, join);
+		Predicate<? super Record> newWhere = combineWithWhereClause(predicate);
+		return new SelectBuilder(grammar, setQuantifier, select, table, Option.<Predicate<? super Record>>some(newWhere), comparator, join);
     }
 
-    public SelectBuilder orderBy(Comparator<? super Record> comparator) {
+	private Predicate<? super Record> combineWithWhereClause(Predicate<? super Record> predicate) {
+		if(where.isEmpty())
+			return predicate;
+		return and(where.get(), predicate);
+	}
+
+	public SelectBuilder orderBy(Comparator<? super Record> comparator) {
         return new SelectBuilder(grammar, setQuantifier, select, table, where, Option.<Comparator<? super Record>>some(comparator), join);
     }
 
