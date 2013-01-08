@@ -6,6 +6,7 @@ import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.*;
 import com.googlecode.totallylazy.predicates.*;
+import com.googlecode.totallylazy.proxy.multi;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
 
@@ -67,24 +68,12 @@ public class Lucene {
         this.mappings = mappings;
     }
 
-	public Query query(Predicate<? super Record> predicate) {
-        if (predicate instanceof WherePredicate) {
-            return where(Unchecked.<WherePredicate<Record, ?>>cast(predicate));
-        }
-        if (predicate instanceof AndPredicate) {
-            return and(Unchecked.<AndPredicate<Record>>cast(predicate).predicates().map(asQuery()));
-        }
-        if (predicate instanceof OrPredicate) {
-            return or(Unchecked.<OrPredicate<Record>>cast(predicate).predicates().map(asQuery()));
-        }
-        if (predicate instanceof Not) {
-            return not(query(Unchecked.<Not<Record>>cast(predicate).predicate()));
-        }
-        if (predicate instanceof AllPredicate) {
-            return new MatchAllDocsQuery();
-        }
-        throw new UnsupportedOperationException();
-    }
+	public Query query(Predicate<? super Record> predicate) { return new multi(){}.method(predicate);}
+    public Query query(WherePredicate<Record, ?> wherePredicate) {return where(wherePredicate); }
+    public Query query(AndPredicate<Record> andPredicate) { return and(andPredicate.predicates().map(asQuery()));}
+    public Query query(OrPredicate<Record> orPredicate) { return or(orPredicate.predicates().map(asQuery()));}
+    public Query query(Not<Record> notPredicate) {return not(query(notPredicate.predicate()));}
+    public Query query(AllPredicate allPredicate) { return new MatchAllDocsQuery(); }
 
     private Function1<Predicate<? super Record>, Query> asQuery() {
         return new Function1<Predicate<? super Record>, Query>() {
