@@ -22,6 +22,7 @@ import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.lazyrecords.Record.methods.update;
 import static com.googlecode.lazyrecords.Using.using;
 import static com.googlecode.lazyrecords.sql.grammars.ColumnDatatypeMappings.hsql;
+import static com.googlecode.totallylazy.Predicates.all;
 import static com.googlecode.totallylazy.Predicates.always;
 import static com.googlecode.totallylazy.Predicates.where;
 import static java.util.UUID.randomUUID;
@@ -141,6 +142,13 @@ public class SqlRecordsTest extends RecordsContract<Records> {
 				.filter(where(firstName, Predicates.is("dan")))
 				.size(),
 				is(1));
+	}
+
+	@Test
+	public void addingTheAllPredicateAsAnOrClauseReturnsAllRecords() {
+		assertThat(
+				records.get(people).filter(where(firstName, Predicates.is("dan")).or(all())).size(),
+				is(3));
 	}
 
 	@Test

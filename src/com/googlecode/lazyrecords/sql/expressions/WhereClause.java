@@ -1,39 +1,13 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
-import com.googlecode.totallylazy.Callable1;
-import com.googlecode.totallylazy.Function1;
-import com.googlecode.totallylazy.Option;
-import com.googlecode.totallylazy.Predicate;
-import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Unchecked;
-import com.googlecode.totallylazy.Value;
-import com.googlecode.totallylazy.predicates.AllPredicate;
-import com.googlecode.totallylazy.predicates.AndPredicate;
-import com.googlecode.totallylazy.predicates.Between;
-import com.googlecode.totallylazy.predicates.ContainsPredicate;
-import com.googlecode.totallylazy.predicates.EndsWithPredicate;
-import com.googlecode.totallylazy.predicates.EqualsPredicate;
-import com.googlecode.totallylazy.predicates.GreaterThan;
-import com.googlecode.totallylazy.predicates.GreaterThanOrEqualTo;
-import com.googlecode.totallylazy.predicates.InPredicate;
-import com.googlecode.totallylazy.predicates.LessThan;
-import com.googlecode.totallylazy.predicates.LessThanOrEqualTo;
-import com.googlecode.totallylazy.predicates.Not;
-import com.googlecode.totallylazy.predicates.NotEqualsPredicate;
-import com.googlecode.totallylazy.predicates.NotNullPredicate;
-import com.googlecode.totallylazy.predicates.NullPredicate;
-import com.googlecode.totallylazy.predicates.OrPredicate;
-import com.googlecode.totallylazy.predicates.StartsWithPredicate;
-import com.googlecode.totallylazy.predicates.WherePredicate;
 import com.googlecode.lazyrecords.Record;
+import com.googlecode.totallylazy.*;
+import com.googlecode.totallylazy.predicates.*;
 
-import static com.googlecode.totallylazy.Predicates.not;
+import static com.googlecode.lazyrecords.sql.expressions.Expressions.*;
+import static com.googlecode.lazyrecords.sql.expressions.SelectList.derivedColumn;
 import static com.googlecode.totallylazy.Sequences.repeat;
 import static com.googlecode.totallylazy.Sequences.sequence;
-import static com.googlecode.lazyrecords.sql.expressions.Expressions.empty;
-import static com.googlecode.lazyrecords.sql.expressions.Expressions.expression;
-import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
-import static com.googlecode.lazyrecords.sql.expressions.SelectList.derivedColumn;
 
 public class WhereClause extends CompoundExpression{
     private WhereClause(Predicate<? super Record> predicate) {
@@ -80,6 +54,7 @@ public class WhereClause extends CompoundExpression{
         if (predicate instanceof OrPredicate) {
             OrPredicate<?> orPredicate = (OrPredicate) predicate;
             if(orPredicate.predicates().isEmpty()) return empty();
+			if(!orPredicate.predicates().safeCast(AllPredicate.class).isEmpty()) return empty();
             return Expressions.join(toExpressions(orPredicate.predicates()), "(", " or ", ")");
         }
         if (predicate instanceof NullPredicate) {
