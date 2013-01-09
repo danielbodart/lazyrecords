@@ -2,17 +2,22 @@ package com.googlecode.lazyrecords.sql.expressions;
 
 import com.googlecode.lazyrecords.*;
 import com.googlecode.totallylazy.Function1;
-import com.googlecode.totallylazy.Option;
+import com.googlecode.totallylazy.Sequences;
 
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.*;
+import static com.googlecode.totallylazy.Sequences.sequence;
 import static java.lang.String.format;
 
 public class FromClause extends CompoundExpression{
-    public FromClause(Definition table, Option<? extends Join> join) {
-        super(textOnly("from"), name(table).join(join.map(asExpression()).getOrElse(Expressions.empty())));
+    public FromClause(Definition table, Iterable<? extends Join> joins) {
+        super(textOnly("from"), name(table).join(joinExpression(joins)));
     }
 
-    public static Function1<Join, Expression> asExpression() {
+	private static CompoundExpression joinExpression(Iterable<? extends Join> joins) {
+		return new CompoundExpression(sequence(joins).map(asExpression()));
+	}
+
+	public static Function1<Join, Expression> asExpression() {
         return new Function1<Join, Expression>() {
             @Override
             public Expression call(Join join) throws Exception {
@@ -36,11 +41,11 @@ public class FromClause extends CompoundExpression{
 		throw new UnsupportedOperationException(format("Cannot created join expression for %s", join));
 	}
 
-	public static Expression fromClause(Definition definition, Option<? extends Join> join) {
-        return new FromClause(definition, join);
+	public static Expression fromClause(Definition definition, Iterable<? extends Join> joins) {
+        return new FromClause(definition, joins);
     }
 
     public static Expression fromClause(Definition definition) {
-        return new FromClause(definition, Option.<Join>none());
+        return new FromClause(definition, Sequences.<Join>empty());
     }
 }

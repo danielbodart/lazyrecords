@@ -16,17 +16,17 @@ import static com.googlecode.lazyrecords.sql.expressions.WhereClause.whereClause
 public class SelectExpression extends CompoundExpression {
     public static final TextOnlyExpression SELECT = textOnly("select");
 
-    private SelectExpression(final SetQuantifier setQuantifier, final Sequence<Keyword<?>> select, final Definition table, final Option<Predicate<? super Record>> where, final Option<Comparator<? super Record>> sort, Option<? extends Join> join) {
+    private SelectExpression(final SetQuantifier setQuantifier, final Sequence<Keyword<?>> select, final Definition table, final Option<Predicate<? super Record>> where, final Option<Comparator<? super Record>> sort, Iterable<? extends Join> joins) {
         super(
                 querySpecification(setQuantifier, select),
-                fromClause(table, join),
+                fromClause(table, joins),
                 whereClause(where),
                 orderByClause(sort)
         );
     }
 
-    public static SelectExpression selectExpression(final Definition table, final Sequence<Keyword<?>> select, final SetQuantifier setQuantifier, final Option<Predicate<? super Record>> where, final Option<Comparator<? super Record>> sort, Option<? extends Join> join) {
-        return new SelectExpression(setQuantifier, select, table, where, sort, join);
+    public static SelectExpression selectExpression(final Definition table, final Sequence<Keyword<?>> select, final SetQuantifier setQuantifier, final Option<Predicate<? super Record>> where, final Option<Comparator<? super Record>> sort, Iterable<? extends Join> joins) {
+        return new SelectExpression(setQuantifier, select, table, where, sort, joins);
     }
 
     public static Expression querySpecification(SetQuantifier setQuantifier, final Sequence<Keyword<?>> select) {
