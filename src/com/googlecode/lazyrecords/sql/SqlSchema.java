@@ -28,7 +28,7 @@ public class SqlSchema implements Schema {
         sqlRecords.update(grammar.createTable(definition));
     }
 
-    private static final Keyword<Integer> one = keyword("1", Integer.class);
+    public static final Keyword<Integer> one = keyword("1", Integer.class);
 
     @Override
     public boolean exists(Definition definition) {

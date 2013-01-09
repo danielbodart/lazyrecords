@@ -173,5 +173,4 @@ public class SqlRecordsTest extends RecordsContract<Records> {
 		assertThat(head, Matchers.is(result.head())); // Check iterator
 		assertThat(logs, Matchers.is(logger.data())); // Check queries
 	}
-
 }

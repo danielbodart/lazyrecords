@@ -493,4 +493,15 @@ public abstract class RecordsContract<T extends Records> {
 		assertThat(records.get(people).sortBy(firstName).drop(2).size(), NumberMatcher.is(1));
 		assertThat(records.get(people).sortBy(firstName).drop(2).map(firstName), hasExactly("matt"));
 	}
+
+    @Test
+    public void supportsExists() throws Exception {
+        assertThat(records.get(people).exists(where(firstName, is("dan"))), CoreMatchers.is(true));
+        assertThat(records.get(people).exists(where(firstName, is("george bush"))), CoreMatchers.is(false));
+    }
+
+    @Test
+    public void supportsFind() throws Exception {
+        assertThat(records.get(people).find(where(firstName, is("dan"))).isEmpty(), CoreMatchers.is(false));
+    }
 }

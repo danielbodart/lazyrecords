@@ -1,10 +1,27 @@
 package com.googlecode.lazyrecords.sql;
 
-import com.googlecode.lazyrecords.*;
+import com.googlecode.lazyrecords.Aggregates;
+import com.googlecode.lazyrecords.FromRecord;
+import com.googlecode.lazyrecords.Join;
+import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.Logger;
+import com.googlecode.lazyrecords.Loggers;
+import com.googlecode.lazyrecords.Record;
+import com.googlecode.lazyrecords.SelectCallable;
 import com.googlecode.lazyrecords.sql.expressions.Expressible;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.expressions.SelectBuilder;
-import com.googlecode.totallylazy.*;
+import com.googlecode.totallylazy.Callable1;
+import com.googlecode.totallylazy.Callable2;
+import com.googlecode.totallylazy.Function;
+import com.googlecode.totallylazy.Functions;
+import com.googlecode.totallylazy.Maps;
+import com.googlecode.totallylazy.Option;
+import com.googlecode.totallylazy.Predicate;
+import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Sets;
+import com.googlecode.totallylazy.Unchecked;
+import com.googlecode.totallylazy.Value;
 
 import java.util.Comparator;
 import java.util.Iterator;
@@ -41,7 +58,7 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
         return sqlRecords.query(select.build(), select.select()).map(callable);
     }
 
-    private SqlSequence<T> build(final SelectBuilder builder){
+    private SqlSequence<T> build(final SelectBuilder builder) {
         return new SqlSequence<T>(sqlRecords, builder, logger, callable);
     }
 
@@ -69,7 +86,7 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
     @Override
     public <S> Sequence<S> flatMap(Callable1<? super T, ? extends Iterable<? extends S>> callable) {
         Callable1 raw = (Callable1) callable;
-        if(raw instanceof Join){
+        if (raw instanceof Join) {
             return Unchecked.cast(build(select.join(some((Join) raw))));
         }
         logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.MESSAGE, "Unsupported function passed to 'flatMap', moving computation to client"), pair(Loggers.FUNCTION, callable)));
@@ -84,6 +101,11 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
             logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.MESSAGE, "Unsupported predicate passed to 'filter', moving computation to client"), pair(Loggers.PREDICATE, predicate)));
             return super.filter(predicate);
         }
+    }
+
+    @Override
+    public Option<T> find(Predicate<? super T> predicate) {
+        return filter(predicate).headOption();
     }
 
     @Override
@@ -135,7 +157,13 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
         return select.toString();
     }
 
+    @Override
     public Expression express() {
         return select;
+    }
+
+    @Override
+    public boolean exists(Predicate<? super T> predicate) {
+        return !filter(predicate).map((Callable1<T, Integer>) SqlSchema.one).unique().isEmpty();
     }
 }
