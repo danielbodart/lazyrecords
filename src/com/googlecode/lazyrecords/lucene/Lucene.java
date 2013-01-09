@@ -6,7 +6,7 @@ import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.*;
 import com.googlecode.totallylazy.predicates.*;
-import com.googlecode.totallylazy.proxy.multi;
+import com.googlecode.totallylazy.multi;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
 
@@ -68,7 +68,7 @@ public class Lucene {
         this.mappings = mappings;
     }
 
-	public Query query(Predicate<? super Record> predicate) { return new multi(){}.method(predicate);}
+    public Query query(Predicate<? super Record> predicate) { return new multi(){}.method(predicate);}
     public Query query(WherePredicate<Record, ?> wherePredicate) {return where(wherePredicate); }
     public Query query(AndPredicate<Record> andPredicate) { return and(andPredicate.predicates().map(asQuery()));}
     public Query query(OrPredicate<Record> orPredicate) { return or(orPredicate.predicates().map(asQuery()));}
