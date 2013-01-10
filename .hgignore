@@ -1,4 +1,5 @@
 syntax: glob
+jdbc*
 out
 *.iws
 build/artifacts

@@ -67,91 +67,37 @@ public class Lucene {
         this.mappings = mappings;
     }
 
-    public Query query(Predicate<? super Record> predicate) {
-        return new multi() {}.<Query>methodOption(predicate).getOrThrow(new UnsupportedOperationException());
-    }
+    public Query query(Predicate<? super Record> predicate) { return new multi() {}.<Query>methodOption(predicate).getOrThrow(new UnsupportedOperationException()); }
     public Query query(WherePredicate<Record, ?> wherePredicate) { return where(wherePredicate); }
     public Query query(AndPredicate<Record> andPredicate) { return and(andPredicate.predicates().map(asQuery())); }
     public Query query(OrPredicate<Record> orPredicate) { return or(orPredicate.predicates().map(asQuery())); }
     public Query query(Not<Record> notPredicate) { return not(query(notPredicate.predicate())); }
     public Query query(AllPredicate allPredicate) { return new MatchAllDocsQuery(); }
 
-    private Function1<Predicate<? super Record>, Query> asQuery() {
-        return new Function1<Predicate<? super Record>, Query>() {
-            public Query call(Predicate<? super Record> predicate) throws Exception {
-                return query(predicate);
-            }
-        };
+    public Query query(Keyword<?> keyword, Predicate<?> predicate) { return new multi(){}.<Query>methodOption(keyword, predicate).getOrThrow(new UnsupportedOperationException()); }
+    public Query query(Keyword<?> keyword, EqualsPredicate<?> predicate) { return equalTo(keyword, predicate.value()); }
+    public Query query(Keyword<?> keyword, GreaterThan<?> predicate) { return greaterThan(keyword, predicate.value()); }
+    public Query query(Keyword<?> keyword, GreaterThanOrEqualTo<?> predicate) { return greaterThanOrEqual(keyword, predicate.value()); }
+    public Query query(Keyword<?> keyword, LessThan<?> predicate) { return lessThan(keyword, predicate.value()); }
+    public Query query(Keyword<?> keyword, LessThanOrEqualTo<?> predicate) { return lessThanOrEqual(keyword, predicate.value()); }
+    public Query query(Keyword<?> keyword, Between<?> predicate) { return between(keyword, predicate.lower(), predicate.upper()); }
+    public Query query(Keyword<?> keyword, NotEqualsPredicate<?> predicate) { return not(equalTo(keyword, predicate.value())); }
+    public Query query(Keyword<?> keyword, Not<?> predicate) { return not(query(keyword, predicate.predicate())); }
+    public Query query(Keyword<?> keyword, InPredicate<?> predicate) { return or(sequence(predicate.values()).map(asQuery(keyword))); }
+    public Query query(Keyword<?> keyword, StartsWithPredicate predicate) { return new PrefixQuery(new Term(keyword.toString(), predicate.value())); }
+    public Query query(Keyword<?> keyword, ContainsPredicate predicate) { return new WildcardQuery(new Term(keyword.toString(), "*" + predicate.value() + "*")); }
+    public Query query(Keyword<?> keyword, EndsWithPredicate predicate) { return new WildcardQuery(new Term(keyword.toString(), "*" + predicate.value())); }
+    public Query query(Keyword<?> keyword, NotNullPredicate<?> predicate) { return notNull(keyword); }
+    public Query query(Keyword<?> keyword, NullPredicate<?> predicate) { return not(notNull(keyword)); }
+
+    private Query newRange(Keyword<?> keyword, Object lower, Object upper, boolean minInclusive, boolean maxInclusive) {
+        return new TermRangeQuery(keyword.name(), lower == null ? null : mappings.toString(keyword.forClass(), lower), upper == null ? null : mappings.toString(keyword.forClass(), upper), minInclusive, maxInclusive);
     }
 
     public Query where(WherePredicate<Record, ?> where) {
         Keyword<?> keyword = (Keyword<?>) where.callable();
         Predicate<?> predicate = where.predicate();
         return query(keyword, predicate);
-    }
-
-    private Query query(Keyword<?> keyword, Predicate<?> predicate) {
-        return new multi(){}.<Query>methodOption(keyword, predicate).getOrThrow(new UnsupportedOperationException());
-    }
-
-    private Query query(Keyword<?> keyword, EqualsPredicate<?> predicate) {
-        return equalTo(keyword, predicate.value());
-    }
-
-    private Query query(Keyword<?> keyword, GreaterThan<?> predicate) {
-        return greaterThan(keyword, predicate.value());
-    }
-
-    private Query query(Keyword<?> keyword, GreaterThanOrEqualTo<?> predicate) {
-        return greaterThanOrEqual(keyword, predicate.value());
-    }
-
-    private Query query(Keyword<?> keyword, LessThan<?> predicate) {
-        return lessThan(keyword, predicate.value());
-    }
-
-    private Query query(Keyword<?> keyword, LessThanOrEqualTo<?> predicate) {
-        return lessThanOrEqual(keyword, predicate.value());
-    }
-
-    private Query query(Keyword<?> keyword, Between<?> predicate) {
-        return between(keyword, predicate.lower(), predicate.upper());
-    }
-
-    private Query query(Keyword<?> keyword, NotEqualsPredicate<?> predicate) {
-        return not(equalTo(keyword, predicate.value()));
-    }
-
-    private Query query(Keyword<?> keyword, Not<?> predicate) {
-        return not(query(keyword, predicate.predicate()));
-    }
-
-    private Query query(Keyword<?> keyword, InPredicate<?> predicate) {
-        return or(sequence(predicate.values()).map(asQuery(keyword)));
-    }
-
-    private Query query(Keyword<?> keyword, StartsWithPredicate predicate) {
-        return new PrefixQuery(new Term(keyword.toString(), predicate.value()));
-    }
-
-    private Query query(Keyword<?> keyword, ContainsPredicate predicate) {
-        return new WildcardQuery(new Term(keyword.toString(), "*" + predicate.value() + "*"));
-    }
-
-    private Query query(Keyword<?> keyword, EndsWithPredicate predicate) {
-        return new WildcardQuery(new Term(keyword.toString(), "*" + predicate.value()));
-    }
-
-    private Query query(Keyword<?> keyword, NotNullPredicate<?> predicate) {
-        return notNull(keyword);
-    }
-
-    private Query query(Keyword<?> keyword, NullPredicate<?> predicate) {
-        return not(notNull(keyword));
-    }
-
-    private Query newRange(Keyword<?> keyword, Object lower, Object upper, boolean minInclusive, boolean maxInclusive) {
-        return new TermRangeQuery(keyword.name(), lower == null ? null : mappings.toString(keyword.forClass(), lower), upper == null ? null : mappings.toString(keyword.forClass(), upper), minInclusive, maxInclusive);
     }
 
     private Query equalTo(Keyword<?> keyword, Object value) {
@@ -190,5 +136,11 @@ public class Lucene {
         };
     }
 
-
+    private Function1<Predicate<Record>, Query> asQuery() {
+        return new Function1<Predicate<Record>, Query>() {
+            public Query call(Predicate<Record> predicate) throws Exception {
+                return query(predicate);
+            }
+        };
+    }
 }
