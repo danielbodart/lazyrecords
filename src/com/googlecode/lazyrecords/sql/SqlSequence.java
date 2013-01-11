@@ -1,27 +1,10 @@
 package com.googlecode.lazyrecords.sql;
 
-import com.googlecode.lazyrecords.Aggregates;
-import com.googlecode.lazyrecords.FromRecord;
-import com.googlecode.lazyrecords.Join;
-import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.lazyrecords.Logger;
-import com.googlecode.lazyrecords.Loggers;
-import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.SelectCallable;
+import com.googlecode.lazyrecords.*;
 import com.googlecode.lazyrecords.sql.expressions.Expressible;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.expressions.SelectBuilder;
-import com.googlecode.totallylazy.Callable1;
-import com.googlecode.totallylazy.Callable2;
-import com.googlecode.totallylazy.Function;
-import com.googlecode.totallylazy.Functions;
-import com.googlecode.totallylazy.Maps;
-import com.googlecode.totallylazy.Option;
-import com.googlecode.totallylazy.Predicate;
-import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Sets;
-import com.googlecode.totallylazy.Unchecked;
-import com.googlecode.totallylazy.Value;
+import com.googlecode.totallylazy.*;
 
 import java.util.Comparator;
 import java.util.Iterator;

@@ -9,15 +9,13 @@ import static com.googlecode.lazyrecords.sql.expressions.SelectList.derivedColum
 import static com.googlecode.totallylazy.Sequences.repeat;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
-public class WhereClause extends CompoundExpression{
+public class WhereClause extends CompoundExpression {
     private WhereClause(Predicate<? super Record> predicate) {
         super(prefixWhere(toSql(predicate)));
     }
 
     private static Expression prefixWhere(Expression expression) {
-        if(Expressions.isEmpty(expression)){
-            return expression;
-        }
+        if(Expressions.isEmpty(expression))return expression;
         return textOnly("where").join(expression);
     }
 
@@ -38,96 +36,96 @@ public class WhereClause extends CompoundExpression{
     }
 
     public static Expression toSql(Predicate<?> predicate) {
-        if(predicate instanceof AllPredicate){
-            return empty();
-        }
-        if (predicate instanceof WherePredicate) {
-            WherePredicate<Record,?> wherePredicate = Unchecked.cast(predicate);
+        return new multi() { }.<Expression>methodOption(predicate).getOrThrow(new UnsupportedOperationException());
+    }
 
-			// where(keyword, all())
-			if(wherePredicate.predicate() instanceof AllPredicate)
-				return empty();
+    public static Expression toSql(AlwaysTrue predicate) {
+        return textOnly("1 = 1");
+    }
 
-			// Empty InPredicate
-			if(wherePredicate.predicate() instanceof InPredicate){
-				InPredicate<Object> inPredicate = Unchecked.cast(wherePredicate.predicate());
-				if(sequence(inPredicate.values()).isEmpty())
-					return textOnly("'A' = 'B'");
-			}
+    public static Expression toSql(AlwaysFalse predicate) {
+        return textOnly("1 != 1");
+    }
 
-            Callable1<? super Record, ?> callable = wherePredicate.callable();
-			Expression predicateSql = toSql(wherePredicate.predicate());
-			return derivedColumn(callable).join(predicateSql);
+    public static Expression toSql(WherePredicate<Record, ?> predicate) {
+        Expression predicateSql = toSql(predicate.predicate());
+        return derivedColumn(predicate.callable()).join(predicateSql);
+    }
+
+    public static Expression toSql(AndPredicate<?> predicate) {
+        if (predicate.predicates().isEmpty()) return empty();
+        return Expressions.join(toExpressions(predicate.predicates()), "(", " and ", ")");
+    }
+
+    public static Expression toSql(OrPredicate<?> predicate) {
+        if (predicate.predicates().isEmpty()) return empty();
+        if (!predicate.predicates().safeCast(AlwaysTrue.class).isEmpty()) return empty();
+        return Expressions.join(toExpressions(predicate.predicates()), "(", " or ", ")");
+    }
+
+    public static Expression toSql(NullPredicate<?> predicate) {
+        return textOnly("is null");
+    }
+
+    public static Expression toSql(NotNullPredicate<?> predicate) {
+        return textOnly("is not null");
+    }
+
+    public static Expression toSql(EqualsPredicate<?> predicate) {
+        return expression("= ?", predicate.value());
+    }
+
+    public static Expression toSql(NotEqualsPredicate<?> predicate) {
+        return expression("!= ?", predicate.value());
+    }
+
+    public static Expression toSql(Not<?> predicate) {
+        return textOnly("not").join(toSql(predicate.predicate()));
+    }
+
+    public static Expression toSql(GreaterThan<?> predicate) {
+        return expression("> ?", predicate.value());
+    }
+
+    public static Expression toSql(GreaterThanOrEqualTo<?> predicate) {
+        return expression(">= ?", predicate.value());
+    }
+
+    public static Expression toSql(LessThan<?> predicate) {
+        return expression("< ?", predicate.value());
+    }
+
+    public static Expression toSql(LessThanOrEqualTo<?> predicate) {
+        return expression("<= ?", predicate.value());
+    }
+
+    public static Expression toSql(Between<?> predicate) {
+        return expression("between ? and ?", sequence(predicate.lower(), predicate.upper()));
+    }
+
+    public static Expression toSql(InPredicate<?> predicate) {
+        Sequence<Object> sequence = sequence(predicate.values());
+        if (sequence instanceof Expressible) {
+            Expression pair = ((Expressible) sequence).express();
+            return expression("in ( " + pair.text() + ")", pair.parameters());
         }
-        if (predicate instanceof AndPredicate) {
-            AndPredicate<?> andPredicate = (AndPredicate) predicate;
-            if(andPredicate.predicates().isEmpty()) return empty();
-            return Expressions.join(toExpressions(andPredicate.predicates()), "(", " and ", ")");
-        }
-        if (predicate instanceof OrPredicate) {
-            OrPredicate<?> orPredicate = (OrPredicate) predicate;
-            if(orPredicate.predicates().isEmpty()) return empty();
-			if(!orPredicate.predicates().safeCast(AllPredicate.class).isEmpty()) return empty();
-            return Expressions.join(toExpressions(orPredicate.predicates()), "(", " or ", ")");
-        }
-        if (predicate instanceof NullPredicate) {
-            return textOnly("is null");
-        }
-        if (predicate instanceof NotNullPredicate) {
-            return textOnly("is not null");
-        }
-        if (predicate instanceof EqualsPredicate) {
-            return expression("= ?", getValue(predicate));
-        }
-        if (predicate instanceof NotEqualsPredicate) {
-            return expression("!= ?", getValue(predicate));
-        }
-        if (predicate instanceof Not) {
-            return textOnly("not").join(toSql(((Not) predicate).predicate()));
-        }
-        if (predicate instanceof GreaterThan) {
-            return expression("> ?", getValue(predicate));
-        }
-        if (predicate instanceof GreaterThanOrEqualTo) {
-            return expression(">= ?", getValue(predicate));
-        }
-        if (predicate instanceof LessThan) {
-            return expression("< ?", getValue(predicate));
-        }
-        if (predicate instanceof LessThanOrEqualTo) {
-            return expression("<= ?", getValue(predicate));
-        }
-        if (predicate instanceof Between) {
-            Between between = (Between) predicate;
-            return expression("between ? and ?", sequence(between.lower(), between.upper()));
-        }
-        if (predicate instanceof InPredicate) {
-            InPredicate<Object> inPredicate = Unchecked.cast(predicate);
-            Sequence<Object> sequence = sequence(inPredicate.values());
-            if (sequence instanceof Expressible) {
-                Expression pair = ((Expressible) sequence).express();
-                return expression("in ( " + pair.text() + ")", pair.parameters());
-            }
-            return expression(repeat("?").take(sequence.size()).toString("in (", ",", ")"), sequence);
-        }
-        if (predicate instanceof StartsWithPredicate) {
-            return expression("like ?", sequence((Object) (((StartsWithPredicate) predicate).value() + "%")));
-        }
-        if (predicate instanceof EndsWithPredicate) {
-            return expression("like ?", sequence((Object) ("%" + ((EndsWithPredicate) predicate).value())));
-        }
-        if (predicate instanceof ContainsPredicate) {
-            return expression("like ?", sequence((Object) ("%" + ((ContainsPredicate) predicate).value() + "%")));
-        }
-        throw new UnsupportedOperationException("Unsupported predicate " + predicate);
+        return expression(repeat("?").take(sequence.size()).toString("in (", ",", ")"), sequence);
+    }
+
+    public static Expression toSql(StartsWithPredicate predicate) {
+        return expression("like ?", sequence(predicate.value() + "%"));
+    }
+
+    public static Expression toSql(EndsWithPredicate predicate) {
+        return expression("like ?", sequence("%" + predicate.value()));
+    }
+
+    public static Expression toSql(ContainsPredicate predicate) {
+        return expression("like ?", sequence("%" + predicate.value() + "%"));
     }
 
     private static Sequence<Expression> toExpressions(Sequence<? extends Predicate<?>> predicates) {
         return predicates.map(toSql());
-    }
-
-    private static Sequence<Object> getValue(Predicate<?> predicate) {
-        return sequence(((Value) predicate).value());
     }
 
     public static Function1<Predicate<?>, Expression> toSql() {

@@ -22,10 +22,12 @@ import java.util.Map;
 import static com.googlecode.lazyrecords.Definition.constructors.definition;
 import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.lazyrecords.LeftJoin.leftJoin;
+import static com.googlecode.lazyrecords.Record.constructors.record;
 import static com.googlecode.lazyrecords.Record.methods.update;
 import static com.googlecode.lazyrecords.Using.using;
 import static com.googlecode.lazyrecords.sql.grammars.ColumnDatatypeMappings.hsql;
 import static com.googlecode.totallylazy.Predicates.*;
+import static com.googlecode.totallylazy.Sequences.empty;
 import static com.googlecode.totallylazy.matchers.Matchers.matcher;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -88,9 +90,9 @@ public class SqlRecordsTest extends RecordsContract<Records> {
 	@Test
 	public void supportsSpacesInTableNames() throws Exception {
 		Definition tableWithSpace = definition("some table", age, firstName);
-		records.add(tableWithSpace, Record.constructors.record().set(firstName, "dan").set(age, 12));
+		records.add(tableWithSpace, record().set(firstName, "dan").set(age, 12));
 		assertThat(records.get(tableWithSpace).map(age).head(), is(12));
-		records.set(tableWithSpace, update(using(firstName), Record.constructors.record().set(firstName, "dan").set(age, 11)));
+		records.set(tableWithSpace, update(using(firstName), record().set(firstName, "dan").set(age, 11)));
 		assertThat(records.get(tableWithSpace).map(age).head(), is(11));
 		records.remove(tableWithSpace);
 	}
@@ -99,9 +101,10 @@ public class SqlRecordsTest extends RecordsContract<Records> {
 	public void supportsSpacesInColumnNames() throws Exception {
 		ImmutableKeyword<Integer> age = keyword("my age", Integer.class);
 		Definition columnWithSpace = definition("foo", age, firstName);
-		records.add(columnWithSpace, Record.constructors.record().set(firstName, "dan").set(age, 12));
+        records.remove(columnWithSpace, always());
+        records.add(columnWithSpace, record().set(firstName, "dan").set(age, 12));
 		assertThat(records.get(columnWithSpace).map(age).head(), is(12));
-		records.set(columnWithSpace, update(using(firstName), Record.constructors.record().set(firstName, "dan").set(age, 11)));
+		records.set(columnWithSpace, update(using(firstName), record().set(firstName, "dan").set(age, 11)));
 		assertThat(records.get(columnWithSpace).filter(where(age, Predicates.is(11))).map(firstName).head(), is("dan"));
 		records.remove(columnWithSpace, always());
 	}
@@ -126,19 +129,11 @@ public class SqlRecordsTest extends RecordsContract<Records> {
 		Definition table = definition(randomUUID().toString(), firstName, lastName);
 
 		String sameSurname = "bodart";
-		Record dan1 = Record.constructors.record()
-				.set(firstName, "dan").set(lastName, sameSurname);
+		Record dan1 = record(firstName, "dan", lastName, sameSurname);
+		Record dan2 = record(firstName, "dan", lastName, "north");
+		Record chris = record(firstName, "chris", lastName, sameSurname);
 
-		Record dan2 = Record.constructors.record()
-				.set(firstName, "dan").set(lastName, "north");
-
-		Record chris = Record.constructors.record()
-				.set(firstName, "chris").set(lastName, sameSurname);
-
-		records.add(table,
-				dan1,
-				dan2,
-				chris);
+		records.add(table, dan1, dan2, chris);
 
 		assertThat(records.get(table)
 				.filter(where(lastName, Predicates.is(sameSurname)))
@@ -163,8 +158,7 @@ public class SqlRecordsTest extends RecordsContract<Records> {
 
 	@Test
 	public void supportsEmptyInPredicates() {
-		assertThat(
-				records.get(people).filter(where(firstName, in(Sequences.empty(String.class)))).size(),
+		assertThat(records.get(people).filter(where(firstName, in(empty(String.class)))).size(),
 				is(0));
 	}
 
@@ -182,7 +176,7 @@ public class SqlRecordsTest extends RecordsContract<Records> {
 		Keyword<BigDecimal> salePrice = keyword("salePrice", BigDecimal.class);
 		Definition salePrices = Grammar.definition("salePrices", isbn, salePrice);
 		records.remove(salePrices);
-		records.add(salePrices, Record.constructors.record().set(isbn, zenIsbn).set(salePrice, new BigDecimal("4.95")));
+		records.add(salePrices, record().set(isbn, zenIsbn).set(salePrice, new BigDecimal("4.95")));
 
 		Sequence<Record> peopleAndBooksAndSalePrices = records.get(people).
 				flatMap(leftJoin(records.get(books), Grammar.using(isbn))).

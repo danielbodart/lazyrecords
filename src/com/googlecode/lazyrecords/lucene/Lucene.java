@@ -72,7 +72,8 @@ public class Lucene {
     public Query query(AndPredicate<Record> andPredicate) { return and(andPredicate.predicates().map(asQuery())); }
     public Query query(OrPredicate<Record> orPredicate) { return or(orPredicate.predicates().map(asQuery())); }
     public Query query(Not<Record> notPredicate) { return not(query(notPredicate.predicate())); }
-    public Query query(AllPredicate allPredicate) { return new MatchAllDocsQuery(); }
+    public Query query(AlwaysTrue alwaysTrue) { return new MatchAllDocsQuery(); }
+    public Query query(AlwaysFalse alwaysFalse) { return not(new MatchAllDocsQuery()); }
 
     public Query query(Keyword<?> keyword, Predicate<?> predicate) { return new multi(){}.<Query>methodOption(keyword, predicate).getOrThrow(new UnsupportedOperationException()); }
     public Query query(Keyword<?> keyword, EqualsPredicate<?> predicate) { return equalTo(keyword, predicate.value()); }

@@ -9,6 +9,7 @@ import com.googlecode.totallylazy.Sequences;
 
 import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.lazyrecords.sql.expressions.SelectBuilder.from;
+import static com.googlecode.totallylazy.Predicates.alwaysFalse;
 import static com.googlecode.totallylazy.Predicates.is;
 
 public class SqlSchema implements Schema {
@@ -33,7 +34,7 @@ public class SqlSchema implements Schema {
     @Override
     public boolean exists(Definition definition) {
         try {
-            sqlRecords.query(from(grammar, definition).select(one).where(Predicates.where(one, is(2))).build(), Sequences.<Keyword<?>>empty()).realise();
+            sqlRecords.query(from(grammar, definition).select(one).where(alwaysFalse()).build(), Sequences.<Keyword<?>>empty()).realise();
             return true;
         } catch (Exception e) {
             return false;
