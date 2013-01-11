@@ -127,6 +127,7 @@ public class SqlRecordsTest extends RecordsContract<Records> {
 	@Test
 	public void correctlyChainsFilterPredicates() {
 		Definition table = definition(randomUUID().toString(), firstName, lastName);
+        records.remove(table);
 
 		String sameSurname = "bodart";
 		Record dan1 = record(firstName, "dan", lastName, sameSurname);

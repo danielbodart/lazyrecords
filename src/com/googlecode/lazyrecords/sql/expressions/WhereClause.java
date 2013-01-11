@@ -80,7 +80,7 @@ public class WhereClause extends CompoundExpression {
     }
 
     public static Expression toSql(Not<?> predicate) {
-        return textOnly("not").join(toSql(predicate.predicate()));
+        return textOnly("not (").join(toSql(predicate.predicate())).join(textOnly(")"));
     }
 
     public static Expression toSql(GreaterThan<?> predicate) {
