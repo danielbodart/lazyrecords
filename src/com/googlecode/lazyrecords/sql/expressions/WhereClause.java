@@ -67,16 +67,8 @@ public class WhereClause extends CompoundExpression {
         return textOnly("is null");
     }
 
-    public static Expression toSql(NotNullPredicate<?> predicate) {
-        return textOnly("is not null");
-    }
-
     public static Expression toSql(EqualsPredicate<?> predicate) {
         return expression("= ?", predicate.value());
-    }
-
-    public static Expression toSql(NotEqualsPredicate<?> predicate) {
-        return expression("!= ?", predicate.value());
     }
 
     public static Expression toSql(Not<?> predicate) {

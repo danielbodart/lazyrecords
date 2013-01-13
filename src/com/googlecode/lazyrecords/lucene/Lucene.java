@@ -11,6 +11,8 @@ import org.apache.lucene.search.*;
 
 import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.totallylazy.Sequences.sequence;
+import static org.apache.lucene.search.BooleanClause.Occur.MUST;
+import static org.apache.lucene.search.BooleanClause.Occur.MUST_NOT;
 
 public class Lucene {
     public static final Keyword<String> RECORD_KEY = keyword("type", String.class);
@@ -25,7 +27,7 @@ public class Lucene {
     }
 
     public static Query and(Iterable<Query> queries) {
-        return sequence(queries).fold(new BooleanQuery(), add(BooleanClause.Occur.MUST));
+        return sequence(queries).fold(new BooleanQuery(), add(MUST));
     }
 
     public static Query or(Query... queries) {
@@ -41,18 +43,27 @@ public class Lucene {
     }
 
     public static Query not(Iterable<Query> queries) {
-        return sequence(queries).fold(new BooleanQuery(), add(BooleanClause.Occur.MUST_NOT));
+        return sequence(queries).fold(new BooleanQuery(), add(MUST_NOT));
     }
 
     private static Function2<? super BooleanQuery, ? super Query, BooleanQuery> add(final BooleanClause.Occur occur) {
         return new Function2<BooleanQuery, Query, BooleanQuery>() {
             public BooleanQuery call(BooleanQuery booleanQuery, Query query) throws Exception {
                 // FIX Lucene issue where it does not understand nested boolean negatives
-                if (query instanceof BooleanQuery && occur.equals(BooleanClause.Occur.MUST)) {
+                if (query instanceof BooleanQuery) {
                     BooleanClause[] clauses = ((BooleanQuery) query).getClauses();
-                    if (clauses.length == 1 && clauses[0].getOccur().equals(BooleanClause.Occur.MUST_NOT)) {
-                        booleanQuery.add(clauses[0]);
-                        return booleanQuery;
+                    if (clauses.length == 1) {
+                        BooleanClause clause = clauses[0];
+                        if(clause.getOccur().equals(MUST_NOT)) switch (occur) {
+                            case MUST: {
+                                booleanQuery.add(clause);
+                                return booleanQuery;
+                            }
+                            case MUST_NOT: {
+                                booleanQuery.add(clause.getQuery(), MUST);
+                                return booleanQuery;
+                            }
+                        }
                     }
                 }
                 booleanQuery.add(query, occur);
@@ -82,13 +93,11 @@ public class Lucene {
     public Query query(Keyword<?> keyword, LessThan<?> predicate) { return lessThan(keyword, predicate.value()); }
     public Query query(Keyword<?> keyword, LessThanOrEqualTo<?> predicate) { return lessThanOrEqual(keyword, predicate.value()); }
     public Query query(Keyword<?> keyword, Between<?> predicate) { return between(keyword, predicate.lower(), predicate.upper()); }
-    public Query query(Keyword<?> keyword, NotEqualsPredicate<?> predicate) { return not(equalTo(keyword, predicate.value())); }
     public Query query(Keyword<?> keyword, Not<?> predicate) { return not(query(keyword, predicate.predicate())); }
     public Query query(Keyword<?> keyword, InPredicate<?> predicate) { return or(sequence(predicate.values()).map(asQuery(keyword))); }
     public Query query(Keyword<?> keyword, StartsWithPredicate predicate) { return new PrefixQuery(new Term(keyword.toString(), predicate.value())); }
     public Query query(Keyword<?> keyword, ContainsPredicate predicate) { return new WildcardQuery(new Term(keyword.toString(), "*" + predicate.value() + "*")); }
     public Query query(Keyword<?> keyword, EndsWithPredicate predicate) { return new WildcardQuery(new Term(keyword.toString(), "*" + predicate.value())); }
-    public Query query(Keyword<?> keyword, NotNullPredicate<?> predicate) { return notNull(keyword); }
     public Query query(Keyword<?> keyword, NullPredicate<?> predicate) { return not(notNull(keyword)); }
 
     private Query newRange(Keyword<?> keyword, Object lower, Object upper, boolean minInclusive, boolean maxInclusive) {
