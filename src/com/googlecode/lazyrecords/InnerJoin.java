@@ -10,7 +10,7 @@ import static com.googlecode.lazyrecords.Record.functions.merge;
 
 public class InnerJoin extends Join {
 
-	public InnerJoin(Sequence<Record> records, Callable1<? super Record, Predicate<Record>> using) {
+	private InnerJoin(Sequence<Record> records, Callable1<? super Record, Predicate<Record>> using) {
 		super(records, Unchecked.<Callable1<? super Record, Predicate<Record>>>cast(using));
     }
 
@@ -18,7 +18,7 @@ public class InnerJoin extends Join {
         return records.filter(using.call(record)).map(merge(record));
     }
 
-    public static Callable1<Record, Iterable<Record>> innerJoin(final Sequence<Record> records, final Callable1<? super Record, Predicate<Record>> using) {
+    public static Join innerJoin(final Sequence<Record> records, final Callable1<? super Record, Predicate<Record>> using) {
         return new InnerJoin(records, using);
     }
 

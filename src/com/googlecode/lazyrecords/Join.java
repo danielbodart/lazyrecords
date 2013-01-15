@@ -23,7 +23,7 @@ public abstract class Join implements Callable1<Record, Iterable<Record>> {
 		return using;
 	}
 
-	public static InnerJoin join(Sequence<Record> records,Callable1<Record, Predicate<Record>> using ){
-		return InnerJoin.join(records, using);
+	public static Join join(Sequence<Record> records,Callable1<Record, Predicate<Record>> using ){
+		return InnerJoin.innerJoin(records, using);
 	}
 }
