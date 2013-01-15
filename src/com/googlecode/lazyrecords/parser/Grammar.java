@@ -8,7 +8,13 @@ import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.mappings.StringMappings;
-import com.googlecode.totallylazy.*;
+import com.googlecode.totallylazy.Callable1;
+import com.googlecode.totallylazy.Callable2;
+import com.googlecode.totallylazy.Pair;
+import com.googlecode.totallylazy.Predicate;
+import com.googlecode.totallylazy.Predicates;
+import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Triple;
 import com.googlecode.totallylazy.predicates.OrPredicate;
 import com.googlecode.totallylazy.time.Seconds;
 
@@ -16,20 +22,76 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static com.googlecode.lazyparsec.Scanners.*;
+import static com.googlecode.lazyparsec.Scanners.isChar;
+import static com.googlecode.lazyparsec.Scanners.notChar;
+import static com.googlecode.lazyparsec.Scanners.pattern;
 import static com.googlecode.lazyparsec.pattern.Patterns.regex;
 import static com.googlecode.totallylazy.Predicates.where;
-import static com.googlecode.totallylazy.Strings.*;
+import static com.googlecode.totallylazy.Strings.contains;
+import static com.googlecode.totallylazy.Strings.endsWith;
+import static com.googlecode.totallylazy.Strings.startsWith;
+import static java.util.regex.Pattern.quote;
 
 @SuppressWarnings("unchecked")
 public class Grammar {
+    private final Sequence<? extends Keyword<?>> keywords;
+    private final StringMappings mappings;
+    private final Parser.Reference<Predicate<Record>> group = Parser.newReference();
+
+    private Grammar(final Sequence<? extends Keyword<?>> keywords, StringMappings mappings) {
+        this.keywords = keywords;
+        this.mappings = mappings;
+        group.set(PARTS.between(ws('('), ws(')')));
+    }
+
+    public static Parser<Predicate<Record>> PARSER(final Sequence<? extends Keyword<?>> keywords, final StringMappings mappings) {
+        return new Grammar(keywords, mappings).PARTS;
+    }
+
+    public Parser<Predicate<Record>> VALUE_ONLY = VALUE_PREDICATES.map(new Callable1<List<Pair<String, Callable1<Object, Predicate>>>, Predicate<Record>>() {
+            @Override
+            public Predicate<Record> call(List<Pair<String, Callable1<Object, Predicate>>> pairs) throws Exception {
+                List<Predicate<Record>> predicates = new ArrayList<Predicate<Record>>();
+                for (final Keyword<?> keyword : keywords) {
+                    predicates.add(toPredicate(keyword, pairs));
+                }
+                return OrPredicate.or(predicates);
+            }
+        });
+
+    public final Parser<Predicate<Record>> GROUP = group.lazy();
+
+    public final Parser<Predicate<Record>> NAME_AND_VALUE =  Parsers.tuple(NAME, ws(':').or(OPERATORS.peek()), VALUE_PREDICATES).map(new Callable1<Triple<String, Void, List<Pair<String, Callable1<Object, Predicate>>>>, Predicate<Record>>() {
+        @Override
+        public Predicate<Record> call(Triple<String, Void, List<Pair<String, Callable1<Object, Predicate>>>> triple) throws Exception {
+            final String name = triple.first();
+            final List<Pair<String, Callable1<Object, Predicate>>> values = triple.third();
+            return toPredicate(Keywords.matchKeyword(name, keywords), values);
+        }
+    });
+
+    public Parser<Predicate<Record>> PARTS = Parsers.or(GROUP, NAME_AND_VALUE, VALUE_ONLY).prefix(NEGATION).infixl(OR.or(AND));
+
+    private Predicate<Record> toPredicate(final Keyword<?> keyword, final List<Pair<String, Callable1<Object, Predicate>>> values) throws Exception {
+        List<Predicate<Record>> valuesPredicates = new ArrayList<Predicate<Record>>();
+        for (Pair<String, Callable1<Object, Predicate>> pair : values) {
+            try {
+                Object actualValue = mappings.toValue(keyword.forClass(), pair.first());
+                Predicate<Record> where = where(keyword, pair.second().call(actualValue));
+                valuesPredicates.add(where);
+            } catch (Exception ignored) {
+            }
+        }
+        return OrPredicate.or(valuesPredicates);
+    }
+
 
     private static Parser<Void> ws(char value) {
         return ws(String.valueOf(value));
     }
 
     private static Parser<Void> ws(String value) {
-        return pattern(regex(String.format("\\s*%s\\s*", value)), value);
+        return pattern(regex(String.format("\\s*%s\\s*", quote(value))), value);
     }
 
     public static final Parser<String> DATE = pattern(regex("\\d{4}/\\d{1,2}/\\d{1,2}"), "date").source();
@@ -163,51 +225,4 @@ public class Grammar {
     public static Parser<Pair<String, Callable1<Object, Predicate>>> VALUE_PREDICATE = Parsers.or(GREATER_THAN_OR_EQUALS, LESS_THAN_OR_EQUALS, GREATER_THAN, LESS_THAN, DATE_IS, TEXT_CONTAINS, TEXT_STARTS_WITH, TEXT_ENDS_WITH, IS_NULL, TEXT_IS);
 
     public static Parser<List<Pair<String, Callable1<Object, Predicate>>>> VALUE_PREDICATES = VALUE_PREDICATE.sepBy(ws(','));
-
-    public static Parser<Predicate<Record>> VALUE_ONLY(final Sequence<? extends Keyword<?>> keywords, final StringMappings mappings) {
-        return VALUE_PREDICATES.map(new Callable1<List<Pair<String, Callable1<Object, Predicate>>>, Predicate<Record>>() {
-            @Override
-            public Predicate<Record> call(List<Pair<String, Callable1<Object, Predicate>>> pairs) throws Exception {
-                List<Predicate<Record>> predicates = new ArrayList<Predicate<Record>>();
-                for (final Keyword<?> keyword : keywords) {
-                    predicates.add(toPredicate(mappings, keyword, pairs));
-                }
-                return OrPredicate.or(predicates);
-
-            }
-        });
-    }
-
-    public static Parser<Predicate<Record>> PARTS(final Sequence<? extends Keyword<?>> keywords, StringMappings mappings) {
-        return Parsers.or(NAME_AND_VALUE(keywords, mappings), VALUE_ONLY(keywords, mappings)).prefix(NEGATION);
-    }
-
-    public static Parser<Predicate<Record>> PARSER(final Sequence<? extends Keyword<?>> keywords, StringMappings mappings) {
-        return PARTS(keywords, mappings).infixl(OR.or(AND));
-    }
-
-    public static final Parser<Predicate<Record>> NAME_AND_VALUE(final Sequence<? extends Keyword<?>> keywords, final StringMappings mappings) {
-        return Parsers.tuple(NAME, ws(':').or(OPERATORS.peek()), VALUE_PREDICATES).map(new Callable1<Triple<String, Void, List<Pair<String, Callable1<Object, Predicate>>>>, Predicate<Record>>() {
-            @Override
-            public Predicate<Record> call(Triple<String, Void, List<Pair<String, Callable1<Object, Predicate>>>> triple) throws Exception {
-                final String name = triple.first();
-                final List<Pair<String, Callable1<Object, Predicate>>> values = triple.third();
-                return toPredicate(mappings, Keywords.matchKeyword(name, keywords), values);
-            }
-        });
-    }
-
-    private static Predicate<Record> toPredicate(final StringMappings mappings, final Keyword<?> keyword, final List<Pair<String, Callable1<Object, Predicate>>> values) throws Exception {
-
-        List<Predicate<Record>> valuesPredicates = new ArrayList<Predicate<Record>>();
-        for (Pair<String, Callable1<Object, Predicate>> pair : values) {
-            try {
-                Object actualValue = mappings.toValue(keyword.forClass(), pair.first());
-                Predicate<Record> where = where(keyword, pair.second().call(actualValue));
-                valuesPredicates.add(where);
-            } catch (Exception ignored) {
-            }
-        }
-        return OrPredicate.or(valuesPredicates);
-    }
 }

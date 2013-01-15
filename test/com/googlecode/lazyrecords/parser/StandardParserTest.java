@@ -24,6 +24,20 @@ import static org.hamcrest.Matchers.notNullValue;
 
 public class StandardParserTest {
     @Test
+    public void supportsBracketing() throws Exception {
+        PredicateParser predicateParser = new StandardParser();
+        Keyword<String> name = keyword("name", String.class);
+        Keyword<String> age = keyword("age", String.class);
+        Predicate<Record> predicate = predicateParser.parse("name:\"dan\" OR (name:\"bob\" AND age:\"old\")", sequence(name, age));
+        assertThat(predicate.matches(Record.constructors.record(name, "bob", age, "young")), is(false));
+        assertThat(predicate.matches(Record.constructors.record(name, "bob", age, "old")), is(true));
+        assertThat(predicate.matches(Record.constructors.record(name, "dan", age, "young")), is(true));
+
+        assertLuceneSyntax(predicate);
+        assertSqlSyntax(predicate);
+    }
+
+    @Test
     public void supportsImplicitKeywords() throws Exception {
         PredicateParser predicateParser = new StandardParser();
         Keyword<String> name = keyword("name", String.class);
