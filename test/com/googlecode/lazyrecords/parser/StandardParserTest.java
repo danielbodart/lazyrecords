@@ -10,6 +10,8 @@ import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
 import org.junit.Test;
+import org.junit.internal.runners.statements.ExpectException;
+import org.junit.rules.ExpectedException;
 
 import java.util.Date;
 
@@ -23,259 +25,258 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 public class StandardParserTest {
+
+    private final StandardParser predicateParser = new StandardParser();
+    private final Keyword<String> name = keyword("name", String.class);
+    private final Keyword<String> age = keyword("age", String.class);
+    private final Keyword<String> id = keyword("id", String.class);
+
     @Test
-    public void supportsBracketing() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
-        Keyword<String> name = keyword("name", String.class);
-        Keyword<String> age = keyword("age", String.class);
+    public void shouldBeAbletoNestBrackets() throws Exception {
+        Predicate<Record> predicate = predicateParser.parse("id:\"X\" AND (name:\"dan\" AND age:\"old\" OR (name:\"bob\" AND age:\"young\"))", sequence(name, age));
+
+        assertThat(predicate.matches(Record.constructors.record(name, "bob", age, "young")), is(false));
+        assertThat(predicate.matches(Record.constructors.record(name, "dan", name, "bob", age, "young")), is(false));
+        assertThat(predicate.matches(Record.constructors.record(name, "stu")), is(false));
+        assertThat(predicate.matches(Record.constructors.record(id, "X", name, "dan", age, "old")), is(true));
+        assertThat(predicate.matches(Record.constructors.record(id, "X", name, "bob", age, "young")), is(true));
+
+        assertLuceAndSqlSyntax(predicate);
+    }
+
+    @Test
+    public void shouldBeAbleToUseMoreThanOneBrackets() throws Exception {
+        Predicate<Record> predicate = predicateParser.parse("(name:\"dan\" AND age:\"old\") OR (name:\"bob\" AND age:\"old\")", sequence(name, age));
+
+        assertThat(predicate.matches(Record.constructors.record(name, "bob", age, "young")), is(false));
+        assertThat(predicate.matches(Record.constructors.record(name, "bob", age, "old")), is(true));
+        assertThat(predicate.matches(Record.constructors.record(name, "dan", age, "young")), is(false));
+        assertThat(predicate.matches(Record.constructors.record(name, "dan", age, "old")), is(true));
+        assertThat(predicate.matches(Record.constructors.record(name, "dan", name, "bob")), is(false));
+
+        assertLuceAndSqlSyntax(predicate);
+    }
+
+
+    @Test
+    public void shouldBracketsAndNot() throws Exception {
+        Predicate<Record> predicate = predicateParser.parse("name:\"dan\" NOT (name:\"bob\" OR age:\"old\")", sequence(name, age));
+
+        assertThat(predicate.matches(Record.constructors.record(name, "bob", age, "young")), is(false));
+        assertThat(predicate.matches(Record.constructors.record(name, "bob", age, "old")), is(false));
+        assertThat(predicate.matches(Record.constructors.record(name, "dan", age, "young")), is(true));
+        assertThat(predicate.matches(Record.constructors.record(name, "dan", age, "old")), is(false));
+
+        assertLuceAndSqlSyntax(predicate);
+    }
+
+    @Test
+    public void supportsBracketingOR() throws Exception {
         Predicate<Record> predicate = predicateParser.parse("name:\"dan\" OR (name:\"bob\" AND age:\"old\")", sequence(name, age));
         assertThat(predicate.matches(Record.constructors.record(name, "bob", age, "young")), is(false));
         assertThat(predicate.matches(Record.constructors.record(name, "bob", age, "old")), is(true));
         assertThat(predicate.matches(Record.constructors.record(name, "dan", age, "young")), is(true));
 
+        assertLuceAndSqlSyntax(predicate);
+    }
+
+    private void assertLuceAndSqlSyntax(Predicate<Record> predicate) {
         assertLuceneSyntax(predicate);
         assertSqlSyntax(predicate);
+    }
+
+    @Test
+    public void supportsBracketingAND() throws Exception {
+        Predicate<Record> predicate = predicateParser.parse("name:\"dan\" AND (name:\"bob\" OR age:\"old\")", sequence(name, age));
+        assertThat(predicate.matches(Record.constructors.record(name, "bob", age, "young")), is(false));
+        assertThat(predicate.matches(Record.constructors.record(name, "bob", age, "old")), is(false));
+        assertThat(predicate.matches(Record.constructors.record(name, "dan", age, "young")), is(false));
+        assertThat(predicate.matches(Record.constructors.record(name, "dan", age, "old")), is(true));
+
+        assertLuceAndSqlSyntax(predicate);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldBarfWithMissingClosingBracket() throws Exception {
+        Predicate<Record> predicate = predicateParser.parse("name:\"dan\" AND (name:\"bob\" OR age:\"old\"", sequence(name, age));
+
+        predicate.matches(Record.constructors.record(name, "bob", age, "young"));
     }
 
     @Test
     public void supportsImplicitKeywords() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
-        Keyword<String> name = keyword("name", String.class);
         Predicate<Record> predicate = predicateParser.parse("bob", sequence(name));
         assertThat(predicate.matches(Record.constructors.record().set(name, "bob")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "dan")), is(false));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     @Test
     public void supportsExplicitKeywords() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Predicate<Record> predicate = predicateParser.parse("name:bob", Sequences.<Keyword<?>>empty());
 
-        Keyword<String> name = keyword("name", String.class);
         assertThat(predicate.matches(Record.constructors.record().set(name, "bob")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "dan")), is(false));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     @Test
     public void supportsMultipleConditions() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Predicate<Record> predicate = predicateParser.parse("name:bob age:12", Sequences.<Keyword<?>>empty());
 
-        Keyword<String> name = keyword("name", String.class);
-        Keyword<String> age = keyword("age", String.class);
         assertThat(predicate.matches(Record.constructors.record().set(name, "bob").set(age, "12")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "bob").set(age, "13")), is(false));
         assertThat(predicate.matches(Record.constructors.record().set(name, "dan").set(age, "12")), is(false));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     @Test
     public void supportsMultipleConditionsSeparatedByManySpaces() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Predicate<Record> predicate = predicateParser.parse("name:bob    age:12", Sequences.<Keyword<?>>empty());
-
-        Keyword<String> name = keyword("name", String.class);
-        Keyword<String> age = keyword("age", String.class);
         assertThat(predicate.matches(Record.constructors.record().set(name, "bob").set(age, "12")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "bob").set(age, "13")), is(false));
         assertThat(predicate.matches(Record.constructors.record().set(name, "dan").set(age, "12")), is(false));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     @Test
     public void supportsNegationWithImplicit() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Predicate<Record> predicate = predicateParser.parse(" NOT bob age:12", sequence(keyword("name", String.class)));
-
-        Keyword<String> name = keyword("name", String.class);
-        Keyword<String> age = keyword("age", String.class);
         assertThat(predicate.matches(Record.constructors.record().set(name, "dan").set(age, "12")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "bob").set(age, "12")), is(false));
         assertThat(predicate.matches(Record.constructors.record().set(name, "dan").set(age, "13")), is(false));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     @Test
     public void supportsNegationWithExplicit() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Predicate<Record> predicate = predicateParser.parse("-name:bob age:12", Sequences.<Keyword<?>>empty());
-
-        Keyword<String> name = keyword("name", String.class);
-        Keyword<String> age = keyword("age", String.class);
         assertThat(predicate.matches(Record.constructors.record().set(name, "dan").set(age, "12")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "bob").set(age, "12")), is(false));
         assertThat(predicate.matches(Record.constructors.record().set(name, "dan").set(age, "13")), is(false));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     @Test
     public void supportsOrWithImplicit() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Predicate<Record> predicate = predicateParser.parse("dan,bob", sequence(keyword("name", String.class)));
-
-        Keyword<String> name = keyword("name", String.class);
         assertThat(predicate.matches(Record.constructors.record().set(name, "dan")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "bob")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "mat")), is(false));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
 
     }
 
     @Test
     public void supportsAndWithExplicit() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Predicate<Record> predicate = predicateParser.parse("name:bodart AND title:baron", Sequences.<Keyword<?>>empty());
-
-        Keyword<String> name = keyword("name", String.class);
         Keyword<String> title = keyword("title", String.class);
         assertThat(predicate.matches(Record.constructors.record().set(title, "baron").set(name, "bodart")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(title, "duke").set(name, "bodart")), is(false));
         assertThat(predicate.matches(Record.constructors.record().set(title, "baron").set(name, "greenback")), is(false));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     @Test
     public void supportsOrWithExplicit() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Predicate<Record> predicate = predicateParser.parse("name:dan OR name:bob", Sequences.<Keyword<?>>empty());
-
-        Keyword<String> name = keyword("name", String.class);
         assertThat(predicate.matches(Record.constructors.record().set(name, "dan")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "bob")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "mat")), is(false));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     @Test
     public void explicitOrRequiresSpace() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
-        Keyword<String> name = keyword("name", String.class);
         Predicate<Record> predicate = predicateParser.parse("ORangutan ORangutan", sequence(name));
         assertThat(predicate.matches(Record.constructors.record().set(name, "angutan")), is(false));
         assertThat(predicate.matches(Record.constructors.record().set(name, "ORangutan")), is(true));
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     @Test
     public void ignoreWhitespaces() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Predicate<Record> predicate = predicateParser.parse("  name  :  dan  ,   bob  ", Sequences.<Keyword<?>>empty());
-
-        Keyword<String> name = keyword("name", String.class);
         assertThat(predicate.matches(Record.constructors.record().set(name, "dan")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "bob")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "mat")), is(false));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     @Test
     public void supportsQuotedValue() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Predicate<Record> predicate = predicateParser.parse("name:\"Dan Bod\"", Sequences.<Keyword<?>>empty());
-
-        Keyword<String> name = keyword("name", String.class);
         assertThat(predicate.matches(Record.constructors.record().set(name, "Dan Bod")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "Dan")), is(false));
         assertThat(predicate.matches(Record.constructors.record().set(name, "Bod")), is(false));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     @Test
     public void supportsStartsWith() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Predicate<Record> predicate = predicateParser.parse("name:Dan*", Sequences.<Keyword<?>>empty());
-
-        Keyword<String> name = keyword("name", String.class);
         assertThat(predicate.matches(Record.constructors.record().set(name, "Dan Bod")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "Dan")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "Bod")), is(false));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     @Test
     public void supportsEndsWith() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Predicate<Record> predicate = predicateParser.parse("name:*Bod", Sequences.<Keyword<?>>empty());
-
-        Keyword<String> name = keyword("name", String.class);
         assertThat(predicate.matches(Record.constructors.record().set(name, "Dan Bod")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "Dan")), is(false));
         assertThat(predicate.matches(Record.constructors.record().set(name, "Bod")), is(true));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     @Test
     public void supportsContains() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Predicate<Record> predicate = predicateParser.parse("name:*ell*", Sequences.<Keyword<?>>empty());
-
-        Keyword<String> name = keyword("name", String.class);
         assertThat(predicate.matches(Record.constructors.record().set(name, "Hello")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "Helo")), is(false));
         assertThat(predicate.matches(Record.constructors.record().set(name, "ell")), is(true));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     @Test
     public void supportsQuotesContainingNonAlphaNumericCharacters() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Predicate<Record> predicate = predicateParser.parse("id:\"urn:uuid:c356d2c5-f975-4c4d-8e2a-a698158c6ef1\"", Sequences.<Keyword<?>>empty());
 
-        Keyword<String> id = keyword("id", String.class);
+
         assertThat(predicate.matches(Record.constructors.record().set(id, "urn:uuid:c356d2c5-f975-4c4d-8e2a-a698158c6ef1")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(id, "fail")), is(false));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     @Test
     public void supportsQuotedName() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Predicate<Record> predicate = predicateParser.parse("\"First Name\":Dan", Sequences.<Keyword<?>>empty());
 
         Keyword<String> name = keyword("First Name", String.class);
         assertThat(predicate.matches(Record.constructors.record().set(name, "Dan")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "Mat")), is(false));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     @Test
     public void supportsEmptyQueries() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Predicate<Record> predicate = predicateParser.parse("", Sequences.<Keyword<?>>empty());
 
         Keyword<String> name = keyword("First Name", String.class);
@@ -288,7 +289,6 @@ public class StandardParserTest {
 
     @Test
     public void supportsExplicitDateBasedQueries() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Keyword<Date> dob = keyword("dob", Date.class);
         Predicate<Record> predicate = predicateParser.parse("dob:2001/1/10", Sequences.sequence(dob));
 
@@ -296,26 +296,22 @@ public class StandardParserTest {
         assertThat(predicate.matches(Record.constructors.record().set(dob, date(2001, 10, 1))), is(false));
         assertThat(predicate.matches(Record.constructors.record().set(dob, date(2001, 1, 10, 3, 15, 59, 123))), is(true));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     @Test
     public void supportsImplicitDateBasedQueries() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Sequence<Keyword<?>> keywords = Sequences.<Keyword<?>>sequence(keyword("dob", Date.class));
         Predicate<Record> predicate = predicateParser.parse("2001/1/10", keywords);
 
         assertThat(predicate.matches(Record.constructors.record().set(keyword("dob", Date.class), date(2001, 1, 10))), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(keyword("dob", Date.class), date(2001, 10, 1))), is(false));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     @Test
     public void supportsGreaterThanQueries() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Sequence<Keyword<?>> keywords = Sequences.<Keyword<?>>sequence(keyword("dob", Date.class));
         Predicate<Record> predicate = predicateParser.parse("dob > 2001/1/10", keywords);
 
@@ -324,13 +320,11 @@ public class StandardParserTest {
         assertThat(predicate.matches(Record.constructors.record().set(dob, date(2001, 1, 10))), is(false));
         assertThat(predicate.matches(Record.constructors.record().set(dob, date(2001, 1, 9))), is(false));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     @Test
     public void supportsLowerThanDateQueries() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Sequence<Keyword<?>> keywords = Sequences.<Keyword<?>>sequence(keyword("dob", Date.class));
         Predicate<Record> predicate = predicateParser.parse("dob < 2001/1/10", keywords);
 
@@ -339,64 +333,47 @@ public class StandardParserTest {
         assertThat(predicate.matches(Record.constructors.record().set(dob, date(2001, 1, 11))), is(false));
         assertThat(predicate.matches(Record.constructors.record().set(dob, date(2001, 1, 10))), is(false));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     @Test
     public void supportsLowerThanStringQueries() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Predicate<Record> predicate = predicateParser.parse("name < Dan", Sequences.<Keyword<?>>empty());
-
-        Keyword<String> name = keyword("name", String.class);
         assertThat(predicate.matches(Record.constructors.record().set(name, "Bob")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "Dan")), is(false));
         assertThat(predicate.matches(Record.constructors.record().set(name, "Mat")), is(false));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     @Test
     public void supportsGreaterThanStringQueries() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Predicate<Record> predicate = predicateParser.parse("name > Dan", Sequences.<Keyword<?>>empty());
-
-        Keyword<String> name = keyword("name", String.class);
         assertThat(predicate.matches(Record.constructors.record().set(name, "Mat")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "Dan")), is(false));
         assertThat(predicate.matches(Record.constructors.record().set(name, "Bob")), is(false));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     @Test
     public void supportsGreaterThanOrEqualStringQueries() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Predicate<Record> predicate = predicateParser.parse("name >= Dan", Sequences.<Keyword<?>>empty());
-
-        Keyword<String> name = keyword("name", String.class);
         assertThat(predicate.matches(Record.constructors.record().set(name, "Mat")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "Dan")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "Bob")), is(false));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     @Test
     public void supportsLessThanOrEqualStringQueries() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
         Predicate<Record> predicate = predicateParser.parse("name <= Dan", Sequences.<Keyword<?>>empty());
-
-        Keyword<String> name = keyword("name", String.class);
         assertThat(predicate.matches(Record.constructors.record().set(name, "Bob")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "Dan")), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(name, "Mat")), is(false));
 
-        assertLuceneSyntax(predicate);
-        assertSqlSyntax(predicate);
+        assertLuceAndSqlSyntax(predicate);
     }
 
     private void assertSqlSyntax(Predicate<Record> predicate) {
@@ -414,8 +391,6 @@ public class StandardParserTest {
 
     @Test
     public void shouldCreateOnlyOnePredicateForExplicitQuery() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
-
         Keyword<Long> keyword = keyword("longKeyword", Long.class);
         Predicate<Record> predicate = predicateParser.parse("longKeyword:13", Sequences.<Keyword<?>>sequence(keyword, keyword("unrelatedKeyword", String.class)));
         Predicate<Record> expected = where(keyword, Predicates.is(13L));
@@ -425,8 +400,6 @@ public class StandardParserTest {
 
     @Test
     public void shouldCreateNPredicatesForImplicitQuery() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
-
         Keyword<Long> longKeyword = keyword("longKeyword", Long.class);
         Keyword<String> stringKeyword = keyword("stringKeyword", String.class);
         Predicate<Record> predicate = predicateParser.parse("13", Sequences.<Keyword<?>>sequence(longKeyword, stringKeyword));
@@ -437,8 +410,6 @@ public class StandardParserTest {
 
     @Test
     public void supportsIsNull() throws Exception {
-        PredicateParser predicateParser = new StandardParser();
-
         Keyword<String> keyword = keyword("stringKeyword", String.class);
         Predicate<Record> predicate = predicateParser.parse("stringKeyword:null", Sequences.<Keyword<?>>sequence(keyword));
         Predicate<Record> expected = where(keyword, Predicates.nullValue());
