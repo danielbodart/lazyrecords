@@ -33,4 +33,10 @@ public class LucenePartitionedRecordsTest extends RecordsContract<LucenePartitio
 	@Ignore("Still thinking about lexical representation of BigDecimal")
 	public void supportsBigDecimal() throws Exception {
 	}
+
+    @Override
+    @Ignore
+    public void supportsConcatenationDuringFiltering() throws Exception {
+    }
+
 }

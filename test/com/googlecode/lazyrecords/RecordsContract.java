@@ -507,11 +507,16 @@ public abstract class RecordsContract<T extends Records> {
         assertThat(records.get(people).find(where(firstName, is("dan"))).isEmpty(), CoreMatchers.is(false));
     }
  
-    // @Test		       
-    // public void supportsConcatenation() throws Exception {
-    //     Keyword<String> fullName = concat(firstName, lastName);
-    //     assertThat(records.get(people).sortBy(age).map(fullName).head(), CoreMatchers.is("danbodart"));
-    //     assertThat(records.get(people).sortBy(age).map(select(fullName)).head().get(fullName), CoreMatchers.is("danbodart"));
-    //     assertThat(records.get(people).filt``er(where(fullName, is("danbodart"))).map(age).head(), CoreMatchers.is(9));
-    // }
+    @Test
+    public void supportsConcatenationDuringSelection() throws Exception {
+         Keyword<String> fullName = concat(firstName, lastName);
+         assertThat(records.get(people).sortBy(age).map(fullName).head(), CoreMatchers.is("danbodart"));
+         assertThat(records.get(people).sortBy(age).map(select(fullName)).head().get(fullName), CoreMatchers.is("danbodart"));
+    }
+
+    @Test
+    public void supportsConcatenationDuringFiltering() throws Exception {
+         Keyword<String> fullName = concat(firstName, lastName);
+         assertThat(records.get(people).filter(where(fullName, is("danbodart"))).map(age).head(), CoreMatchers.is(9));
+    }
 }

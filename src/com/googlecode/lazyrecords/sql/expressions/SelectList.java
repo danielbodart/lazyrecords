@@ -5,15 +5,13 @@ import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Callable2;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.callables.JoinCharSequence;
 import com.googlecode.totallylazy.callables.JoinString;
 
-import static com.googlecode.lazyrecords.sql.expressions.Expressions.expression;
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.name;
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
 import static com.googlecode.lazyrecords.sql.expressions.SetFunctionType.setFunctionType;
 
-public class SelectList extends CompoundExpression{
+public class SelectList extends CompoundExpression {
     public SelectList(Sequence<Keyword<?>> select) {
         super(select.map(derivedColumn()));
     }
@@ -36,11 +34,11 @@ public class SelectList extends CompoundExpression{
     }
 
     public static <T> AbstractExpression derivedColumn(Callable1<? super Record, T> callable) {
-        if(callable instanceof CompositeKeyword){
+        if (callable instanceof CompositeKeyword) {
             CompositeKeyword<?> composite = (CompositeKeyword<?>) callable;
             return Expressions.join(composite.keywords().map(name()), "(", combiner(composite.combiner()), ")");
         }
-        if(callable instanceof Aggregate){
+        if (callable instanceof Aggregate) {
             Aggregate aggregate = (Aggregate) callable;
             return setFunctionType(aggregate.reducer(), aggregate.source());
         }
@@ -61,14 +59,14 @@ public class SelectList extends CompoundExpression{
 
     public static <T> AbstractExpression derivedColumnWithAlias(Callable1<? super Record, T> callable) {
         AbstractExpression expression = derivedColumn(callable);
-        if(callable instanceof Aliased){
+        if (callable instanceof Aliased) {
             return expression.join(asClause((Keyword<?>) callable));
         }
         return expression;
     }
 
     private static String combiner(Callable2<?, ?, ?> combiner) {
-        if(combiner instanceof JoinString) {
+        if (combiner instanceof JoinString) {
             return "||";
         }
         throw new UnsupportedOperationException("Unsupported combiner " + combiner);
@@ -99,7 +97,7 @@ public class SelectList extends CompoundExpression{
         return new Function1<Keyword<?>, String>() {
             @Override
             public String call(Keyword<?> keyword) throws Exception {
-                if(isLongName(keyword)){
+                if (isLongName(keyword)) {
                     return shortName(keyword).name();
                 }
                 return keyword.name();

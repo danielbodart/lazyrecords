@@ -76,5 +76,8 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
         assertThat(logs, Matchers.is(logger.data())); // Check queries
     }
 
-
+    @Override
+    @Ignore
+    public void supportsConcatenationDuringFiltering() throws Exception {
+    }
 }
