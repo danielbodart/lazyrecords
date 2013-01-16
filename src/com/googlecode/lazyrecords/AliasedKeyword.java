@@ -1,6 +1,6 @@
 package com.googlecode.lazyrecords;
 
-public class AliasedKeyword<T> extends AbstractKeyword<T> {
+public class AliasedKeyword<T> extends AbstractKeyword<T> implements Aliased {
     private final Keyword<T> source;
     private final String name;
 

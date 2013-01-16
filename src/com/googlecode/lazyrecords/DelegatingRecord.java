@@ -37,8 +37,8 @@ public class DelegatingRecord implements Record {
     }
 
     @Override
-    public Sequence<Object> getValuesFor(Sequence<Keyword<?>> keywords) {
-        return record.getValuesFor(keywords);
+    public <T> Sequence<T> valuesFor(Sequence<? extends Keyword<? extends T>> keywords) {
+        return record.valuesFor(keywords);
     }
 
     @Override

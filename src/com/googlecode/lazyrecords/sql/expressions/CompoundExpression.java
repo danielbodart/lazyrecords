@@ -16,16 +16,16 @@ public class CompoundExpression extends AbstractExpression {
         this(sequence(expressions));
     }
 
-    public CompoundExpression(final Sequence<Expression> expressions) {
+    public CompoundExpression(final Sequence<? extends Expression> expressions) {
         this(expressions, "", " ", "");
     }
 
-    public CompoundExpression(final Sequence<Expression> expressions, String separator) {
+    public CompoundExpression(final Sequence<? extends Expression> expressions, String separator) {
         this(expressions, "", separator, "");
     }
 
-    public CompoundExpression(final Sequence<Expression> expressions, final String start, final String separator, final String end) {
-        this.expressions = expressions;
+    public CompoundExpression(final Sequence<? extends Expression> expressions, final String start, final String separator, final String end) {
+        this.expressions = expressions.unsafeCast();
         this.start = start;
         this.separator = separator;
         this.end = end;
