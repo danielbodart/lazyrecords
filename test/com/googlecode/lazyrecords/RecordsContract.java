@@ -506,4 +506,12 @@ public abstract class RecordsContract<T extends Records> {
     public void supportsFind() throws Exception {
         assertThat(records.get(people).find(where(firstName, is("dan"))).isEmpty(), CoreMatchers.is(false));
     }
+ 
+    // @Test		       
+    // public void supportsConcatenation() throws Exception {
+    //     Keyword<String> fullName = concat(firstName, lastName);
+    //     assertThat(records.get(people).sortBy(age).map(fullName).head(), CoreMatchers.is("danbodart"));
+    //     assertThat(records.get(people).sortBy(age).map(select(fullName)).head().get(fullName), CoreMatchers.is("danbodart"));
+    //     assertThat(records.get(people).filt``er(where(fullName, is("danbodart"))).map(age).head(), CoreMatchers.is(9));
+    // }
 }

@@ -1,13 +1,14 @@
 package com.googlecode.lazyrecords;
 
+import com.googlecode.totallylazy.Callable2;
 import com.googlecode.totallylazy.Function1;
+import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Sequence;
 
 import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Strings.equalIgnoringCase;
 
 public class Keywords {
-
     public static final Keyword<Boolean> UNIQUE = Keywords.keyword("unique", Boolean.class);
     public static final Keyword<Boolean> INDEXED = Keywords.keyword("indexed", Boolean.class);
 
@@ -39,7 +40,7 @@ public class Keywords {
         return results.flatMap(Record.functions.keywords()).unique().realise();
     }
 
-	/**
+    /**
 	 * Moved to Keyword.functions.name()
 	 */
 	@Deprecated

@@ -39,6 +39,14 @@ public class Grammar {
         return Keywords.keyword(keyword);
     }
 
+    public static Keyword<String> concat(Keyword<String> first, Keyword<String> second) {
+        return concat(Sequences.sequence(first, second));
+    }
+
+    public static Keyword<String> concat(Sequence<Keyword<String>> keywords) {
+        return Keyword.constructors.compose(Strings.join, keywords);
+    }
+
     public static Record record() {
         return Record.constructors.record();
     }

@@ -1,15 +1,12 @@
 package com.googlecode.lazyrecords;
 
-import com.googlecode.totallylazy.Callables;
-import com.googlecode.totallylazy.Option;
-import com.googlecode.totallylazy.Pair;
-import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.*;
 import com.googlecode.totallylazy.collections.PersistentMap;
 import com.googlecode.totallylazy.collections.ListMap;
+import com.googlecode.totallylazy.predicates.LogicalPredicate;
 
 import static com.googlecode.totallylazy.Callables.second;
 import static com.googlecode.totallylazy.Option.option;
-import static com.googlecode.totallylazy.Predicates.in;
 import static com.googlecode.totallylazy.Predicates.is;
 import static com.googlecode.totallylazy.Predicates.where;
 
@@ -48,8 +45,11 @@ public class PersistentRecord implements Record {
         return fields().map(Callables.<Keyword<?>>first());
     }
 
-    public Sequence<Object> getValuesFor(Sequence<Keyword<?>> keywords) {
-        return fields().filter(where(Callables.<Keyword<?>>first(), is(in(keywords)))).map(second());
+    public <T> Sequence<T> valuesFor(Sequence<? extends Keyword<? extends T>> keywords) {
+        return fields().
+                filter(where(Callables.<Keyword<?>>first(), Predicates.<Keyword<?>>in(keywords))).
+                map(second()).
+                unsafeCast();
     }
 
     @Override

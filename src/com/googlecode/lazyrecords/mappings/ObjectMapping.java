@@ -12,9 +12,7 @@ public class ObjectMapping<T> implements StringMapping<T> {
     }
 
     public T toValue(String value) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        if(aClass.equals(Object.class)){
-            return cast(value);
-        }
+        if(aClass.isAssignableFrom(value.getClass())) return aClass.cast(value);
         return aClass.getConstructor(String.class).newInstance(value);
     }
 

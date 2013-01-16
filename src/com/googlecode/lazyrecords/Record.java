@@ -32,7 +32,7 @@ public interface Record {
 
     Sequence<Keyword<?>> keywords();
 
-    Sequence<Object> getValuesFor(Sequence<Keyword<?>> keywords);
+    <T> Sequence<T> valuesFor(Sequence<? extends Keyword<? extends T>> keywords);
 
     public static final class constructors {
         private constructors() {
@@ -164,10 +164,10 @@ public interface Record {
             };
         }
 
-        public static FromRecord<Sequence<Object>> getValuesFor(final Sequence<Keyword<?>> fields) {
-            return new FromRecord<Sequence<Object>>() {
-                public Sequence<Object> call(Record record) throws Exception {
-                    return record.getValuesFor(fields);
+        public static <T> FromRecord<Sequence<T>> getValuesFor(final Sequence<? extends Keyword<? extends T>> fields) {
+            return new FromRecord<Sequence<T>>() {
+                public Sequence<T> call(Record record) throws Exception {
+                    return record.valuesFor(fields);
                 }
             };
         }

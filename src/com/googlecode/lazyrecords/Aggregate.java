@@ -7,7 +7,7 @@ import com.googlecode.totallylazy.numbers.Numbers;
 
 import static java.lang.String.format;
 
-public class Aggregate<T, R> extends AbstractKeyword<R> implements Reducer<T, R> {
+public class Aggregate<T, R> extends AbstractKeyword<R> implements Reducer<T, R>, Aliased {
     private final Reducer<T, R> reducer;
     private final Keyword<T> source;
     private final String name;

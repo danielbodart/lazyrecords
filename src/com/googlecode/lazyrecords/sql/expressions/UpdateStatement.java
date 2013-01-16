@@ -2,8 +2,6 @@ package com.googlecode.lazyrecords.sql.expressions;
 
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.totallylazy.Function1;
-import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Strings;
@@ -28,7 +26,7 @@ public class UpdateStatement extends CompoundExpression {
 
     public static CompoundExpression setClause(Definition definition, Record record) {
         Sequence<Keyword<?>> updatingKeywords = Record.methods.filter(record, definition.fields()).keywords();
-        return SET.join(expression(updatingKeywords.map(name()).map(Strings.format("%s=?")).toString(), record.getValuesFor(updatingKeywords)));
+        return SET.join(expression(updatingKeywords.map(name()).map(Strings.format("%s=?")).toString(), record.valuesFor(updatingKeywords)));
     }
 
     public static Expression updateStatement(Definition definition, Predicate<? super Record> predicate, Record record) {

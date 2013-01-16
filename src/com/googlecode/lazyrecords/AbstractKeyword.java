@@ -39,5 +39,4 @@ public abstract class AbstractKeyword<T> implements Keyword<T> {
     public <M> Keyword<T> setMetadata(Keyword<M> name, M value) {
         return metadata(metadata().set(name, value));
     }
-
 }
