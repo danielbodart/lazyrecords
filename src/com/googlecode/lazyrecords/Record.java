@@ -4,6 +4,7 @@ import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
+import com.googlecode.totallylazy.Mapper;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicate;
@@ -204,5 +205,14 @@ public interface Record {
 				}
 			};
 		}
+
+        public static <T> Mapper<T, Record> set(final Record record, final Keyword<T> keyword) {
+            return new Mapper<T, Record>() {
+                @Override
+                public Record call(T value) throws Exception {
+                    return record.set(keyword, value);
+                }
+            };
+        }
 	}
 }
