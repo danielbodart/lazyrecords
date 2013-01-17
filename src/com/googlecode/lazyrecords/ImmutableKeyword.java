@@ -34,7 +34,7 @@ public class ImmutableKeyword<T> extends AbstractKeyword<T> {
     }
 
     public AliasedKeyword<T> of(Named named) {
-        return setMetadata(Keywords.DEFINED, named.name()).as(format("%s_%s", named.name(), name));
+        return setMetadata(Keywords.QUALIFIED, named.name()).as(format("%s_%s", named.name(), name));
     }
 
     public String name() {

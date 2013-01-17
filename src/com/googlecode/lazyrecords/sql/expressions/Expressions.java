@@ -1,13 +1,16 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
 import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.Named;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Function1;
+import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.regex.Regex;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
+import static java.lang.String.format;
 
 public class Expressions {
     public static Function1<? super Expression, Iterable<Object>> parameters() {
@@ -27,7 +30,7 @@ public class Expressions {
     }
 
     public static TextOnlyExpression textOnly(String expression, Object... args) {
-        return textOnly(String.format(expression, args));
+        return textOnly(format(expression, args));
     }
 
     public static TextOnlyExpression textOnly(Object expression) {
@@ -35,7 +38,16 @@ public class Expressions {
     }
 
     public static TextOnlyExpression name(Named named) {
-        return textOnly(quote(named.name()));
+        Option<String> qualified = metadata(named, Keywords.QUALIFIED);
+        if(qualified.isEmpty()) return textOnly(quote(named.name()));
+        return textOnly(format("%s.%s", quote(qualified.get()), quote(named.name())));
+    }
+
+    private static <T> Option<T> metadata(Named named, Keyword<T> keyword) {
+        if(named instanceof Keyword) {
+            return ((Keyword) named).metadata().getOption(keyword);
+        }
+        return Option.none();
     }
 
     public static Function1<Named, TextOnlyExpression> name() {
@@ -96,6 +108,6 @@ public class Expressions {
     }
 
     public static String toString(Expression expression, Callable1<Object, Object> valueConverter) {
-        return String.format(expression.text().replace("%", "%%").replace("?", "'%s'"), expression.parameters().map(valueConverter).toArray(Object.class));
+        return format(expression.text().replace("%", "%%").replace("?", "'%s'"), expression.parameters().map(valueConverter).toArray(Object.class));
     }
 }

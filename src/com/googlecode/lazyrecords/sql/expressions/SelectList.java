@@ -72,10 +72,6 @@ public class SelectList extends CompoundExpression {
         throw new UnsupportedOperationException("Unsupported combiner " + combiner);
     }
 
-    public static boolean isLongName(Keyword<?> keyword) {
-        return keyword.name().contains(".");
-    }
-
     public static Expression asClause(Keyword<?> keyword) {
         return asClause(keyword.name());
     }

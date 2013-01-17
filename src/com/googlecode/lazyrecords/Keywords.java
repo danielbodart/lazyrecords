@@ -1,8 +1,6 @@
 package com.googlecode.lazyrecords;
 
-import com.googlecode.totallylazy.Callable2;
 import com.googlecode.totallylazy.Function1;
-import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Sequence;
 
 import static com.googlecode.totallylazy.Predicates.where;
@@ -11,9 +9,9 @@ import static com.googlecode.totallylazy.Strings.equalIgnoringCase;
 public class Keywords {
     public static final Keyword<Boolean> UNIQUE = Keywords.keyword("unique", Boolean.class);
     public static final Keyword<Boolean> INDEXED = Keywords.keyword("indexed", Boolean.class);
-    public static final Keyword<String> DEFINED = Keywords.keyword("defined", String.class);
+    public static final Keyword<String> QUALIFIED = Keywords.keyword("qualified", String.class);
 
-	public static Keyword<Object> matchKeyword(String name, Sequence<? extends Keyword<?>> definitions) {
+    public static Keyword<Object> matchKeyword(String name, Sequence<? extends Keyword<?>> definitions) {
         return matchKeyword(name, definitions, Keyword.functions.name());
     }
 
@@ -42,26 +40,26 @@ public class Keywords {
     }
 
     /**
-	 * Moved to Keyword.functions.name()
-	 */
-	@Deprecated
-	public static Function1<Keyword<?>, String> name() {
-		return Keyword.functions.name();
-	}
+     * Moved to Keyword.functions.name()
+     */
+    @Deprecated
+    public static Function1<Keyword<?>, String> name() {
+        return Keyword.functions.name();
+    }
 
-	/**
-	 * Moved to Keyword.functions.metadata()
-	 */
-	@Deprecated
-	public static <T> Function1<Keyword<?>, T> metadata(final Keyword<T> metadataKey) {
-		return Keyword.functions.metadata(metadataKey);
-	}
+    /**
+     * Moved to Keyword.functions.metadata()
+     */
+    @Deprecated
+    public static <T> Function1<Keyword<?>, T> metadata(final Keyword<T> metadataKey) {
+        return Keyword.functions.metadata(metadataKey);
+    }
 
-	/**
-	 * Moved to Record.functions.keywords()
-	 */
-	@Deprecated
-	public static Function1<Record, Sequence<Keyword<?>>> keywords() {
-		return Record.functions.keywords();
-	}
+    /**
+     * Moved to Record.functions.keywords()
+     */
+    @Deprecated
+    public static Function1<Record, Sequence<Keyword<?>>> keywords() {
+        return Record.functions.keywords();
+    }
 }
