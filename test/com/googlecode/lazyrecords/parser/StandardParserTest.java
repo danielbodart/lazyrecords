@@ -33,7 +33,7 @@ public class StandardParserTest {
     private final Keyword<String> id = keyword("id", String.class);
 
     @Test
-    public void producesTheSaneResultAsLucne() throws Exception {
+    public void producesTheSameResultAsLucne() throws Exception {
         QueryParser parser = new QueryParser(LuceneRecordsTest.VERSION, null, LuceneRecordsTest.ANALYZER);
         Predicate<Record> predicates = new StandardParser().parse("type:people OR (firstName:da* AND lastName:bod)", Sequences.<Keyword<?>>empty());
         Query query = new Lucene(new StringMappings()).query(predicates);
