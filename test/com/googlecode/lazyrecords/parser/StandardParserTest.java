@@ -3,12 +3,15 @@ package com.googlecode.lazyrecords.parser;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.lucene.Lucene;
+import com.googlecode.lazyrecords.lucene.LuceneRecordsTest;
 import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.lazyrecords.sql.expressions.WhereClause;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
+import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.search.Query;
 import org.junit.Test;
 import org.junit.internal.runners.statements.ExpectException;
 import org.junit.rules.ExpectedException;
@@ -23,6 +26,7 @@ import static com.googlecode.totallylazy.time.Dates.date;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertEquals;
 
 public class StandardParserTest {
 
@@ -32,7 +36,19 @@ public class StandardParserTest {
     private final Keyword<String> id = keyword("id", String.class);
 
     @Test
-    public void shouldBeAbletoNestBrackets() throws Exception {
+    public void producesTheSaneResultAsLucne() throws Exception {
+        QueryParser parser = new QueryParser(LuceneRecordsTest.VERSION, null, LuceneRecordsTest.ANALYZER);
+        Predicate<Record> predicates = new StandardParser().parse("type:people OR (firstName:da* AND lastName:bod)", Sequences.<Keyword<?>>empty());
+        Query query = new Lucene(new StringMappings()).query(predicates);
+        Query plus = parser.parse("type:people (+firstName:da* +lastName:bod)");
+        Query and = parser.parse("type:people OR (firstName:da* AND lastName:bod)");
+        assertEquals(plus, and);
+        assertEquals(query, and);
+    }
+
+
+    @Test
+    public void shouldBeAbleToNestBrackets() throws Exception {
         Predicate<Record> predicate = predicateParser.parse("id:\"X\" AND (name:\"dan\" AND age:\"old\" OR (name:\"bob\" AND age:\"young\"))", sequence(name, age));
 
         assertThat(predicate.matches(Record.constructors.record(name, "bob", age, "young")), is(false));

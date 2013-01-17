@@ -48,11 +48,6 @@ public class SimpleDBRecordsTest extends SchemaBasedRecordContract<SimpleDBRecor
 	public void supportsSortingByMultipleKeywords() throws Exception {
 	}
 
-	@Override
-    @Ignore("Not Supported by AWS")
-    public void supportsAliasingAKeyword() throws Exception {
-    }
-
     @Test
     public void canAddMoreThat25RecordsAtATimeAndReceiveMoreThanAHundred() throws Exception {
         assertThat(records.get(books).size(), is(3));

@@ -11,6 +11,7 @@ import static com.googlecode.totallylazy.Strings.equalIgnoringCase;
 public class Keywords {
     public static final Keyword<Boolean> UNIQUE = Keywords.keyword("unique", Boolean.class);
     public static final Keyword<Boolean> INDEXED = Keywords.keyword("indexed", Boolean.class);
+    public static final Keyword<String> DEFINED = Keywords.keyword("defined", String.class);
 
 	public static Keyword<Object> matchKeyword(String name, Sequence<? extends Keyword<?>> definitions) {
         return matchKeyword(name, definitions, Keyword.functions.name());
