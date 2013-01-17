@@ -1,6 +1,7 @@
 package com.googlecode.lazyrecords;
 
 import static com.googlecode.totallylazy.Unchecked.cast;
+import static java.lang.String.format;
 
 public class ImmutableKeyword<T> extends AbstractKeyword<T> {
     private final String name;
@@ -28,6 +29,14 @@ public class ImmutableKeyword<T> extends AbstractKeyword<T> {
         return new AliasedKeyword<T>(this, keyword.name());
     }
 
+    public AliasedKeyword<T> of(String named) {
+        return of(Named.constructors.named(named));
+    }
+
+    public AliasedKeyword<T> of(Named named) {
+        return setMetadata(Keywords.DEFINED, named.name()).as(format("%s_%s", named.name(), name));
+    }
+
     public String name() {
         return name;
     }
@@ -40,4 +49,10 @@ public class ImmutableKeyword<T> extends AbstractKeyword<T> {
     public ImmutableKeyword<T> metadata(Record metadata) {
         return new ImmutableKeyword<T>(name, aClass, metadata);
     }
+
+    @Override
+    public <M> ImmutableKeyword<T> setMetadata(Keyword<M> name, M value) {
+        return metadata(metadata().set(name, value));
+    }
+
 }

@@ -83,25 +83,4 @@ public class SelectList extends CompoundExpression {
     public static AbstractExpression asClause(String name) {
         return textOnly("as " + name);
     }
-
-    public static Keyword<?> shortName(Keyword<?> keyword) {
-        return Keywords.keyword(shortName(keyword.name()), keyword.forClass());
-    }
-
-    public static String shortName(String value) {
-        String[] parts = value.split("\\.");
-        return parts[parts.length - 1];
-    }
-
-    public static Function1<Keyword<?>, String> shortName() {
-        return new Function1<Keyword<?>, String>() {
-            @Override
-            public String call(Keyword<?> keyword) throws Exception {
-                if (isLongName(keyword)) {
-                    return shortName(keyword).name();
-                }
-                return keyword.name();
-            }
-        };
-    }
 }

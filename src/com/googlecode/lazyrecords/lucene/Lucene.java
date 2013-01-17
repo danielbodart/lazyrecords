@@ -111,7 +111,7 @@ public class Lucene {
     }
 
     private Query equalTo(Keyword<?> keyword, Object value) {
-        return newRange(keyword, value, value, true, true);
+        return new TermQuery(new Term(keyword.name(), mappings.toString(keyword.forClass(), value)));
     }
 
     private Query greaterThan(Keyword<?> keyword, Object value) {

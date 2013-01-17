@@ -39,4 +39,13 @@ public class LucenePartitionedRecordsTest extends RecordsContract<LucenePartitio
     public void supportsConcatenationDuringFiltering() throws Exception {
     }
 
+    @Override
+    @Ignore
+    public void supportsAliasingAKeywordDuringFilter() throws Exception {
+    }
+
+    @Override
+    @Ignore
+    public void canFullyQualifyAKeywordDuringFiltering() throws Exception {
+    }
 }

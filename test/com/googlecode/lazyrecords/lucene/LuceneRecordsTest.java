@@ -2,6 +2,10 @@ package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.lazyrecords.Logger;
 import com.googlecode.lazyrecords.MemoryLogger;
+import com.googlecode.lazyrecords.mappings.StringMappings;
+import com.googlecode.lazyrecords.parser.StandardParser;
+import com.googlecode.totallylazy.Predicate;
+import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
 import com.googlecode.lazyrecords.RecordsContract;
@@ -12,6 +16,7 @@ import com.googlecode.totallylazy.matchers.Matchers;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.search.Query;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.Version;
 import org.junit.After;
@@ -25,6 +30,7 @@ import java.util.Map;
 import static com.googlecode.totallylazy.Files.temporaryDirectory;
 import static com.googlecode.totallylazy.matchers.IterableMatcher.hasExactly;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
     public static final Version VERSION = Version.LUCENE_33;
@@ -79,5 +85,15 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
     @Override
     @Ignore
     public void supportsConcatenationDuringFiltering() throws Exception {
+    }
+
+    @Override
+    @Ignore
+    public void supportsAliasingAKeywordDuringFilter() throws Exception {
+    }
+
+    @Override
+    @Ignore
+    public void canFullyQualifyAKeywordDuringFiltering() throws Exception {
     }
 }

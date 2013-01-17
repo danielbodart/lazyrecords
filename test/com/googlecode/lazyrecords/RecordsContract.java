@@ -5,10 +5,7 @@ import com.googlecode.totallylazy.matchers.IterableMatcher;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
@@ -301,12 +298,19 @@ public abstract class RecordsContract<T extends Records> {
 	}
 
 	@Test
-	public void supportsAliasingAKeyword() throws Exception {
+	public void supportsAliasingAKeywordDuringSelection() throws Exception {
 		Keyword<String> first = keyword("first", String.class);
 		Record record = records.get(people).filter(where(lastName, is("bodart"))).map(select(firstName.as(first))).head();
 		assertThat(record.get(first), Matchers.is("dan"));
 		Keyword<String> result = Unchecked.cast(record.keywords().head());
 		assertThat(result, Matchers.is(first));
+	}
+
+	@Test
+	public void supportsAliasingAKeywordDuringFilter() throws Exception {
+		Keyword<String> first = keyword("first", String.class);
+        String last = records.get(people).filter(where(firstName.as(first), is("dan"))).map(lastName).head();
+        assertThat(last, Matchers.is("bodart"));
 	}
 
 	@Test
@@ -518,5 +522,17 @@ public abstract class RecordsContract<T extends Records> {
     public void supportsConcatenationDuringFiltering() throws Exception {
          Keyword<String> fullName = concat(firstName, lastName);
          assertThat(records.get(people).filter(where(fullName, is("danbodart"))).map(age).head(), CoreMatchers.is(9));
+    }
+
+    @Test
+    public void canFullyQualifyAKeywordDuringSelection() throws Exception {
+        AliasedKeyword<String> fullyQualified = firstName.of(people);
+        assertThat(records.get(people).filter(where(age, is(9))).map(select(fullyQualified)).head().get(fullyQualified), CoreMatchers.is("dan"));
+    }
+
+    @Test
+    public void canFullyQualifyAKeywordDuringFiltering() throws Exception {
+        AliasedKeyword<String> fullyQualified = firstName.of(people);
+        assertThat(records.get(people).filter(where(fullyQualified, is("dan"))).map(age).head(), CoreMatchers.is(9));
     }
 }

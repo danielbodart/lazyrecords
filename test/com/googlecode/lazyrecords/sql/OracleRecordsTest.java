@@ -59,7 +59,6 @@ public class OracleRecordsTest extends RecordsContract<Records> {
         return new SchemaGeneratingRecords(sqlRecords, sqlSchema);
     }
 
-
 	@Override
 	@Ignore("Waiting for Dan to test against Oracle")
 	public void supportsBigDecimal() throws Exception {
@@ -72,10 +71,9 @@ public class OracleRecordsTest extends RecordsContract<Records> {
         } catch (Exception ignore) {
         }
         sqlRecords.update(textOnly("create sequence foo"));
-        Keyword<Integer> nextVal = keyword("foo.nextval", Integer.class);
+        Keyword<Integer> nextVal = keyword("nextval", Integer.class).of("foo");
         Definition definition = definition("dual", nextVal);
         Integer integer = records.get(definition).head().get(nextVal);
         assertThat(integer, is(1));
-
     }
 }
