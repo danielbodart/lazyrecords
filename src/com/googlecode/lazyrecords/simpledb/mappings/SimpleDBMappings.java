@@ -4,7 +4,7 @@ import com.amazonaws.services.simpledb.model.Attribute;
 import com.amazonaws.services.simpledb.model.Item;
 import com.amazonaws.services.simpledb.model.ReplaceableAttribute;
 import com.amazonaws.services.simpledb.model.ReplaceableItem;
-import com.googlecode.lazyrecords.FromRecord;
+import com.googlecode.lazyrecords.RecordTo;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.Record;
@@ -57,8 +57,8 @@ public class SimpleDBMappings {
         };
     }
 
-    public FromRecord<ReplaceableItem> toReplaceableItem() {
-        return new FromRecord<ReplaceableItem>() {
+    public RecordTo<ReplaceableItem> toReplaceableItem() {
+        return new RecordTo<ReplaceableItem>() {
             public ReplaceableItem call(Record record) throws Exception {
                 return new ReplaceableItem(UUID.randomUUID().toString(), record.fields().
                         filter(where(second(Object.class), is(notNullValue()))).

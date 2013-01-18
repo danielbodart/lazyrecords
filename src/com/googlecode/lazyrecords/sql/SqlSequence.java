@@ -46,7 +46,7 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
     }
 
     private <S> SqlSequence<S> build(final Keyword<S> keyword) {
-        return new SqlSequence<S>(sqlRecords, select.select(keyword), logger, new FromRecord<S>() {
+        return new SqlSequence<S>(sqlRecords, select.select(keyword), logger, new RecordTo<S>() {
             public S call(Record record) throws Exception {
                 return record.get(keyword);
             }

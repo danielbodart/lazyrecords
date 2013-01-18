@@ -29,8 +29,8 @@ public class CsvWriter {
         };
     }
 
-    private static FromRecord<String> rowToString(final Sequence<Keyword<?>> fields) {
-        return new FromRecord<String>() {
+    private static RecordTo<String> rowToString(final Sequence<Keyword<?>> fields) {
+        return new RecordTo<String>() {
             @Override
             public String call(final Record record) throws Exception {
                 return fields.map(fieldToString(record)).map(escapeSpecialCharacters()).toString(FIELD_SEPARATOR);

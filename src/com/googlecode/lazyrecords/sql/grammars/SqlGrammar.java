@@ -1,7 +1,7 @@
 package com.googlecode.lazyrecords.sql.grammars;
 
 import com.googlecode.lazyrecords.Definition;
-import com.googlecode.lazyrecords.FromRecord;
+import com.googlecode.lazyrecords.RecordTo;
 import com.googlecode.lazyrecords.Join;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
@@ -25,8 +25,8 @@ public interface SqlGrammar {
     Expression dropTable(Definition definition);
 
     class functions {
-        public static FromRecord<Expression> insertStatement(final SqlGrammar grammar, final Definition definition) {
-            return new FromRecord<Expression>() {
+        public static RecordTo<Expression> insertStatement(final SqlGrammar grammar, final Definition definition) {
+            return new RecordTo<Expression>() {
                 public Expression call(Record record) throws Exception {
                     return grammar.insertStatement(definition, record);
                 }
