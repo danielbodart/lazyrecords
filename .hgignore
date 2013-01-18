@@ -10,6 +10,7 @@ build/artifacts
 lib/build
 lib/runtime
 lib/optional
+lib/jcompilo.jar
 test/com/googlecode/totallylazy/records/simpledb/AwsCredentials.properties
 test/com/googlecode/lazyrecords/sql/oracle.properties
 test/com/googlecode/lazyrecords/sql/mysql.properties
