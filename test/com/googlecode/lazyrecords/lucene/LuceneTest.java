@@ -76,7 +76,6 @@ public class LuceneTest {
     }
 
     @Test
-    @Ignore // FIX ME
     public void shouldSeeRecord_with_XFalseYNullZNull() throws Exception {
         LuceneRecords records = createRecords();
         records.add(DEFINITION, Record.constructors.record(X, "false"));
@@ -104,7 +103,8 @@ public class LuceneTest {
     public void shouldSeeRecord_with_HandcraftedHQL() throws Exception {
         LuceneRecords records = createRecords();
         records.add(DEFINITION, Record.constructors.record(X, "false"));
-        String queryString = "xxx:[true TO true] (xxx:[false TO false] -yyy:[* TO *] AND -zzz:[* TO *])";
+        String queryString =
+                " ( ( *:* -yyy:[* TO *] ) AND ( *:* -zzz:[* TO *] ) ) OR xxx:true";
         System.out.println(queryString);
         Query parsedQuery = new QueryParser(Version.LUCENE_36, "default field for query term", new StandardAnalyzer(Version.LUCENE_36)).parse(queryString);
         Sequence<Record> otherResults = records.query(parsedQuery, DEFINITION.fields());

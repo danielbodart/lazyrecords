@@ -98,7 +98,7 @@ public class Lucene {
     public Query query(Keyword<?> keyword, StartsWithPredicate predicate) { return new PrefixQuery(new Term(keyword.toString(), predicate.value())); }
     public Query query(Keyword<?> keyword, ContainsPredicate predicate) { return new WildcardQuery(new Term(keyword.toString(), "*" + predicate.value() + "*")); }
     public Query query(Keyword<?> keyword, EndsWithPredicate predicate) { return new WildcardQuery(new Term(keyword.toString(), "*" + predicate.value())); }
-    public Query query(Keyword<?> keyword, NullPredicate<?> predicate) { return not(notNull(keyword)); }
+    public Query query(Keyword<?> keyword, NullPredicate<?> predicate) { return notNull(keyword); }
 
     private Query newRange(Keyword<?> keyword, Object lower, Object upper, boolean minInclusive, boolean maxInclusive) {
         return new TermRangeQuery(keyword.name(), lower == null ? null : mappings.toString(keyword.forClass(), lower), upper == null ? null : mappings.toString(keyword.forClass(), upper), minInclusive, maxInclusive);
@@ -135,7 +135,17 @@ public class Lucene {
     }
 
     private Query notNull(Keyword<?> keyword) {
-        return newRange(keyword, null, null, true, true);
+        Query range = newRange(keyword, null, null, true, true);
+        
+        Query matchAllDocsQuery = new MatchAllDocsQuery();
+        
+        BooleanQuery booleanQuery = new BooleanQuery();
+        booleanQuery.add(matchAllDocsQuery, BooleanClause.Occur.SHOULD);
+        booleanQuery.add(range, MUST_NOT);
+
+        return booleanQuery;
+        
+        //return sequence(matchAllDocsQuery).fold(range, add(BooleanClause.Occur.SHOULD));
     }
 
     private Function1<Object, Query> asQuery(final Keyword<?> keyword) {
