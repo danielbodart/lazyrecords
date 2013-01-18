@@ -155,16 +155,6 @@ public class Lucene {
                 .fold(new BooleanQuery(), booleanAdd);
     }
 
-    private Callable1<BooleanQuery, BooleanQuery> createMapper(final Query query, final Occur occur) {
-        return new Callable1<BooleanQuery, BooleanQuery>() {
-            @Override
-            public BooleanQuery call(BooleanQuery input) throws Exception {
-                input.add(query, occur);
-                return input;
-            }
-        };
-    }
-
     private Function1<Object, Query> asQuery(final Keyword<?> keyword) {
         return new Function1<Object, Query>() {
             public Query call(Object o) throws Exception {
