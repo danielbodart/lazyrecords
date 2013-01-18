@@ -1,7 +1,7 @@
 package com.googlecode.lazyrecords.lucene.mappings;
 
 import com.googlecode.lazyrecords.Definition;
-import com.googlecode.lazyrecords.FromRecord;
+import com.googlecode.lazyrecords.RecordTo;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.Record;
@@ -77,8 +77,8 @@ public class LuceneMappings {
         };
     }
 
-    public FromRecord<Document> asDocument(final Definition definition) {
-        return new FromRecord<Document>() {
+    public RecordTo<Document> asDocument(final Definition definition) {
+        return new RecordTo<Document>() {
             public Document call(Record record) throws Exception {
                 return sortFields(definition, record).fields().
                         add(Pair.<Keyword<?>, Object>pair(Lucene.RECORD_KEY, definition)).
