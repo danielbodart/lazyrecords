@@ -1,6 +1,8 @@
 package com.googlecode.lazyrecords.sql;
 
 import com.googlecode.lazyrecords.*;
+import com.googlecode.lazyrecords.sql.expressions.CompoundExpression;
+import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
@@ -66,14 +68,16 @@ public class OracleRecordsTest extends RecordsContract<Records> {
 
 	@Test
     public void supportsDBSequences() throws Exception {
+        ImmutableKeyword<Integer> nextValue = keyword("nextval", Integer.class);
+        Definition foo = Definition.constructors.definition("foo", nextValue);
+        Expression sequence = textOnly("sequence").join(textOnly(foo.name()));
         try {
-            sqlRecords.update(textOnly("drop sequence foo"));
+            sqlRecords.update(textOnly("drop").join(sequence));
         } catch (Exception ignore) {
         }
-        sqlRecords.update(textOnly("create sequence foo"));
-        Keyword<Integer> nextVal = keyword("nextval", Integer.class).of("foo");
-        Definition definition = definition("dual", nextVal);
-        Integer integer = records.get(definition).head().get(nextVal);
+        sqlRecords.update(textOnly("create").join(sequence));
+        Definition definition = definition("dual", nextValue.of(foo));
+        Integer integer = records.get(definition).head().get(nextValue);
         assertThat(integer, is(1));
     }
 }

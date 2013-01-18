@@ -29,12 +29,8 @@ public class ImmutableKeyword<T> extends AbstractKeyword<T> {
         return new AliasedKeyword<T>(this, keyword.name());
     }
 
-    public AliasedKeyword<T> of(String named) {
-        return of(Named.constructors.named(named));
-    }
-
-    public AliasedKeyword<T> of(Named named) {
-        return setMetadata(Keywords.QUALIFIED, named.name()).as(format("%s_%s", named.name(), name));
+    public AliasedKeyword<T> of(Definition definition) {
+        return setMetadata(Keywords.definition, definition).as(format("%s_%s", definition.name(), name));
     }
 
     public String name() {

@@ -32,7 +32,7 @@ public abstract class AbstractKeyword<T> implements Keyword<T> {
 
     @Override
     public int compareTo(Keyword<T> keyword) {
-        return name().compareTo(keyword.name());
+        return name().toLowerCase().compareTo(keyword.name().toLowerCase());
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
+import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.Named;
@@ -38,9 +39,9 @@ public class Expressions {
     }
 
     public static TextOnlyExpression name(Named named) {
-        Option<String> qualified = metadata(named, Keywords.QUALIFIED);
+        Option<Definition> qualified = metadata(named, Keywords.definition);
         if(qualified.isEmpty()) return textOnly(quote(named.name()));
-        return textOnly(format("%s.%s", quote(qualified.get()), quote(named.name())));
+        return textOnly(format("%s.%s", quote(qualified.get().name()), quote(named.name())));
     }
 
     private static <T> Option<T> metadata(Named named, Keyword<T> keyword) {
