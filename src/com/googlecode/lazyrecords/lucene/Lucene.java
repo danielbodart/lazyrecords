@@ -8,11 +8,13 @@ import com.googlecode.totallylazy.*;
 import com.googlecode.totallylazy.predicates.*;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
+import org.apache.lucene.search.BooleanClause.Occur;
 
 import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static org.apache.lucene.search.BooleanClause.Occur.MUST;
 import static org.apache.lucene.search.BooleanClause.Occur.MUST_NOT;
+import static org.apache.lucene.search.BooleanClause.Occur.SHOULD;
 
 public class Lucene {
     public static final Keyword<String> RECORD_KEY = keyword("type", String.class);
@@ -45,11 +47,21 @@ public class Lucene {
     public static Query not(Iterable<Query> queries) {
         return sequence(queries).fold(new BooleanQuery(), add(MUST_NOT));
     }
+    
+    private static Callable2<BooleanQuery, Pair<Query, Occur>, BooleanQuery> booleanAdd = new Callable2<BooleanQuery, Pair<Query, Occur>, BooleanQuery>() {
+
+        @Override
+        public BooleanQuery call(BooleanQuery booleanQuery, Pair<Query, Occur> pair)
+                throws Exception {
+            booleanQuery.add(pair.first(), pair.second());
+            return booleanQuery;
+        }
+
+    };
 
     private static Function2<? super BooleanQuery, ? super Query, BooleanQuery> add(final BooleanClause.Occur occur) {
         return new Function2<BooleanQuery, Query, BooleanQuery>() {
             public BooleanQuery call(BooleanQuery booleanQuery, Query query) throws Exception {
-                // FIX Lucene issue where it does not understand nested boolean negatives
                 if (query instanceof BooleanQuery) {
                     BooleanClause[] clauses = ((BooleanQuery) query).getClauses();
                     if (clauses.length == 1) {
@@ -135,17 +147,22 @@ public class Lucene {
     }
 
     private Query notNull(Keyword<?> keyword) {
-        Query range = newRange(keyword, null, null, true, true);
-        
+        Query range             = newRange(keyword, null, null, true, true);
         Query matchAllDocsQuery = new MatchAllDocsQuery();
-        
-        BooleanQuery booleanQuery = new BooleanQuery();
-        booleanQuery.add(matchAllDocsQuery, BooleanClause.Occur.SHOULD);
-        booleanQuery.add(range, MUST_NOT);
 
-        return booleanQuery;
-        
-        //return sequence(matchAllDocsQuery).fold(range, add(BooleanClause.Occur.SHOULD));
+        return sequence(matchAllDocsQuery, range)
+                .zip(sequence(SHOULD, MUST_NOT))
+                .fold(new BooleanQuery(), booleanAdd);
+    }
+
+    private Callable1<BooleanQuery, BooleanQuery> createMapper(final Query query, final Occur occur) {
+        return new Callable1<BooleanQuery, BooleanQuery>() {
+            @Override
+            public BooleanQuery call(BooleanQuery input) throws Exception {
+                input.add(query, occur);
+                return input;
+            }
+        };
     }
 
     private Function1<Object, Query> asQuery(final Keyword<?> keyword) {
