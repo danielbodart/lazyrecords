@@ -8,11 +8,13 @@ import com.googlecode.totallylazy.*;
 import com.googlecode.totallylazy.predicates.*;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
+import org.apache.lucene.search.BooleanClause.Occur;
 
 import static com.googlecode.lazyrecords.Keywords.keyword;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static org.apache.lucene.search.BooleanClause.Occur.MUST;
 import static org.apache.lucene.search.BooleanClause.Occur.MUST_NOT;
+import static org.apache.lucene.search.BooleanClause.Occur.SHOULD;
 
 public class Lucene {
     public static final Keyword<String> RECORD_KEY = keyword("type", String.class);
@@ -45,11 +47,21 @@ public class Lucene {
     public static Query not(Iterable<Query> queries) {
         return sequence(queries).fold(new BooleanQuery(), add(MUST_NOT));
     }
+    
+    private static Callable2<BooleanQuery, Pair<Query, Occur>, BooleanQuery> booleanAdd = new Callable2<BooleanQuery, Pair<Query, Occur>, BooleanQuery>() {
+
+        @Override
+        public BooleanQuery call(BooleanQuery booleanQuery, Pair<Query, Occur> pair)
+                throws Exception {
+            booleanQuery.add(pair.first(), pair.second());
+            return booleanQuery;
+        }
+
+    };
 
     private static Function2<? super BooleanQuery, ? super Query, BooleanQuery> add(final BooleanClause.Occur occur) {
         return new Function2<BooleanQuery, Query, BooleanQuery>() {
             public BooleanQuery call(BooleanQuery booleanQuery, Query query) throws Exception {
-                // FIX Lucene issue where it does not understand nested boolean negatives
                 if (query instanceof BooleanQuery) {
                     BooleanClause[] clauses = ((BooleanQuery) query).getClauses();
                     if (clauses.length == 1) {
@@ -98,7 +110,7 @@ public class Lucene {
     public Query query(Keyword<?> keyword, StartsWithPredicate predicate) { return new PrefixQuery(new Term(keyword.toString(), predicate.value())); }
     public Query query(Keyword<?> keyword, ContainsPredicate predicate) { return new WildcardQuery(new Term(keyword.toString(), "*" + predicate.value() + "*")); }
     public Query query(Keyword<?> keyword, EndsWithPredicate predicate) { return new WildcardQuery(new Term(keyword.toString(), "*" + predicate.value())); }
-    public Query query(Keyword<?> keyword, NullPredicate<?> predicate) { return not(notNull(keyword)); }
+    public Query query(Keyword<?> keyword, NullPredicate<?> predicate) { return notNull(keyword); }
 
     private Query newRange(Keyword<?> keyword, Object lower, Object upper, boolean minInclusive, boolean maxInclusive) {
         return new TermRangeQuery(keyword.name(), lower == null ? null : mappings.toString(keyword.forClass(), lower), upper == null ? null : mappings.toString(keyword.forClass(), upper), minInclusive, maxInclusive);
@@ -135,7 +147,12 @@ public class Lucene {
     }
 
     private Query notNull(Keyword<?> keyword) {
-        return newRange(keyword, null, null, true, true);
+        Query range             = newRange(keyword, null, null, true, true);
+        Query matchAllDocsQuery = new MatchAllDocsQuery();
+
+        return sequence(matchAllDocsQuery, range)
+                .zip(sequence(SHOULD, MUST_NOT))
+                .fold(new BooleanQuery(), booleanAdd);
     }
 
     private Function1<Object, Query> asQuery(final Keyword<?> keyword) {
