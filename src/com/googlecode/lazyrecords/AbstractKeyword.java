@@ -9,7 +9,7 @@ public abstract class AbstractKeyword<T> implements Keyword<T> {
 
     @Override
     public boolean equals(Object other) {
-        return other instanceof Keyword && Keywords.equalto(this, (Keyword) other);
+        return other instanceof Keyword && Keyword.methods.equalTo(this, (Keyword) other);
     }
 
     @Override

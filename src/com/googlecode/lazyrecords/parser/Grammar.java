@@ -66,7 +66,7 @@ public class Grammar {
         public Predicate<Record> call(Triple<String, Void, List<Pair<String, Callable1<Object, Predicate>>>> triple) throws Exception {
             final String name = triple.first();
             final List<Pair<String, Callable1<Object, Predicate>>> values = triple.third();
-            return toPredicate(Keywords.matchKeyword(name, keywords), values);
+            return toPredicate(Keyword.methods.matchKeyword(name, keywords), values);
         }
     });
 

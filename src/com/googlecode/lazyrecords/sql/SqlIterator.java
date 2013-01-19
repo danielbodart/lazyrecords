@@ -19,7 +19,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.Map;
 
-import static com.googlecode.lazyrecords.Keywords.matchKeyword;
+import static com.googlecode.lazyrecords.Keyword.methods.matchKeyword;
 import static com.googlecode.totallylazy.Pair.pair;
 import static com.googlecode.totallylazy.callables.TimeCallable.calculateMilliseconds;
 import static com.googlecode.totallylazy.numbers.Numbers.range;

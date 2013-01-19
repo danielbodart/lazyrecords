@@ -3,21 +3,10 @@ package com.googlecode.lazyrecords;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Sequence;
 
-import static com.googlecode.totallylazy.Predicates.where;
-import static com.googlecode.totallylazy.Strings.equalIgnoringCase;
-
 public class Keywords {
     public static final Keyword<Boolean> UNIQUE = Keyword.constructors.keyword("unique", Boolean.class);
     public static final Keyword<Boolean> INDEXED = Keyword.constructors.keyword("indexed", Boolean.class);
     public static final Keyword<Definition> definition = Keyword.constructors.keyword("definition", Definition.class);
-
-    public static Keyword<Object> matchKeyword(String name, Sequence<? extends Keyword<?>> definitions) {
-        return matchKeyword(name, definitions, Keyword.functions.name());
-    }
-
-    public static Keyword<Object> matchKeyword(String shortName, Sequence<? extends Keyword<?>> definitions, Function1<Keyword<?>, String> extractor) {
-        return definitions.<Keyword<Object>>unsafeCast().find(where(extractor, equalIgnoringCase(shortName))).getOrElse(Keyword.constructors.keyword(shortName));
-    }
 
     /** @deprecated Replaced by {@link Keyword.constructors#keyword(String)}  } */
     @Deprecated
@@ -31,18 +20,28 @@ public class Keywords {
         return Keyword.constructors.keyword(value, aClass);
     }
 
-    /** @deprecated Replaced by {@link Keyword.constructors#keyword(Keyword)}  } */
+    /** @deprecated Replaced by {@link Keyword.methods#matchKeyword(String, Sequence)}  } */
     @Deprecated
-    public static <T> ImmutableKeyword<T> keyword(Keyword<? extends T> keyword) {
-        return Keyword.constructors.keyword(keyword);
+    public static Keyword<Object> matchKeyword(String name, Sequence<? extends Keyword<?>> definitions) {
+        return Keyword.methods.matchKeyword(name, definitions);
     }
 
+    /** @deprecated Replaced by {@link Keyword.methods#matchKeyword(String, Sequence, Function1)}  } */
+    @Deprecated
+    public static Keyword<Object> matchKeyword(String shortName, Sequence<? extends Keyword<?>> definitions, Function1<Keyword<?>, String> extractor) {
+        return Keyword.methods.matchKeyword(shortName, definitions, extractor);
+    }
+
+    /** @deprecated Replaced by {@link Keyword.methods#equalTo(Keyword, Keyword)}  } */
+    @Deprecated
     public static boolean equalto(Keyword<?> keyword, Keyword<?> other) {
-        return keyword.name().equalsIgnoreCase(other.name());
+        return Keyword.methods.equalTo(keyword, other);
     }
 
+    /** @deprecated Replaced by {@link Keyword.methods#keywords(Sequence)}  } */
+    @Deprecated
     public static Sequence<Keyword<?>> keywords(Sequence<Record> results) {
-        return results.flatMap(Record.functions.keywords()).unique().realise();
+        return Keyword.methods.keywords(results);
     }
 
     /** @deprecated Replaced by {@link Keyword.functions#name } */

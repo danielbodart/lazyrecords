@@ -57,7 +57,7 @@ public class LuceneMappings {
         return new Function1<Fieldable, Pair<Keyword<?>, Object>>() {
             public Pair<Keyword<?>, Object> call(Fieldable fieldable) throws Exception {
                 String name = fieldable.name();
-                Keyword<?> keyword = Keywords.matchKeyword(name, definitions);
+                Keyword<?> keyword = Keyword.methods.matchKeyword(name, definitions);
                 return Pair.<Keyword<?>, Object>pair(keyword, stringMappings.toValue(keyword.forClass(), fieldable.stringValue()));
             }
         };
@@ -71,7 +71,7 @@ public class LuceneMappings {
                 }
 
                 String name = pair.first().name();
-                Keyword<?> keyword = Keywords.matchKeyword(name, definitions);
+                Keyword<?> keyword = Keyword.methods.matchKeyword(name, definitions);
                 return new Field(name, LuceneMappings.this.stringMappings.toString(keyword.forClass(), pair.second()), Field.Store.YES, Field.Index.NOT_ANALYZED);
             }
         };

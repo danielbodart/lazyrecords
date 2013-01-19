@@ -25,9 +25,6 @@ public interface Record {
     <T> Sequence<T> valuesFor(Sequence<? extends Keyword<? extends T>> keywords);
 
     public static final class constructors {
-        private constructors() {
-        }
-
         public static Record record() {
             return new PersistentRecord();
         }
@@ -62,12 +59,10 @@ public interface Record {
     }
 
     public static final class methods {
-        private methods() {
-        }
-
-        @Deprecated // please use Keywords.matchKeyword);
+        /** @deprecated Replaced by {@link Keyword.methods#matchKeyword(String, Sequence)}  } */
+        @Deprecated
         public static Keyword<Object> getKeyword(String name, Sequence<? extends Keyword<?>> definitions) {
-            return Keywords.matchKeyword(name, definitions);
+            return Keyword.methods.matchKeyword(name, definitions);
         }
 
         public static Record filter(Record original, Keyword<?>... fields) {
@@ -101,9 +96,6 @@ public interface Record {
     }
 
     public static final class functions {
-        private functions() {
-        }
-
         public static Function2<Record, Pair<Keyword<?>, Object>, Record> updateValues() {
             return new Function2<Record, Pair<Keyword<?>, Object>, Record>() {
                 public Record call(Record record, Pair<Keyword<?>, Object> field) throws Exception {

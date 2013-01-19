@@ -51,7 +51,7 @@ public class SimpleDBMappings {
     public Function2<Record, Attribute, Record> asField(final Sequence<Keyword<?>> definitions) {
         return new Function2<Record, Attribute, Record>() {
             public Record call(Record mapRecord, Attribute attribute) throws Exception {
-                Keyword<?> keyword = Keywords.matchKeyword(attribute.getName(), definitions);
+                Keyword<?> keyword = Keyword.methods.matchKeyword(attribute.getName(), definitions);
                 return mapRecord.set(Unchecked.<Keyword<Object>>cast(keyword), stringMappings.toValue(keyword.forClass(), attribute.getValue()));
             }
         };
