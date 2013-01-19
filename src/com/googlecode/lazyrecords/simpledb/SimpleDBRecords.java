@@ -5,13 +5,7 @@ import com.amazonaws.services.simpledb.model.BatchDeleteAttributesRequest;
 import com.amazonaws.services.simpledb.model.BatchPutAttributesRequest;
 import com.amazonaws.services.simpledb.model.DeletableItem;
 import com.amazonaws.services.simpledb.model.Item;
-import com.googlecode.lazyrecords.AbstractRecords;
-import com.googlecode.lazyrecords.Definition;
-import com.googlecode.lazyrecords.IgnoreLogger;
-import com.googlecode.lazyrecords.Keywords;
-import com.googlecode.lazyrecords.Logger;
-import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.Schema;
+import com.googlecode.lazyrecords.*;
 import com.googlecode.lazyrecords.simpledb.mappings.SimpleDBMappings;
 import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
@@ -79,8 +73,8 @@ public class SimpleDBRecords extends AbstractRecords {
 
     @Override
     public Number remove(Definition definition) {
-        Record head = get(definition).map(select(Keywords.keyword("count(*)", String.class))).head();
-        Number result = Numbers.valueOf(head.get(Keywords.keyword("Count", String.class))).get();
+        Record head = get(definition).map(select(Keyword.constructors.keyword("count(*)", String.class))).head();
+        Number result = Numbers.valueOf(head.get(Keyword.constructors.keyword("Count", String.class))).get();
         schema.undefine(definition);
         schema.define(definition);
         return result;

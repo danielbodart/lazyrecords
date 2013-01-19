@@ -2,7 +2,6 @@ package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.ImmutableKeyword;
-import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.mappings.BooleanMapping;
 import com.googlecode.lazyrecords.mappings.StringMapping;
@@ -24,20 +23,20 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
 
+import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
 import static com.googlecode.totallylazy.predicates.AndPredicate.and;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 public class LuceneTest {
 
-    public static final ImmutableKeyword<String> Z = Keywords.keyword("zzz", String.class);
-    public static final ImmutableKeyword<String> Y = Keywords.keyword("yyy", String.class);
-    public static final ImmutableKeyword<String> X = Keywords.keyword("xxx", String.class);
+    public static final ImmutableKeyword<String> Z = keyword("zzz", String.class);
+    public static final ImmutableKeyword<String> Y = keyword("yyy", String.class);
+    public static final ImmutableKeyword<String> X = keyword("xxx", String.class);
     public static final Definition DEFINITION = Definition.constructors.definition("testy", X, Y, Z);
 
     private final LogicalPredicate<Record> whereXEqualsX = whereXIsTrue();
@@ -63,7 +62,7 @@ public class LuceneTest {
     }
 
     private LuceneRecords createRecords() throws IOException {
-        Directory directory   = new RAMDirectory();
+        Directory directory = new RAMDirectory();
         return new LuceneRecords(new OptimisedStorage(directory, new LucenePool(directory)));
     }
 
@@ -121,23 +120,23 @@ public class LuceneTest {
     }
 
     private Query createQueryXOr_YIsNullAndZIsNullAndNotX() {
-        Iterable<LogicalPredicate<Record>>  yAndZPredicates = Sequences.<LogicalPredicate<Record>>sequence().add(whereYEqualsY).add(whereZEqualsZ);
-        LogicalPredicate<Record>            zAndYNotX       = AndPredicate.<Record>and(yAndZPredicates).and(whereXIsFalse());
+        Iterable<LogicalPredicate<Record>> yAndZPredicates = Sequences.<LogicalPredicate<Record>>sequence().add(whereYEqualsY).add(whereZEqualsZ);
+        LogicalPredicate<Record> zAndYNotX = AndPredicate.<Record>and(yAndZPredicates).and(whereXIsFalse());
 
         Query luceneQuery = lucene.query(whereXEqualsX.or(zAndYNotX));
 
-        logHACK((BooleanQuery)luceneQuery);
+        logHACK((BooleanQuery) luceneQuery);
 
         return luceneQuery;
     }
 
     private Query createQueryXOr_YIsNullAndZIsNull() {
-        Iterable<LogicalPredicate<Record>>  yAndZPredicates = Sequences.<LogicalPredicate<Record>>sequence().add(whereYEqualsY).add(whereZEqualsZ);
-        LogicalPredicate<Record>            zAndY           = and(yAndZPredicates);
+        Iterable<LogicalPredicate<Record>> yAndZPredicates = Sequences.<LogicalPredicate<Record>>sequence().add(whereYEqualsY).add(whereZEqualsZ);
+        LogicalPredicate<Record> zAndY = and(yAndZPredicates);
 
         Query luceneQuery = lucene.query(whereXEqualsX.or(zAndY));
 
-        logHACK((BooleanQuery)luceneQuery);
+        logHACK((BooleanQuery) luceneQuery);
 
         return luceneQuery;
     }
@@ -152,7 +151,8 @@ public class LuceneTest {
     }
 
     private LogicalPredicate<Record> whereZIsNull() {
-        LogicalPredicate<String> zEqualsZ = Predicates.nullValue();;
+        LogicalPredicate<String> zEqualsZ = Predicates.nullValue();
+        ;
         Callable1<Record, String> keywordZ = Z;
         return WherePredicate.where(keywordZ, zEqualsZ);
     }

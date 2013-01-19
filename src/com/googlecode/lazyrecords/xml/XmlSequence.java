@@ -15,6 +15,8 @@ import org.w3c.dom.Node;
 
 import java.util.Iterator;
 
+import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
+
 public class XmlSequence extends Sequence<Record> {
     private final Sequence<Node> nodes;
     private final XmlMappings mappings;
@@ -46,7 +48,7 @@ public class XmlSequence extends Sequence<Record> {
                     return nodeRecord;
                 }
                 Object value = mappings.get(keyword.forClass()).from(nodes);
-                return nodeRecord.set(Keywords.keyword(keyword), value);
+                return nodeRecord.set(keyword(keyword), value);
             }
         };
     }

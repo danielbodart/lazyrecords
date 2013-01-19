@@ -28,15 +28,15 @@ public class Grammar {
     }
 
     public static ImmutableKeyword<Object> keyword(String value) {
-        return Keywords.keyword(value);
+        return Keyword.constructors.keyword(value);
     }
 
     public static <T> ImmutableKeyword<T> keyword(String value, Class<? extends T> aClass) {
-        return Keywords.keyword(value, aClass);
+        return Keyword.constructors.keyword(value, aClass);
     }
 
     public static <T> ImmutableKeyword<T> keyword(Keyword<? extends T> keyword) {
-        return Keywords.keyword(keyword);
+        return Keyword.constructors.keyword(keyword);
     }
 
     public static Keyword<String> concat(Keyword<String> first, Keyword<String> second) {

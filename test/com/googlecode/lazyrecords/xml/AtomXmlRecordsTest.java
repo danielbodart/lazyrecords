@@ -20,10 +20,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 public class AtomXmlRecordsTest {
-    private static final Keyword<Integer> id = Keywords.keyword("id", Integer.class);
-    private static final Keyword<URI> link = Keywords.keyword("link/@href", URI.class);
-    private static final Keyword<String> content = Keywords.keyword("content", String.class);
-    private static final Keyword<Date> updated = Keywords.keyword("updated", Date.class);
+    private static final Keyword<Integer> id = Keyword.constructors.keyword("id", Integer.class);
+    private static final Keyword<URI> link = Keyword.constructors.keyword("link/@href", URI.class);
+    private static final Keyword<String> content = Keyword.constructors.keyword("content", String.class);
+    private static final Keyword<Date> updated = Keyword.constructors.keyword("updated", Date.class);
     private static final Definition entries = definition("/feed/entry", id, link, content, updated);
 
     @Test

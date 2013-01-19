@@ -20,7 +20,6 @@ public class ImmutableKeyword<T> extends AbstractKeyword<T> {
         this.aClass = cast(aClass);
     }
 
-
     public AliasedKeyword<T> as(String name) {
         return new AliasedKeyword<T>(this, name);
     }

@@ -7,7 +7,7 @@ import com.googlecode.totallylazy.*;
 import java.util.Comparator;
 import java.util.concurrent.Callable;
 
-import static com.googlecode.lazyrecords.Keywords.keyword;
+import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
 import static com.googlecode.lazyrecords.sql.expressions.SetQuantifier.ALL;
 import static com.googlecode.lazyrecords.sql.expressions.SetQuantifier.DISTINCT;
 import static com.googlecode.totallylazy.Predicates.and;

@@ -1,17 +1,6 @@
 package com.googlecode.lazyrecords;
 
-import com.googlecode.totallylazy.Callable1;
-import com.googlecode.totallylazy.Callables;
-import com.googlecode.totallylazy.Function1;
-import com.googlecode.totallylazy.Function2;
-import com.googlecode.totallylazy.Mapper;
-import com.googlecode.totallylazy.Option;
-import com.googlecode.totallylazy.Pair;
-import com.googlecode.totallylazy.Predicate;
-import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Sequences;
-import com.googlecode.totallylazy.Unchecked;
-import com.googlecode.totallylazy.Reducer;
+import com.googlecode.totallylazy.*;
 
 import java.util.Map;
 
@@ -85,13 +74,13 @@ public interface Record {
             return filter(original, Sequences.sequence(fields));
         }
 
-		public static Record merge(Record first, Record second, Record... others) {
-			return merge(sequence(first, second).join(sequence(others)));
-		}
+        public static Record merge(Record first, Record second, Record... others) {
+            return merge(sequence(first, second).join(sequence(others)));
+        }
 
-		public static Record merge(Iterable<Record> records) {
-			return sequence(records).reduce(functions.merge());
-		}
+        public static Record merge(Iterable<Record> records) {
+            return sequence(records).reduce(functions.merge());
+        }
 
         public static Record filter(Record original, Sequence<Keyword<?>> fields) {
             return constructors.record(original.fields().filter(where(Callables.<Keyword<?>>first(), is(in(fields)))));
@@ -125,16 +114,16 @@ public interface Record {
 
         public static Reducer<Record, Record> merge() {
             return new Reducer<Record, Record>() {
-				@Override
-				public Record call(Record first, Record second) throws Exception {
-					return second.fields().fold(first, updateValues());
-				}
+                @Override
+                public Record call(Record first, Record second) throws Exception {
+                    return second.fields().fold(first, updateValues());
+                }
 
-				@Override
-				public Record identity() {
-					return record();
-				}
-			};
+                @Override
+                public Record identity() {
+                    return record();
+                }
+            };
         }
 
         public static Function1<Record, Record> merge(final Record other) {
@@ -198,13 +187,15 @@ public interface Record {
             };
         }
 
-		public static RecordTo<Sequence<Keyword<?>>> keywords() {
-			return new RecordTo<Sequence<Keyword<?>>>() {
-				public Sequence<Keyword<?>> call(Record record) throws Exception {
-					return record.keywords();
-				}
-			};
-		}
+        public static RecordTo<Sequence<Keyword<?>>> keywords = new RecordTo<Sequence<Keyword<?>>>() {
+            public Sequence<Keyword<?>> call(Record record) throws Exception {
+                return record.keywords();
+            }
+        };
+
+        public static RecordTo<Sequence<Keyword<?>>> keywords() {
+            return keywords;
+        }
 
         public static <T> Mapper<T, Record> set(final Record record, final Keyword<T> keyword) {
             return new Mapper<T, Record>() {
@@ -214,5 +205,5 @@ public interface Record {
                 }
             };
         }
-	}
+    }
 }

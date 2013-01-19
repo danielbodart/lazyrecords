@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.io.StringWriter;
 import java.io.Writer;
 
+import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
 import static com.googlecode.lazyrecords.Record.constructors.record;
 import static com.googlecode.totallylazy.Sequences.one;
 import static com.googlecode.totallylazy.Sequences.sequence;
@@ -19,10 +20,10 @@ public class CsvWriterTest {
     @Test
     public void shouldWorkWhenFieldsAreMissingInThenMiddle() throws Exception {
         Writer writer = new StringWriter();
-        Keyword<?> keywordA = Keywords.keyword("A", String.class);
-        Keyword<?> keywordB = Keywords.keyword("B", String.class);
-        Keyword<?> keywordC = Keywords.keyword("C", String.class);
-        Keyword<?> keywordD = Keywords.keyword("D", String.class);
+        Keyword<?> keywordA = keyword("A", String.class);
+        Keyword<?> keywordB = keyword("B", String.class);
+        Keyword<?> keywordC = keyword("C", String.class);
+        Keyword<?> keywordD = keyword("D", String.class);
         Sequence<Keyword<?>> keywords = sequence(keywordA, keywordB, keywordC, keywordD);
 
         Pair<Keyword<?>, Object> record1 = Pair.<Keyword<?>, Object>pair(keywordA, "1");
@@ -42,7 +43,7 @@ public class CsvWriterTest {
     @Test
     public void shouldQuoteFieldsContainingCommas() throws Exception {
         Writer writer = new StringWriter();
-        Keyword<?> keywordA = Keywords.keyword("A", String.class);
+        Keyword<?> keywordA = keyword("A", String.class);
 
 
         Pair<Keyword<?>, Object> record1 = Pair.<Keyword<?>, Object>pair(keywordA, "Well,hello there,sugar");

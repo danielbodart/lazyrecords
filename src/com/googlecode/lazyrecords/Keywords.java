@@ -7,28 +7,34 @@ import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Strings.equalIgnoringCase;
 
 public class Keywords {
-    public static final Keyword<Boolean> UNIQUE = Keywords.keyword("unique", Boolean.class);
-    public static final Keyword<Boolean> INDEXED = Keywords.keyword("indexed", Boolean.class);
-    public static final Keyword<Definition> definition = Keywords.keyword("definition", Definition.class);
+    public static final Keyword<Boolean> UNIQUE = Keyword.constructors.keyword("unique", Boolean.class);
+    public static final Keyword<Boolean> INDEXED = Keyword.constructors.keyword("indexed", Boolean.class);
+    public static final Keyword<Definition> definition = Keyword.constructors.keyword("definition", Definition.class);
 
     public static Keyword<Object> matchKeyword(String name, Sequence<? extends Keyword<?>> definitions) {
         return matchKeyword(name, definitions, Keyword.functions.name());
     }
 
     public static Keyword<Object> matchKeyword(String shortName, Sequence<? extends Keyword<?>> definitions, Function1<Keyword<?>, String> extractor) {
-        return definitions.<Keyword<Object>>unsafeCast().find(where(extractor, equalIgnoringCase(shortName))).getOrElse(Keywords.keyword(shortName));
+        return definitions.<Keyword<Object>>unsafeCast().find(where(extractor, equalIgnoringCase(shortName))).getOrElse(Keyword.constructors.keyword(shortName));
     }
 
+    /** @deprecated Replaced by {@link Keyword.constructors#keyword(String)}  } */
+    @Deprecated
     public static ImmutableKeyword<Object> keyword(String value) {
-        return new ImmutableKeyword<Object>(value, Object.class);
+        return Keyword.constructors.keyword(value);
     }
 
+    /** @deprecated Replaced by {@link Keyword.constructors#keyword(String, Class)}  } */
+    @Deprecated
     public static <T> ImmutableKeyword<T> keyword(String value, Class<? extends T> aClass) {
-        return new ImmutableKeyword<T>(value, aClass);
+        return Keyword.constructors.keyword(value, aClass);
     }
 
+    /** @deprecated Replaced by {@link Keyword.constructors#keyword(Keyword)}  } */
+    @Deprecated
     public static <T> ImmutableKeyword<T> keyword(Keyword<? extends T> keyword) {
-        return keyword(keyword.name(), keyword.forClass()).metadata(keyword.metadata());
+        return Keyword.constructors.keyword(keyword);
     }
 
     public static boolean equalto(Keyword<?> keyword, Keyword<?> other) {
@@ -39,27 +45,21 @@ public class Keywords {
         return results.flatMap(Record.functions.keywords()).unique().realise();
     }
 
-    /**
-     * Moved to Keyword.functions.name()
-     */
+    /** @deprecated Replaced by {@link Keyword.functions#name } */
     @Deprecated
     public static Function1<Keyword<?>, String> name() {
-        return Keyword.functions.name();
+        return Keyword.functions.name;
     }
 
-    /**
-     * Moved to Keyword.functions.metadata()
-     */
+    /** @deprecated Replaced by {@link Keyword.functions#metadata(Keyword)}  } */
     @Deprecated
     public static <T> Function1<Keyword<?>, T> metadata(final Keyword<T> metadataKey) {
         return Keyword.functions.metadata(metadataKey);
     }
 
-    /**
-     * Moved to Record.functions.keywords()
-     */
+    /** @deprecated Replaced by {@link Record.functions#keywords} */
     @Deprecated
     public static Function1<Record, Sequence<Keyword<?>>> keywords() {
-        return Record.functions.keywords();
+        return Record.functions.keywords;
     }
 }

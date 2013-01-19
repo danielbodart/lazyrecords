@@ -3,6 +3,7 @@ package com.googlecode.lazyrecords;
 import com.googlecode.totallylazy.Sequence;
 import org.junit.Test;
 
+import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
 import static com.googlecode.lazyrecords.Record.constructors.record;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -11,8 +12,8 @@ import static org.hamcrest.Matchers.is;
 public abstract class RecordContract {
     protected abstract Record createRecord();
 
-    private Keyword<String> firstName = Keywords.keyword("firstName", String.class);
-    private Keyword<Integer> lastName = Keywords.keyword("age", Integer.class);
+    private Keyword<String> firstName = keyword("firstName", String.class);
+    private Keyword<Integer> lastName = keyword("age", Integer.class);
 
     @Test
     public void supportsEquality() throws Exception {

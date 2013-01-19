@@ -6,7 +6,7 @@ import com.googlecode.totallylazy.Unchecked;
 import org.hamcrest.Matcher;
 import org.junit.Test;
 
-import static com.googlecode.lazyrecords.Keywords.keyword;
+import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
 import static com.googlecode.lazyrecords.Record.constructors.record;
 import static com.googlecode.lazyrecords.Record.functions.getFrom;
 import static com.googlecode.lazyrecords.Record.methods.filter;

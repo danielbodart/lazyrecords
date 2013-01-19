@@ -16,7 +16,7 @@ import java.sql.Connection;
 import java.util.Properties;
 
 import static com.googlecode.lazyrecords.Definition.constructors.definition;
-import static com.googlecode.lazyrecords.Keywords.keyword;
+import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
 import static com.googlecode.lazyrecords.sql.grammars.ColumnDatatypeMappings.oracle;
 import static com.googlecode.totallylazy.Closeables.safeClose;
