@@ -23,7 +23,7 @@ public class SelectBuilderTest {
     @Test
     public void ifColumnsSelectedIsEmptyUseDefinitionFields() throws Exception {
         Expression build = from(grammar, cars).select(Sequences.<Keyword<?>>empty()).build();
-        assertThat(build.text(), is("select make,model,1 from cars"));
+        assertThat(build.text(), is("select make, model, 1 from cars"));
     }
 
     @Test
@@ -35,7 +35,7 @@ public class SelectBuilderTest {
     @Test
     public void selectMultipleColumns() throws Exception {
         Expression build = from(grammar, cars).select(make, model).build();
-        assertThat(build.text(), is("select make,model from cars"));
+        assertThat(build.text(), is("select make, model from cars"));
     }
 
     @Test

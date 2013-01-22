@@ -8,7 +8,6 @@ import com.googlecode.totallylazy.*;
 import com.googlecode.totallylazy.predicates.*;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
-import org.apache.lucene.search.BooleanClause.Occur;
 
 import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
 import static com.googlecode.totallylazy.Sequences.sequence;
@@ -45,39 +44,14 @@ public class Lucene {
     }
 
     public static Query not(Iterable<Query> queries) {
-        return sequence(queries).fold(new BooleanQuery(), add(MUST_NOT));
+        BooleanQuery seed = new BooleanQuery();
+        seed.add(new MatchAllDocsQuery(), SHOULD);
+        return sequence(queries).fold(seed, add(MUST_NOT));
     }
     
-    private static Callable2<BooleanQuery, Pair<Query, Occur>, BooleanQuery> booleanAdd = new Callable2<BooleanQuery, Pair<Query, Occur>, BooleanQuery>() {
-
-        @Override
-        public BooleanQuery call(BooleanQuery booleanQuery, Pair<Query, Occur> pair)
-                throws Exception {
-            booleanQuery.add(pair.first(), pair.second());
-            return booleanQuery;
-        }
-
-    };
-
     private static Function2<? super BooleanQuery, ? super Query, BooleanQuery> add(final BooleanClause.Occur occur) {
         return new Function2<BooleanQuery, Query, BooleanQuery>() {
             public BooleanQuery call(BooleanQuery booleanQuery, Query query) throws Exception {
-                if (query instanceof BooleanQuery) {
-                    BooleanClause[] clauses = ((BooleanQuery) query).getClauses();
-                    if (clauses.length == 1) {
-                        BooleanClause clause = clauses[0];
-                        if(clause.getOccur().equals(MUST_NOT)) switch (occur) {
-                            case MUST: {
-                                booleanQuery.add(clause);
-                                return booleanQuery;
-                            }
-                            case MUST_NOT: {
-                                booleanQuery.add(clause.getQuery(), MUST);
-                                return booleanQuery;
-                            }
-                        }
-                    }
-                }
                 booleanQuery.add(query, occur);
                 return booleanQuery;
             }
@@ -110,7 +84,7 @@ public class Lucene {
     public Query query(Keyword<?> keyword, StartsWithPredicate predicate) { return new PrefixQuery(new Term(keyword.toString(), predicate.value())); }
     public Query query(Keyword<?> keyword, ContainsPredicate predicate) { return new WildcardQuery(new Term(keyword.toString(), "*" + predicate.value() + "*")); }
     public Query query(Keyword<?> keyword, EndsWithPredicate predicate) { return new WildcardQuery(new Term(keyword.toString(), "*" + predicate.value())); }
-    public Query query(Keyword<?> keyword, NullPredicate<?> predicate) { return notNull(keyword); }
+    public Query query(Keyword<?> keyword, NullPredicate<?> predicate) { return nullValue(keyword); }
 
     private Query newRange(Keyword<?> keyword, Object lower, Object upper, boolean minInclusive, boolean maxInclusive) {
         return new TermRangeQuery(keyword.name(), lower == null ? null : mappings.toString(keyword.forClass(), lower), upper == null ? null : mappings.toString(keyword.forClass(), upper), minInclusive, maxInclusive);
@@ -146,13 +120,8 @@ public class Lucene {
         return newRange(keyword, lower, upper, true, true);
     }
 
-    private Query notNull(Keyword<?> keyword) {
-        Query range             = newRange(keyword, null, null, true, true);
-        Query matchAllDocsQuery = new MatchAllDocsQuery();
-
-        return sequence(matchAllDocsQuery, range)
-                .zip(sequence(SHOULD, MUST_NOT))
-                .fold(new BooleanQuery(), booleanAdd);
+    private Query nullValue(Keyword<?> keyword) {
+        return not(newRange(keyword, null, null, true, true));
     }
 
     private Function1<Object, Query> asQuery(final Keyword<?> keyword) {
