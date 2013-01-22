@@ -22,7 +22,7 @@ public class SelectList extends CompoundExpression {
 
     @Override
     public String text() {
-        return expressions.map(Expressions.text()).toString();
+        return expressions.map(Expressions.text()).toString(", ");
     }
 
     public static Function1<Keyword<?>, Expression> derivedColumn() {

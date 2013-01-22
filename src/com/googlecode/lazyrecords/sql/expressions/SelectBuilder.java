@@ -78,6 +78,19 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
         return new SelectBuilder(grammar, setQuantifier, columns, table, where, comparator, joins);
     }
 
+    public SelectBuilder qualify() {
+        return new SelectBuilder(grammar, setQuantifier, select.map(qualify(table)), table, where, comparator, joins);
+    }
+
+    private static UnaryFunction<Keyword<?>> qualify(final Definition definition) {
+        return new UnaryFunction<Keyword<?>>() {
+            @Override
+            public Keyword<?> call(Keyword<?> keyword) throws Exception {
+                return keyword.setMetadata(Keywords.definition, definition);
+            }
+        };
+    }
+
     public SelectBuilder where(Predicate<? super Record> predicate) {
 		Predicate<? super Record> newWhere = combineWithWhereClause(predicate);
 		return new SelectBuilder(grammar, setQuantifier, select, table, Option.<Predicate<? super Record>>some(newWhere), comparator, joins);
@@ -142,7 +155,7 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
             public Sequence<Keyword<?>> call(Join join) throws Exception {
                 Expressible records = (Expressible) join.records();
                 SelectBuilder select = (SelectBuilder) records.express();
-                return select.select();
+                return select.qualify().select();
             }
         });
     }

@@ -215,8 +215,12 @@ public class Grammar {
         return SelectCallable.select(keywords);
     }
 
-    public static On on(Keyword<?> left, Keyword<?> right) {
+    public static <T> On<T> on(Keyword<T> left, Keyword<T> right) {
         return On.on(left, right);
+    }
+
+    public static <T> On<T> on(Keyword<T> left, Callable1<T, ? extends Predicate<T>> predicateCreator, Keyword<T> right) {
+        return On.on(left, predicateCreator, right);
     }
 
     public static Using using(Keyword<?>... keyword) {
