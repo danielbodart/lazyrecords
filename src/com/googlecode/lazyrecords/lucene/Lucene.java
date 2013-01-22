@@ -19,7 +19,7 @@ public class Lucene {
     public static final Keyword<String> RECORD_KEY = keyword("type", String.class);
     static final Sort NO_SORT = new Sort();
 
-    public static TermQuery record(Definition definition) {
+    public static Query record(Definition definition) {
         return new TermQuery(new Term(RECORD_KEY.toString(), definition.name()));
     }
 
@@ -45,7 +45,7 @@ public class Lucene {
 
     public static Query not(Iterable<Query> queries) {
         BooleanQuery seed = new BooleanQuery();
-        seed.add(new MatchAllDocsQuery(), SHOULD);
+        seed.add(new MatchAllDocsQuery(), SHOULD); // Fixes weird Lucene bugs where it does not understand negative queries
         return sequence(queries).fold(seed, add(MUST_NOT));
     }
     
