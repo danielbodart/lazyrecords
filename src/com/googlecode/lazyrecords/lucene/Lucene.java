@@ -28,7 +28,7 @@ public class Lucene {
     }
 
     public static Query and(Iterable<Query> queries) {
-        return sequence(queries).fold(new BooleanQuery(), add(MUST));
+        return booleanQuery(queries, MUST);
     }
 
     public static Query or(Query... queries) {
@@ -36,7 +36,7 @@ public class Lucene {
     }
 
     public static Query or(Iterable<Query> queries) {
-        return sequence(queries).fold(new BooleanQuery(), add(BooleanClause.Occur.SHOULD));
+        return booleanQuery(queries, SHOULD);
     }
 
     public static Query not(Query... queries) {
@@ -46,10 +46,18 @@ public class Lucene {
     public static Query not(Iterable<Query> queries) {
         BooleanQuery seed = new BooleanQuery();
         seed.add(new MatchAllDocsQuery(), SHOULD); // Fixes weird Lucene bugs where it does not understand negative queries
-        return sequence(queries).fold(seed, add(MUST_NOT));
+        return booleanQuery(queries, MUST_NOT, seed);
     }
-    
-    private static Function2<? super BooleanQuery, ? super Query, BooleanQuery> add(final BooleanClause.Occur occur) {
+
+    private static BooleanQuery booleanQuery(Iterable<Query> queries, BooleanClause.Occur occur) {
+        return sequence(queries).fold(new BooleanQuery(), add(occur));
+    }
+
+    private static BooleanQuery booleanQuery(Iterable<Query> queries, BooleanClause.Occur occur, BooleanQuery seed) {
+        return sequence(queries).fold(seed, add(occur));
+    }
+
+    private static Function2<BooleanQuery, Query, BooleanQuery> add(final BooleanClause.Occur occur) {
         return new Function2<BooleanQuery, Query, BooleanQuery>() {
             public BooleanQuery call(BooleanQuery booleanQuery, Query query) throws Exception {
                 booleanQuery.add(query, occur);
