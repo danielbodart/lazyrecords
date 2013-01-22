@@ -2,10 +2,6 @@ package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.totallylazy.Files;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.search.MatchAllDocsQuery;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.NIOFSDirectory;
 import org.apache.lucene.store.RAMDirectory;
 import org.junit.Test;
 
@@ -22,7 +18,7 @@ public class LuceneStorageTest {
         LuceneStorage source = storage();
         source.add(sequence(new Document()));
         source.flush();
-        assertThat(source.count(new MatchAllDocsQuery()), is(1));
+        assertThat(source.count(Lucene.all()), is(1));
 
         File backup = Files.temporaryFile();
         source.backup(backup);
@@ -30,13 +26,13 @@ public class LuceneStorageTest {
         LuceneStorage destination = storage();
         destination.restore(backup);
 
-        assertThat(destination.count(new MatchAllDocsQuery()), is(1));
+        assertThat(destination.count(Lucene.all()), is(1));
     }
 
     @Test
     public void canSearchAnEmptyIndex() throws Exception {
         LuceneStorage storage = storage();
-        assertThat(storage.count(new MatchAllDocsQuery()), is(0));
+        assertThat(storage.count(Lucene.all()), is(0));
     }
 
     @Test
@@ -45,9 +41,9 @@ public class LuceneStorageTest {
         storage.add(sequence(new Document()));
         storage.add(sequence(new Document()));
         storage.flush();
-        assertThat(storage.count(new MatchAllDocsQuery()), is(2));
+        assertThat(storage.count(Lucene.all()), is(2));
         storage.deleteAll();
-        assertThat(storage.count(new MatchAllDocsQuery()), is(0));
+        assertThat(storage.count(Lucene.all()), is(0));
     }
 
     private LuceneStorage storage() throws IOException {

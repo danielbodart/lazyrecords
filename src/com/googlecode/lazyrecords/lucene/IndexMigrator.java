@@ -1,7 +1,6 @@
 package com.googlecode.lazyrecords.lucene;
 
 import org.apache.lucene.document.Document;
-import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.store.NIOFSDirectory;
 
@@ -18,7 +17,7 @@ public class IndexMigrator {
         LucenePartitionedIndex partitionedIndex = LucenePartitionedIndex.partitionedIndex(newStructure);
 
         Searcher oldSeacher = oldStorage.searcher();
-        ScoreDoc[] docs = oldSeacher.search(new MatchAllDocsQuery(), Lucene.NO_SORT).scoreDocs;
+        ScoreDoc[] docs = oldSeacher.search(Lucene.all(), Lucene.NO_SORT).scoreDocs;
         for (ScoreDoc doc : docs) {
             Document document = oldSeacher.document(doc.doc);
             String type = document.get(Lucene.RECORD_KEY.name());

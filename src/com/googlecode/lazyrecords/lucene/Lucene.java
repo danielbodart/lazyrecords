@@ -45,7 +45,7 @@ public class Lucene {
 
     public static Query not(Iterable<Query> queries) {
         BooleanQuery seed = new BooleanQuery();
-        seed.add(new MatchAllDocsQuery(), SHOULD); // Fixes weird Lucene bugs where it does not understand negative queries
+        seed.add(all(), SHOULD); // Fixes weird Lucene bugs where it does not understand negative queries
         return booleanQuery(queries, MUST_NOT, seed);
     }
 
@@ -77,8 +77,8 @@ public class Lucene {
     public Query query(AndPredicate<Record> andPredicate) { return and(andPredicate.predicates().map(asQuery())); }
     public Query query(OrPredicate<Record> orPredicate) { return or(orPredicate.predicates().map(asQuery())); }
     public Query query(Not<Record> notPredicate) { return not(query(notPredicate.predicate())); }
-    public Query query(AlwaysTrue alwaysTrue) { return new MatchAllDocsQuery(); }
-    public Query query(AlwaysFalse alwaysFalse) { return not(new MatchAllDocsQuery()); }
+    public Query query(AlwaysTrue alwaysTrue) { return all(); }
+    public Query query(AlwaysFalse alwaysFalse) { return not(all()); }
 
     public Query query(Keyword<?> keyword, Predicate<?> predicate) { return new multi(){}.<Query>methodOption(keyword, predicate).getOrThrow(new UnsupportedOperationException()); }
     public Query query(Keyword<?> keyword, EqualsPredicate<?> predicate) { return equalTo(keyword, predicate.value()); }
@@ -102,6 +102,10 @@ public class Lucene {
         Keyword<?> keyword = (Keyword<?>) where.callable();
         Predicate<?> predicate = where.predicate();
         return query(keyword, predicate);
+    }
+
+    public static Query all() {
+        return new MatchAllDocsQuery();
     }
 
     private Query equalTo(Keyword<?> keyword, Object value) {
