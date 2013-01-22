@@ -1,7 +1,9 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
 import com.googlecode.lazyrecords.*;
+import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Function1;
+import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequences;
 
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.*;
@@ -29,8 +31,16 @@ public class FromClause extends CompoundExpression{
     public static Expression toSql(Join join) {
         Expressible records = (Expressible) join.records();
         SelectBuilder select = (SelectBuilder) records.express();
-        Using using = (Using) join.using();
-        return textOnly("%s %s using %s", joinExpression(join),name(select.table()), names(using.keywords()));
+        Callable1<Record,Predicate<Record>> predicateCreator = join.using();
+        if(predicateCreator instanceof Using){
+            Using using = (Using) predicateCreator;
+            return textOnly("%s %s using %s", joinExpression(join),name(select.table()), names(using.keywords()));
+        }
+        if(predicateCreator instanceof On){
+            On on = (On) predicateCreator;
+            return textOnly("%s %s on %s = %s", joinExpression(join),name(select.table()), name(on.left()), name(on.right()));
+        }
+        throw new UnsupportedOperationException(format("Unknown expression %s", predicateCreator));
     }
 
 	private static String joinExpression(Join join) {

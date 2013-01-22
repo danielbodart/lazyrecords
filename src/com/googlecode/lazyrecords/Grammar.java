@@ -215,6 +215,10 @@ public class Grammar {
         return SelectCallable.select(keywords);
     }
 
+    public static On on(Keyword<?> left, Keyword<?> right) {
+        return On.on(left, right);
+    }
+
     public static Using using(Keyword<?>... keyword) {
         return Using.using(keyword);
     }

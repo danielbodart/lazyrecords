@@ -143,18 +143,23 @@ public abstract class RecordsContract<T extends Records> {
 
 	@Test
 	public void supportsJoinOn() throws Exception {
-		assertThat(records.get(people).filter(where(age, is(lessThan(12)))).
-				flatMap(join(records.get(books), using(isbn))).
-				head().fields().size(), NumberMatcher.is(9));
+        Keyword<BigDecimal> price = keyword("price", BigDecimal.class);
+        Keyword<URI> book = keyword("book", URI.class);
+        Definition prices = definition("prices", book, price);
 
-		assertThat(records.get(people).filter(where(age, is(lessThan(12)))).
-				flatMap(join(records.get(books), using(isbn))).
-				map(select(firstName, isbn)).
-				head().fields().size(), NumberMatcher.is(2));
+        records.remove(prices);
+        records.add(prices, record(book, zenIsbn, price, new BigDecimal("4.95")));
 
-		assertThat(records.get(people).map(select(isbn, age)).filter(where(age, is(lessThan(12)))).
-				flatMap(join(records.get(books).map(select(title, isbn)), using(isbn))).
-				head().fields().size(), NumberMatcher.is(3));
+        Sequence<Record> peopleAndSalePrices = records.get(people).
+                flatMap(leftJoin(records.get(prices), on(isbn, book)));
+
+        Record dansFavouriteBook = peopleAndSalePrices.filter(where(firstName, is("dan"))).head();
+        assertThat(dansFavouriteBook.get(firstName), Matchers.is("dan"));
+        assertThat(dansFavouriteBook.get(price), matcher(between(new BigDecimal("4.95"), new BigDecimal("4.95"))));
+
+        Record mattsFavouriteBook = peopleAndSalePrices.filter(where(firstName, is("matt"))).head();
+        assertThat(mattsFavouriteBook.get(firstName), Matchers.is("matt"));
+        assertThat(mattsFavouriteBook.get(price), Matchers.is(Matchers.nullValue()));
 	}
 
 	@Test
