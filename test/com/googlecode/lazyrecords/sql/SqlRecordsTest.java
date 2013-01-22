@@ -172,25 +172,4 @@ public class SqlRecordsTest extends RecordsContract<Records> {
 		assertThat(head, Matchers.is(result.head())); // Check iterator
 		assertThat(logs, Matchers.is(logger.data())); // Check queries
 	}
-	@Test
-	public void supportsJoiningAcrossMoreThanTwoTables() {
-		Keyword<BigDecimal> salePrice = keyword("salePrice", BigDecimal.class);
-		Definition salePrices = Grammar.definition("salePrices", isbn, salePrice);
-		records.remove(salePrices);
-		records.add(salePrices, record().set(isbn, zenIsbn).set(salePrice, new BigDecimal("4.95")));
-
-		Sequence<Record> peopleAndBooksAndSalePrices = records.get(people).
-				flatMap(leftJoin(records.get(books), Grammar.using(isbn))).
-				flatMap(leftJoin(records.get(salePrices), Grammar.using(isbn)));
-
-		Record dansFavouriteBook = peopleAndBooksAndSalePrices.filter(where(firstName, Grammar.is("dan"))).head();
-		assertThat(dansFavouriteBook.get(firstName), is("dan"));
-		assertThat(dansFavouriteBook.get(title), is("Zen And The Art Of Motorcycle Maintenance"));
-		assertThat(dansFavouriteBook.get(salePrice), matcher(between(new BigDecimal("4.95"), new BigDecimal("4.95"))));
-
-		Record mattsFavouriteBook = peopleAndBooksAndSalePrices.filter(where(firstName, Grammar.is("matt"))).head();
-		assertThat(mattsFavouriteBook.get(firstName), is("matt"));
-		assertThat(mattsFavouriteBook.get(title), is("Godel, Escher, Bach: An Eternal Golden Braid"));
-		assertThat(mattsFavouriteBook.get(salePrice), is(nullValue()));
-	}
 }

@@ -24,6 +24,7 @@ import static com.googlecode.totallylazy.Streams.streams;
 import static com.googlecode.totallylazy.URLs.uri;
 import static com.googlecode.totallylazy.comparators.Comparators.comparators;
 import static com.googlecode.totallylazy.matchers.IterableMatcher.hasExactly;
+import static com.googlecode.totallylazy.matchers.Matchers.matcher;
 import static com.googlecode.totallylazy.matchers.NumberMatcher.equalTo;
 import static com.googlecode.totallylazy.time.Dates.date;
 import static java.util.UUID.randomUUID;
@@ -127,6 +128,22 @@ public abstract class RecordsContract<T extends Records> {
 	@Test
 	public void supportsJoinUsing() throws Exception {
 		assertThat(records.get(people).filter(where(age, is(lessThan(12)))).
+                flatMap(join(records.get(books), using(isbn))).
+                head().fields().size(), NumberMatcher.is(9));
+
+		assertThat(records.get(people).filter(where(age, is(lessThan(12)))).
+				flatMap(join(records.get(books), using(isbn))).
+				map(select(firstName, isbn)).
+				head().fields().size(), NumberMatcher.is(2));
+
+		assertThat(records.get(people).map(select(isbn, age)).filter(where(age, is(lessThan(12)))).
+				flatMap(join(records.get(books).map(select(title, isbn)), using(isbn))).
+				head().fields().size(), NumberMatcher.is(3));
+	}
+
+	@Test
+	public void supportsJoinOn() throws Exception {
+		assertThat(records.get(people).filter(where(age, is(lessThan(12)))).
 				flatMap(join(records.get(books), using(isbn))).
 				head().fields().size(), NumberMatcher.is(9));
 
@@ -164,7 +181,30 @@ public abstract class RecordsContract<T extends Records> {
 				head().get(firstName), Matchers.is("ray"));
 	}
 
-	@Test
+    @Test
+    public void supportsJoiningAcrossMoreThanTwoTables() {
+        Keyword<BigDecimal> salePrice = keyword("salePrice", BigDecimal.class);
+        Definition salePrices = Grammar.definition("salePrices", isbn, salePrice);
+        records.remove(salePrices);
+        records.add(salePrices, record(isbn, zenIsbn, salePrice, new BigDecimal("4.95")));
+
+        Sequence<Record> peopleAndBooksAndSalePrices = records.get(people).
+                flatMap(leftJoin(records.get(books), using(isbn))).
+                flatMap(leftJoin(records.get(salePrices), using(isbn)));
+
+        Record dansFavouriteBook = peopleAndBooksAndSalePrices.filter(where(firstName, Grammar.is("dan"))).head();
+        assertThat(dansFavouriteBook.get(firstName), Matchers.is("dan"));
+        assertThat(dansFavouriteBook.get(title), Matchers.is("Zen And The Art Of Motorcycle Maintenance"));
+        assertThat(dansFavouriteBook.get(salePrice), matcher(between(new BigDecimal("4.95"), new BigDecimal("4.95"))));
+
+        Record mattsFavouriteBook = peopleAndBooksAndSalePrices.filter(where(firstName, Grammar.is("matt"))).head();
+        assertThat(mattsFavouriteBook.get(firstName), Matchers.is("matt"));
+        assertThat(mattsFavouriteBook.get(title), Matchers.is("Godel, Escher, Bach: An Eternal Golden Braid"));
+        assertThat(mattsFavouriteBook.get(salePrice), Matchers.is(Matchers.nullValue()));
+    }
+
+
+    @Test
 	public void supportsUUID() throws Exception {
 		Record record = records.get(books).filter(where(uuid, is(zenUuid))).head();
 		assertThat(record.get(isbn), CoreMatchers.is(zenIsbn));
