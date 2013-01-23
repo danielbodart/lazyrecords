@@ -44,13 +44,13 @@ public class Expressions {
 
     public static AbstractExpression name(Named named) {
         TextOnlyExpression quoted = textOnly(quote(named.name()));
-        AbstractExpression fullyQualified = metadata(named, Keywords.definition).fold(quoted, new Function2<AbstractExpression, Definition, AbstractExpression>() {
+        AbstractExpression qualified = metadata(named, Keywords.qualifier).fold(quoted, new Function2<AbstractExpression, String, AbstractExpression>() {
             @Override
-            public AbstractExpression call(AbstractExpression expression, Definition definition) throws Exception {
-                return new CompoundExpression(sequence(textOnly(quote(definition.name())), expression), ".");
+            public AbstractExpression call(AbstractExpression expression, String qualifier) throws Exception {
+                return new CompoundExpression(sequence(textOnly(quote(qualifier)), expression), ".");
             }
         });
-        return metadata(named, Keywords.alias).fold(fullyQualified, new Function2<AbstractExpression, String, AbstractExpression>() {
+        return metadata(named, Keywords.alias).fold(qualified, new Function2<AbstractExpression, String, AbstractExpression>() {
             @Override
             public AbstractExpression call(AbstractExpression expression, String alias) throws Exception {
                 return expression.join(asClause(alias));

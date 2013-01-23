@@ -29,7 +29,7 @@ public class ImmutableKeyword<T> extends AbstractKeyword<T> {
     }
 
     public AliasedKeyword<T> of(Definition definition) {
-        return metadata(Keywords.definition, definition).as(format("%s_%s", definition.name(), name));
+        return metadata(Keywords.qualifier, definition.name()).as(format("%s_%s", definition.name(), name));
     }
 
     public String name() {

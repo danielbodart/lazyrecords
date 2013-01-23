@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.concurrent.Callable;
 
 import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
+import static com.googlecode.lazyrecords.Keyword.functions.metadata;
 import static com.googlecode.lazyrecords.sql.expressions.SetQuantifier.ALL;
 import static com.googlecode.lazyrecords.sql.expressions.SetQuantifier.DISTINCT;
 import static com.googlecode.totallylazy.Predicates.and;
@@ -75,7 +76,18 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
     }
 
     public SelectBuilder select(Sequence<Keyword<?>> columns) {
-        return new SelectBuilder(grammar, setQuantifier, columns, table, where, comparator, joins);
+        Sequence<Keyword<?>> qualifiedColumns = table.metadata(Keywords.alias).fold(columns, new Function2<Sequence<Keyword<?>>, String, Sequence<Keyword<?>>>() {
+            @Override
+            public Sequence<Keyword<?>> call(Sequence<Keyword<?>> keywords, final String alias) throws Exception {
+                return keywords.map(new UnaryFunction<Keyword<?>>() {
+                    @Override
+                    public Keyword<?> call(Keyword<?> keyword) throws Exception {
+                        return keyword.metadata(Keywords.qualifier, alias);
+                    }
+                });
+            }
+        });
+        return new SelectBuilder(grammar, setQuantifier, qualifiedColumns, table, where, comparator, joins);
     }
 
     public SelectBuilder qualify() {
@@ -98,7 +110,7 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
     }
 
     private static <T> Keyword<T> qualify(Keyword<T> keyword, Definition definition) {
-        return keyword.metadata(Keywords.definition, definition);
+        return keyword.metadata(Keywords.qualifier, definition.name());
     }
 
     public SelectBuilder where(Predicate<? super Record> predicate) {

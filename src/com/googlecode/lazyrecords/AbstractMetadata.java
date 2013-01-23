@@ -1,5 +1,7 @@
 package com.googlecode.lazyrecords;
 
+import com.googlecode.totallylazy.Option;
+
 public abstract class AbstractMetadata<Self extends Metadata<Self>> implements Metadata<Self> {
     protected final Record metadata;
 
@@ -12,8 +14,8 @@ public abstract class AbstractMetadata<Self extends Metadata<Self>> implements M
     }
 
     @Override
-    public <T> T metadata(Keyword<T> keyword) {
-        return metadata.get(keyword);
+    public <T> Option<T> metadata(Keyword<T> keyword) {
+        return metadata.getOption(keyword);
     }
 
     @Override

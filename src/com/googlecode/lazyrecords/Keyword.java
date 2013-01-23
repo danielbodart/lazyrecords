@@ -70,7 +70,7 @@ public interface Keyword<T> extends Named, Metadata<Keyword<T>>, Callable1<Recor
             };
         }
 
-        public static <T, M> Function1<Keyword<T>, Keyword<T>> setMetadata(final Keyword<M> name, final M value) {
+        public static <T, M> Function1<Keyword<T>, Keyword<T>> metadata(final Keyword<M> name, final M value) {
             return new Function1<Keyword<T>, Keyword<T>>() {
                 public Keyword<T> call(Keyword<T> keyword) throws Exception {
                     return keyword.metadata(name, value);
