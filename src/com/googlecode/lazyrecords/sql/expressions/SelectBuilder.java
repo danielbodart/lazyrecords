@@ -23,7 +23,7 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
     private final Option<Predicate<? super Record>> where;
     private final Option<Comparator<? super Record>> comparator;
     private final Sequence<Join> joins;
-    private final Value<Expression> value;
+    private final Lazy<Expression> value;
 
     private SelectBuilder(SqlGrammar grammar, SetQuantifier setQuantifier, Sequence<Keyword<?>> select, Definition table, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> comparator, Iterable<? extends Join> joins) {
         this.grammar = grammar;
@@ -36,13 +36,13 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
         value = lazyExpression(this);
     }
 
-    private Function<Expression> lazyExpression(final SelectBuilder builder) {
-        return new Function<Expression>() {
+    private Lazy<Expression> lazyExpression(final SelectBuilder builder) {
+        return new Lazy<Expression>() {
             @Override
-            public Expression call() throws Exception {
+            protected Expression get() throws Exception {
                 return builder.grammar.selectExpression(builder.table, builder.select, builder.setQuantifier, builder.where, builder.comparator, builder.joins);
             }
-        }.lazy();
+        };
     }
 
     public Expression call() throws Exception {
