@@ -2,7 +2,6 @@ package com.googlecode.lazyrecords.xml;
 
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.Records;
 import com.googlecode.lazyrecords.mappings.DateMapping;

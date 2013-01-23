@@ -209,7 +209,7 @@ public abstract class RecordsContract<T extends Records> {
     }
 
     @Test
-    @Ignore("SQL not working yet")
+    @Ignore("WIP")
     public void supportsJoiningOnSameTableMultipleTimes() {
         Keyword<BigDecimal> price = keyword("price", BigDecimal.class);
         Keyword<String> creatorId = keyword("creator_id", String.class);
@@ -221,8 +221,8 @@ public abstract class RecordsContract<T extends Records> {
         Keyword<String> creator = lastName.as("creator");
         Keyword<String> approver = lastName.as("approver");
         Record tradeDetails = records.get(trades).
-                flatMap(leftJoin(records.get(people).map(select(firstName.as(creatorId), creator)), using(creatorId))).
-                flatMap(leftJoin(records.get(people).map(select(firstName.as(approverId), approver)), using(approverId))).head();
+                flatMap(leftJoin(records.get(people).map(select(firstName, creator)), on(creatorId, firstName))).
+                flatMap(leftJoin(records.get(people).map(select(firstName, approver)), on(approverId, firstName))).head();
 
         assertThat(tradeDetails.get(creator), Matchers.is("bodart"));
         assertThat(tradeDetails.get(price), matcher(between(new BigDecimal("4.95"), new BigDecimal("4.95"))));

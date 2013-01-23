@@ -5,12 +5,8 @@ import com.googlecode.totallylazy.*;
 import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Strings.equalIgnoringCase;
 
-public interface Keyword<T> extends Named, Callable1<Record, T>, GenericType<T>, Comparable<Keyword<T>> {
+public interface Keyword<T> extends Named, Metadata<Keyword<T>>, Callable1<Record, T>, GenericType<T>, Comparable<Keyword<T>> {
     Record metadata();
-
-    Keyword<T> metadata(Record metadata);
-
-    <M> Keyword<T> setMetadata(Keyword<M> name, M value);
 
     class constructors {
         public static ImmutableKeyword<Object> keyword(String value) {
@@ -77,7 +73,7 @@ public interface Keyword<T> extends Named, Callable1<Record, T>, GenericType<T>,
         public static <T, M> Function1<Keyword<T>, Keyword<T>> setMetadata(final Keyword<M> name, final M value) {
             return new Function1<Keyword<T>, Keyword<T>>() {
                 public Keyword<T> call(Keyword<T> keyword) throws Exception {
-                    return keyword.setMetadata(name, value);
+                    return keyword.metadata(name, value);
                 }
             };
         }

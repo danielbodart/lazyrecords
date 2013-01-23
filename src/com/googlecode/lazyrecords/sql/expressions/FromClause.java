@@ -38,7 +38,7 @@ public class FromClause extends CompoundExpression {
         }
         if (predicateCreator instanceof On) {
             On on = (On) predicateCreator;
-            return textOnly("%s %s on %s = %s", joinExpression(join), name(select.table()), name(on.left()), name(on.right()));
+            return textOnly("%s %s on %s = %2$s.%s", joinExpression(join), name(select.table()), name(on.left()), name(on.right()));
         }
         throw new UnsupportedOperationException(format("Unknown expression %s", predicateCreator));
     }

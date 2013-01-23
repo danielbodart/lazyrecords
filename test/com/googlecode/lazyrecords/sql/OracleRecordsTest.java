@@ -1,7 +1,6 @@
 package com.googlecode.lazyrecords.sql;
 
 import com.googlecode.lazyrecords.*;
-import com.googlecode.lazyrecords.sql.expressions.CompoundExpression;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;

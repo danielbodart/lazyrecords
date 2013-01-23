@@ -4,12 +4,13 @@ import com.googlecode.totallylazy.Sequence;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
 
-public class RecordDefinition implements Definition {
+public class RecordDefinition extends AbstractMetadata<Definition> implements Definition {
     private final String name;
     private final Sequence<Keyword<?>> fields;
 
     // See Definition.constructors.definition to construct
-    RecordDefinition(final String name, final Iterable<? extends Keyword<?>> fields) {
+    RecordDefinition(final String name, Record metadata, final Iterable<? extends Keyword<?>> fields) {
+        super(metadata);
         this.name = name;
         this.fields = sequence(fields);
     }
@@ -44,5 +45,10 @@ public class RecordDefinition implements Definition {
     @Override
     public int compareTo(Definition definition) {
         return name().compareTo(definition.name());
+    }
+
+    @Override
+    public Definition metadata(Record record) {
+        return new RecordDefinition(name, record, fields);
     }
 }

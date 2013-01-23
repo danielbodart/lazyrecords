@@ -79,16 +79,26 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
     }
 
     public SelectBuilder qualify() {
-        return new SelectBuilder(grammar, setQuantifier, select.map(qualify(table)), table, where, comparator, joins);
+        Sequence<Keyword<?>> map = select.<Keyword<Object>>unsafeCast().map(qualify(table)).unsafeCast();
+        return new SelectBuilder(grammar, setQuantifier, map, table, where, comparator, joins);
     }
 
-    private static UnaryFunction<Keyword<?>> qualify(final Definition definition) {
-        return new UnaryFunction<Keyword<?>>() {
+    private static <T> UnaryFunction<Keyword<T>> qualify(final Definition definition) {
+        return new UnaryFunction<Keyword<T>>() {
             @Override
-            public Keyword<?> call(Keyword<?> keyword) throws Exception {
-                return keyword.setMetadata(Keywords.definition, definition);
+            public Keyword<T> call(Keyword<T> keyword) throws Exception {
+                if(keyword instanceof AliasedKeyword) {
+                    Keyword<T> source = Unchecked.<AliasedKeyword<T>>cast(keyword).source();
+                    Keyword<T> qualify = qualify(source, definition);
+                    return new AliasedKeyword<T>(qualify, keyword.name(), keyword.metadata());
+                }
+                return qualify(keyword, definition);
             }
         };
+    }
+
+    private static <T> Keyword<T> qualify(Keyword<T> keyword, Definition definition) {
+        return keyword.metadata(Keywords.definition, definition);
     }
 
     public SelectBuilder where(Predicate<? super Record> predicate) {

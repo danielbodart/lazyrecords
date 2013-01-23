@@ -6,16 +6,20 @@ import static com.googlecode.lazyrecords.Record.constructors.record;
 import static com.googlecode.totallylazy.Sequences.indexIn;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
-public interface Definition extends Named, Comparable<Definition> {
+public interface Definition extends Named, Metadata<Definition>, Comparable<Definition> {
     Sequence<Keyword<?>> fields();
 
     class constructors {
+        public static Definition definition(final String name, Record metadata, final Iterable<? extends Keyword<?>> fields) {
+            return new RecordDefinition(name, metadata, sequence(fields));
+        }
+
         public static Definition definition(final String name, final Iterable<? extends Keyword<?>> fields) {
-            return new RecordDefinition(name, sequence(fields));
+            return definition(name, record(), sequence(fields));
         }
 
         public static Definition definition(final String name, final Keyword<?> head, final Keyword<?>... tail) {
-            return new RecordDefinition(name, sequence(tail).cons(head));
+            return definition(name, sequence(tail).cons(head));
         }
     }
 

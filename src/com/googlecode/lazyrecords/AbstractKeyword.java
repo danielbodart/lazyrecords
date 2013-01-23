@@ -1,10 +1,8 @@
 package com.googlecode.lazyrecords;
 
-public abstract class AbstractKeyword<T> implements Keyword<T> {
-    private final Record metadata;
-
+public abstract class AbstractKeyword<T> extends AbstractMetadata<Keyword<T>> implements Keyword<T> {
     protected AbstractKeyword(Record metadata) {
-        this.metadata = metadata;
+        super(metadata);
     }
 
     @Override
@@ -26,17 +24,8 @@ public abstract class AbstractKeyword<T> implements Keyword<T> {
         return name();
     }
 
-    public Record metadata() {
-        return metadata;
-    }
-
     @Override
     public int compareTo(Keyword<T> keyword) {
         return name().toLowerCase().compareTo(keyword.name().toLowerCase());
-    }
-
-    @Override
-    public <M> Keyword<T> setMetadata(Keyword<M> name, M value) {
-        return metadata(metadata().set(name, value));
     }
 }

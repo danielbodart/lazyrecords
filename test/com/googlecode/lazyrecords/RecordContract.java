@@ -4,7 +4,6 @@ import com.googlecode.totallylazy.Sequence;
 import org.junit.Test;
 
 import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
-import static com.googlecode.lazyrecords.Record.constructors.record;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;

@@ -39,7 +39,7 @@ public class XmlRecordsTest extends RecordsContract<XmlRecords> {
     public void shouldSupportAliasingByGetting() throws Exception {
         Records xmlRecords = new XmlRecords(document("<data><user><summary><firstName>Dan</firstName></summary></user></data>"));
 
-        Keyword<String> aliased = keyword("summary/firstName", String.class).as("first").setMetadata(Keywords.INDEXED, true);
+        Keyword<String> aliased = keyword("summary/firstName", String.class).as("first").metadata(Keywords.INDEXED, true);
         Definition definition = definition("/data/user", aliased);
         Sequence<Pair<Keyword<?>,Object>> fields = xmlRecords.get(definition).head().fields();
         assertThat(fields.size(), NumberMatcher.is(1));
