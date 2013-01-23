@@ -3,13 +3,17 @@ package com.googlecode.lazyrecords.sql.expressions;
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Keywords;
+import com.googlecode.lazyrecords.Metadata;
 import com.googlecode.lazyrecords.Named;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Function1;
+import com.googlecode.totallylazy.Function2;
+import com.googlecode.totallylazy.Mapper;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.regex.Regex;
 
+import static com.googlecode.lazyrecords.sql.expressions.SelectList.asClause;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static java.lang.String.format;
 
@@ -38,23 +42,33 @@ public class Expressions {
         return TextOnlyExpression.textOnly(expression.toString());
     }
 
-    public static TextOnlyExpression name(Named named) {
-        Option<Definition> qualified = metadata(named, Keywords.definition);
-        if(qualified.isEmpty()) return textOnly(quote(named.name()));
-        return textOnly(format("%s.%s", quote(qualified.get().name()), quote(named.name())));
+    public static AbstractExpression name(Named named) {
+        TextOnlyExpression quoted = textOnly(quote(named.name()));
+        AbstractExpression fullyQualified = metadata(named, Keywords.definition).fold(quoted, new Function2<AbstractExpression, Definition, AbstractExpression>() {
+            @Override
+            public AbstractExpression call(AbstractExpression expression, Definition definition) throws Exception {
+                return new CompoundExpression(sequence(textOnly(quote(definition.name())), expression), ".");
+            }
+        });
+        return metadata(named, Keywords.alias).fold(fullyQualified, new Function2<AbstractExpression, String, AbstractExpression>() {
+            @Override
+            public AbstractExpression call(AbstractExpression expression, String alias) throws Exception {
+                return expression.join(asClause(alias));
+            }
+        } );
     }
 
     private static <T> Option<T> metadata(Named named, Keyword<T> keyword) {
-        if(named instanceof Keyword) {
-            return ((Keyword) named).metadata().getOption(keyword);
+        if(named instanceof Metadata) {
+            return ((Metadata) named).metadata().getOption(keyword);
         }
         return Option.none();
     }
 
-    public static Function1<Named, TextOnlyExpression> name() {
-        return new Function1<Named, TextOnlyExpression>() {
+    public static Mapper<Named, AbstractExpression> name() {
+        return new Mapper<Named, AbstractExpression>() {
             @Override
-            public TextOnlyExpression call(Named named) throws Exception {
+            public AbstractExpression call(Named named) throws Exception {
                 return name(named);
             }
         };

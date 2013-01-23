@@ -43,6 +43,11 @@ public class RecordDefinition extends AbstractMetadata<Definition> implements De
     }
 
     @Override
+    public Definition as(String name) {
+        return metadata(Keywords.alias, name);
+    }
+
+    @Override
     public int compareTo(Definition definition) {
         return name().compareTo(definition.name());
     }

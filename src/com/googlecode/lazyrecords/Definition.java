@@ -9,6 +9,8 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 public interface Definition extends Named, Metadata<Definition>, Comparable<Definition> {
     Sequence<Keyword<?>> fields();
 
+    Definition as(String name);
+
     class constructors {
         public static Definition definition(final String name, Record metadata, final Iterable<? extends Keyword<?>> fields) {
             return new RecordDefinition(name, metadata, sequence(fields));

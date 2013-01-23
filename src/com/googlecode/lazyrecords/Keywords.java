@@ -7,6 +7,7 @@ public class Keywords {
     public static final Keyword<Boolean> UNIQUE = Keyword.constructors.keyword("unique", Boolean.class);
     public static final Keyword<Boolean> INDEXED = Keyword.constructors.keyword("indexed", Boolean.class);
     public static final Keyword<Definition> definition = Keyword.constructors.keyword("definition", Definition.class);
+    public static final Keyword<String> alias = Keyword.constructors.keyword("alias", String.class);
 
     /** @deprecated Replaced by {@link Keyword.constructors#keyword(String)}  } */
     @Deprecated

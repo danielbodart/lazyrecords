@@ -77,6 +77,6 @@ public class SelectList extends CompoundExpression {
     }
 
     public static AbstractExpression asClause(String name) {
-        return textOnly("as " + name);
+        return textOnly(name);
     }
 }

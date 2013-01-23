@@ -386,6 +386,15 @@ public abstract class RecordsContract<T extends Records> {
     }
 
     @Test
+    public void supportsAliasingTables() throws Exception {
+        Keyword<String> first = keyword("first", String.class);
+        Record record = records.get(people.as("resources")).filter(where(lastName, is("bodart"))).map(select(firstName.as(first))).head();
+        assertThat(record.get(first), Matchers.is("dan"));
+        Keyword<String> result = Unchecked.cast(record.keywords().head());
+        assertThat(result, Matchers.is(first));
+    }
+
+    @Test
     public void supportsAliasingAKeywordDuringSelection() throws Exception {
         Keyword<String> first = keyword("first", String.class);
         Record record = records.get(people).filter(where(lastName, is("bodart"))).map(select(firstName.as(first))).head();
