@@ -209,7 +209,6 @@ public abstract class RecordsContract<T extends Records> {
     }
 
     @Test
-    @Ignore("WIP")
     public void supportsJoiningOnSameTableMultipleTimes() {
         Keyword<BigDecimal> price = keyword("price", BigDecimal.class);
         Keyword<String> creatorId = keyword("creator_id", String.class);

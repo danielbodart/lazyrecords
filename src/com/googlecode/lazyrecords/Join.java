@@ -1,5 +1,7 @@
 package com.googlecode.lazyrecords;
 
+import com.googlecode.lazyrecords.sql.expressions.Expressible;
+import com.googlecode.lazyrecords.sql.expressions.SelectBuilder;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
