@@ -43,7 +43,9 @@ public class OracleRecordsTest extends RecordsContract<Records> {
             Properties properties = new Properties();
             properties.load(OracleRecordsTest.class.getResourceAsStream("oracle.properties"));
             Class.forName(properties.getProperty("driver"));
-            return Option.some(getConnection(properties.getProperty("url"), properties.getProperty("username"), properties.getProperty("password")));
+            Connection connection = getConnection(properties.getProperty("url"), properties.getProperty("username"), properties.getProperty("password"));
+            connection.createStatement().execute("alter session set current_schema=" + properties.getProperty("schema"));
+            return Option.some(connection);
         } catch (Exception e) {
             return Option.none();
         }
@@ -76,7 +78,7 @@ public class OracleRecordsTest extends RecordsContract<Records> {
         }
         sqlRecords.update(textOnly("create").join(sequence));
         Definition definition = definition("dual", nextValue.of(foo));
-        Integer integer = records.get(definition).head().get(nextValue);
+        Integer integer = records.get(definition).head().get(nextValue.of(foo));
         assertThat(integer, is(1));
     }
 }
