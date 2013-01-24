@@ -108,29 +108,6 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
         return new SelectBuilder(grammar, setQuantifier, qualifiedColumns, table, where, comparator, joins);
     }
 
-    public SelectBuilder qualify() {
-        Sequence<Keyword<?>> map = select.<Keyword<Object>>unsafeCast().map(qualify(table)).unsafeCast();
-        return new SelectBuilder(grammar, setQuantifier, map, table, where, comparator, joins);
-    }
-
-    private static <T> UnaryFunction<Keyword<T>> qualify(final Definition definition) {
-        return new UnaryFunction<Keyword<T>>() {
-            @Override
-            public Keyword<T> call(Keyword<T> keyword) throws Exception {
-                if (keyword instanceof AliasedKeyword) {
-                    Keyword<T> source = Unchecked.<AliasedKeyword<T>>cast(keyword).source();
-                    Keyword<T> qualify = qualify(source, definition);
-                    return new AliasedKeyword<T>(qualify, keyword.name(), keyword.metadata());
-                }
-                return qualify(keyword, definition);
-            }
-        };
-    }
-
-    private static <T> Keyword<T> qualify(Keyword<T> keyword, Definition definition) {
-        return keyword.metadata(Keywords.qualifier, definition.name());
-    }
-
     public SelectBuilder where(Predicate<? super Record> predicate) {
         Predicate<? super Record> newWhere = combineWithWhereClause(predicate);
         return new SelectBuilder(grammar, setQuantifier, select, table, Option.<Predicate<? super Record>>some(newWhere), comparator, joins);
@@ -177,7 +154,7 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
     }
 
     public SelectBuilder join(Join join) {
-        return new SelectBuilder(grammar, setQuantifier, select.join(qualifyTable(joins.size(), join)), table, where, comparator, joins.add(join));
+        return new SelectBuilder(grammar, setQuantifier, select.join(qualifyTable(joins.size(), join)).unique(), table, where, comparator, joins.add(join));
     }
 
     private static Sequence<Keyword<?>> qualifyTable(Number index, Join join) {
@@ -217,6 +194,4 @@ public class SelectBuilder implements Expressible, Callable<Expression>, Express
         Expressible records = (Expressible) join.records();
         return (SelectBuilder) records.express();
     }
-
-
 }
