@@ -203,8 +203,20 @@ public class Grammar {
         return InnerJoin.innerJoin(records, using);
     }
 
+    public static Callable1<Record, Iterable<Record>> innerJoin(final Sequence<Record> records, final Callable1<? super Record, Predicate<Record>> using) {
+        return join(records, using);
+    }
+
     public static Callable1<Record, Iterable<Record>> leftJoin(final Sequence<Record> records, final Callable1<? super Record, Predicate<Record>> using) {
         return LeftJoin.leftJoin(records, using);
+    }
+
+    public static Callable1<Record, Iterable<Record>> leftOuterJoin(final Sequence<Record> records, final Callable1<? super Record, Predicate<Record>> using) {
+        return leftJoin(records, using);
+    }
+
+    public static Callable1<Record, Iterable<Record>> outerJoin(final Sequence<Record> records, final Callable1<? super Record, Predicate<Record>> using) {
+        return leftJoin(records, using);
     }
 
     public static Sequence<Pair<Predicate<Record>, Record>> update(final Callable1<? super Record, Predicate<Record>> callable, final Record... records) {
