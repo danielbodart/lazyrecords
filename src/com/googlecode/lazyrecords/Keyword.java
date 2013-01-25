@@ -2,6 +2,7 @@ package com.googlecode.lazyrecords;
 
 import com.googlecode.totallylazy.*;
 
+import static com.googlecode.totallylazy.Functions.returns1;
 import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Strings.equalIgnoringCase;
 
@@ -45,37 +46,41 @@ public interface Keyword<T> extends Named, Metadata<Keyword<T>>, Callable1<Recor
     }
 
     class functions {
-        public static Function1<Keyword<?>, String> name = new Function1<Keyword<?>, String>() {
+        public static Mapper<Keyword<?>, String> name = new Mapper<Keyword<?>, String>() {
             @Override
             public String call(Keyword<?> keyword) throws Exception {
                 return keyword.name();
             }
         };
 
-        public static Function1<Keyword<?>, String> name() { return name; }
+        public static Mapper<Keyword<?>, String> name() { return name; }
 
-        public static <T> Function1<Keyword<?>, T> metadata(final Keyword<T> metadataKey) {
-            return new Function1<Keyword<?>, T>() {
+        public static <T> Mapper<Keyword<?>, T> metadata(final Keyword<T> metadataKey) {
+            return new Mapper<Keyword<?>, T>() {
                 public T call(Keyword<?> keyword) throws Exception {
                     return keyword.metadata().get(metadataKey);
                 }
             };
         }
 
-        public static <T> Function1<Keyword<T>, Keyword<T>> metadata(final Record metadata) {
-            return new Function1<Keyword<T>, Keyword<T>>() {
+        public static <T> UnaryFunction<Keyword<T>> metadata(final Record metadata) {
+            return new UnaryFunction<Keyword<T>>() {
                 public Keyword<T> call(Keyword<T> keyword) throws Exception {
                     return keyword.metadata(metadata);
                 }
             };
         }
 
-        public static <T, M> Function1<Keyword<T>, Keyword<T>> metadata(final Keyword<M> name, final M value) {
-            return new Function1<Keyword<T>, Keyword<T>>() {
+        public static <T, M> UnaryFunction<Keyword<T>> metadata(final Keyword<M> name, final M value) {
+            return new UnaryFunction<Keyword<T>>() {
                 public Keyword<T> call(Keyword<T> keyword) throws Exception {
                     return keyword.metadata(name, value);
                 }
             };
+        }
+
+        public static UnaryFunction<Keyword<?>> replace(Keyword<?> from, Keyword<?> to) {
+            return Callables.<Keyword<?>>replace(Predicates.<Keyword<?>>is(from), returns1(to));
         }
     }
 }
