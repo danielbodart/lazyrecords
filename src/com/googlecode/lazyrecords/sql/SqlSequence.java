@@ -108,7 +108,7 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
             Callable2 raw = callable;
             SelectBuilder reduce = select.reduce(callable);
             if (raw instanceof Aggregates) {
-                return Unchecked.cast(build(reduce).head());
+                return Unchecked.<S>cast(build(reduce).head());
             }
             SqlSequence<Record> records = new SqlSequence<Record>(sqlRecords, reduce, logger, Functions.<Record>identity());
             return (S) records.head().fields().head().second();

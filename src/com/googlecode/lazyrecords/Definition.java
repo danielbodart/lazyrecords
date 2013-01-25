@@ -24,7 +24,7 @@ public interface Definition extends Named, Metadata<Definition>, Comparable<Defi
 
         public static <T extends Definition> T definition(Class<T> definition, String name) {
             final RecordDefinition recordDefinition = new RecordDefinition(name, record(), fields(definition));
-            return cast(Proxy.newProxyInstance(Definition.class.getClassLoader(), new Class[]{definition}, new InvocationHandler() {
+            return Unchecked.<T>cast(Proxy.newProxyInstance(Definition.class.getClassLoader(), new Class[]{definition}, new InvocationHandler() {
                 @Override
                 public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                     return method.invoke(recordDefinition, args);
