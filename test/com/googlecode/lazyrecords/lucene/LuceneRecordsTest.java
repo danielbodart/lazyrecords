@@ -1,22 +1,17 @@
 package com.googlecode.lazyrecords.lucene;
 
+import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Logger;
 import com.googlecode.lazyrecords.MemoryLogger;
-import com.googlecode.lazyrecords.mappings.StringMappings;
-import com.googlecode.lazyrecords.parser.StandardParser;
-import com.googlecode.totallylazy.Predicate;
-import com.googlecode.totallylazy.Predicates;
+import com.googlecode.lazyrecords.Record;
+import com.googlecode.lazyrecords.RecordsContract;
+import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
-import com.googlecode.lazyrecords.RecordsContract;
-import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
 import com.googlecode.totallylazy.matchers.Matchers;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.search.Query;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.Version;
 import org.junit.After;
@@ -27,10 +22,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import static com.googlecode.lazyrecords.RecordsContract.People.age;
+import static com.googlecode.lazyrecords.RecordsContract.People.lastName;
+import static com.googlecode.lazyrecords.RecordsContract.People.people;
 import static com.googlecode.totallylazy.Files.temporaryDirectory;
 import static com.googlecode.totallylazy.matchers.IterableMatcher.hasExactly;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
 
 public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
     public static final Version VERSION = Version.LUCENE_33;
@@ -60,12 +57,12 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
     }
 
 
-	@Override
-	@Ignore("Still thinking about lexical representation of BigDecimal")
-	public void supportsBigDecimal() throws Exception {
-	}
+    @Override
+    @Ignore("Still thinking about lexical representation of BigDecimal")
+    public void supportsBigDecimal() throws Exception {
+    }
 
-	@Test
+    @Test
     public void canQueryIndexDirectly() throws Exception {
         QueryParser parser = new QueryParser(VERSION, null, ANALYZER);
         Sequence<Record> results = records.query(parser.parse("type:people +firstName:da*"), Sequences.<Keyword<?>>sequence(lastName));
@@ -77,7 +74,7 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
         MemoryLogger logger = new MemoryLogger();
         Sequence<Record> result = luceneRecords(logger).get(people).sortBy(age);
         Record head = result.head();
-        Sequence<Map<String,?>> logs = logger.data();
+        Sequence<Map<String, ?>> logs = logger.data();
         assertThat(head, Matchers.is(result.head())); // Check iterator
         assertThat(logs, Matchers.is(logger.data())); // Check queries
     }

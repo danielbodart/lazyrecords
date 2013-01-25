@@ -2,7 +2,10 @@ package com.googlecode.lazyrecords;
 
 import org.junit.Before;
 
-public abstract class SchemaBasedRecordContract<T extends Records> extends RecordsContract<T>{
+import static com.googlecode.lazyrecords.RecordsContract.Books.books;
+import static com.googlecode.lazyrecords.RecordsContract.People.people;
+
+public abstract class SchemaBasedRecordContract<T extends Records> extends RecordsContract<T> {
 
     protected Schema schema;
 

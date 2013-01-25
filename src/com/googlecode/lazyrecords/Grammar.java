@@ -19,6 +19,14 @@ import static com.googlecode.totallylazy.Unchecked.cast;
 
 
 public class Grammar {
+    public static <T extends Definition> T definition(Class<T> definition) {
+        return Definition.constructors.definition(definition);
+    }
+
+    public static <T extends Definition> T definition(Class<T> definition, String name) {
+        return Definition.constructors.definition(definition, name);
+    }
+
     public static Definition definition(final String name, final Iterable<? extends Keyword<?>> fields) {
         return Definition.constructors.definition(name, fields);
     }

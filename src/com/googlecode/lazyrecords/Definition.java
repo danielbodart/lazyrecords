@@ -2,9 +2,15 @@ package com.googlecode.lazyrecords;
 
 import com.googlecode.totallylazy.*;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
 import static com.googlecode.lazyrecords.Record.constructors.record;
+import static com.googlecode.totallylazy.Predicates.*;
 import static com.googlecode.totallylazy.Sequences.indexIn;
 import static com.googlecode.totallylazy.Sequences.sequence;
+import static com.googlecode.totallylazy.Unchecked.cast;
 
 public interface Definition extends Named, Metadata<Definition>, Comparable<Definition> {
     Sequence<Keyword<?>> fields();
@@ -12,6 +18,27 @@ public interface Definition extends Named, Metadata<Definition>, Comparable<Defi
     Definition as(String name);
 
     class constructors {
+        public static <T extends Definition> T definition(final Class<T> definition) {
+            return definition(definition, definition.getSimpleName().toLowerCase());
+        }
+
+        public static <T extends Definition> T definition(Class<T> definition, String name) {
+            final RecordDefinition recordDefinition = new RecordDefinition(name, record(), fields(definition));
+            return cast(Proxy.newProxyInstance(Definition.class.getClassLoader(), new Class[]{definition}, new InvocationHandler() {
+                @Override
+                public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                    return method.invoke(recordDefinition, args);
+                }
+            }));
+        }
+
+        private static <T extends Definition> Sequence<Keyword<?>> fields(Class<T> definition) {
+            return sequence(definition.getDeclaredFields()).
+                    filter(where(Fields.type, is(classAssignableTo(Keyword.class)))).
+                    map(Fields.value(null)).
+                    unsafeCast();
+        }
+
         public static Definition definition(final String name, Record metadata, final Iterable<? extends Keyword<?>> fields) {
             return new RecordDefinition(name, metadata, sequence(fields));
         }

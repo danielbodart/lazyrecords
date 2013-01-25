@@ -3,6 +3,7 @@ package com.googlecode.lazyrecords.memory;
 import com.googlecode.lazyrecords.RecordsContract;
 import org.junit.Test;
 
+import static com.googlecode.lazyrecords.RecordsContract.People.people;
 import static com.googlecode.totallylazy.matchers.Matchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 

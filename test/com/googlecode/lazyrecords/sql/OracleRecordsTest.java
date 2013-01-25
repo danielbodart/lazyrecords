@@ -1,6 +1,10 @@
 package com.googlecode.lazyrecords.sql;
 
-import com.googlecode.lazyrecords.*;
+import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.ImmutableKeyword;
+import com.googlecode.lazyrecords.Records;
+import com.googlecode.lazyrecords.RecordsContract;
+import com.googlecode.lazyrecords.SchemaGeneratingRecords;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
@@ -16,6 +20,8 @@ import java.util.Properties;
 
 import static com.googlecode.lazyrecords.Definition.constructors.definition;
 import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
+import static com.googlecode.lazyrecords.RecordsContract.Books.books;
+import static com.googlecode.lazyrecords.RecordsContract.People.people;
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
 import static com.googlecode.lazyrecords.sql.grammars.ColumnDatatypeMappings.oracle;
 import static com.googlecode.totallylazy.Closeables.safeClose;
@@ -62,12 +68,12 @@ public class OracleRecordsTest extends RecordsContract<Records> {
         return new SchemaGeneratingRecords(sqlRecords, sqlSchema);
     }
 
-	@Override
-	@Ignore("Waiting for Dan to test against Oracle")
-	public void supportsBigDecimal() throws Exception {
-	}
+    @Override
+    @Ignore("Waiting for Dan to test against Oracle")
+    public void supportsBigDecimal() throws Exception {
+    }
 
-	@Test
+    @Test
     public void supportsDBSequences() throws Exception {
         ImmutableKeyword<Integer> nextValue = keyword("nextval", Integer.class);
         Definition foo = Definition.constructors.definition("foo", nextValue);

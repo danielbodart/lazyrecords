@@ -17,6 +17,9 @@ import org.junit.Test;
 import java.io.InputStream;
 import java.util.Map;
 
+import static com.googlecode.lazyrecords.RecordsContract.Books.books;
+import static com.googlecode.lazyrecords.RecordsContract.People.age;
+import static com.googlecode.lazyrecords.RecordsContract.People.people;
 import static com.googlecode.totallylazy.Sequences.repeat;
 import static com.googlecode.totallylazy.matchers.NumberMatcher.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -38,20 +41,20 @@ public class SimpleDBRecordsTest extends SchemaBasedRecordContract<SimpleDBRecor
         return new SimpleDBRecords(amazonSimpleDBClient, true, new SimpleDBMappings(), logger1, schema);
     }
 
-	@Override
-	@Ignore("Still thinking about lexical representation of BigDecimal")
-	public void supportsBigDecimal() throws Exception {
-	}
+    @Override
+    @Ignore("Still thinking about lexical representation of BigDecimal")
+    public void supportsBigDecimal() throws Exception {
+    }
 
-	@Override
-	@Ignore("Not implemented yet")
-	public void supportsSortingByMultipleKeywords() throws Exception {
-	}
+    @Override
+    @Ignore("Not implemented yet")
+    public void supportsSortingByMultipleKeywords() throws Exception {
+    }
 
     @Test
     public void canAddMoreThat25RecordsAtATimeAndReceiveMoreThanAHundred() throws Exception {
         assertThat(records.get(books).size(), is(3));
-        Sequence<Record> newBooks = repeat(Record.constructors.record().set(isbn, zenIsbn)).take(100);
+        Sequence<Record> newBooks = repeat(Record.constructors.record().set(Books.isbn, zenIsbn)).take(100);
         assertThat(newBooks.size(), NumberMatcher.is(100));
         records.add(books, newBooks);
         assertThat(records.get(books).size(), is(103));

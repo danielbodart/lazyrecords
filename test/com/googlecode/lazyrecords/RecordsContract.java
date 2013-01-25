@@ -1,11 +1,18 @@
 package com.googlecode.lazyrecords;
 
-import com.googlecode.totallylazy.*;
+import com.googlecode.totallylazy.Callables;
+import com.googlecode.totallylazy.Closeables;
+import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Sequences;
+import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.matchers.IterableMatcher;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
@@ -17,7 +24,50 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.UUID;
 
-import static com.googlecode.lazyrecords.Grammar.*;
+import static com.googlecode.lazyrecords.Grammar.all;
+import static com.googlecode.lazyrecords.Grammar.ascending;
+import static com.googlecode.lazyrecords.Grammar.average;
+import static com.googlecode.lazyrecords.Grammar.between;
+import static com.googlecode.lazyrecords.Grammar.concat;
+import static com.googlecode.lazyrecords.Grammar.contains;
+import static com.googlecode.lazyrecords.Grammar.count;
+import static com.googlecode.lazyrecords.Grammar.definition;
+import static com.googlecode.lazyrecords.Grammar.descending;
+import static com.googlecode.lazyrecords.Grammar.endsWith;
+import static com.googlecode.lazyrecords.Grammar.greaterThan;
+import static com.googlecode.lazyrecords.Grammar.greaterThanOrEqualTo;
+import static com.googlecode.lazyrecords.Grammar.in;
+import static com.googlecode.lazyrecords.Grammar.is;
+import static com.googlecode.lazyrecords.Grammar.join;
+import static com.googlecode.lazyrecords.Grammar.keyword;
+import static com.googlecode.lazyrecords.Grammar.leftJoin;
+import static com.googlecode.lazyrecords.Grammar.lessThan;
+import static com.googlecode.lazyrecords.Grammar.lessThanOrEqualTo;
+import static com.googlecode.lazyrecords.Grammar.maximum;
+import static com.googlecode.lazyrecords.Grammar.minimum;
+import static com.googlecode.lazyrecords.Grammar.not;
+import static com.googlecode.lazyrecords.Grammar.notNullValue;
+import static com.googlecode.lazyrecords.Grammar.nullValue;
+import static com.googlecode.lazyrecords.Grammar.on;
+import static com.googlecode.lazyrecords.Grammar.record;
+import static com.googlecode.lazyrecords.Grammar.select;
+import static com.googlecode.lazyrecords.Grammar.startsWith;
+import static com.googlecode.lazyrecords.Grammar.sum;
+import static com.googlecode.lazyrecords.Grammar.to;
+import static com.googlecode.lazyrecords.Grammar.update;
+import static com.googlecode.lazyrecords.Grammar.using;
+import static com.googlecode.lazyrecords.Grammar.where;
+import static com.googlecode.lazyrecords.RecordsContract.Books.isbn;
+import static com.googlecode.lazyrecords.RecordsContract.Books.books;
+import static com.googlecode.lazyrecords.RecordsContract.Books.inPrint;
+import static com.googlecode.lazyrecords.RecordsContract.Books.rrp;
+import static com.googlecode.lazyrecords.RecordsContract.Books.title;
+import static com.googlecode.lazyrecords.RecordsContract.Books.uuid;
+import static com.googlecode.lazyrecords.RecordsContract.People.age;
+import static com.googlecode.lazyrecords.RecordsContract.People.dob;
+import static com.googlecode.lazyrecords.RecordsContract.People.firstName;
+import static com.googlecode.lazyrecords.RecordsContract.People.lastName;
+import static com.googlecode.lazyrecords.RecordsContract.People.people;
 import static com.googlecode.totallylazy.Pair.pair;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.Streams.streams;
@@ -33,19 +83,23 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.fail;
 
 public abstract class RecordsContract<T extends Records> {
-    protected static Keyword<Integer> age = keyword("age", Integer.class);
-    protected static Keyword<Date> dob = keyword("dob", Date.class);
-    protected static ImmutableKeyword<String> firstName = keyword("firstName", String.class);
-    protected static ImmutableKeyword<String> lastName = keyword("lastName", String.class);
+    public interface Books extends Definition {
+        Books books = definition(Books.class);
+        Keyword<URI> isbn = keyword("isbn", URI.class);
+        Keyword<String> title = keyword("title", String.class);
+        Keyword<Boolean> inPrint = keyword("inPrint", Boolean.class);
+        Keyword<UUID> uuid = keyword("uuid", UUID.class);
+        Keyword<BigDecimal> rrp = keyword("rrp", BigDecimal.class);
+    }
 
-    protected static Keyword<URI> isbn = keyword("isbn", URI.class);
-    protected static Keyword<String> title = keyword("title", String.class);
-    protected static Keyword<Boolean> inPrint = keyword("inPrint", Boolean.class);
-    protected static Keyword<UUID> uuid = keyword("uuid", UUID.class);
-    protected static Keyword<BigDecimal> rrp = keyword("rrp", BigDecimal.class);
-
-    protected static Definition people = definition("people", isbn, age, dob, firstName, lastName);
-    protected static Definition books = definition("books", isbn, title, inPrint, uuid, rrp);
+    public interface People extends Definition {
+        People people = definition(People.class);
+        Keyword<Integer> age = keyword("age", Integer.class);
+        Keyword<Date> dob = keyword("dob", Date.class);
+        ImmutableKeyword<String> firstName = keyword("firstName", String.class);
+        ImmutableKeyword<String> lastName = keyword("lastName", String.class);
+        Keyword<URI> isbn = Books.isbn;
+    }
 
     public static final URI zenIsbn = uri("urn:isbn:0099322617");
     public static final URI godelEsherBach = uri("urn:isbn:0140289208");

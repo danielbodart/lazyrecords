@@ -14,6 +14,8 @@ import org.junit.BeforeClass;
 import java.sql.Connection;
 import java.util.Properties;
 
+import static com.googlecode.lazyrecords.RecordsContract.Books.books;
+import static com.googlecode.lazyrecords.RecordsContract.People.people;
 import static com.googlecode.totallylazy.Closeables.safeClose;
 import static com.googlecode.totallylazy.Option.none;
 import static java.sql.DriverManager.getConnection;
@@ -31,7 +33,7 @@ public class MysqlRecordsTest extends RecordsContract<Records> {
     @AfterClass
     public static void shutDown() {
         for (Connection mysql : connection)
-			safeClose(mysql);
+            safeClose(mysql);
     }
 
     private static Option<Connection> createConnection() {
