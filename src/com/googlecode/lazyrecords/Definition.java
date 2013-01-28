@@ -1,16 +1,24 @@
 package com.googlecode.lazyrecords;
 
-import com.googlecode.totallylazy.*;
+import com.googlecode.totallylazy.Callable1;
+import com.googlecode.totallylazy.Callables;
+import com.googlecode.totallylazy.Fields;
+import com.googlecode.totallylazy.First;
+import com.googlecode.totallylazy.Function1;
+import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Unchecked;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
+import static com.googlecode.lazyrecords.Definition.constructors.definition;
 import static com.googlecode.lazyrecords.Record.constructors.record;
-import static com.googlecode.totallylazy.Predicates.*;
+import static com.googlecode.totallylazy.Predicates.classAssignableTo;
+import static com.googlecode.totallylazy.Predicates.is;
+import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Sequences.indexIn;
 import static com.googlecode.totallylazy.Sequences.sequence;
-import static com.googlecode.totallylazy.Unchecked.cast;
 
 public interface Definition extends Named, Metadata<Definition>, Comparable<Definition> {
     Sequence<Keyword<?>> fields();
@@ -59,6 +67,10 @@ public interface Definition extends Named, Metadata<Definition>, Comparable<Defi
 
         private static Function1<First<Keyword<?>>, Integer> sameOrderAs(final Definition definition) {
             return Callables.<Keyword<?>>first().then(indexIn(definition.fields()));
+        }
+
+        public static Definition replace(Definition definition, Keyword<?> from, Keyword<?> to) {
+            return definition(definition.name(), definition.fields().map(Keyword.functions.replace(from, to)));
         }
     }
 
