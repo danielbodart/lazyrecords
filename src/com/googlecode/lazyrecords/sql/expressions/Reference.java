@@ -1,53 +1,55 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
-import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Sequences;
+import com.googlecode.totallylazy.*;
 
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.quote;
+import static com.googlecode.totallylazy.Option.some;
+import static com.googlecode.totallylazy.Predicates.not;
+import static com.googlecode.totallylazy.Strings.empty;
 import static java.lang.String.format;
 
 public abstract class Reference<Self extends Reference<Self>> extends AbstractExpression {
-    protected final String qualifier;
     protected final String name;
-    protected final String alias;
+    protected final Option<String> qualifier;
+    protected final Option<String> alias;
 
-    protected Reference(String qualifier, String name, String alias) {
-        this.qualifier = quote(qualifier);
+    protected Reference(String name, Option<String> qualifier, Option<String> alias) {
+        this.qualifier = qualifier.map(quote);
         this.name = quote(name);
-        this.alias = quote(alias);
+        this.alias = alias.map(quote);
     }
 
-    protected abstract Self self(String qualifier, String text, String alias);
+    protected abstract Self self(String text, Option<String> qualifier, Option<String> alias);
 
     public Self qualify(String qualifier) {
-        if (isQualified()) return self(this.qualifier, name, alias);
-        return self(qualifier, name, alias);
+        if (isQualified()) return self(name, this.qualifier, alias);
+        return self(name, some(qualifier), alias);
     }
 
     public Self alias(String alias) {
-        if (isAliased()) return self(qualifier, name, this.alias);
-        return self(qualifier, name, alias);
+        if (isAliased()) return self(name, qualifier, this.alias);
+        return self(name, qualifier, some(alias));
     }
 
     public boolean isQualified() {
-        return !qualifier.isEmpty();
+        return !qualifier.filter(not(empty)).isEmpty();
     }
 
     public boolean isAliased() {
-        return !alias.isEmpty();
+        return !alias.filter(not(empty)).isEmpty();
     }
 
     public String name() {
-        return isAliased() ? alias : name;
+        return isAliased() ? alias.get() : name;
     }
 
     @Override
     public String text() {
-        return isQualified() ? format("%s.%s", qualifier, aliased()) : aliased();
+        return isQualified() ? format("%s.%s", qualifier.get(), aliased()) : aliased();
     }
 
     private String aliased() {
-        return isAliased() ? format("%s %s", name, alias) : name;
+        return isAliased() ? format("%s %s", name, alias.get()) : name;
     }
 
     @Override

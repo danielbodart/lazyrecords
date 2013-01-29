@@ -4,9 +4,10 @@ import com.googlecode.lazyrecords.*;
 import com.googlecode.totallylazy.*;
 import com.googlecode.totallylazy.regex.Regex;
 
-import static com.googlecode.lazyrecords.sql.expressions.ColumnReference.columnName;
+import static com.googlecode.lazyrecords.sql.expressions.ColumnReference.columnReference;
 import static com.googlecode.lazyrecords.sql.expressions.SelectList.asClause;
 import static com.googlecode.lazyrecords.sql.expressions.TableName.tableName;
+import static com.googlecode.totallylazy.Option.none;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static java.lang.String.format;
 
@@ -35,36 +36,16 @@ public class Expressions {
         return TextOnlyExpression.textOnly(expression.toString());
     }
 
-    public static ColumnReference name(Keyword<?> named) {
-        ColumnReference quoted = columnName(named.name());
-        ColumnReference qualified = metadata(named, Keywords.qualifier).fold(quoted, new Function2<ColumnReference, String, ColumnReference>() {
-            @Override
-            public ColumnReference call(ColumnReference expression, String qualifier) throws Exception {
-                return expression.qualify(qualifier);
-            }
-        });
-        return metadata(named, Keywords.alias).fold(qualified, new Function2<ColumnReference, String, ColumnReference>() {
-            @Override
-            public ColumnReference call(ColumnReference expression, String alias) throws Exception {
-                return expression.alias(alias);
-            }
-        });
+    public static ColumnReference name(Keyword<?> keyword) {
+        return columnReference(keyword.name(), metadata(keyword, Keywords.qualifier), metadata(keyword, Keywords.alias));
     }
 
     public static TableName name(Definition definition) {
-        TableName quoted = tableName(definition.name());
-        return metadata(definition, Keywords.alias).fold(quoted, new Function2<TableName, String, TableName>() {
-            @Override
-            public TableName call(TableName expression, String alias) throws Exception {
-                return expression.alias(alias);
-            }
-        });
+        return tableName(definition.name(), metadata(definition, Keywords.qualifier), metadata(definition, Keywords.alias));
     }
 
     private static <T> Option<T> metadata(Named named, Keyword<T> keyword) {
-        if (named instanceof Metadata) {
-            return ((Metadata) named).metadata().getOption(keyword);
-        }
+        if (named instanceof Metadata) return ((Metadata) named).metadata().getOption(keyword);
         return Option.none();
     }
 
@@ -86,6 +67,13 @@ public class Expressions {
     }
 
     private static final Regex legal = Regex.regex("[a-zA-Z0-9_$*#.@]+");
+
+    public static UnaryFunction<String> quote = new UnaryFunction<String>() {
+        @Override
+        public String call(String value) throws Exception {
+            return quote(value);
+        }
+    };
 
     public static String quote(String name) {
         if (Strings.isEmpty(name)) return name;
