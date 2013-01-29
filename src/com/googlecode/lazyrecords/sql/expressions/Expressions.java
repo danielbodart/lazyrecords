@@ -1,19 +1,12 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
-import com.googlecode.lazyrecords.Definition;
-import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.lazyrecords.Keywords;
-import com.googlecode.lazyrecords.Metadata;
-import com.googlecode.lazyrecords.Named;
-import com.googlecode.totallylazy.Callable1;
-import com.googlecode.totallylazy.Function1;
-import com.googlecode.totallylazy.Function2;
-import com.googlecode.totallylazy.Mapper;
-import com.googlecode.totallylazy.Option;
-import com.googlecode.totallylazy.Sequence;
+import com.googlecode.lazyrecords.*;
+import com.googlecode.totallylazy.*;
 import com.googlecode.totallylazy.regex.Regex;
 
+import static com.googlecode.lazyrecords.sql.expressions.ColumnReference.columnName;
 import static com.googlecode.lazyrecords.sql.expressions.SelectList.asClause;
+import static com.googlecode.lazyrecords.sql.expressions.TableName.tableName;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static java.lang.String.format;
 
@@ -42,34 +35,44 @@ public class Expressions {
         return TextOnlyExpression.textOnly(expression.toString());
     }
 
-    public static AbstractExpression name(Named named) {
-        TextOnlyExpression quoted = textOnly(quote(named.name()));
-        AbstractExpression qualified = metadata(named, Keywords.qualifier).fold(quoted, new Function2<AbstractExpression, String, AbstractExpression>() {
+    public static ColumnReference name(Keyword<?> named) {
+        ColumnReference quoted = columnName(named.name());
+        ColumnReference qualified = metadata(named, Keywords.qualifier).fold(quoted, new Function2<ColumnReference, String, ColumnReference>() {
             @Override
-            public AbstractExpression call(AbstractExpression expression, String qualifier) throws Exception {
-                return new CompoundExpression(sequence(textOnly(quote(qualifier)), expression), ".");
+            public ColumnReference call(ColumnReference expression, String qualifier) throws Exception {
+                return expression.qualify(qualifier);
             }
         });
-        return metadata(named, Keywords.alias).fold(qualified, new Function2<AbstractExpression, String, AbstractExpression>() {
+        return metadata(named, Keywords.alias).fold(qualified, new Function2<ColumnReference, String, ColumnReference>() {
             @Override
-            public AbstractExpression call(AbstractExpression expression, String alias) throws Exception {
-                return expression.join(asClause(alias));
+            public ColumnReference call(ColumnReference expression, String alias) throws Exception {
+                return expression.alias(alias);
             }
-        } );
+        });
+    }
+
+    public static TableName name(Definition definition) {
+        TableName quoted = tableName(definition.name());
+        return metadata(definition, Keywords.alias).fold(quoted, new Function2<TableName, String, TableName>() {
+            @Override
+            public TableName call(TableName expression, String alias) throws Exception {
+                return expression.alias(alias);
+            }
+        });
     }
 
     private static <T> Option<T> metadata(Named named, Keyword<T> keyword) {
-        if(named instanceof Metadata) {
+        if (named instanceof Metadata) {
             return ((Metadata) named).metadata().getOption(keyword);
         }
         return Option.none();
     }
 
-    public static Mapper<Named, AbstractExpression> name() {
-        return new Mapper<Named, AbstractExpression>() {
+    public static Mapper<Keyword<?>, AbstractExpression> name() {
+        return new Mapper<Keyword<?>, AbstractExpression>() {
             @Override
-            public AbstractExpression call(Named named) throws Exception {
-                return name(named);
+            public AbstractExpression call(Keyword<?> keyword) throws Exception {
+                return name(keyword);
             }
         };
     }
@@ -85,9 +88,8 @@ public class Expressions {
     private static final Regex legal = Regex.regex("[a-zA-Z0-9_$*#.@]+");
 
     public static String quote(String name) {
-        if (legal.matches(name)) {
-            return name;
-        }
+        if (Strings.isEmpty(name)) return name;
+        if (legal.matches(name)) return name;
         return '"' + name + '"';
     }
 
