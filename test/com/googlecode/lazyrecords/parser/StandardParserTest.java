@@ -5,6 +5,7 @@ import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.lucene.Lucene;
 import com.googlecode.lazyrecords.lucene.LuceneRecordsTest;
 import com.googlecode.lazyrecords.mappings.StringMappings;
+import com.googlecode.lazyrecords.sql.expressions.AnsiWhereClause;
 import com.googlecode.lazyrecords.sql.expressions.WhereClause;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Predicates;
@@ -390,7 +391,7 @@ public class StandardParserTest {
     }
 
     private void assertSqlSyntax(Predicate<Record> predicate) {
-        String sql = WhereClause.toSql(predicate).toString();
+        String sql = AnsiWhereClause.toSql(predicate).toString();
         System.out.println("SQL = " + sql);
         assertThat(sql, is(notNullValue()));
     }

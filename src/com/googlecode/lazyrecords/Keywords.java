@@ -3,11 +3,15 @@ package com.googlecode.lazyrecords;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Sequence;
 
+import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
+
 public class Keywords {
-    public static final Keyword<Boolean> UNIQUE = Keyword.constructors.keyword("unique", Boolean.class);
-    public static final Keyword<Boolean> INDEXED = Keyword.constructors.keyword("indexed", Boolean.class);
+    public static final Keyword<Boolean> unique = Keyword.constructors.keyword("unique", Boolean.class);
+    public static final Keyword<Boolean> indexed = Keyword.constructors.keyword("indexed", Boolean.class);
     public static final Keyword<String> qualifier = Keyword.constructors.keyword("qualifier", String.class);
     public static final Keyword<String> alias = Keyword.constructors.keyword("alias", String.class);
+    public static final Keyword<Object> star = Keyword.constructors.keyword("*");
+
 
     /** @deprecated Replaced by {@link Keyword.constructors#keyword(String)}  } */
     @Deprecated

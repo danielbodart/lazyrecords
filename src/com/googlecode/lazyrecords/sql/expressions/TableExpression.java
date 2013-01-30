@@ -1,4 +1,4 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
-public interface WhereClause extends Expression {
+public interface TableExpression extends Expression {
 }

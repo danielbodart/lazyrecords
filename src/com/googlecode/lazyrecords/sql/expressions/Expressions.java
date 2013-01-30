@@ -5,9 +5,8 @@ import com.googlecode.totallylazy.*;
 import com.googlecode.totallylazy.regex.Regex;
 
 import static com.googlecode.lazyrecords.sql.expressions.ColumnReference.columnReference;
-import static com.googlecode.lazyrecords.sql.expressions.SelectList.asClause;
 import static com.googlecode.lazyrecords.sql.expressions.TableName.tableName;
-import static com.googlecode.totallylazy.Option.none;
+import static com.googlecode.totallylazy.Functions.identity;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static java.lang.String.format;
 
@@ -114,5 +113,9 @@ public class Expressions {
 
     public static String toString(Expression expression, Callable1<Object, Object> valueConverter) {
         return format(expression.text().replace("%", "%%").replace("?", "'%s'"), expression.parameters().map(valueConverter).toArray(Object.class));
+    }
+
+    public static Expression expression(Option<? extends Expression> optionalExpression) {
+        return optionalExpression.map(identity(Expression.class)).getOrElse(empty());
     }
 }

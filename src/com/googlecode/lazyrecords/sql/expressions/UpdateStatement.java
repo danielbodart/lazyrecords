@@ -10,7 +10,7 @@ import com.googlecode.lazyrecords.Record;
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.expression;
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.name;
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
-import static com.googlecode.lazyrecords.sql.expressions.WhereClause.whereClause;
+import static com.googlecode.lazyrecords.sql.expressions.AnsiWhereClause.whereClause;
 
 public class UpdateStatement extends CompoundExpression {
     public static final TextOnlyExpression UPDATE = textOnly("update");

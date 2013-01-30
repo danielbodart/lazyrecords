@@ -23,9 +23,35 @@ public class AnsiSqlGrammar implements SqlGrammar {
     }
 
     @Override
-    public Expression selectExpression(Definition definition, Sequence<Keyword<?>> select, SetQuantifier setQuantifier, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> orderBy) {
-        return SelectExpression.selectExpression(definition, select, setQuantifier, where, orderBy);
+    public SelectExpression selectExpression(Option<SetQuantifier> setQuantifier,
+                                             SelectList selectList,
+                                             FromClause fromClause,
+                                             Option<WhereClause> whereClause,
+                                             Option<OrderByClause> orderByClause) {
+        return AnsiSelectExpression.selectExpression(setQuantifier, selectList, fromClause, whereClause, orderByClause);
     }
+
+    @Override
+    public SelectList selectList(Sequence<Keyword<?>> select) {
+        return AnsiSelectList.selectList(select);
+    }
+
+    @Override
+    public FromClause fromClause(Definition definition) {
+        return AnsiFromClause.fromClause(definition);
+    }
+
+    @Override
+    public Option<WhereClause> whereClause(Option<Predicate<? super Record>> where) {
+        return AnsiWhereClause.whereClause(where);
+    }
+
+    @Override
+    public Option<OrderByClause> orderByClause(Option<Comparator<? super Record>> orderBy) {
+        return AnsiOrderByClause.orderByClause(orderBy);
+    }
+
+
 
     @Override
     public Expression insertStatement(Definition definition, Record record) {

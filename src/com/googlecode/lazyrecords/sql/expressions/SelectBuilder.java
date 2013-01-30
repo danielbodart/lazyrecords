@@ -21,46 +21,50 @@ import com.googlecode.totallylazy.UnaryFunction;
 import com.googlecode.totallylazy.Unchecked;
 
 import java.util.Comparator;
-import java.util.concurrent.Callable;
 
 import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
-import static com.googlecode.lazyrecords.sql.expressions.SetQuantifier.ALL;
-import static com.googlecode.lazyrecords.sql.expressions.SetQuantifier.DISTINCT;
+import static com.googlecode.lazyrecords.sql.expressions.AnsiSetQuantifier.ALL;
+import static com.googlecode.lazyrecords.sql.expressions.AnsiSetQuantifier.DISTINCT;
+import static com.googlecode.totallylazy.Option.some;
 import static com.googlecode.totallylazy.Predicates.and;
 import static com.googlecode.totallylazy.Sequences.join;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.Unchecked.cast;
 
 public class SelectBuilder implements Expression, ExpressionBuilder {
-    public static final Keyword<Object> STAR = keyword("*");
     private final SqlGrammar grammar;
     private final SetQuantifier setQuantifier;
     private final Sequence<Keyword<?>> select;
     private final Definition table;
     private final Option<Predicate<? super Record>> where;
     private final Option<Comparator<? super Record>> comparator;
-    private final Lazy<Expression> value;
+    private final Lazy<SelectExpression> value;
 
-    private SelectBuilder(SqlGrammar grammar, SetQuantifier setQuantifier, Sequence<Keyword<?>> select, Definition table, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> comparator) {
+    private SelectBuilder(SqlGrammar grammar, SetQuantifier setQuantifier, Sequence<Keyword<?>> select,
+                          Definition table, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> comparator) {
         this.grammar = grammar;
         this.setQuantifier = setQuantifier;
         this.select = select.isEmpty() ? table.fields() : select;
         this.table = table;
         this.where = where;
         this.comparator = comparator;
-        value = lazyExpression(this);
+        value = lazyExpression();
     }
 
-    private Lazy<Expression> lazyExpression(final SelectBuilder builder) {
-        return new Lazy<Expression>() {
+    private Lazy<SelectExpression> lazyExpression() {
+        return new Lazy<SelectExpression>() {
             @Override
-            protected Expression get() throws Exception {
-                return builder.grammar.selectExpression(builder.table, builder.select, builder.setQuantifier, builder.where, builder.comparator);
+            protected SelectExpression get() throws Exception {
+                return grammar.selectExpression(Option.<SetQuantifier>some(setQuantifier),
+                        grammar.selectList(select),
+                        grammar.fromClause(table),
+                        grammar.whereClause(where),
+                        grammar.orderByClause(comparator));
             }
         };
     }
 
-    public Expression build() {
+    public SelectExpression build() {
         return value.value();
     }
 
@@ -106,8 +110,7 @@ public class SelectBuilder implements Expression, ExpressionBuilder {
     }
 
     private Predicate<? super Record> combineWithWhereClause(Predicate<? super Record> predicate) {
-        if (where.isEmpty())
-            return predicate;
+        if (where.isEmpty()) return predicate;
         return and(where.get(), predicate);
     }
 
@@ -161,9 +164,9 @@ public class SelectBuilder implements Expression, ExpressionBuilder {
             public Keyword<?> call(Keyword<?> keyword) throws Exception {
                 if( keyword instanceof AliasedKeyword) {
                     Keyword<?> source = ((AliasedKeyword<?>) keyword).source();
-                    return new AliasedKeyword(source.metadata(Keywords.qualifier, SelectExpression.tableAlias(index)), keyword.name());
+                    return new AliasedKeyword(source.metadata(Keywords.qualifier, AnsiSelectExpression.tableAlias(index)), keyword.name());
                 }
-                return keyword.metadata(Keywords.qualifier, SelectExpression.tableAlias(index));
+                return keyword.metadata(Keywords.qualifier, AnsiSelectExpression.tableAlias(index));
             }
         };
     }

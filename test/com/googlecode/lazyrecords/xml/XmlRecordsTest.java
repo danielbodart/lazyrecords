@@ -39,7 +39,7 @@ public class XmlRecordsTest extends RecordsContract<XmlRecords> {
     public void shouldSupportAliasingByGetting() throws Exception {
         Records xmlRecords = new XmlRecords(document("<data><user><summary><firstName>Dan</firstName></summary></user></data>"));
 
-        Keyword<String> aliased = keyword("summary/firstName", String.class).as("first").metadata(Keywords.INDEXED, true);
+        Keyword<String> aliased = keyword("summary/firstName", String.class).as("first").metadata(Keywords.indexed, true);
         Definition definition = definition("/data/user", aliased);
         Sequence<Pair<Keyword<?>,Object>> fields = xmlRecords.get(definition).head().fields();
         assertThat(fields.size(), NumberMatcher.is(1));
@@ -49,6 +49,6 @@ public class XmlRecordsTest extends RecordsContract<XmlRecords> {
         assertThat(keyword.forClass().equals(String.class), is(true));
         assertThat(keyword, is(not(instanceOf(AliasedKeyword.class))));
         assertThat(keyword.metadata().fields().size(), NumberMatcher.is(1));
-        assertThat(keyword.metadata().get(Keywords.INDEXED), is(true));
+        assertThat(keyword.metadata().get(Keywords.indexed), is(true));
     }
 }

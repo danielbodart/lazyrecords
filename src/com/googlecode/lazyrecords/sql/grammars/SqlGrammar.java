@@ -2,17 +2,28 @@ package com.googlecode.lazyrecords.sql.grammars;
 
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.RecordTo;
-import com.googlecode.lazyrecords.Join;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.sql.expressions.Expression;
-import com.googlecode.lazyrecords.sql.expressions.SetQuantifier;
+import com.googlecode.lazyrecords.sql.expressions.*;
 import com.googlecode.totallylazy.*;
 
 import java.util.Comparator;
 
 public interface SqlGrammar {
-    Expression selectExpression(Definition definition, Sequence<Keyword<?>> select, SetQuantifier setQuantifier, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> orderBy);
+    SelectExpression selectExpression(Option<SetQuantifier> setQuantifier,
+                                      SelectList selectList,
+                                      FromClause fromClause,
+                                      Option<WhereClause> whereClause,
+                                      Option<OrderByClause> orderByClause);
+
+    SelectList selectList(Sequence<Keyword<?>> select);
+
+    FromClause fromClause(Definition definition);
+
+    Option<WhereClause> whereClause(Option<Predicate<? super Record>> where);
+
+    Option<OrderByClause> orderByClause(Option<Comparator<? super Record>> orderBy);
+
 
     Expression insertStatement(Definition definition, Record record);
 
@@ -23,6 +34,9 @@ public interface SqlGrammar {
     Expression createTable(Definition definition);
 
     Expression dropTable(Definition definition);
+
+
+
 
     class functions {
         public static RecordTo<Expression> insertStatement(final SqlGrammar grammar, final Definition definition) {
