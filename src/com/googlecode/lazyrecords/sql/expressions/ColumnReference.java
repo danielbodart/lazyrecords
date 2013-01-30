@@ -4,7 +4,7 @@ import com.googlecode.totallylazy.Option;
 
 import static com.googlecode.totallylazy.Option.none;
 
-public class ColumnReference extends Reference<ColumnReference> {
+public class ColumnReference extends Reference<ColumnReference> implements ValueExpression {
     protected ColumnReference(String name, Option<String> qualifier, Option<String> alias) {
         super(name, qualifier, alias);
     }

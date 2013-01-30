@@ -33,7 +33,7 @@ public class AnsiSqlGrammar implements SqlGrammar {
 
     @Override
     public SelectList selectList(Sequence<Keyword<?>> select) {
-        return AnsiSelectList.selectList(select);
+        return AnsiSelectList.selectList(this, select);
     }
 
     @Override

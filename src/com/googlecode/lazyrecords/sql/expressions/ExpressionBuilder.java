@@ -2,7 +2,6 @@ package com.googlecode.lazyrecords.sql.expressions;
 
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
-import com.googlecode.totallylazy.Callable2;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Reducer;
 import com.googlecode.totallylazy.Sequence;
@@ -24,5 +23,5 @@ public interface ExpressionBuilder extends Expressible, Expression {
 
     ExpressionBuilder distinct();
 
-    ExpressionBuilder reduce(Reducer<?,?> reducer);
+    ExpressionBuilder reduce(Reducer<?, ?> reducer);
 }

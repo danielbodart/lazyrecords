@@ -32,11 +32,11 @@ public class AnsiOrderByClause extends CompoundExpression implements OrderByClau
     }
 
     public static Expression toSql(AscendingComparator<? super Record, ?> comparator) {
-        return Expressions.join(AnsiSelectList.derivedColumn(comparator.callable()), textOnly("asc"));
+        return Expressions.join(AnsiSelectList.valueExpression(comparator.callable()), textOnly("asc"));
     }
 
     public static Expression toSql(DescendingComparator<? super Record, ?> comparator) {
-        return Expressions.join(AnsiSelectList.derivedColumn(comparator.callable()), textOnly("desc"));
+        return Expressions.join(AnsiSelectList.valueExpression(comparator.callable()), textOnly("desc"));
     }
 
     public static Expression toSql(CompositeComparator<Record> comparator) {

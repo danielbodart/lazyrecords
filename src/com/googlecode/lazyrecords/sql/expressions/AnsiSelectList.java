@@ -1,6 +1,13 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
-import com.googlecode.lazyrecords.*;
+import com.googlecode.lazyrecords.Aggregate;
+import com.googlecode.lazyrecords.Aliased;
+import com.googlecode.lazyrecords.AliasedKeyword;
+import com.googlecode.lazyrecords.CompositeKeyword;
+import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.Record;
+import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
+import com.googlecode.totallylazy.Binary;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Callable2;
 import com.googlecode.totallylazy.Function1;
@@ -8,35 +15,38 @@ import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.callables.JoinString;
 
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.name;
-import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
 import static com.googlecode.lazyrecords.sql.expressions.SetFunctionType.setFunctionType;
+import static com.googlecode.totallylazy.Option.none;
+import static com.googlecode.totallylazy.Option.some;
 
 public class AnsiSelectList extends CompoundExpression implements SelectList {
-    public AnsiSelectList(Sequence<Keyword<?>> select) {
-        super(select.map(derivedColumn()));
+    private final Sequence<DerivedColumn> derivedColumns;
+
+    public AnsiSelectList(Sequence<DerivedColumn> derivedColumns) {
+        super(derivedColumns, ", ");
+        this.derivedColumns = derivedColumns;
     }
 
-    public static SelectList selectList(final Sequence<Keyword<?>> select) {
-        return new AnsiSelectList(select);
+    public static SelectList selectList(SqlGrammar grammar, final Sequence<Keyword<?>> select) {
+        return new AnsiSelectList(select.map(derivedColumn()));
     }
 
-    @Override
-    public String text() {
-        return expressions.map(Expressions.text()).toString(", ");
-    }
-
-    public static Function1<Keyword<?>, Expression> derivedColumn() {
-        return new Function1<Keyword<?>, Expression>() {
-            public Expression call(Keyword<?> keyword) throws Exception {
-                return derivedColumnWithAlias(keyword);
+    public static Function1<Keyword<?>, DerivedColumn> derivedColumn() {
+        return new Function1<Keyword<?>, DerivedColumn>() {
+            public DerivedColumn call(Keyword<?> keyword) throws Exception {
+                return derivedColumn(keyword);
             }
         };
     }
 
-    public static <T> Expression derivedColumn(Callable1<? super Record, T> callable) {
+    public static <T> ValueExpression valueExpression(Callable1<? super Record, T> callable) {
         if (callable instanceof CompositeKeyword) {
             CompositeKeyword<?> composite = (CompositeKeyword<?>) callable;
-            return Expressions.join(composite.keywords().map(name()), "(", combiner(composite.combiner()), ")");
+            Binary<?> combiner = composite.combiner();
+            if (combiner instanceof JoinString) {
+                return new CompositeExpression(composite.keywords().map(name()), "(", "||", ")");
+            }
+            throw new UnsupportedOperationException("Unsupported combiner " + combiner);
         }
         if (callable instanceof Aggregate) {
             Aggregate aggregate = (Aggregate) callable;
@@ -50,33 +60,27 @@ public class AnsiSelectList extends CompoundExpression implements SelectList {
             Keyword<?> keyword = (Keyword) callable;
             return name(keyword);
         }
-        if (callable instanceof SelectCallable) {
-            Sequence<Keyword<?>> keywords = ((SelectCallable) callable).keywords();
-            return selectList(keywords);
-        }
         throw new UnsupportedOperationException("Unsupported reducer " + callable);
     }
 
-    public static <T> Expression derivedColumnWithAlias(Callable1<? super Record, T> callable) {
-        Expression expression = derivedColumn(callable);
+    public static <T> DerivedColumn derivedColumn(Callable1<? super Record, T> callable) {
+        ValueExpression expression = valueExpression(callable);
         if (callable instanceof Aliased) {
-            return Expressions.join(expression, asClause((Keyword<?>) callable));
+            return AnsiDerivedColumn.derivedColumn(expression, some(asClause((Keyword<?>) callable)));
         }
-        return expression;
+        return AnsiDerivedColumn.derivedColumn(expression, none(AsClause.class));
     }
 
-    private static String combiner(Callable2<?, ?, ?> combiner) {
-        if (combiner instanceof JoinString) {
-            return "||";
-        }
-        throw new UnsupportedOperationException("Unsupported combiner " + combiner);
-    }
-
-    public static Expression asClause(Keyword<?> keyword) {
+    public static AsClause asClause(Keyword<?> keyword) {
         return asClause(keyword.name());
     }
 
-    public static AbstractExpression asClause(String name) {
-        return textOnly(name);
+    public static AsClause asClause(String name) {
+        return AnsiAsClause.asClause(name);
+    }
+
+    @Override
+    public Sequence<DerivedColumn> derivedColumns() {
+        return derivedColumns;
     }
 }

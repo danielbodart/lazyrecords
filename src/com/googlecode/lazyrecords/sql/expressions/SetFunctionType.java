@@ -19,7 +19,7 @@ import static com.googlecode.totallylazy.Maps.pairs;
 import static com.googlecode.totallylazy.Predicates.where;
 import static java.lang.String.format;
 
-public class SetFunctionType extends TextOnlyExpression {
+public class SetFunctionType extends TextOnlyExpression implements ValueExpression {
     @SuppressWarnings("unchecked")
     private static final Map<Class<? extends Reducer>, String> names = new LinkedHashMap<Class<? extends Reducer>, String>() {{
         put(Count.class, "count");

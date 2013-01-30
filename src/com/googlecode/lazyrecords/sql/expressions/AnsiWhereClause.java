@@ -4,7 +4,6 @@ import com.googlecode.lazyrecords.Record;
 import com.googlecode.totallylazy.*;
 import com.googlecode.totallylazy.predicates.*;
 
-import static com.googlecode.lazyrecords.sql.expressions.AnsiSelectList.derivedColumn;
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.*;
 import static com.googlecode.totallylazy.Sequences.repeat;
 import static com.googlecode.totallylazy.Sequences.sequence;
@@ -50,7 +49,7 @@ public class AnsiWhereClause extends CompoundExpression implements WhereClause {
 
     public static Expression toSql(WherePredicate<Record, ?> predicate) {
         Expression predicateSql = toSql(predicate.predicate());
-        return Expressions.join(derivedColumn(predicate.callable()), predicateSql);
+        return Expressions.join(AnsiSelectList.valueExpression(predicate.callable()), predicateSql);
     }
 
     public static Expression toSql(AndPredicate<?> predicate) {
