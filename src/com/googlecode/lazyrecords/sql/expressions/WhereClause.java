@@ -98,7 +98,7 @@ public class WhereClause extends CompoundExpression {
     public static Expression toSql(InPredicate<?> predicate) {
         Sequence<Object> sequence = sequence(predicate.values());
         if (sequence instanceof Expressible) {
-            Expression pair = ((Expressible) sequence).express();
+            Expression pair = ((Expressible) sequence).build();
             return expression("in ( " + pair.text() + ")", pair.parameters());
         }
         return expression(repeat("?").take(sequence.size()).toString("in (", ",", ")"), sequence);

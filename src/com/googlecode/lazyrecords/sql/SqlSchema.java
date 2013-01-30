@@ -5,7 +5,6 @@ import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.Schema;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
-import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequences;
 
 import static com.googlecode.lazyrecords.Keyword.constructors.keyword;

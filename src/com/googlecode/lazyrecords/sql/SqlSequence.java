@@ -1,26 +1,43 @@
 package com.googlecode.lazyrecords.sql;
 
-import com.googlecode.lazyrecords.*;
+import com.googlecode.lazyrecords.Aggregates;
+import com.googlecode.lazyrecords.Join;
+import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.Logger;
+import com.googlecode.lazyrecords.Loggers;
+import com.googlecode.lazyrecords.Record;
+import com.googlecode.lazyrecords.RecordTo;
+import com.googlecode.lazyrecords.SelectCallable;
 import com.googlecode.lazyrecords.sql.expressions.Expressible;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
-import com.googlecode.lazyrecords.sql.expressions.SelectBuilder;
-import com.googlecode.totallylazy.*;
+import com.googlecode.lazyrecords.sql.expressions.ExpressionBuilder;
+import com.googlecode.totallylazy.Callable1;
+import com.googlecode.totallylazy.Callable2;
+import com.googlecode.totallylazy.Function;
+import com.googlecode.totallylazy.Functions;
+import com.googlecode.totallylazy.Maps;
+import com.googlecode.totallylazy.Option;
+import com.googlecode.totallylazy.Predicate;
+import com.googlecode.totallylazy.Reducer;
+import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Sets;
+import com.googlecode.totallylazy.Unchecked;
+import com.googlecode.totallylazy.Value;
 
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Set;
 
-import static com.googlecode.totallylazy.Option.some;
 import static com.googlecode.totallylazy.Pair.pair;
 
 public class SqlSequence<T> extends Sequence<T> implements Expressible {
     private final SqlRecords sqlRecords;
-    private final SelectBuilder select;
+    private final ExpressionBuilder select;
     private final Logger logger;
     private final Value<Sequence<T>> data;
     private final Callable1<? super Record, ? extends T> callable;
 
-    public SqlSequence(final SqlRecords records, final SelectBuilder select, final Logger logger, Callable1<? super Record, ? extends T> callable) {
+    public SqlSequence(final SqlRecords records, final ExpressionBuilder select, final Logger logger, Callable1<? super Record, ? extends T> callable) {
         this.sqlRecords = records;
         this.select = select;
         this.logger = logger;
@@ -37,11 +54,11 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
         return data.value().iterator();
     }
 
-    private Sequence<T> execute(final SelectBuilder select) {
-        return sqlRecords.query(select.build(), select.select()).map(callable);
+    private Sequence<T> execute(final ExpressionBuilder builder) {
+        return sqlRecords.query(builder.build(), builder.fields()).map(callable);
     }
 
-    private SqlSequence<T> build(final SelectBuilder builder) {
+    private SqlSequence<T> build(final ExpressionBuilder builder) {
         return new SqlSequence<T>(sqlRecords, builder, logger, callable);
     }
 
@@ -70,7 +87,16 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
     public <S> Sequence<S> flatMap(Callable1<? super T, ? extends Iterable<? extends S>> callable) {
         Callable1 raw = (Callable1) callable;
         if (raw instanceof Join) {
-            return Unchecked.cast(build(select.join((Join) raw)));
+            Join join = (Join) raw;
+            Sequence<Record> records = join.records();
+            if(records instanceof Expressible){
+                Expression express = ((Expressible) records).build();
+                if(express instanceof ExpressionBuilder){
+                    ExpressionBuilder expressionBuilder = (ExpressionBuilder) express;
+                    ExpressionBuilder joined = JoinBuilder.join(select, expressionBuilder);
+                    return Unchecked.cast(build(joined));
+                }
+            }
         }
         logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.MESSAGE, "Unsupported function passed to 'flatMap', moving computation to client"), pair(Loggers.FUNCTION, callable)));
         return super.flatMap(callable);
@@ -105,17 +131,17 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
     @SuppressWarnings("unchecked")
     public <S> S reduce(Callable2<? super S, ? super T, ? extends S> callable) {
         try {
-            Callable2 raw = callable;
-            SelectBuilder reduce = select.reduce(callable);
-            if (raw instanceof Aggregates) {
-                return Unchecked.<S>cast(build(reduce).head());
+            if (callable instanceof Reducer) {
+                Reducer<?, ?> reducer = (Reducer) callable;
+                ExpressionBuilder builder = select.reduce(reducer);
+                if (reducer instanceof Aggregates) return Unchecked.<S>cast(build(builder).head());
+                SqlSequence<Record> records = new SqlSequence<Record>(sqlRecords, builder, logger, Functions.<Record>identity());
+                return (S) records.head().fields().head().second();
             }
-            SqlSequence<Record> records = new SqlSequence<Record>(sqlRecords, reduce, logger, Functions.<Record>identity());
-            return (S) records.head().fields().head().second();
-        } catch (UnsupportedOperationException ex) {
-            logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.MESSAGE, "Unsupported function passed to 'reduce', moving computation to client"), pair(Loggers.FUNCTION, callable)));
-            return super.reduce(callable);
+        } catch (UnsupportedOperationException ignored) {
         }
+        logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.MESSAGE, "Unsupported function passed to 'reduce', moving computation to client"), pair(Loggers.FUNCTION, callable)));
+        return super.reduce(callable);
     }
 
     @Override
@@ -141,7 +167,7 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
     }
 
     @Override
-    public Expression express() {
+    public Expression build() {
         return select;
     }
 

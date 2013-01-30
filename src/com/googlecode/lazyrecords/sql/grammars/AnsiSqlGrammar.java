@@ -1,7 +1,6 @@
 package com.googlecode.lazyrecords.sql.grammars;
 
 import com.googlecode.lazyrecords.Definition;
-import com.googlecode.lazyrecords.Join;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.sql.expressions.*;
@@ -24,8 +23,8 @@ public class AnsiSqlGrammar implements SqlGrammar {
     }
 
     @Override
-    public Expression selectExpression(Definition definition, Sequence<Keyword<?>> select, SetQuantifier setQuantifier, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> orderBy, Sequence<? extends Join> joins) {
-        return SelectExpression.selectExpression(definition, select, setQuantifier, where, orderBy, joins);
+    public Expression selectExpression(Definition definition, Sequence<Keyword<?>> select, SetQuantifier setQuantifier, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> orderBy) {
+        return SelectExpression.selectExpression(definition, select, setQuantifier, where, orderBy);
     }
 
     @Override

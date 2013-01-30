@@ -12,7 +12,7 @@ import com.googlecode.totallylazy.*;
 import java.util.Comparator;
 
 public interface SqlGrammar {
-    Expression selectExpression(Definition definition, Sequence<Keyword<?>> select, SetQuantifier setQuantifier, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> orderBy, Sequence<? extends Join> join);
+    Expression selectExpression(Definition definition, Sequence<Keyword<?>> select, SetQuantifier setQuantifier, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> orderBy);
 
     Expression insertStatement(Definition definition, Record record);
 

@@ -1,5 +1,5 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
 public interface Expressible {
-    Expression express();
+    Expression build();
 }

@@ -13,21 +13,8 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 import static java.lang.String.format;
 
 public class FromClause extends CompoundExpression {
-    public FromClause(Definition table, Iterable<? extends Join> joins) {
-        super(textOnly("from"), name(table).join(joinExpression(joins)));
-    }
-
-    private static CompoundExpression joinExpression(Iterable<? extends Join> joins) {
-        return new CompoundExpression(sequence(joins).zipWithIndex().map(asExpression()));
-    }
-
-    public static Mapper<Pair<Number, Join>, Expression> asExpression() {
-        return new Mapper<Pair<Number, Join>, Expression>() {
-            @Override
-            public Expression call(Pair<Number, Join> join) throws Exception {
-                return toSql(join);
-            }
-        };
+    public FromClause(Definition table) {
+        super(textOnly("from"), name(table));
     }
 
     public static Expression toSql(Pair<Number, Join> pair) {
@@ -56,11 +43,7 @@ public class FromClause extends CompoundExpression {
         throw new UnsupportedOperationException(format("Cannot created join expression for %s", join));
     }
 
-    public static Expression fromClause(Definition definition, Iterable<? extends Join> joins) {
-        return new FromClause(definition, joins);
-    }
-
     public static Expression fromClause(Definition definition) {
-        return new FromClause(definition, Sequences.<Join>empty());
+        return new FromClause(definition);
     }
 }

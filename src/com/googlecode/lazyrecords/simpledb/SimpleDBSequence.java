@@ -9,7 +9,7 @@ import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.expressions.Expressions;
 import com.googlecode.totallylazy.*;
 import com.googlecode.lazyrecords.mappings.StringMappings;
-import com.googlecode.lazyrecords.sql.expressions.SelectBuilder;
+import com.googlecode.lazyrecords.sql.expressions.ExpressionBuilder;
 
 import java.util.Comparator;
 import java.util.Iterator;
@@ -19,14 +19,14 @@ import static java.lang.String.format;
 
 public class SimpleDBSequence<T> extends Sequence<T> {
     private final AmazonSimpleDB sdb;
-    private final SelectBuilder builder;
+    private final ExpressionBuilder builder;
     private final StringMappings mappings;
     private final Callable1<? super Item, T> itemToRecord;
     private final Logger logger;
     private final boolean consistentRead;
     private final Value<Iterable<T>> data;
 
-    public SimpleDBSequence(AmazonSimpleDB sdb, final SelectBuilder builder, StringMappings mappings, Callable1<? super Item, T> itemToRecord, Logger logger, boolean consistentRead) {
+    public SimpleDBSequence(AmazonSimpleDB sdb, final ExpressionBuilder builder, StringMappings mappings, Callable1<? super Item, T> itemToRecord, Logger logger, boolean consistentRead) {
         this.sdb = sdb;
         this.builder = builder;
         this.mappings = mappings;
