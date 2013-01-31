@@ -2,10 +2,14 @@ package com.googlecode.lazyrecords.sql.expressions;
 
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Grammar;
+import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
-import com.googlecode.totallylazy.*;
-import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.totallylazy.Mapper;
+import com.googlecode.totallylazy.Option;
+import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Sequences;
+import com.googlecode.totallylazy.UnaryFunction;
 import org.junit.Test;
 
 import static com.googlecode.lazyrecords.Definition.constructors.definition;
@@ -13,6 +17,7 @@ import static com.googlecode.lazyrecords.Grammar.where;
 import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
 import static com.googlecode.lazyrecords.sql.expressions.SelectBuilder.from;
 import static com.googlecode.totallylazy.Callables.when;
+import static com.googlecode.totallylazy.Option.some;
 import static com.googlecode.totallylazy.Predicates.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -50,11 +55,11 @@ public class SelectBuilderTest {
 
     @Test
     public void canFlatternTheExpression() throws Exception {
-        Expression expression = from(grammar, cars).select(make, model).distinct().where(where(make, Grammar.is("Honda"))).build();
-        Sequence<Expression> original = expressions(expression);
+        SelectExpression expression = (SelectExpression) from(grammar, cars).select(make, model).distinct().where(where(make, Grammar.is("Honda"))).build();
+        Sequence<Expression> original = expressions(expression).realise();
         String alias = "t0";
-        Sequence<Expression> expr = original.map(when(instanceOf(TableName.class), aliasTable(alias))).
-                map(when(instanceOf(ColumnReference.class), qualifyColumn(alias)));
+        Sequence<Expression> expr = original.map(when(instanceOf(TableReference.class), aliasTable(alias))).
+                map(when(instanceOf(ColumnReference.class), qualifyColumn(alias))).realise();
         System.out.println(expr);
     }
 
@@ -62,7 +67,7 @@ public class SelectBuilderTest {
         return new UnaryFunction<Expression>() {
             @Override
             public Expression call(Expression expression) throws Exception {
-                return ((TableName) expression);//.alias(alias);
+                return AnsiTableReference.tableReference(((TableReference) expression).tableName(), some(AnsiAsClause.asClause(alias)));
             }
         };
     }
@@ -77,7 +82,10 @@ public class SelectBuilderTest {
     }
 
     private Sequence<Expression> expressions(Expression expression) {
-        if(expression instanceof CompoundExpression){
+        if (expression instanceof TableReference) {
+            return Sequences.one(expression);
+        }
+        if (expression instanceof CompoundExpression) {
             return expressions((CompoundExpression) expression);
         }
         return Sequences.one(expression);
