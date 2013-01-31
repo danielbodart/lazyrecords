@@ -41,4 +41,19 @@ public class CompoundExpression extends AbstractExpression {
         return expressions.flatMap(Expressions.parameters());
     }
 
+    public Sequence<Expression> expressions() {
+        return expressions;
+    }
+
+    public String start() {
+        return start;
+    }
+
+    public String separator() {
+        return separator;
+    }
+
+    public String end() {
+        return end;
+    }
 }

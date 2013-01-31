@@ -19,6 +19,6 @@ public class QualifierTest {
     public void canQualifyAnSelectExpression() throws Exception {
         SelectExpression expression = (SelectExpression) from(grammar, people).select(firstName, lastName).distinct().where(where(firstName, Grammar.is("dan"))).build();
         SelectExpression qualified = new Qualifier("t0").qualify(expression);
-        assertThat(qualified.toString(), is("select distinct t0.firstName, t0.lastName from t0.people where firstName = 'dan'"));
+        assertThat(qualified.toString(), is("select distinct t0.firstName, t0.lastName from t0.people where t0.firstName = 'dan'"));
     }
 }

@@ -1,9 +1,8 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
-import com.googlecode.totallylazy.Option;
-import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.UnaryFunction;
-import com.googlecode.totallylazy.multi;
+import com.googlecode.totallylazy.*;
+
+import static com.googlecode.totallylazy.Unchecked.cast;
 
 public class Qualifier {
     private final String qualified;
@@ -12,9 +11,19 @@ public class Qualifier {
         this.qualified = qualified;
     }
 
-    public SelectExpression qualify(SelectExpression expression) {
-        return AnsiSelectExpression.selectExpression(expression.setQuantifier(), qualify(expression.selectList()), qualify(expression.fromClause()), expression.whereClause(), expression.orderByClause());
+    public <T extends Expression> T qualify(final T expression) {
+        return new multi() {}.<T>methodOption(expression).getOrElse(new Function<T>() {
+            @Override
+            public T call() throws Exception {
+                if(expression instanceof CompoundExpression) return cast(compound((CompoundExpression) expression));
+                return expression;
+            }
+        });
+    }
 
+    public SelectExpression qualify(SelectExpression expression) {
+        return AnsiSelectExpression.selectExpression(expression.setQuantifier(), qualify(expression.selectList()),
+                qualify(expression.fromClause()), qualify(expression.whereClause()), expression.orderByClause());
     }
 
     private FromClause qualify(FromClause fromClause) {
@@ -29,24 +38,37 @@ public class Qualifier {
         return AnsiSelectList.selectList(qualify(selectList.derivedColumns()));
     }
 
-    public Sequence<DerivedColumn> qualify(Sequence<DerivedColumn> derivedColumns) {
-        return derivedColumns.map(new UnaryFunction<DerivedColumn>() {
-            @Override
-            public DerivedColumn call(DerivedColumn derivedColumn) throws Exception {
-                return qualify(derivedColumn);
-            }
-        });
+    public WhereClause qualify(WhereClause whereClause) {
+        return AnsiWhereClause.whereClause(qualify(whereClause.expression()));
+    }
+
+    public PredicateExpression qualify(PredicateExpression predicateExpression) {
+        return AnsiPredicateExpression.predicateExpression(qualify(predicateExpression.predicand()), qualify(predicateExpression.predicate()));
+    }
+
+    public CompoundExpression compound(CompoundExpression compoundExpression) {
+        return new CompoundExpression(qualify(compoundExpression.expressions()), compoundExpression.start(), compoundExpression.separator(), compoundExpression.end());
     }
 
     public DerivedColumn qualify(DerivedColumn derivedColumn) {
-        return AnsiDerivedColumn.derivedColumn(qualifyValue(derivedColumn.valueExpression()), derivedColumn.asClause());
+        return AnsiDerivedColumn.derivedColumn(qualify(derivedColumn.valueExpression()), derivedColumn.asClause());
     }
 
-    public ValueExpression qualifyValue(ValueExpression valueExpression) {
-        return new multi(){}.<ValueExpression>methodOption(valueExpression).getOrElse(valueExpression);
-    }
-
-    public ColumnReference qualifyValue(ColumnReference columnReference) {
+    public ColumnReference qualify(ColumnReference columnReference) {
         return ColumnReference.columnReference(columnReference.name(), Option.some(qualified));
     }
+
+    public  <T extends Expression, M extends Functor<T>> M qualify(M items) {
+        return cast(items.map(this.<T>qualify()));
+    }
+
+    private <T extends Expression> UnaryFunction<T> qualify() {
+        return new UnaryFunction<T>() {
+            @Override
+            public T call(T expression) throws Exception {
+                return qualify(expression);
+            }
+        };
+    }
+
 }
