@@ -4,6 +4,7 @@ import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.RecordTo;
+import com.googlecode.lazyrecords.sql.expressions.AsClause;
 import com.googlecode.lazyrecords.sql.expressions.DerivedColumn;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.expressions.FromClause;
@@ -32,13 +33,18 @@ public interface SqlGrammar {
 
     SelectList selectList(Sequence<Keyword<?>> select);
 
-    DerivedColumn derivedColumn(Callable1<? super Record, ?> callable);
-
     FromClause fromClause(Definition definition);
 
     WhereClause whereClause(Predicate<? super Record> where);
 
     OrderByClause orderByClause(Comparator<? super Record> orderBy);
+
+    DerivedColumn derivedColumn(Callable1<? super Record, ?> callable);
+
+    ValueExpression valueExpression(Callable1<? super Record, ?> callable);
+
+    ValueExpression concat(Sequence<? extends Keyword<?>> keywords);
+
 
 
     Expression insertStatement(Definition definition, Record record);
@@ -51,9 +57,7 @@ public interface SqlGrammar {
 
     Expression dropTable(Definition definition);
 
-    ValueExpression valueExpression(Callable1<? super Record, ?> callable);
-
-    ValueExpression concat(Sequence<? extends Keyword<?>> keywords);
+    AsClause asClause(String alias);
 
 
     class functions {

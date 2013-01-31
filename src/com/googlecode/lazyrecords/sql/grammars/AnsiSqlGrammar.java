@@ -62,9 +62,14 @@ public class AnsiSqlGrammar implements SqlGrammar {
     public DerivedColumn derivedColumn(Callable1<? super Record, ?> callable) {
         ValueExpression expression = valueExpression(callable);
         if (callable instanceof Aliased) {
-            return AnsiDerivedColumn.derivedColumn(expression, some(AnsiAsClause.asClause(((Keyword<?>) callable).name())));
+            return AnsiDerivedColumn.derivedColumn(expression, some(asClause(((Keyword<?>) callable).name())));
         }
         return AnsiDerivedColumn.derivedColumn(expression, none(AsClause.class));
+    }
+
+    @Override
+    public AsClause asClause(String alias) {
+        return AnsiAsClause.asClause(alias);
     }
 
     @Override
