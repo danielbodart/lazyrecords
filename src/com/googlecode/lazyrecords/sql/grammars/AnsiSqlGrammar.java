@@ -1,15 +1,21 @@
 package com.googlecode.lazyrecords.sql.grammars;
 
+import com.googlecode.lazyrecords.Aliased;
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.sql.expressions.*;
+import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 
 import java.util.Comparator;
 import java.util.Map;
+
+import static com.googlecode.lazyrecords.sql.expressions.Expressions.name;
+import static com.googlecode.totallylazy.Option.none;
+import static com.googlecode.totallylazy.Option.some;
 
 public class AnsiSqlGrammar implements SqlGrammar {
     private final Map<Class, String> mappings;
@@ -33,7 +39,7 @@ public class AnsiSqlGrammar implements SqlGrammar {
 
     @Override
     public SelectList selectList(Sequence<Keyword<?>> select) {
-        return AnsiSelectList.selectList(this, select);
+        return AnsiSelectList.selectList(select.map(functions.derivedColumn(this)));
     }
 
     @Override
@@ -51,7 +57,24 @@ public class AnsiSqlGrammar implements SqlGrammar {
         return AnsiOrderByClause.orderByClause(orderBy);
     }
 
+    @Override
+    public DerivedColumn derivedColumn(Callable1<? super Record, ?> callable) {
+        ValueExpression expression = valueExpression(callable);
+        if (callable instanceof Aliased) {
+            return AnsiDerivedColumn.derivedColumn(expression, some(AnsiAsClause.asClause(((Keyword<?>) callable).name())));
+        }
+        return AnsiDerivedColumn.derivedColumn(expression, none(AsClause.class));
+    }
 
+    @Override
+    public ValueExpression valueExpression(Callable1<? super Record, ?> callable) {
+        return AnsiValueExpression.valueExpression(callable);
+    }
+
+    @Override
+    public ValueExpression concat(Sequence<? extends Keyword<?>> keywords) {
+        return AnsiValueExpression.concat(keywords);
+    }
 
     @Override
     public Expression insertStatement(Definition definition, Record record) {

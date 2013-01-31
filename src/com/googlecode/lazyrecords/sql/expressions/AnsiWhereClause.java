@@ -49,7 +49,7 @@ public class AnsiWhereClause extends CompoundExpression implements WhereClause {
 
     public static Expression toSql(WherePredicate<Record, ?> predicate) {
         Expression predicateSql = toSql(predicate.predicate());
-        return Expressions.join(AnsiSelectList.valueExpression(predicate.callable()), predicateSql);
+        return Expressions.join(AnsiValueExpression.valueExpression(predicate.callable()), predicateSql);
     }
 
     public static Expression toSql(AndPredicate<?> predicate) {

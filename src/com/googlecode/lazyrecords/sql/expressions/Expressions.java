@@ -4,6 +4,7 @@ import com.googlecode.lazyrecords.*;
 import com.googlecode.totallylazy.*;
 import com.googlecode.totallylazy.regex.Regex;
 
+import static com.googlecode.lazyrecords.Keywords.qualifier;
 import static com.googlecode.lazyrecords.sql.expressions.ColumnReference.columnReference;
 import static com.googlecode.lazyrecords.sql.expressions.TableName.tableName;
 import static com.googlecode.totallylazy.Functions.identity;
@@ -36,16 +37,11 @@ public class Expressions {
     }
 
     public static ColumnReference name(Keyword<?> keyword) {
-        return columnReference(keyword.name(), metadata(keyword, Keywords.qualifier), metadata(keyword, Keywords.alias));
+        return columnReference(keyword.name(), keyword.metadata(qualifier));
     }
 
     public static TableName name(Definition definition) {
-        return tableName(definition.name(), metadata(definition, Keywords.qualifier), metadata(definition, Keywords.alias));
-    }
-
-    private static <T> Option<T> metadata(Named named, Keyword<T> keyword) {
-        if (named instanceof Metadata) return ((Metadata) named).metadata().getOption(keyword);
-        return Option.none();
+        return tableName(definition.name(), definition.metadata(qualifier));
     }
 
     public static Mapper<Keyword<?>, AbstractExpression> name() {

@@ -10,11 +10,11 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 import static java.lang.String.format;
 
 public class AnsiFromClause extends CompoundExpression implements FromClause {
-    private final TableName tableName;
+    private final TableReference tableReference;
 
-    private AnsiFromClause(TableName tableName) {
-        super(from, tableName);
-        this.tableName = tableName;
+    private AnsiFromClause(TableReference tableReference) {
+        super(from, tableReference);
+        this.tableReference = tableReference;
     }
 
     public static Expression toSql(Pair<Number, Join> pair) {
@@ -44,11 +44,11 @@ public class AnsiFromClause extends CompoundExpression implements FromClause {
     }
 
     public static FromClause fromClause(Definition definition) {
-        return new AnsiFromClause(name(definition));
+        return new AnsiFromClause(AnsiTableReference.tableReference(name(definition), AnsiAsClause.asClause(definition)));
     }
 
     @Override
-    public TableName tableName() {
-        return tableName;
+    public TableReference tableReference() {
+        return tableReference;
     }
 }

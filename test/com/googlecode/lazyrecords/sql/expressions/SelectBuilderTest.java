@@ -62,7 +62,7 @@ public class SelectBuilderTest {
         return new UnaryFunction<Expression>() {
             @Override
             public Expression call(Expression expression) throws Exception {
-                return ((TableName) expression).alias(alias);
+                return ((TableName) expression);//.alias(alias);
             }
         };
     }
