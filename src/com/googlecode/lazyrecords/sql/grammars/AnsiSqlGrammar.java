@@ -30,11 +30,12 @@ public class AnsiSqlGrammar implements SqlGrammar {
 
     @Override
     public SelectExpression selectExpression(Option<SetQuantifier> setQuantifier,
-                                             SelectList selectList,
-                                             FromClause fromClause,
-                                             Option<WhereClause> whereClause,
-                                             Option<OrderByClause> orderByClause) {
-        return AnsiSelectExpression.selectExpression(setQuantifier, selectList, fromClause, whereClause, orderByClause);
+                                             Sequence<Keyword<?>> selectList,
+                                             Definition fromClause,
+                                             Option<Predicate<? super Record>> whereClause,
+                                             Option<Comparator<? super Record>> orderByClause) {
+        return AnsiSelectExpression.selectExpression(setQuantifier, selectList(selectList), fromClause(fromClause),
+                whereClause.map(functions.whereClause(this)), orderByClause.map(functions.orderByClause(this)));
     }
 
     @Override
@@ -48,12 +49,12 @@ public class AnsiSqlGrammar implements SqlGrammar {
     }
 
     @Override
-    public Option<WhereClause> whereClause(Option<Predicate<? super Record>> where) {
+    public WhereClause whereClause(Predicate<? super Record> where) {
         return AnsiWhereClause.whereClause(where);
     }
 
     @Override
-    public Option<OrderByClause> orderByClause(Option<Comparator<? super Record>> orderBy) {
+    public OrderByClause orderByClause(Comparator<? super Record> orderBy) {
         return AnsiOrderByClause.orderByClause(orderBy);
     }
 

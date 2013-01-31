@@ -56,10 +56,10 @@ public class SelectBuilder implements Expression, ExpressionBuilder {
             @Override
             protected SelectExpression get() throws Exception {
                 return grammar.selectExpression(Option.<SetQuantifier>some(setQuantifier),
-                        grammar.selectList(select),
-                        grammar.fromClause(table),
-                        grammar.whereClause(where),
-                        grammar.orderByClause(comparator));
+                        select,
+                        table,
+                        where,
+                        comparator);
             }
         };
     }
