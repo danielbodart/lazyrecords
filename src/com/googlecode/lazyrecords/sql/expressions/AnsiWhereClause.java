@@ -26,7 +26,7 @@ public class AnsiWhereClause extends CompoundExpression implements WhereClause {
         return predicate.map(whereClause());
     }
 
-    public static Mapper<Predicate<? super Record>, WhereClause> whereClause() {
+    public static Mapper<Predicate<? super Record>, WhereClause>  whereClause() {
         return new Mapper<Predicate<? super Record>, WhereClause>() {
             public WhereClause call(Predicate<? super Record> predicate) throws Exception {
                 return whereClause(predicate);

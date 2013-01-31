@@ -9,16 +9,16 @@ public class ColumnReference extends Reference<ColumnReference> implements Value
         super(name, qualifier);
     }
 
-    public static ColumnReference columnReference(String text) {
-        return columnReference(text, none(String.class));
+    public static ColumnReference columnReference(String name) {
+        return columnReference(name, none(String.class));
     }
 
-    public static ColumnReference columnReference(String text, Option<String> qualifier) {
-        return new ColumnReference(text, qualifier);
+    public static ColumnReference columnReference(String name, Option<String> qualifier) {
+        return new ColumnReference(name, qualifier);
     }
 
     @Override
-    protected ColumnReference self(String text, Option<String> qualifier) {
-        return columnReference(text, qualifier);
+    protected ColumnReference self(String name, Option<String> qualifier) {
+        return columnReference(name, qualifier);
     }
 }

@@ -2,6 +2,7 @@ package com.googlecode.lazyrecords.sql.expressions;
 
 import com.googlecode.lazyrecords.*;
 import com.googlecode.totallylazy.Callable1;
+import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicate;
 
@@ -44,7 +45,11 @@ public class AnsiFromClause extends CompoundExpression implements FromClause {
     }
 
     public static FromClause fromClause(Definition definition) {
-        return new AnsiFromClause(AnsiTableReference.tableReference(name(definition), AnsiAsClause.asClause(definition)));
+        return fromClause(AnsiTableReference.tableReference(name(definition), AnsiAsClause.asClause(definition)));
+    }
+
+    public static FromClause fromClause(TableReference tableReference) {
+        return new AnsiFromClause(tableReference);
     }
 
     @Override
