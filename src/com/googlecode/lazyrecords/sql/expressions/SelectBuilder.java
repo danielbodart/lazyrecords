@@ -34,13 +34,13 @@ import static com.googlecode.totallylazy.Unchecked.cast;
 public class SelectBuilder implements Expression, ExpressionBuilder {
     private final SqlGrammar grammar;
     private final SetQuantifier setQuantifier;
-    private final Sequence<Keyword<?>> select;
+    private final Sequence<? extends Keyword<?>> select;
     private final Definition table;
     private final Option<Predicate<? super Record>> where;
     private final Option<Comparator<? super Record>> comparator;
     private final Lazy<SelectExpression> value;
 
-    private SelectBuilder(SqlGrammar grammar, SetQuantifier setQuantifier, Sequence<Keyword<?>> select,
+    private SelectBuilder(SqlGrammar grammar, SetQuantifier setQuantifier, Sequence<? extends Keyword<?>> select,
                           Definition table, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> comparator) {
         this.grammar = grammar;
         this.setQuantifier = setQuantifier;
@@ -75,7 +75,7 @@ public class SelectBuilder implements Expression, ExpressionBuilder {
 
     @Override
     public Sequence<Keyword<?>> fields() {
-        return select;
+        return select.unsafeCast();
     }
 
     public static ExpressionBuilder from(SqlGrammar grammar, Definition table) {
@@ -88,10 +88,10 @@ public class SelectBuilder implements Expression, ExpressionBuilder {
     }
 
     @Override
-    public ExpressionBuilder select(Sequence<Keyword<?>> columns) {
-        Sequence<Keyword<?>> qualifiedColumns = table.metadata(Keywords.alias).fold(columns, new Function2<Sequence<Keyword<?>>, String, Sequence<Keyword<?>>>() {
+    public ExpressionBuilder select(Sequence<? extends Keyword<?>> columns) {
+        Sequence<? extends Keyword<?>> qualifiedColumns = table.metadata(Keywords.alias).fold(columns, new Function2<Sequence<? extends Keyword<?>>, String, Sequence<Keyword<?>>>() {
             @Override
-            public Sequence<Keyword<?>> call(Sequence<Keyword<?>> keywords, final String alias) throws Exception {
+            public Sequence<Keyword<?>> call(Sequence<? extends Keyword<?>> keywords, final String alias) throws Exception {
                 return keywords.map(new UnaryFunction<Keyword<?>>() {
                     @Override
                     public Keyword<?> call(Keyword<?> keyword) throws Exception {

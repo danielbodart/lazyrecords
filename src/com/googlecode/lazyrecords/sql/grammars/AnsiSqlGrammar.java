@@ -30,7 +30,7 @@ public class AnsiSqlGrammar implements SqlGrammar {
 
     @Override
     public SelectExpression selectExpression(Option<SetQuantifier> setQuantifier,
-                                             Sequence<Keyword<?>> selectList,
+                                             Sequence<? extends Keyword<?>> selectList,
                                              Definition fromClause,
                                              Option<Predicate<? super Record>> whereClause,
                                              Option<Comparator<? super Record>> orderByClause) {
@@ -39,7 +39,7 @@ public class AnsiSqlGrammar implements SqlGrammar {
     }
 
     @Override
-    public SelectList selectList(Sequence<Keyword<?>> select) {
+    public SelectList selectList(Sequence<? extends Keyword<?>> select) {
         return AnsiSelectList.selectList(select.map(functions.derivedColumn(this)));
     }
 

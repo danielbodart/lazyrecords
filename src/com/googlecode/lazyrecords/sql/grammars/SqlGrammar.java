@@ -26,12 +26,12 @@ import java.util.Comparator;
 
 public interface SqlGrammar {
     SelectExpression selectExpression(Option<SetQuantifier> setQuantifier,
-                                      Sequence<Keyword<?>> selectList,
+                                      Sequence<? extends Keyword<?>> selectList,
                                       Definition fromClause,
                                       Option<Predicate<? super Record>> whereClause,
                                       Option<Comparator<? super Record>> orderByClause);
 
-    SelectList selectList(Sequence<Keyword<?>> select);
+    SelectList selectList(Sequence<? extends Keyword<?>> select);
 
     FromClause fromClause(Definition definition);
 

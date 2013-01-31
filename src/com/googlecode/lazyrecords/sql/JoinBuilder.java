@@ -46,7 +46,7 @@ public class JoinBuilder implements ExpressionBuilder {
     }
 
     @Override
-    public ExpressionBuilder select(Sequence<Keyword<?>> columns) {
+    public ExpressionBuilder select(Sequence<? extends Keyword<?>> columns) {
         throw new UnsupportedOperationException();
     }
 

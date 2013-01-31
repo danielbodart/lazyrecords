@@ -13,7 +13,7 @@ public interface ExpressionBuilder extends Expressible, Expression {
 
     ExpressionBuilder select(Keyword<?>... columns);
 
-    ExpressionBuilder select(Sequence<Keyword<?>> columns);
+    ExpressionBuilder select(Sequence<? extends Keyword<?>> columns);
 
     ExpressionBuilder where(Predicate<? super Record> predicate);
 
