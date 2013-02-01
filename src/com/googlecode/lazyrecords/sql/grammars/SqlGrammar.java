@@ -1,5 +1,8 @@
 package com.googlecode.lazyrecords.sql.grammars;
 
+import com.googlecode.lazyrecords.Aggregate;
+import com.googlecode.lazyrecords.AliasedKeyword;
+import com.googlecode.lazyrecords.CompositeKeyword;
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
@@ -58,6 +61,14 @@ public interface SqlGrammar {
     Expression dropTable(Definition definition);
 
     AsClause asClause(String alias);
+
+    ValueExpression valueExpression(Keyword<?> keyword);
+
+    ValueExpression valueExpression(AliasedKeyword aliasedKeyword);
+
+    ValueExpression valueExpression(Aggregate aggregate);
+
+    ValueExpression valueExpression(CompositeKeyword<?> composite);
 
 
     class functions {

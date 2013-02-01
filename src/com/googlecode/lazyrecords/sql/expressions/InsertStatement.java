@@ -5,7 +5,7 @@ import com.googlecode.lazyrecords.Record;
 
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.expression;
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.formatList;
-import static com.googlecode.lazyrecords.sql.expressions.Expressions.name;
+import static com.googlecode.lazyrecords.sql.expressions.Expressions.columnReference;
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.names;
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
 import static com.googlecode.totallylazy.Sequences.repeat;
@@ -17,7 +17,7 @@ public class InsertStatement extends CompoundExpression {
     public InsertStatement(final Definition definition, final Record record) {
         super(
                 INSERT,
-                textOnly("into").join(name(definition)),
+                textOnly("into").join(Expressions.tableName(definition)),
                 columns(record),
                 VALUES,
                 values(record)

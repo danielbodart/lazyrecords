@@ -36,25 +36,25 @@ public class Expressions {
         return TextOnlyExpression.textOnly(expression.toString());
     }
 
-    public static ColumnReference name(Keyword<?> keyword) {
-        return columnReference(keyword.name(), keyword.metadata(qualifier));
+    public static ColumnReference columnReference(Keyword<?> keyword) {
+        return ColumnReference.columnReference(keyword.name(), keyword.metadata(qualifier));
     }
 
-    public static TableName name(Definition definition) {
-        return tableName(definition.name(), definition.metadata(qualifier));
+    public static TableName tableName(Definition definition) {
+        return TableName.tableName(definition.name(), definition.metadata(qualifier));
     }
 
-    public static Mapper<Keyword<?>, AbstractExpression> name() {
-        return new Mapper<Keyword<?>, AbstractExpression>() {
+    public static Mapper<Keyword<?>, ColumnReference> columnReference() {
+        return new Mapper<Keyword<?>, ColumnReference>() {
             @Override
-            public AbstractExpression call(Keyword<?> keyword) throws Exception {
-                return name(keyword);
+            public ColumnReference call(Keyword<?> keyword) throws Exception {
+                return columnReference(keyword);
             }
         };
     }
 
     public static String names(Sequence<Keyword<?>> keywords) {
-        return formatList(keywords.map(name()));
+        return formatList(keywords.map(columnReference()));
     }
 
     public static String formatList(final Sequence<?> values) {

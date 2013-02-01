@@ -2,7 +2,6 @@ package com.googlecode.lazyrecords.sql.expressions;
 
 import com.googlecode.lazyrecords.*;
 import com.googlecode.totallylazy.Callable1;
-import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicate;
 
@@ -27,11 +26,11 @@ public class AnsiFromClause extends CompoundExpression implements FromClause {
         Callable1<Record, Predicate<Record>> predicateCreator = join.using();
         if (predicateCreator instanceof Using) {
             Using using = (Using) predicateCreator;
-            return textOnly("%s %s using %s", joinExpression(join), name(definition), names(using.keywords()));
+            return textOnly("%s %s using %s", joinExpression(join), tableName(definition), names(using.keywords()));
         }
         if (predicateCreator instanceof On) {
             On on = (On) predicateCreator;
-            return textOnly("%s %s on %s = %s.%s", joinExpression(join), name(definition), name(on.left()), tableAlias, name(on.right()));
+            return textOnly("%s %s on %s = %s.%s", joinExpression(join), tableName(definition), columnReference(on.left()), tableAlias, columnReference(on.right()));
         }
         throw new UnsupportedOperationException(format("Unknown expression %s", predicateCreator));
     }
@@ -45,7 +44,7 @@ public class AnsiFromClause extends CompoundExpression implements FromClause {
     }
 
     public static FromClause fromClause(Definition definition) {
-        return fromClause(AnsiTableReference.tableReference(name(definition), AnsiAsClause.asClause(definition)));
+        return fromClause(AnsiTableReference.tableReference(tableName(definition), AnsiAsClause.asClause(definition)));
     }
 
     public static FromClause fromClause(TableReference tableReference) {

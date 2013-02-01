@@ -13,7 +13,6 @@ import com.googlecode.totallylazy.predicates.LogicalPredicate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static com.googlecode.lazyrecords.sql.expressions.Expressions.name;
 import static com.googlecode.totallylazy.Callables.second;
 import static com.googlecode.totallylazy.Maps.pairs;
 import static com.googlecode.totallylazy.Predicates.where;
@@ -34,7 +33,7 @@ public class SetFunctionType extends TextOnlyExpression implements ValueExpressi
     }
 
     public static String functionName(final Class<? extends Reducer> aClass, Keyword<?> column) {
-        return format("%s(%s)", get(aClass), name(column));
+        return format("%s(%s)", get(aClass), Expressions.columnReference(column));
     }
 
     private static String get(Class<? extends Reducer> aClass) {
