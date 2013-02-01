@@ -6,9 +6,14 @@ import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.sql.expressions.*;
 import com.googlecode.totallylazy.Callable1;
+import com.googlecode.totallylazy.Mapper;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.comparators.AscendingComparator;
+import com.googlecode.totallylazy.comparators.CompositeComparator;
+import com.googlecode.totallylazy.comparators.DescendingComparator;
+import com.googlecode.totallylazy.multi;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -16,6 +21,7 @@ import java.util.Map;
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.name;
 import static com.googlecode.totallylazy.Option.none;
 import static com.googlecode.totallylazy.Option.some;
+import static com.googlecode.totallylazy.Sequences.one;
 
 public class AnsiSqlGrammar implements SqlGrammar {
     private final Map<Class, String> mappings;
@@ -55,8 +61,31 @@ public class AnsiSqlGrammar implements SqlGrammar {
 
     @Override
     public OrderByClause orderByClause(Comparator<? super Record> orderBy) {
-        return AnsiOrderByClause.orderByClause(orderBy);
+        return AnsiOrderByClause.orderByClause(sortSpecification(orderBy));
     }
+
+    public Sequence<SortSpecification> sortSpecification(Comparator<? super Record> comparator) {
+        return new multi() { }.<Sequence<SortSpecification>>methodOption(comparator).getOrThrow(new UnsupportedOperationException("Unsupported comparator " + comparator));
+    }
+
+    public Sequence<SortSpecification> sortSpecification(AscendingComparator<? super Record, ?> comparator) {
+        return one(AnsiSortSpecification.sortSpecification(valueExpression(comparator.callable()), OrderingSpecification.asc));
+    }
+
+    public Sequence<SortSpecification> sortSpecification(DescendingComparator<? super Record, ?> comparator) {
+        return one(AnsiSortSpecification.sortSpecification(valueExpression(comparator.callable()), OrderingSpecification.desc));
+    }
+
+    public Sequence<SortSpecification> sortSpecification(CompositeComparator<Record> comparator) {
+        return comparator.comparators().flatMap(sortSpecification);
+    }
+
+    public Mapper<Comparator<? super Record>, Sequence<SortSpecification>> sortSpecification = new Mapper<Comparator<? super Record>, Sequence<SortSpecification>>() {
+        @Override
+        public Sequence<SortSpecification> call(Comparator<? super Record> comparator) throws Exception {
+            return sortSpecification(comparator);
+        }
+    };
 
     @Override
     public DerivedColumn derivedColumn(Callable1<? super Record, ?> callable) {
