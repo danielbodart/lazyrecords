@@ -1,6 +1,6 @@
 #!/bin/sh
 
-version=99
+version=100
 artifact=jcompilo
 group=com/googlecode/${artifact}
 repo=repo.bodar.com.s3.amazonaws.com
