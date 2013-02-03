@@ -70,6 +70,13 @@ public class Expressions {
         }
     };
 
+    public static Mapper<String, TextOnlyExpression> quotedText = new Mapper<String, TextOnlyExpression>() {
+        @Override
+        public TextOnlyExpression call(String value) throws Exception {
+            return textOnly(quote(value));
+        }
+    };
+
     public static String quote(String name) {
         if (Strings.isEmpty(name)) return name;
         if (legal.matches(name)) return name;

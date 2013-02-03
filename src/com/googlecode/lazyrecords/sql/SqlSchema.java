@@ -34,7 +34,7 @@ public class SqlSchema implements Schema {
     @Override
     public boolean exists(Definition definition) {
         try {
-            sqlRecords.query(from(grammar, definition.metadata(Keywords.alias, null)).select(one).where(alwaysFalse()).build(), Sequences.<Keyword<?>>empty()).realise();
+            sqlRecords.query(from(grammar, definition.metadata(Keywords.alias, null)).select(one).filter(alwaysFalse()).build(), Sequences.<Keyword<?>>empty()).realise();
             return true;
         } catch (Exception e) {
             return false;

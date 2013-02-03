@@ -6,7 +6,6 @@ import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.totallylazy.Mapper;
-import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
 import com.googlecode.totallylazy.UnaryFunction;
@@ -55,10 +54,10 @@ public class SelectBuilderTest {
 
     @Test
     public void canFlatternTheExpression() throws Exception {
-        SelectExpression expression = (SelectExpression) from(grammar, cars).select(make, model).distinct().where(where(make, Grammar.is("Honda"))).build();
+        SelectExpression expression = (SelectExpression) from(grammar, cars).select(make, model).distinct().filter(where(make, Grammar.is("Honda"))).build();
         Sequence<Expression> original = expressions(expression).realise();
         String alias = "t0";
-        Sequence<Expression> expr = original.map(when(instanceOf(TableReference.class), aliasTable(alias))).
+        Sequence<Expression> expr = original.map(when(instanceOf(TablePrimary.class), aliasTable(alias))).
                 map(when(instanceOf(ColumnReference.class), qualifyColumn(alias))).realise();
         System.out.println(expr);
     }
@@ -67,7 +66,7 @@ public class SelectBuilderTest {
         return new UnaryFunction<Expression>() {
             @Override
             public Expression call(Expression expression) throws Exception {
-                return AnsiTableReference.tableReference(((TableReference) expression).tableName(), some(AnsiAsClause.asClause(alias)));
+                return AnsiTablePrimary.tablePrimary(((TablePrimary) expression).tableName(), some(AnsiAsClause.asClause(alias)));
             }
         };
     }
@@ -82,7 +81,7 @@ public class SelectBuilderTest {
     }
 
     private Sequence<Expression> expressions(Expression expression) {
-        if (expression instanceof TableReference) {
+        if (expression instanceof TablePrimary) {
             return Sequences.one(expression);
         }
         if (expression instanceof CompoundExpression) {

@@ -8,9 +8,9 @@ import static com.googlecode.totallylazy.Unchecked.cast;
 
 public abstract class Join implements Callable1<Record, Iterable<Record>> {
     protected final Sequence<Record> records;
-    protected final Callable1<Record, Predicate<Record>> using;
+    protected final Joiner using;
 
-    public Join(Sequence<Record> records, Callable1<? super Record, Predicate<Record>> using) {
+    protected Join(Sequence<Record> records, Joiner using) {
         this.records = records;
         this.using = cast(using);
     }
@@ -19,11 +19,11 @@ public abstract class Join implements Callable1<Record, Iterable<Record>> {
         return records;
     }
 
-    public Callable1<Record, Predicate<Record>> using() {
+    public Joiner joiner() {
         return using;
     }
 
-    public static Join join(Sequence<Record> records, Callable1<Record, Predicate<Record>> using) {
+    public static Join join(Sequence<Record> records, Joiner using) {
         return InnerJoin.innerJoin(records, using);
     }
 }

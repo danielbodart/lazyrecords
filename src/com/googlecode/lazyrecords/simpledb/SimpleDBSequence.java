@@ -71,7 +71,7 @@ public class SimpleDBSequence<T> extends Sequence<T> {
 
     @Override
     public Sequence<T> filter(Predicate<? super T> predicate) {
-        return new SimpleDBSequence<T>(sdb, builder.where(Unchecked.<Predicate<Record>>cast(predicate)), mappings, itemToRecord, logger, consistentRead);
+        return new SimpleDBSequence<T>(sdb, builder.filter(Unchecked.<Predicate<Record>>cast(predicate)), mappings, itemToRecord, logger, consistentRead);
     }
 
     @Override

@@ -1,9 +1,7 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
 import com.googlecode.lazyrecords.*;
-import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Pair;
-import com.googlecode.totallylazy.Predicate;
 
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.*;
 import static com.googlecode.totallylazy.Sequences.sequence;
@@ -23,28 +21,28 @@ public class AnsiFromClause extends CompoundExpression implements FromClause {
         SelectBuilder select = SelectBuilder.selectBuilder(join);
         String tableAlias = AnsiSelectExpression.tableAlias(index);
         Definition definition = select.table().metadata(Keywords.alias, tableAlias);
-        Callable1<Record, Predicate<Record>> predicateCreator = join.using();
-        if (predicateCreator instanceof Using) {
-            Using using = (Using) predicateCreator;
+        Joiner joiner = join.joiner();
+        if (joiner instanceof Using) {
+            Using using = (Using) joiner;
             return textOnly("%s %s using %s", joinExpression(join), tableName(definition), names(using.keywords()));
         }
-        if (predicateCreator instanceof On) {
-            On on = (On) predicateCreator;
+        if (joiner instanceof On) {
+            On on = (On) joiner;
             return textOnly("%s %s on %s = %s.%s", joinExpression(join), tableName(definition), columnReference(on.left()), tableAlias, columnReference(on.right()));
         }
-        throw new UnsupportedOperationException(format("Unknown expression %s", predicateCreator));
+        throw new UnsupportedOperationException(format("Unknown expression %s", joiner));
     }
 
     private static String joinExpression(Join join) {
         if (join instanceof InnerJoin)
             return "inner join";
-        if (join instanceof LeftJoin)
+        if (join instanceof OuterJoin)
             return "left join";
         throw new UnsupportedOperationException(format("Cannot created join expression for %s", join));
     }
 
     public static FromClause fromClause(Definition definition) {
-        return fromClause(AnsiTableReference.tableReference(tableName(definition), AnsiAsClause.asClause(definition)));
+        return fromClause(AnsiTablePrimary.tablePrimary(tableName(definition), AnsiAsClause.asClause(definition)));
     }
 
     public static FromClause fromClause(TableReference tableReference) {

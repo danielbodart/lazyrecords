@@ -1,7 +1,6 @@
 package com.googlecode.lazyrecords.sql;
 
 import com.googlecode.lazyrecords.Aggregates;
-import com.googlecode.lazyrecords.Join;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Logger;
 import com.googlecode.lazyrecords.Loggers;
@@ -85,19 +84,12 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
 
     @Override
     public <S> Sequence<S> flatMap(Callable1<? super T, ? extends Iterable<? extends S>> callable) {
-        Callable1 raw = (Callable1) callable;
-        if (raw instanceof Join) {
-            Join join = (Join) raw;
-            Sequence<Record> records = join.records();
-            if(records instanceof Expressible){
-                Expression express = ((Expressible) records).build();
-                if(express instanceof ExpressionBuilder){
-                    ExpressionBuilder expressionBuilder = (ExpressionBuilder) express;
-                    ExpressionBuilder joined = JoinBuilder.join(selectBuilder, expressionBuilder);
-                    return Unchecked.cast(build(joined));
-                }
-            }
-        }
+//        Callable1 raw = (Callable1) callable;
+//        if (raw instanceof Join) {
+//            Join join = (Join) raw;
+//            ExpressionBuilder joined = JoinBuilder.join(selectBuilder, join);
+//            return Unchecked.cast(build(joined));
+//        }
         logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.MESSAGE, "Unsupported function passed to 'flatMap', moving computation to client"), pair(Loggers.FUNCTION, callable)));
         return super.flatMap(callable);
     }
@@ -105,7 +97,7 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
     @Override
     public Sequence<T> filter(Predicate<? super T> predicate) {
         try {
-            return build(selectBuilder.where(Unchecked.<Predicate<Record>>cast(predicate)));
+            return build(selectBuilder.filter(Unchecked.<Predicate<Record>>cast(predicate)));
         } catch (UnsupportedOperationException ex) {
             logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.MESSAGE, "Unsupported predicate passed to 'filter', moving computation to client"), pair(Loggers.PREDICATE, predicate)));
             return super.filter(predicate);

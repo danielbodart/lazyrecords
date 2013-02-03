@@ -1,24 +1,20 @@
 package com.googlecode.lazyrecords;
 
-import com.googlecode.totallylazy.Callable1;
-import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Unchecked;
 
 import static com.googlecode.lazyrecords.Record.functions.merge;
 
 
 public class InnerJoin extends Join {
-
-	private InnerJoin(Sequence<Record> records, Callable1<? super Record, Predicate<Record>> using) {
-		super(records, Unchecked.<Callable1<? super Record, Predicate<Record>>>cast(using));
+    private InnerJoin(Sequence<Record> records, Joiner using) {
+        super(records, using);
     }
 
     public Iterable<Record> call(Record record) throws Exception {
         return records.filter(using.call(record)).map(merge(record));
     }
 
-    public static Join innerJoin(final Sequence<Record> records, final Callable1<? super Record, Predicate<Record>> using) {
+    public static Join innerJoin(final Sequence<Record> records, final Joiner using) {
         return new InnerJoin(records, using);
     }
 

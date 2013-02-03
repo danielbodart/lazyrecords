@@ -78,17 +78,17 @@ public class SelectBuilder implements Expression, ExpressionBuilder {
         return select.unsafeCast();
     }
 
-    public static ExpressionBuilder from(SqlGrammar grammar, Definition table) {
+    public static SelectBuilder from(SqlGrammar grammar, Definition table) {
         return new SelectBuilder(grammar, ALL, table.fields(), table, Option.<Predicate<? super Record>>none(), Option.<Comparator<? super Record>>none());
     }
 
     @Override
-    public ExpressionBuilder select(Keyword<?>... columns) {
+    public SelectBuilder select(Keyword<?>... columns) {
         return select(sequence(columns));
     }
 
     @Override
-    public ExpressionBuilder select(Sequence<? extends Keyword<?>> columns) {
+    public SelectBuilder select(Sequence<? extends Keyword<?>> columns) {
         Sequence<? extends Keyword<?>> qualifiedColumns = table.metadata(Keywords.alias).fold(columns, new Function2<Sequence<? extends Keyword<?>>, String, Sequence<Keyword<?>>>() {
             @Override
             public Sequence<Keyword<?>> call(Sequence<? extends Keyword<?>> keywords, final String alias) throws Exception {
@@ -104,7 +104,7 @@ public class SelectBuilder implements Expression, ExpressionBuilder {
     }
 
     @Override
-    public ExpressionBuilder where(Predicate<? super Record> predicate) {
+    public SelectBuilder filter(Predicate<? super Record> predicate) {
         Predicate<? super Record> newWhere = combineWithWhereClause(predicate);
         return new SelectBuilder(grammar, setQuantifier, select, table, Option.<Predicate<? super Record>>some(newWhere), comparator);
     }
@@ -115,24 +115,24 @@ public class SelectBuilder implements Expression, ExpressionBuilder {
     }
 
     @Override
-    public ExpressionBuilder orderBy(Comparator<? super Record> comparator) {
+    public SelectBuilder orderBy(Comparator<? super Record> comparator) {
         return new SelectBuilder(grammar, setQuantifier, select, table, where, Option.<Comparator<? super Record>>some(comparator));
     }
 
     @Override
-    public ExpressionBuilder count() {
+    public SelectBuilder count() {
         Aggregate<?, Number> recordCount = Aggregate.count(keyword("*", Long.class)).as("record_count");
         Sequence<Keyword<?>> sequence = Sequences.<Keyword<?>>sequence(recordCount);
         return new SelectBuilder(grammar, setQuantifier, sequence, table, where, Option.<Comparator<? super Record>>none());
     }
 
     @Override
-    public ExpressionBuilder distinct() {
+    public SelectBuilder distinct() {
         return new SelectBuilder(grammar, DISTINCT, select, table, where, comparator);
     }
 
     @Override
-    public ExpressionBuilder reduce(Reducer<?,?> reducer) {
+    public SelectBuilder reduce(Reducer<?,?> reducer) {
         return select(aggregates(reducer));
     }
 

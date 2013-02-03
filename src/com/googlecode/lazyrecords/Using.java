@@ -1,16 +1,16 @@
 package com.googlecode.lazyrecords;
 
-import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
+import com.googlecode.totallylazy.predicates.LogicalPredicate;
 
 import static com.googlecode.totallylazy.Predicates.and;
 import static com.googlecode.totallylazy.Predicates.is;
 import static com.googlecode.totallylazy.Predicates.where;
 
-public class Using implements Callable1<Record, Predicate<Record>> {
+public class Using implements Joiner {
     private final Sequence<Keyword<?>> keywords;
 
     protected Using(Sequence<Keyword<?>> keywords) {
@@ -25,7 +25,7 @@ public class Using implements Callable1<Record, Predicate<Record>> {
         return new Using(keyword);
     }
 
-    public Predicate<Record> call(Record record) {
+    public LogicalPredicate<Record> call(Record record) {
         return and(keywords.map(asPredicate(record)).toArray(Predicate.class));
     }
 
@@ -39,5 +39,10 @@ public class Using implements Callable1<Record, Predicate<Record>> {
 
     public Sequence<Keyword<?>> keywords() {
         return keywords;
+    }
+
+    @Override
+    public boolean matches(final Record a, final Record b) {
+        return call(a).matches(b);
     }
 }

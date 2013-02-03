@@ -1,52 +1,52 @@
 package com.googlecode.lazyrecords;
 
-import com.googlecode.totallylazy.*;
+import com.googlecode.totallylazy.predicates.EqualsBinaryPredicate;
+import com.googlecode.totallylazy.predicates.LogicalBinaryPredicate;
 import com.googlecode.totallylazy.predicates.LogicalPredicate;
 
-import static com.googlecode.totallylazy.Predicates.*;
-import static com.googlecode.totallylazy.Unchecked.cast;
+import static com.googlecode.totallylazy.LazyException.lazyException;
+import static com.googlecode.totallylazy.Predicates.where;
 
-public class On<T> implements Callable1<Record, Predicate<Record>> {
-    private final Keyword<T> left,right;
-    private final Function1<T, Predicate<T>> predicate;
+public class On<T> implements Joiner {
+    private final Keyword<T> left, right;
+    private final LogicalBinaryPredicate<T> predicate;
 
-    protected On(Keyword<T> left, Function1<T, Predicate<T>> predicate, Keyword<T> right) {
+    protected On(Keyword<T> left, LogicalBinaryPredicate<T> predicate, Keyword<T> right) {
         this.left = left;
         this.right = right;
-        this.predicate = cast(predicate);
+        this.predicate = predicate;
     }
 
     public static <T> On<T> on(Keyword<T> left, Keyword<T> right) {
-        return on(left, On.<T>is(), right);
+        return on(left, EqualsBinaryPredicate.<T>is(), right);
     }
 
-    public static <T> On<T> on(Keyword<T> left, Callable1<T, ? extends Predicate<T>> predicateCreator, Keyword<T> right) {
-        Function1<T, Predicate<T>> function = Functions.function(predicateCreator);
-        return new On<T>(left, function, right);
+    public static <T> On<T> on(Keyword<T> left, LogicalBinaryPredicate<T> predicate, Keyword<T> right) {
+        return new On<T>(left, predicate, right);
     }
 
-    private static <T> Mapper<T,LogicalPredicate<T>> is() {
-        return new Mapper<T, LogicalPredicate<T>>() {
-            @Override
-            public LogicalPredicate<T> call(T o) throws Exception {
-                return Predicates.is(o);
-            }
-        };
-    }
-
-    public Predicate<Record> call(Record record) throws Exception {
-        return where(right, predicate.call(left.call(record)));
+    public LogicalPredicate<Record> call(Record record) throws Exception {
+        return where(right, predicate.apply(left.call(record)));
     }
 
     public Keyword<T> left() {
         return left;
     }
 
-    public Function1<T, Predicate<T>> predicate() {
+    public LogicalBinaryPredicate<T> predicate() {
         return predicate;
     }
 
     public Keyword<T> right() {
         return right;
+    }
+
+    @Override
+    public boolean matches(final Record a, final Record b) {
+        try {
+            return call(a).matches(b);
+        } catch (Exception e) {
+            throw lazyException(e);
+        }
     }
 }

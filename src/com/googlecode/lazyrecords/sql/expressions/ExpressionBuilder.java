@@ -15,7 +15,7 @@ public interface ExpressionBuilder extends Expressible, Expression {
 
     ExpressionBuilder select(Sequence<? extends Keyword<?>> columns);
 
-    ExpressionBuilder where(Predicate<? super Record> predicate);
+    ExpressionBuilder filter(Predicate<? super Record> predicate);
 
     ExpressionBuilder orderBy(Comparator<? super Record> comparator);
 

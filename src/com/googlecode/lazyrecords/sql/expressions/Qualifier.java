@@ -4,21 +4,11 @@ import com.googlecode.totallylazy.*;
 
 import static com.googlecode.totallylazy.Unchecked.cast;
 
-public class Qualifier {
+public class Qualifier extends AbstractQualifier {
     private final String qualified;
 
     public Qualifier(String qualified) {
         this.qualified = qualified;
-    }
-
-    public <T extends Expression> T qualify(final T expression) {
-        return new multi() {}.<T>methodOption(expression).getOrElse(new Function<T>() {
-            @Override
-            public T call() throws Exception {
-                if(expression instanceof CompoundExpression) return cast(compound((CompoundExpression) expression));
-                return expression;
-            }
-        });
     }
 
     public SelectExpression qualify(SelectExpression expression) {
@@ -30,8 +20,8 @@ public class Qualifier {
         return AnsiFromClause.fromClause(qualify(fromClause.tableReference()));
     }
 
-    public TableReference qualify(TableReference tableReference) {
-        return AnsiTableReference.tableReference(tableReference.tableName().qualify(qualified), tableReference.asClause());
+    public TablePrimary qualify(TablePrimary tablePrimary) {
+        return AnsiTablePrimary.tablePrimary(tablePrimary.tableName(), Option.some(AnsiAsClause.asClause(qualified)));
     }
 
     public SelectList qualify(SelectList selectList) {
@@ -46,7 +36,7 @@ public class Qualifier {
         return AnsiPredicateExpression.predicateExpression(qualify(predicateExpression.predicand()), qualify(predicateExpression.predicate()));
     }
 
-    public CompoundExpression compound(CompoundExpression compoundExpression) {
+    public CompoundExpression qualify(CompoundExpression compoundExpression) {
         return new CompoundExpression(qualify(compoundExpression.expressions()), compoundExpression.start(), compoundExpression.separator(), compoundExpression.end());
     }
 
@@ -56,19 +46,6 @@ public class Qualifier {
 
     public ColumnReference qualify(ColumnReference columnReference) {
         return ColumnReference.columnReference(columnReference.name(), Option.some(qualified));
-    }
-
-    public  <T extends Expression, M extends Functor<T>> M qualify(M items) {
-        return cast(items.map(this.<T>qualify()));
-    }
-
-    private <T extends Expression> UnaryFunction<T> qualify() {
-        return new UnaryFunction<T>() {
-            @Override
-            public T call(T expression) throws Exception {
-                return qualify(expression);
-            }
-        };
     }
 
 }
