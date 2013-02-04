@@ -153,12 +153,12 @@ public class AnsiJoinBuilder implements ExpressionBuilder {
 
     @Override
     public String text() {
-        throw new UnsupportedOperationException();
+        return expression.text();
     }
 
     @Override
     public Sequence<Object> parameters() {
-        throw new UnsupportedOperationException();
+        return expression.parameters();
     }
 
 
