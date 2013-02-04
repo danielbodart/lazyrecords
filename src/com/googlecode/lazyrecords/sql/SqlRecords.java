@@ -8,6 +8,7 @@ import com.googlecode.lazyrecords.Logger;
 import com.googlecode.lazyrecords.Loggers;
 import com.googlecode.lazyrecords.Queryable;
 import com.googlecode.lazyrecords.Record;
+import com.googlecode.lazyrecords.sql.expressions.AnsiSelectBuilder;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.expressions.Expressions;
 import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
@@ -63,7 +64,7 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
 
 
     public SqlSequence<Record> get(Definition definition) {
-        return new SqlSequence<Record>(this, from(grammar, definition), logger, Functions.<Record>identity());
+        return new SqlSequence<Record>(this, AnsiSelectBuilder.from(grammar, definition), logger, Functions.<Record>identity());
     }
 
     public Sequence<Record> query(final Expression expression, final Sequence<Keyword<?>> definitions) {

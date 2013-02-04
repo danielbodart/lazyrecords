@@ -145,10 +145,11 @@ public class AnsiSqlGrammar implements SqlGrammar {
     @Override
     public DerivedColumn derivedColumn(Callable1<? super Record, ?> callable) {
         ValueExpression expression = valueExpression(callable);
+        Keyword<?> keyword = (Keyword<?>) callable;
         if (callable instanceof Aliased) {
-            return AnsiDerivedColumn.derivedColumn(expression, some(asClause(((Keyword<?>) callable).name())));
+            return AnsiDerivedColumn.derivedColumn(expression, some(asClause(keyword.name())), keyword.forClass());
         }
-        return AnsiDerivedColumn.derivedColumn(expression, none(AsClause.class));
+        return AnsiDerivedColumn.derivedColumn(expression, none(AsClause.class), keyword.forClass());
     }
 
     @Override
@@ -223,13 +224,13 @@ public class AnsiSqlGrammar implements SqlGrammar {
 
     public Expression toSql(AndPredicate<?> predicate) {
         if (predicate.predicates().isEmpty()) return empty();
-        return Expressions.join(toExpressions(predicate.predicates()), "(", " and ", ")");
+        return AndExpression.andExpression(toExpressions(predicate.predicates()));
     }
 
     public Expression toSql(OrPredicate<?> predicate) {
         if (predicate.predicates().isEmpty()) return empty();
         if (!predicate.predicates().safeCast(AlwaysTrue.class).isEmpty()) return empty();
-        return Expressions.join(toExpressions(predicate.predicates()), "(", " or ", ")");
+        return OrExpression.orExpression(toExpressions(predicate.predicates()));
     }
 
     public Expression toSql(Not<?> predicate) {

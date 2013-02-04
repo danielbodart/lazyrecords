@@ -88,7 +88,7 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
         Callable1 raw = (Callable1) callable;
         if (raw instanceof Join) {
             Join join = (Join) raw;
-            ExpressionBuilder joined = JoinBuilder.join(selectBuilder, join);
+            ExpressionBuilder joined = AnsiJoinBuilder.join(selectBuilder, join);
             return Unchecked.cast(build(joined));
         }
         logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.MESSAGE, "Unsupported function passed to 'flatMap', moving computation to client"), pair(Loggers.FUNCTION, callable)));

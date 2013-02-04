@@ -13,13 +13,13 @@ import static com.googlecode.totallylazy.Strings.equalIgnoringCase;
 import static java.lang.String.format;
 
 public class AnsiSelectExpression extends CompoundExpression implements SelectExpression {
-    private final Option<SetQuantifier> setQuantifier;
-    private final SelectList selectList;
-    private final FromClause fromClause;
-    private final Option<WhereClause> whereClause;
-    private final Option<OrderByClause> orderByClause;
+    protected final Option<SetQuantifier> setQuantifier;
+    protected final SelectList selectList;
+    protected final FromClause fromClause;
+    protected final Option<WhereClause> whereClause;
+    protected final Option<OrderByClause> orderByClause;
 
-    private AnsiSelectExpression(Option<SetQuantifier> setQuantifier,
+    protected AnsiSelectExpression(Option<SetQuantifier> setQuantifier,
                                  SelectList selectList,
                                  FromClause fromClause,
                                  Option<WhereClause> whereClause,

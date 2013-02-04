@@ -2,8 +2,6 @@ package com.googlecode.lazyrecords.sql.expressions;
 
 import com.googlecode.totallylazy.*;
 
-import static com.googlecode.totallylazy.Unchecked.cast;
-
 public class Qualifier extends AbstractQualifier {
     private final String qualified;
 
@@ -45,7 +43,7 @@ public class Qualifier extends AbstractQualifier {
     }
 
     public DerivedColumn qualify(DerivedColumn derivedColumn) {
-        return AnsiDerivedColumn.derivedColumn(qualify(derivedColumn.valueExpression()), derivedColumn.asClause());
+        return AnsiDerivedColumn.derivedColumn(qualify(derivedColumn.valueExpression()), derivedColumn.asClause(), derivedColumn.forClass());
     }
 
     public ColumnReference qualify(ColumnReference columnReference) {

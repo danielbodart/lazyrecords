@@ -21,7 +21,6 @@ import com.googlecode.lazyrecords.sql.expressions.JoinSpecification;
 import com.googlecode.lazyrecords.sql.expressions.JoinType;
 import com.googlecode.lazyrecords.sql.expressions.NamedColumnsJoin;
 import com.googlecode.lazyrecords.sql.expressions.Qualifier;
-import com.googlecode.lazyrecords.sql.expressions.SelectBuilder;
 import com.googlecode.lazyrecords.sql.expressions.SelectExpression;
 import com.googlecode.lazyrecords.sql.expressions.SelectList;
 import com.googlecode.lazyrecords.sql.expressions.TableReference;
@@ -33,7 +32,6 @@ import com.googlecode.totallylazy.Quadruple;
 import com.googlecode.totallylazy.Reducer;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Triple;
-import com.googlecode.totallylazy.multi;
 
 import java.util.Comparator;
 
@@ -50,32 +48,27 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.Triple.triple;
 import static com.googlecode.totallylazy.numbers.Numbers.increment;
 
-public class JoinBuilder implements ExpressionBuilder {
+public class AnsiJoinBuilder implements ExpressionBuilder {
     public static final String primaryQualified = "p";
     public static final String secondaryQualifier = "s";
-    private final SelectBuilder primary;
+    private final ExpressionBuilder primary;
     private final Sequence<Triple<ExpressionBuilder, JoinType, JoinSpecification>> secondaries;
 
-    private JoinBuilder(SelectBuilder primary, Sequence<Triple<ExpressionBuilder, JoinType, JoinSpecification>> secondaries) {
+    private AnsiJoinBuilder(ExpressionBuilder primary, Sequence<Triple<ExpressionBuilder, JoinType, JoinSpecification>> secondaries) {
         this.primary = primary;
         this.secondaries = secondaries;
     }
 
-    public static JoinBuilder join(ExpressionBuilder primary, ExpressionBuilder secondary, JoinType type, JoinSpecification specification) {
-        return new multi() {
-        }.method(primary, secondary, type, specification);
+    public static AnsiJoinBuilder join(ExpressionBuilder primary, ExpressionBuilder secondary, JoinType type, JoinSpecification specification) {
+        if (primary instanceof AnsiJoinBuilder) {
+            AnsiJoinBuilder builder = (AnsiJoinBuilder) primary;
+            return join(builder.primary, builder.secondaries.add(triple(secondary, type, specification)));
+        }
+        return join(primary, one(triple(secondary, type, specification)));
     }
 
-    public static JoinBuilder join(SelectBuilder builder, ExpressionBuilder secondary, JoinType type, JoinSpecification specification) {
-        return join(builder, one(triple(secondary, type, specification)));
-    }
-
-    public static JoinBuilder join(SelectBuilder primary, Sequence<Triple<ExpressionBuilder, JoinType, JoinSpecification>> secondaries) {
-        return new JoinBuilder(primary, secondaries);
-    }
-
-    public static JoinBuilder join(JoinBuilder builder, ExpressionBuilder secondary, JoinType type, JoinSpecification specification) {
-        return join(builder.primary, builder.secondaries.add(triple(secondary, type, specification)));
+    public static AnsiJoinBuilder join(ExpressionBuilder primary, Sequence<Triple<ExpressionBuilder, JoinType, JoinSpecification>> secondaries) {
+        return new AnsiJoinBuilder(primary, secondaries);
     }
 
     public static ExpressionBuilder join(final ExpressionBuilder builder, final Join join) {
@@ -154,7 +147,7 @@ public class JoinBuilder implements ExpressionBuilder {
 
     @Override
     public SelectExpression build() {
-        SelectExpression qualifiedPrimary = new Qualifier(primaryQualified).qualify(primary.build());
+        SelectExpression qualifiedPrimary = (SelectExpression) new Qualifier(primaryQualified).qualify(primary.build());
         Sequence<SelectExpression> qualifiedSecondaries = secondaries.map(first(ExpressionBuilder.class)).
                 map(selectExpression).
                 zipWithIndex().

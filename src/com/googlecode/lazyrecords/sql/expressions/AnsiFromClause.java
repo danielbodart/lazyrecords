@@ -1,11 +1,8 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
-import com.googlecode.lazyrecords.*;
-import com.googlecode.totallylazy.Pair;
+import com.googlecode.lazyrecords.Definition;
 
-import static com.googlecode.lazyrecords.sql.expressions.Expressions.*;
-import static com.googlecode.totallylazy.Sequences.sequence;
-import static java.lang.String.format;
+import static com.googlecode.lazyrecords.sql.expressions.Expressions.tableName;
 
 public class AnsiFromClause extends CompoundExpression implements FromClause {
     private final TableReference tableReference;
@@ -13,32 +10,6 @@ public class AnsiFromClause extends CompoundExpression implements FromClause {
     private AnsiFromClause(TableReference tableReference) {
         super(from, tableReference);
         this.tableReference = tableReference;
-    }
-
-    public static Expression toSql(Pair<Number, Join> pair) {
-        Number index = pair.first();
-        Join join = pair.second();
-        SelectBuilder select = SelectBuilder.selectBuilder(join);
-        String tableAlias = AnsiSelectExpression.tableAlias(index);
-        Definition definition = select.table().metadata(Keywords.alias, tableAlias);
-        Joiner joiner = join.joiner();
-        if (joiner instanceof Using) {
-            Using using = (Using) joiner;
-            return textOnly("%s %s using %s", joinExpression(join), tableName(definition), names(using.keywords()));
-        }
-        if (joiner instanceof On) {
-            On on = (On) joiner;
-            return textOnly("%s %s on %s = %s.%s", joinExpression(join), tableName(definition), columnReference(on.left()), tableAlias, columnReference(on.right()));
-        }
-        throw new UnsupportedOperationException(format("Unknown expression %s", joiner));
-    }
-
-    private static String joinExpression(Join join) {
-        if (join instanceof InnerJoin)
-            return "inner join";
-        if (join instanceof OuterJoin)
-            return "left join";
-        throw new UnsupportedOperationException(format("Cannot created join expression for %s", join));
     }
 
     public static FromClause fromClause(Definition definition) {
