@@ -25,10 +25,14 @@ public class StandardParser implements PredicateParser {
     private final StringMappings mappings;
 
     public StandardParser() {
-        mappings = new StringMappings().
+        this(new StringMappings().
                 add(Integer.class, new IntegerMapping()).
                 add(Long.class, new LongMapping()).
-                add(Date.class, new DateMapping(new DateFormatConverter(sequence(DATE_FORMAT))));
+                add(Date.class, new DateMapping(new DateFormatConverter(sequence(DATE_FORMAT)))));
+    }
+
+    public StandardParser(StringMappings mappings) {
+        this.mappings = mappings;
     }
 
     public Predicate<Record> parse(String raw, Sequence<? extends Keyword<?>> implicits) throws IllegalArgumentException{
