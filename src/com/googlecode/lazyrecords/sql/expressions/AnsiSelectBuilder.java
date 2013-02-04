@@ -5,20 +5,19 @@ import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.sql.grammars.AndExpression;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
-import com.googlecode.totallylazy.Mapper;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Reducer;
 import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Sequences;
 
 import java.util.Comparator;
 
-import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
 import static com.googlecode.lazyrecords.sql.expressions.AnsiSelectExpression.selectExpression;
-import static com.googlecode.lazyrecords.sql.expressions.DerivedColumn.methods.columnReferences;
+import static com.googlecode.lazyrecords.sql.expressions.AnsiSetQuantifier.DISTINCT;
+import static com.googlecode.lazyrecords.sql.expressions.AnsiWhereClause.whereClause;
 import static com.googlecode.lazyrecords.sql.expressions.SelectBuilder.aggregates;
 import static com.googlecode.lazyrecords.sql.expressions.SelectBuilder.countStar;
+import static com.googlecode.lazyrecords.sql.grammars.AndExpression.andExpression;
 import static com.googlecode.totallylazy.Option.some;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
@@ -47,30 +46,7 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
 
     @Override
     public Sequence<Keyword<?>> fields() {
-        return expression.selectList().derivedColumns().flatMap(new Mapper<DerivedColumn, Sequence<Keyword<?>>>() {
-            @Override
-            public Sequence<Keyword<?>> call(final DerivedColumn column) throws Exception {
-                if (!column.asClause().isEmpty())
-                    return Sequences.<Keyword<?>>one(keyword(removeQuotes(column.asClause().get().alias()), column.forClass()));
-                return columnReferences(column).map(asKeyword(column));
-            }
-        });
-    }
-
-    private Mapper<ColumnReference, Keyword<?>> asKeyword(final DerivedColumn column) {
-        return new Mapper<ColumnReference, Keyword<?>>() {
-            @Override
-            public Keyword<?> call(final ColumnReference columnReference) throws Exception {
-                return keyword(removeQuotes(columnReference.name()), column.forClass());
-            }
-        };
-    }
-
-    public static String removeQuotes(String s) {
-        s = s.trim();
-        if (s.startsWith("\"")) s = s.substring(1);
-        if (s.endsWith("\"")) s = s.substring(0, s.length() - 1);
-        return s;
+        return SelectList.methods.fields(expression.selectList());
     }
 
     @Override
@@ -83,7 +59,7 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
         return select(grammar.selectList(columns));
     }
 
-    public ExpressionBuilder select(final SelectList selectList) {
+    public AnsiSelectBuilder select(final SelectList selectList) {
         return from(grammar, selectExpression(
                 expression.setQuantifier(),
                 selectList,
@@ -108,7 +84,7 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
 
     private WhereClause combine(final Option<WhereClause> existing, final WhereClause additional) {
         if (existing.isEmpty()) return additional;
-        return AnsiWhereClause.whereClause(AndExpression.andExpression(existing.get().expression(), additional.expression()));
+        return whereClause(andExpression(existing.get().expression(), additional.expression()));
     }
 
     @Override
@@ -138,7 +114,7 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
     @Override
     public ExpressionBuilder distinct() {
         return from(grammar, selectExpression(
-                Option.<SetQuantifier>some(AnsiSetQuantifier.DISTINCT),
+                Option.<SetQuantifier>some(DISTINCT),
                 expression.selectList(),
                 expression.fromClause(),
                 expression.whereClause(),
@@ -151,7 +127,7 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
     }
 
     @Override
-    public Expression build() {
+    public SelectExpression build() {
         return expression;
     }
 

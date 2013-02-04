@@ -23,6 +23,22 @@ public class QualifierTest {
     private static final SqlGrammar grammar = new AnsiSqlGrammar();
 
     @Test
+    public void doesNotOverrideAlreadyQualifiedSelectExpression() throws Exception {
+        SelectExpression expression = from(grammar, people).select(firstName, lastName).distinct().filter(where(firstName, eq("dan"))).build();
+        SelectExpression qualified = new Qualifier("t0").qualify(expression);
+        SelectExpression again = new Qualifier("p").qualify(qualified);
+        assertThat(again.toString(), is("select distinct t0.firstName, t0.lastName from people t0 where t0.firstName = 'dan'"));
+    }
+
+    @Test
+    public void doesNotOverrideAlreadyQualifiedQualifiedJoin() throws Exception {
+        QualifiedJoin join = qualifiedJoin(tablePrimary(tableName("people")), inner, tablePrimary(tableName("books")), joinCondition("isbn", "isbn"));
+        QualifiedJoin qualifiedJoin = new JoinQualifier("p", "t0").qualify(join);
+        QualifiedJoin againJoin = new JoinQualifier("r", "u0").qualify(qualifiedJoin);
+        assertThat(againJoin.toString(), is("people p inner join books t0 on p.isbn = t0.isbn"));
+    }
+
+    @Test
     public void canQualifyAnSelectExpression() throws Exception {
         SelectExpression expression = from(grammar, people).select(firstName, lastName).distinct().filter(where(firstName, eq("dan"))).build();
         SelectExpression qualified = new Qualifier("t0").qualify(expression);

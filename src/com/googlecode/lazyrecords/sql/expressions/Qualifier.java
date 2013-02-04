@@ -2,6 +2,9 @@ package com.googlecode.lazyrecords.sql.expressions;
 
 import com.googlecode.totallylazy.*;
 
+import static com.googlecode.lazyrecords.sql.expressions.AnsiAsClause.asClause;
+import static com.googlecode.totallylazy.Option.some;
+
 public class Qualifier extends AbstractQualifier {
     private final String qualified;
 
@@ -19,7 +22,7 @@ public class Qualifier extends AbstractQualifier {
     }
 
     public TablePrimary qualify(TablePrimary tablePrimary) {
-        return AnsiTablePrimary.tablePrimary(tablePrimary.tableName(), Option.some(AnsiAsClause.asClause(qualified)));
+        return AnsiTablePrimary.tablePrimary(tablePrimary.tableName(), some(tablePrimary.asClause().getOrElse(asClause(qualified))));
     }
 
     public SelectList qualify(SelectList selectList) {
@@ -39,7 +42,8 @@ public class Qualifier extends AbstractQualifier {
     }
 
     public CompoundExpression qualify(CompoundExpression compoundExpression) {
-        return new CompoundExpression(qualify(compoundExpression.expressions()), compoundExpression.start(), compoundExpression.separator(), compoundExpression.end());
+        return new CompoundExpression(qualify(compoundExpression.expressions()), compoundExpression.start(),
+                compoundExpression.separator(), compoundExpression.end());
     }
 
     public DerivedColumn qualify(DerivedColumn derivedColumn) {
@@ -47,7 +51,7 @@ public class Qualifier extends AbstractQualifier {
     }
 
     public ColumnReference qualify(ColumnReference columnReference) {
-        return ColumnReference.columnReference(columnReference.name(), Option.some(qualified));
+        return ColumnReference.columnReference(columnReference.name(), some(columnReference.qualifier.getOrElse(qualified)));
     }
 
 }

@@ -70,6 +70,9 @@ import static com.googlecode.lazyrecords.RecordsContract.People.lastName;
 import static com.googlecode.lazyrecords.RecordsContract.People.people;
 import static com.googlecode.lazyrecords.RecordsContract.Prices.price;
 import static com.googlecode.lazyrecords.RecordsContract.Prices.prices;
+import static com.googlecode.lazyrecords.RecordsContract.Trades.approverId;
+import static com.googlecode.lazyrecords.RecordsContract.Trades.creatorId;
+import static com.googlecode.lazyrecords.RecordsContract.Trades.trades;
 import static com.googlecode.totallylazy.Pair.pair;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.Streams.streams;
@@ -243,8 +246,8 @@ public abstract class RecordsContract<T extends Records> {
     }
 
     public interface Prices extends Definition{
-        Prices prices = definition(Prices.class);
-        Keyword<BigDecimal> price = keyword("price", BigDecimal.class);
+        Prices prices = definition(Prices.class, "salePrices");
+        Keyword<BigDecimal> price = keyword("salePrice", BigDecimal.class);
         Keyword<URI> isbn = Books.isbn;
     }
 
@@ -268,12 +271,15 @@ public abstract class RecordsContract<T extends Records> {
         assertThat(mattsFavouriteBook.get(price), Matchers.is(Matchers.nullValue()));
     }
 
-    @Test
-    public void supportsJoiningOnSameTableMultipleTimes() {
-        Keyword<BigDecimal> price = keyword("price", BigDecimal.class);
+    public interface Trades extends Definition{
+        Definition trades = definition(Trades.class);
+        Keyword<BigDecimal> price = Prices.price;
         Keyword<String> creatorId = keyword("creator_id", String.class);
         Keyword<String> approverId = keyword("approver_id", String.class);
-        Definition trades = Grammar.definition("trades", creatorId, approverId, price);
+    }
+
+    @Test
+    public void supportsJoiningOnSameTableMultipleTimes() {
         records.remove(trades);
         records.add(trades, record(creatorId, "dan", approverId, "matt", price, new BigDecimal("4.95")));
 
@@ -290,24 +296,22 @@ public abstract class RecordsContract<T extends Records> {
 
     @Test
     public void supportsJoiningOnToSameTable() {
-        Keyword<BigDecimal> salePrice = keyword("salePrice", BigDecimal.class);
-        Definition salePrices = Grammar.definition("salePrices", isbn, salePrice);
-        records.remove(salePrices);
-        records.add(salePrices, record(isbn, zenIsbn, salePrice, new BigDecimal("4.95")));
+        records.remove(prices);
+        records.add(prices, record(isbn, zenIsbn, price, new BigDecimal("4.95")));
 
         Sequence<Record> peopleAndBooksAndSalePrices = records.get(people).
                 flatMap(outerJoin(records.get(books), using(isbn))).
-                flatMap(outerJoin(records.get(salePrices), using(isbn)));
+                flatMap(outerJoin(records.get(prices), using(isbn)));
 
         Record dansFavouriteBook = peopleAndBooksAndSalePrices.filter(where(firstName, Grammar.is("dan"))).head();
         assertThat(dansFavouriteBook.get(firstName), Matchers.is("dan"));
         assertThat(dansFavouriteBook.get(title), Matchers.is("Zen And The Art Of Motorcycle Maintenance"));
-        assertThat(dansFavouriteBook.get(salePrice), matcher(between(new BigDecimal("4.95"), new BigDecimal("4.95"))));
+        assertThat(dansFavouriteBook.get(price), matcher(between(new BigDecimal("4.95"), new BigDecimal("4.95"))));
 
         Record mattsFavouriteBook = peopleAndBooksAndSalePrices.filter(where(firstName, Grammar.is("matt"))).head();
         assertThat(mattsFavouriteBook.get(firstName), Matchers.is("matt"));
         assertThat(mattsFavouriteBook.get(title), Matchers.is("Godel, Escher, Bach: An Eternal Golden Braid"));
-        assertThat(mattsFavouriteBook.get(salePrice), Matchers.is(Matchers.nullValue()));
+        assertThat(mattsFavouriteBook.get(price), Matchers.is(Matchers.nullValue()));
     }
 
 

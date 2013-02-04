@@ -9,66 +9,54 @@ import com.googlecode.lazyrecords.OuterJoin;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.Using;
 import com.googlecode.lazyrecords.sql.expressions.AnsiJoinType;
-import com.googlecode.lazyrecords.sql.expressions.AnsiSelectExpression;
+import com.googlecode.lazyrecords.sql.expressions.AnsiSelectBuilder;
 import com.googlecode.lazyrecords.sql.expressions.AnsiSelectList;
 import com.googlecode.lazyrecords.sql.expressions.DerivedColumn;
 import com.googlecode.lazyrecords.sql.expressions.Expressible;
+import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.expressions.ExpressionBuilder;
-import com.googlecode.lazyrecords.sql.expressions.FromClause;
 import com.googlecode.lazyrecords.sql.expressions.JoinCondition;
-import com.googlecode.lazyrecords.sql.expressions.JoinQualifier;
 import com.googlecode.lazyrecords.sql.expressions.JoinSpecification;
 import com.googlecode.lazyrecords.sql.expressions.JoinType;
 import com.googlecode.lazyrecords.sql.expressions.NamedColumnsJoin;
-import com.googlecode.lazyrecords.sql.expressions.Qualifier;
 import com.googlecode.lazyrecords.sql.expressions.SelectExpression;
 import com.googlecode.lazyrecords.sql.expressions.SelectList;
-import com.googlecode.lazyrecords.sql.expressions.TableReference;
-import com.googlecode.totallylazy.Function2;
+import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
+import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.totallylazy.Mapper;
-import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicate;
-import com.googlecode.totallylazy.Quadruple;
 import com.googlecode.totallylazy.Reducer;
 import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Triple;
+import com.googlecode.totallylazy.Unary;
 
 import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 
-import static com.googlecode.lazyrecords.sql.expressions.AnsiFromClause.fromClause;
-import static com.googlecode.lazyrecords.sql.expressions.AnsiQualifiedJoin.qualifiedJoin;
+import static com.googlecode.lazyrecords.sql.expressions.AnsiSelectBuilder.from;
+import static com.googlecode.lazyrecords.sql.expressions.AnsiSelectList.selectList;
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.columnReference;
-import static com.googlecode.totallylazy.Callables.first;
-import static com.googlecode.totallylazy.Callables.second;
-import static com.googlecode.totallylazy.Callables.third;
-import static com.googlecode.totallylazy.Sequences.cons;
-import static com.googlecode.totallylazy.Sequences.iterate;
-import static com.googlecode.totallylazy.Sequences.one;
 import static com.googlecode.totallylazy.Sequences.sequence;
-import static com.googlecode.totallylazy.Triple.triple;
-import static com.googlecode.totallylazy.numbers.Numbers.increment;
 
 public class AnsiJoinBuilder implements ExpressionBuilder {
-    public static final String primaryQualified = "p";
-    public static final String secondaryQualifier = "s";
-    private final ExpressionBuilder primary;
-    private final Sequence<Triple<ExpressionBuilder, JoinType, JoinSpecification>> secondaries;
+    private final SqlGrammar grammar;
+    private final SelectExpression expression;
 
-    private AnsiJoinBuilder(ExpressionBuilder primary, Sequence<Triple<ExpressionBuilder, JoinType, JoinSpecification>> secondaries) {
-        this.primary = primary;
-        this.secondaries = secondaries;
+    private AnsiJoinBuilder(final SqlGrammar grammar, final SelectExpression expression) {
+        this.grammar = grammar;
+        this.expression = expression;
+    }
+
+    private static AnsiJoinBuilder join(final SelectExpression expression) {
+        return new AnsiJoinBuilder(new AnsiSqlGrammar(), expression);
     }
 
     public static AnsiJoinBuilder join(ExpressionBuilder primary, ExpressionBuilder secondary, JoinType type, JoinSpecification specification) {
         if (primary instanceof AnsiJoinBuilder) {
             AnsiJoinBuilder builder = (AnsiJoinBuilder) primary;
-            return join(builder.primary, builder.secondaries.add(triple(secondary, type, specification)));
+            return join(Merger.merger(builder.expression, (SelectExpression) secondary.build(), type, specification).merge());
         }
-        return join(primary, one(triple(secondary, type, specification)));
-    }
-
-    public static AnsiJoinBuilder join(ExpressionBuilder primary, Sequence<Triple<ExpressionBuilder, JoinType, JoinSpecification>> secondaries) {
-        return new AnsiJoinBuilder(primary, secondaries);
+        return join(Merger.merger((SelectExpression) primary.build(), (SelectExpression) secondary.build(), type, specification).merge());
     }
 
     public static ExpressionBuilder join(final ExpressionBuilder builder, final Join join) {
@@ -92,23 +80,10 @@ public class AnsiJoinBuilder implements ExpressionBuilder {
         throw new UnsupportedOperationException();
     }
 
-
     @Override
     public Sequence<Keyword<?>> fields() {
-        return primary.fields().
-                join(secondaries.
-                        map(first(ExpressionBuilder.class)).
-                        flatMap(fields)).
-                reverse().
-                unique();
+        return SelectList.methods.fields(expression.selectList());
     }
-
-    private static final Mapper<ExpressionBuilder, Sequence<Keyword<?>>> fields = new Mapper<ExpressionBuilder, Sequence<Keyword<?>>>() {
-        @Override
-        public Sequence<Keyword<?>> call(final ExpressionBuilder builder) throws Exception {
-            return builder.fields();
-        }
-    };
 
     @Override
     public ExpressionBuilder select(Keyword<?>... columns) {
@@ -117,12 +92,38 @@ public class AnsiJoinBuilder implements ExpressionBuilder {
 
     @Override
     public ExpressionBuilder select(Sequence<? extends Keyword<?>> columns) {
-        return join(primary.select(columns), secondaries);
+        Sequence<DerivedColumn> selectList = grammar.selectList(columns).derivedColumns();
+        final Map<String, List<DerivedColumn>> existingNames = existingNames(expression.selectList().derivedColumns());
+        SelectExpression select = from(grammar, expression).select(selectList(selectList.map(lookup(existingNames)))).build();
+        return new AnsiJoinBuilder(grammar, select);
+    }
+
+    private Unary<DerivedColumn> lookup(final Map<String, List<DerivedColumn>> existingNames) {
+        return new Unary<DerivedColumn>() {
+            @Override
+            public DerivedColumn call(final DerivedColumn column) throws Exception {
+                return existingNames.get(name(column)).get(0);
+            }
+        };
+    }
+
+    private Map<String, List<DerivedColumn>> existingNames(final Sequence<DerivedColumn> derivedColumns) {
+        return derivedColumns.toMap(new Mapper<DerivedColumn, String>() {
+            @Override
+            public String call(final DerivedColumn column) throws Exception {
+                return name(column);
+            }
+        });
+    }
+
+    private String name(final DerivedColumn column) {
+        if(!column.asClause().isEmpty()) return column.asClause().get().alias();
+        return DerivedColumn.methods.columnReferences(column).head().name();
     }
 
     @Override
     public ExpressionBuilder filter(Predicate<? super Record> predicate) {
-        return join(primary.filter(predicate), secondaries);
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -147,61 +148,8 @@ public class AnsiJoinBuilder implements ExpressionBuilder {
 
     @Override
     public SelectExpression build() {
-        SelectExpression qualifiedPrimary = (SelectExpression) new Qualifier(primaryQualified).qualify(primary.build());
-        Sequence<SelectExpression> qualifiedSecondaries = secondaries.map(first(ExpressionBuilder.class)).
-                map(selectExpression).
-                zipWithIndex().
-                map(qualify).
-                realise();
-        return AnsiSelectExpression.selectExpression(
-                qualifiedPrimary.setQuantifier(),
-                mergeSelectList(qualifiedPrimary, qualifiedSecondaries),
-                mergeFromClause(qualifiedPrimary, qualifiedSecondaries),
-                qualifiedPrimary.whereClause(),
-                qualifiedPrimary.orderByClause());
+        return expression;
     }
-
-    private FromClause mergeFromClause(final SelectExpression qualifiedPrimary, final Sequence<SelectExpression> qualifiedSecondaries) {
-        return fromClause(secondaries.map(second(JoinType.class)).zip(iterate(increment(), 0), secondaries.map(third(JoinSpecification.class)), qualifiedSecondaries.map(tableReference)).
-                fold(qualifiedPrimary.fromClause().tableReference(), new Function2<TableReference, Quadruple<JoinType, Number, JoinSpecification, TableReference>, TableReference>() {
-                    @Override
-                    public TableReference call(final TableReference reference, final Quadruple<JoinType, Number, JoinSpecification, TableReference> quadruple) throws Exception {
-                        return new JoinQualifier(primaryQualified, secondaryQualifier + quadruple.second()).qualify(qualifiedJoin(reference, quadruple.first(), quadruple.fourth(), quadruple.third()));
-                    }
-                }));
-    }
-
-    private static final Mapper<SelectExpression, TableReference> tableReference = new Mapper<SelectExpression, TableReference>() {
-        @Override
-        public TableReference call(final SelectExpression expression) throws Exception {
-            return expression.fromClause().tableReference();
-        }
-    };
-
-    private static SelectList mergeSelectList(final SelectExpression select, final Sequence<SelectExpression> expressions) {
-        return AnsiSelectList.selectList(cons(select, expressions).flatMap(derivedColumns));
-    }
-
-    private static final Mapper<SelectExpression, Sequence<DerivedColumn>> derivedColumns = new Mapper<SelectExpression, Sequence<DerivedColumn>>() {
-        @Override
-        public Sequence<DerivedColumn> call(final SelectExpression expression) throws Exception {
-            return expression.selectList().derivedColumns();
-        }
-    };
-
-    private static final Mapper<Pair<Number, SelectExpression>, SelectExpression> qualify = new Mapper<Pair<Number, SelectExpression>, SelectExpression>() {
-        @Override
-        public SelectExpression call(final Pair<Number, SelectExpression> pair) throws Exception {
-            return new Qualifier(secondaryQualifier + pair.first()).qualify(pair.second());
-        }
-    };
-
-    private static final Mapper<ExpressionBuilder, SelectExpression> selectExpression = new Mapper<ExpressionBuilder, SelectExpression>() {
-        @Override
-        public SelectExpression call(final ExpressionBuilder expressionBuilder) throws Exception {
-            return (SelectExpression) expressionBuilder.build();
-        }
-    };
 
     @Override
     public String text() {
@@ -212,5 +160,6 @@ public class AnsiJoinBuilder implements ExpressionBuilder {
     public Sequence<Object> parameters() {
         throw new UnsupportedOperationException();
     }
+
 
 }
