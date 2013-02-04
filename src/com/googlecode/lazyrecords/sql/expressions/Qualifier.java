@@ -36,6 +36,10 @@ public class Qualifier extends AbstractQualifier {
         return AnsiPredicateExpression.predicateExpression(qualify(predicateExpression.predicand()), qualify(predicateExpression.predicate()));
     }
 
+    public QualifiedJoin qualify(QualifiedJoin qualifiedJoin){
+        return qualifiedJoin;
+    }
+
     public CompoundExpression qualify(CompoundExpression compoundExpression) {
         return new CompoundExpression(qualify(compoundExpression.expressions()), compoundExpression.start(), compoundExpression.separator(), compoundExpression.end());
     }

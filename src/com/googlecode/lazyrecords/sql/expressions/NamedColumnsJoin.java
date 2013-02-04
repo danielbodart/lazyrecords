@@ -11,7 +11,7 @@ public class NamedColumnsJoin extends CompoundExpression implements JoinSpecific
     private final Sequence<String> columnNames;
 
     private NamedColumnsJoin(final Sequence<String> columnNames) {
-        super(columnNames.map(quotedText).cons(using));
+        super(using, new CompoundExpression(columnNames.map(quotedText), "(", ", ", ")"));
         this.columnNames = columnNames;
     }
 

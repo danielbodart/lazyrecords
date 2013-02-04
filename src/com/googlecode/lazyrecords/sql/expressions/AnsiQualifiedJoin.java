@@ -1,7 +1,5 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
-import com.googlecode.totallylazy.Sequence;
-
 public class AnsiQualifiedJoin extends CompoundExpression implements QualifiedJoin {
     private final TableReference left;
     private final JoinType joinType;

@@ -1,8 +1,15 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
 import com.googlecode.totallylazy.Option;
+import com.googlecode.totallylazy.Strings;
+import com.googlecode.totallylazy.predicates.LogicalPredicate;
 
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.expression;
+import static com.googlecode.lazyrecords.sql.expressions.Expressions.text;
+import static com.googlecode.totallylazy.Predicates.is;
+import static com.googlecode.totallylazy.Predicates.not;
+import static com.googlecode.totallylazy.Predicates.where;
+import static com.googlecode.totallylazy.Strings.equalIgnoringCase;
 import static java.lang.String.format;
 
 public class AnsiSelectExpression extends CompoundExpression implements SelectExpression {
@@ -18,8 +25,7 @@ public class AnsiSelectExpression extends CompoundExpression implements SelectEx
                                  Option<WhereClause> whereClause,
                                  Option<OrderByClause> orderByClause) {
         super(
-                select,
-                expression(setQuantifier),
+                setQuantifier.isEmpty() ? select : select.join(expression(setQuantifier)),
                 selectList,
                 fromClause,
                 expression(whereClause),
@@ -37,7 +43,7 @@ public class AnsiSelectExpression extends CompoundExpression implements SelectEx
                                                     FromClause fromClause,
                                                     Option<WhereClause> whereClause,
                                                     Option<OrderByClause> orderByClause) {
-        return new AnsiSelectExpression(setQuantifier,
+        return new AnsiSelectExpression(setQuantifier.filter(where(Expressions.text(), not(equalIgnoringCase("all")))),
                 selectList,
                 fromClause,
                 whereClause,

@@ -33,7 +33,7 @@ public class QualifierTest {
     public void canQualifyAJoinWithUsing() throws Exception {
         QualifiedJoin join = qualifiedJoin(tablePrimary(tableName("people")), inner, tablePrimary(tableName("books")), namedColumnsJoin("isbn"));
         QualifiedJoin qualified = new JoinQualifier("p", "t0").qualify(join);
-        assertThat(qualified.toString(), is("people p inner join books t0 using isbn"));
+        assertThat(qualified.toString(), is("people p inner join books t0 using (isbn)"));
     }
 
     @Test
