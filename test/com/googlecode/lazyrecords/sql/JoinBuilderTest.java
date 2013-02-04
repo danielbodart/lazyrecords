@@ -44,7 +44,7 @@ public class JoinBuilderTest {
         SelectBuilder secondary = from(grammar, books).select(title);
         JoinBuilder join = join(primary, secondary, inner, namedColumnsJoin("isbn"));
         String sql = join.build().text();
-        assertEquals(sql, "select  p.firstName, p.isbn, s0.title from people p inner join books s0 using (isbn)");
+        assertEquals(sql, "select p.firstName, p.isbn, s0.title from people p inner join books s0 using (isbn)");
     }
 
     @Test
@@ -54,6 +54,6 @@ public class JoinBuilderTest {
         SelectBuilder tertiary = from(grammar, prices).select(price);
         JoinBuilder join = join(join(primary, secondary, inner, namedColumnsJoin("isbn")), tertiary, inner, namedColumnsJoin("isbn"));
         String sql = join.build().text();
-        assertEquals(sql, "select  p.firstName, p.isbn, s0.title, s1.price from people p inner join books s0 using (isbn) inner join prices s1 using (isbn)");
+        assertEquals(sql, "select p.firstName, p.isbn, s0.title, s1.price from people p inner join books s0 using (isbn) inner join prices s1 using (isbn)");
     }
 }
