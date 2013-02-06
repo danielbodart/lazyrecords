@@ -314,7 +314,6 @@ public abstract class RecordsContract<T extends Records> {
         assertThat(mattsFavouriteBook.get(price), Matchers.is(Matchers.nullValue()));
     }
 
-
     @Test
     public void supportsUUID() throws Exception {
         Record record = records.get(books).filter(where(uuid, is(zenUuid))).head();

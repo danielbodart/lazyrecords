@@ -60,6 +60,10 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
         this(connection, new SqlMappings(), new AnsiSqlGrammar(), new IgnoreLogger());
     }
 
+    Connection connection() {
+        return connection;
+    }
+
     public void close() throws IOException {
         closeables.close();
     }
