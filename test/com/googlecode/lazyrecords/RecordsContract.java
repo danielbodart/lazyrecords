@@ -57,6 +57,7 @@ import static com.googlecode.lazyrecords.Grammar.to;
 import static com.googlecode.lazyrecords.Grammar.update;
 import static com.googlecode.lazyrecords.Grammar.using;
 import static com.googlecode.lazyrecords.Grammar.where;
+import static com.googlecode.lazyrecords.Loggers.loggers;
 import static com.googlecode.lazyrecords.RecordsContract.Books.isbn;
 import static com.googlecode.lazyrecords.RecordsContract.Books.books;
 import static com.googlecode.lazyrecords.RecordsContract.Books.inPrint;
@@ -114,15 +115,23 @@ public abstract class RecordsContract<T extends Records> {
     protected T records;
 
     protected Logger logger;
-    private ByteArrayOutputStream stream;
+    protected MemoryLogger memory;
+    protected ByteArrayOutputStream stream;
     protected boolean supportsRowCount = true;
+
+    protected String popLog() {
+        String result = stream.toString();
+        stream.reset();
+        return result;
+    }
 
     protected abstract T createRecords() throws Exception;
 
     @Before
     public void setupRecords() throws Exception {
         stream = new ByteArrayOutputStream();
-        logger = new PrintStreamLogger(new PrintStream(streams(System.out, stream)));
+        memory = new MemoryLogger();
+        logger = loggers(memory, new PrintStreamLogger(new PrintStream(streams(System.out, stream))));
         this.records = createRecords();
         setupData();
     }
@@ -185,11 +194,14 @@ public abstract class RecordsContract<T extends Records> {
     }
 
     @Test
-    public void supportsJoinUsing() throws Exception {
+    public void joiningWithOutSelectingReturnsAllFieldsFromBothByDefault() throws Exception {
         assertThat(records.get(people).filter(where(age, is(lessThan(12)))).
                 flatMap(join(records.get(books), using(isbn))).
                 head().fields().size(), NumberMatcher.is(9));
+    }
 
+    @Test
+    public void supportsJoinUsing() throws Exception {
         assertThat(records.get(people).filter(where(age, is(lessThan(12)))).
                 flatMap(join(records.get(books), using(isbn))).
                 map(select(firstName, isbn)).

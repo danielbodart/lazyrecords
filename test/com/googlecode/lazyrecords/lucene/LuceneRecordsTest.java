@@ -71,12 +71,11 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
 
     @Test
     public void memorisesAndThereforeOnlyExecutesQueryOnce() throws Exception {
-        MemoryLogger logger = new MemoryLogger();
-        Sequence<Record> result = luceneRecords(logger).get(people).sortBy(age);
+        Sequence<Record> result = records.get(people).sortBy(age);
         Record head = result.head();
-        Sequence<Map<String, ?>> logs = logger.data();
+        Sequence<Map<String, ?>> logs = memory.data();
         assertThat(head, Matchers.is(result.head())); // Check iterator
-        assertThat(logs, Matchers.is(logger.data())); // Check queries
+        assertThat(logs, Matchers.is(memory.data())); // Check queries
     }
 
     @Override

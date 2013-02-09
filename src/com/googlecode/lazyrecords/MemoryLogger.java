@@ -1,24 +1,31 @@
 package com.googlecode.lazyrecords;
 
 import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.collections.PersistentList;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class MemoryLogger implements Logger {
-    private final List<Map<String, ?>> data = new ArrayList<Map<String, ?>>();
+    private volatile PersistentList<Map<String, ?>> data;
+
+    public MemoryLogger() {
+        forget();
+    }
+
+    public MemoryLogger forget() {
+        data = PersistentList.constructors.empty();
+        return this;
+    }
 
     @Override
     public Logger log(Map<String, ?> parameters) {
-        data.add(parameters);
+        data = data.cons(parameters);
         return this;
     }
 
     public Sequence<Map<String, ?>> data() {
-        return sequence(data).realise();
+        return sequence(data);
     }
 }

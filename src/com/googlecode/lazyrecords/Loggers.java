@@ -1,19 +1,30 @@
 package com.googlecode.lazyrecords;
 
 import com.googlecode.totallylazy.Callable1;
-import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.collections.PersistentList;
 
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
+import static com.googlecode.totallylazy.collections.PersistentList.constructors.list;
 
 public final class Loggers implements Logger {
-    private final List<Logger> loggers;
+    private final PersistentList<Logger> loggers;
 
-    public Loggers() {
-        this.loggers = new CopyOnWriteArrayList<Logger>();
+    private Loggers(final PersistentList<Logger> empty) {
+        this.loggers = empty;
+    }
+
+    public static Loggers loggers() {
+        return loggers(PersistentList.constructors.<Logger>empty());
+    }
+
+    public static Loggers loggers(final Logger... loggers) {
+        return new Loggers(list(loggers));
+    }
+
+    public static Loggers loggers(final PersistentList<Logger> empty) {
+        return new Loggers(empty);
     }
 
     @Override
@@ -22,9 +33,8 @@ public final class Loggers implements Logger {
         return this;
     }
 
-    public Loggers add(Logger logger){
-        loggers.add(logger);
-        return this;
+    public Loggers add(Logger logger) {
+        return loggers(loggers.cons(logger));
     }
 
     public static final String TYPE = "type";
