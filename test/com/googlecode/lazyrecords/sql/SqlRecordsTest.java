@@ -184,9 +184,25 @@ public class SqlRecordsTest extends RecordsContract<Records> {
     }
 
     @Test @Override
-    public void joiningWithOutSelectingReturnsAllFieldsFromBothByDefault() throws Exception {
-        super.joiningWithOutSelectingReturnsAllFieldsFromBothByDefault();
+    public void joinUsingWithOutSelectingReturnsAllFieldsFromBothByDefault() throws Exception {
+        super.joinUsingWithOutSelectingReturnsAllFieldsFromBothByDefault();
         assertSql("select p.age, p.dob, p.firstName, p.lastName, p.isbn, b.isbn, b.title, b.inPrint, b.uuid, b.rrp " +
+                "from people p inner join books b using (isbn) " +
+                "where p.age < '12'");
+    }
+
+    @Test @Override
+    public void joinUsingMergesPreviouslySelectedFields() throws Exception {
+        super.joinUsingMergesPreviouslySelectedFields();
+        assertSql("select p.isbn, p.age, b.title, b.isbn " +
+                "from people p inner join books b using (isbn) " +
+                "where p.age < '12'");
+    }
+
+    @Test @Override
+    public void canSelectFieldsAfterJoining() throws Exception {
+        super.canSelectFieldsAfterJoining();
+        assertSql("select p.firstName, p.isbn " +
                 "from people p inner join books b using (isbn) " +
                 "where p.age < '12'");
     }

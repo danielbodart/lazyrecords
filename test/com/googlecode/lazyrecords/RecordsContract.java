@@ -194,22 +194,25 @@ public abstract class RecordsContract<T extends Records> {
     }
 
     @Test
-    public void joiningWithOutSelectingReturnsAllFieldsFromBothByDefault() throws Exception {
+    public void joinUsingWithOutSelectingReturnsAllFieldsFromBothByDefault() throws Exception {
         assertThat(records.get(people).filter(where(age, is(lessThan(12)))).
                 flatMap(join(records.get(books), using(isbn))).
                 head().fields().size(), NumberMatcher.is(9));
     }
 
     @Test
-    public void supportsJoinUsing() throws Exception {
+    public void joinUsingMergesPreviouslySelectedFields() throws Exception {
+        assertThat(records.get(people).map(select(isbn, age)).filter(where(age, is(lessThan(12)))).
+                flatMap(join(records.get(books).map(select(title, isbn)), using(isbn))).
+                head().fields().size(), NumberMatcher.is(3));
+    }
+
+    @Test
+    public void canSelectFieldsAfterJoining() throws Exception {
         assertThat(records.get(people).filter(where(age, is(lessThan(12)))).
                 flatMap(join(records.get(books), using(isbn))).
                 map(select(firstName, isbn)).
                 head().fields().size(), NumberMatcher.is(2));
-
-        assertThat(records.get(people).map(select(isbn, age)).filter(where(age, is(lessThan(12)))).
-                flatMap(join(records.get(books).map(select(title, isbn)), using(isbn))).
-                head().fields().size(), NumberMatcher.is(3));
     }
 
     @Test
