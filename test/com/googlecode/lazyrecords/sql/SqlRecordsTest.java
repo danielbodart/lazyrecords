@@ -3,7 +3,6 @@ package com.googlecode.lazyrecords.sql;
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.ImmutableKeyword;
 import com.googlecode.lazyrecords.Logger;
-import com.googlecode.lazyrecords.MemoryLogger;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.Records;
 import com.googlecode.lazyrecords.RecordsContract;
@@ -43,6 +42,7 @@ import static com.googlecode.totallylazy.Sequences.empty;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
 
 public class SqlRecordsTest extends RecordsContract<Records> {
     private static JDBCDataSource dataSource;
@@ -126,12 +126,12 @@ public class SqlRecordsTest extends RecordsContract<Records> {
 
     @Test
     public void memorisesAndThereforeOnlyExecutesSqlOnce() throws Exception {
-        MemoryLogger logger = new MemoryLogger();
-        Sequence<Record> result = sqlRecords(logger).get(people).sortBy(age);
+        memory.forget();
+        Sequence<Record> result = records.get(people).sortBy(age);
         Record head = result.head();
-        Sequence<Map<String, ?>> logs = logger.data();
+        Sequence<Map<String, ?>> logs = memory.data();
         assertThat(head, Matchers.is(result.head())); // Check iterator
-        assertThat(logs, Matchers.is(logger.data())); // Check queries
+        assertThat(logs, Matchers.is(memory.data())); // Check queries
     }
 
     @Test
@@ -175,11 +175,51 @@ public class SqlRecordsTest extends RecordsContract<Records> {
 
     @Test
     public void memorisesAndThereforeOnlyExecutesSqlOnceEvenWhenYouMapToAKeyword() throws Exception {
-        MemoryLogger logger = new MemoryLogger();
-        Sequence<String> result = sqlRecords(logger).get(people).map(firstName);
+        memory.forget();
+        Sequence<String> result = records.get(people).map(firstName);
         String head = result.head();
-        Sequence<Map<String, ?>> logs = logger.data();
+        Sequence<Map<String, ?>> logs = memory.data();
         assertThat(head, Matchers.is(result.head())); // Check iterator
-        assertThat(logs, Matchers.is(logger.data())); // Check queries
+        assertThat(logs, Matchers.is(memory.data())); // Check queries
+    }
+
+    @Test @Override
+    public void joinUsingWithOutSelectingReturnsAllFieldsFromBothByDefault() throws Exception {
+        super.joinUsingWithOutSelectingReturnsAllFieldsFromBothByDefault();
+        assertSql("select p.age, p.dob, p.firstName, p.lastName, p.isbn, b.isbn, b.title, b.inPrint, b.uuid, b.rrp " +
+                "from people p inner join books b using (isbn) " +
+                "where p.age < '12'");
+    }
+
+    @Test @Override
+    public void joinUsingMergesPreviouslySelectedFields() throws Exception {
+        super.joinUsingMergesPreviouslySelectedFields();
+        assertSql("select p.isbn, p.age, b.title, b.isbn " +
+                "from people p inner join books b using (isbn) " +
+                "where p.age < '12'");
+    }
+
+    @Test @Override
+    public void canSelectFieldsAfterJoining() throws Exception {
+        super.canSelectFieldsAfterJoining();
+        assertSql("select p.firstName, p.isbn " +
+                "from people p inner join books b using (isbn) " +
+                "where p.age < '12'");
+    }
+
+    @Test @Override
+    public void supportsJoinOn() throws Exception {
+        super.supportsJoinOn();
+        assertSql("select p.age, p.dob, p.firstName, p.lastName, p.isbn, p1.book, p1.price " +
+                "from people p left join prices p1 on p.isbn = p1.book " +
+                "where p.firstName = 'matt'");
+    }
+
+    protected void assertSql(final String expected) {
+        assertEquals(expected, sql());
+    }
+
+    protected String sql() {
+        return memory.data().head().get("expression").toString();
     }
 }

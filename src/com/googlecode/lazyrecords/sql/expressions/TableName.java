@@ -5,8 +5,8 @@ import com.googlecode.totallylazy.Option;
 import static com.googlecode.totallylazy.Option.none;
 
 public class TableName extends Reference<TableName> {
-    protected TableName(String name, Option<String> qualifier, Option<String> alias) {
-        super(name, qualifier, alias);
+    protected TableName(String name, Option<String> qualifier) {
+        super(name, qualifier);
     }
 
     public static TableName tableName(String text) {
@@ -14,15 +14,11 @@ public class TableName extends Reference<TableName> {
     }
 
     public static TableName tableName(String text, Option<String> qualifier) {
-        return new TableName(text, qualifier, none(String.class));
-    }
-
-    public static TableName tableName(String text, Option<String> qualifier, Option<String> alias) {
-        return new TableName(text, qualifier, alias);
+        return new TableName(text, qualifier);
     }
 
     @Override
-    protected TableName self(String text, Option<String> qualifier, Option<String> alias) {
-        return tableName(text, qualifier, alias);
+    protected TableName self(String text, Option<String> qualifier) {
+        return tableName(text, qualifier);
     }
 }

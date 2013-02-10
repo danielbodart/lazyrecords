@@ -4,25 +4,21 @@ import com.googlecode.totallylazy.Option;
 
 import static com.googlecode.totallylazy.Option.none;
 
-public class ColumnReference extends Reference<ColumnReference> {
-    protected ColumnReference(String name, Option<String> qualifier, Option<String> alias) {
-        super(name, qualifier, alias);
+public class ColumnReference extends Reference<ColumnReference> implements ValueExpression {
+    protected ColumnReference(String name, Option<String> qualifier) {
+        super(name, qualifier);
     }
 
-    public static ColumnReference columnReference(String text) {
-        return columnReference(text, none(String.class));
+    public static ColumnReference columnReference(String name) {
+        return columnReference(name, none(String.class));
     }
 
-    public static ColumnReference columnReference(String text, Option<String> qualifier) {
-        return new ColumnReference(text, qualifier, none(String.class));
-    }
-
-    public static ColumnReference columnReference(String text, Option<String> qualifier, Option<String> alias) {
-        return new ColumnReference(text, qualifier, alias);
+    public static ColumnReference columnReference(String name, Option<String> qualifier) {
+        return new ColumnReference(name, qualifier);
     }
 
     @Override
-    protected ColumnReference self(String text, Option<String> qualifier, Option<String> alias) {
-        return columnReference(text, qualifier, alias);
+    protected ColumnReference self(String name, Option<String> qualifier) {
+        return columnReference(name, qualifier);
     }
 }

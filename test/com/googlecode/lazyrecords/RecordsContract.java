@@ -40,7 +40,7 @@ import static com.googlecode.lazyrecords.Grammar.in;
 import static com.googlecode.lazyrecords.Grammar.is;
 import static com.googlecode.lazyrecords.Grammar.join;
 import static com.googlecode.lazyrecords.Grammar.keyword;
-import static com.googlecode.lazyrecords.Grammar.leftJoin;
+import static com.googlecode.lazyrecords.Grammar.outerJoin;
 import static com.googlecode.lazyrecords.Grammar.lessThan;
 import static com.googlecode.lazyrecords.Grammar.lessThanOrEqualTo;
 import static com.googlecode.lazyrecords.Grammar.maximum;
@@ -57,6 +57,7 @@ import static com.googlecode.lazyrecords.Grammar.to;
 import static com.googlecode.lazyrecords.Grammar.update;
 import static com.googlecode.lazyrecords.Grammar.using;
 import static com.googlecode.lazyrecords.Grammar.where;
+import static com.googlecode.lazyrecords.Loggers.loggers;
 import static com.googlecode.lazyrecords.RecordsContract.Books.isbn;
 import static com.googlecode.lazyrecords.RecordsContract.Books.books;
 import static com.googlecode.lazyrecords.RecordsContract.Books.inPrint;
@@ -68,6 +69,11 @@ import static com.googlecode.lazyrecords.RecordsContract.People.dob;
 import static com.googlecode.lazyrecords.RecordsContract.People.firstName;
 import static com.googlecode.lazyrecords.RecordsContract.People.lastName;
 import static com.googlecode.lazyrecords.RecordsContract.People.people;
+import static com.googlecode.lazyrecords.RecordsContract.Prices.price;
+import static com.googlecode.lazyrecords.RecordsContract.Prices.prices;
+import static com.googlecode.lazyrecords.RecordsContract.Trades.approverId;
+import static com.googlecode.lazyrecords.RecordsContract.Trades.creatorId;
+import static com.googlecode.lazyrecords.RecordsContract.Trades.trades;
 import static com.googlecode.totallylazy.Pair.pair;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.Streams.streams;
@@ -109,15 +115,23 @@ public abstract class RecordsContract<T extends Records> {
     protected T records;
 
     protected Logger logger;
-    private ByteArrayOutputStream stream;
+    protected MemoryLogger memory;
+    protected ByteArrayOutputStream stream;
     protected boolean supportsRowCount = true;
+
+    protected String popLog() {
+        String result = stream.toString();
+        stream.reset();
+        return result;
+    }
 
     protected abstract T createRecords() throws Exception;
 
     @Before
     public void setupRecords() throws Exception {
         stream = new ByteArrayOutputStream();
-        logger = new PrintStreamLogger(new PrintStream(streams(System.out, stream)));
+        memory = new MemoryLogger();
+        logger = loggers(memory, new PrintStreamLogger(new PrintStream(streams(System.out, stream))));
         this.records = createRecords();
         setupData();
     }
@@ -180,19 +194,25 @@ public abstract class RecordsContract<T extends Records> {
     }
 
     @Test
-    public void supportsJoinUsing() throws Exception {
+    public void joinUsingWithOutSelectingReturnsAllFieldsFromBothByDefault() throws Exception {
         assertThat(records.get(people).filter(where(age, is(lessThan(12)))).
                 flatMap(join(records.get(books), using(isbn))).
                 head().fields().size(), NumberMatcher.is(9));
+    }
 
+    @Test
+    public void joinUsingMergesPreviouslySelectedFields() throws Exception {
+        assertThat(records.get(people).map(select(isbn, age)).filter(where(age, is(lessThan(12)))).
+                flatMap(join(records.get(books).map(select(title, isbn)), using(isbn))).
+                head().fields().size(), NumberMatcher.is(3));
+    }
+
+    @Test
+    public void canSelectFieldsAfterJoining() throws Exception {
         assertThat(records.get(people).filter(where(age, is(lessThan(12)))).
                 flatMap(join(records.get(books), using(isbn))).
                 map(select(firstName, isbn)).
                 head().fields().size(), NumberMatcher.is(2));
-
-        assertThat(records.get(people).map(select(isbn, age)).filter(where(age, is(lessThan(12)))).
-                flatMap(join(records.get(books).map(select(title, isbn)), using(isbn))).
-                head().fields().size(), NumberMatcher.is(3));
     }
 
     @Test
@@ -205,7 +225,7 @@ public abstract class RecordsContract<T extends Records> {
         records.add(prices, record(book, zenIsbn, price, new BigDecimal("4.95")));
 
         Sequence<Record> peopleAndSalePrices = records.get(people).
-                flatMap(leftJoin(records.get(prices), on(isbn, book)));
+                flatMap(outerJoin(records.get(prices), on(isbn, book)));
 
         Record dansFavouriteBook = peopleAndSalePrices.filter(where(firstName, is("dan"))).head();
         assertThat(dansFavouriteBook.get(firstName), Matchers.is("dan"));
@@ -217,18 +237,18 @@ public abstract class RecordsContract<T extends Records> {
     }
 
     @Test
-    public void supportsLeftJoinUsing() throws Exception {
+    public void supportsOuterJoinUsing() throws Exception {
         assertThat(records.get(people).filter(where(age, is(lessThan(12)))).
-                flatMap(leftJoin(records.get(books), using(isbn))).
+                flatMap(outerJoin(records.get(books), using(isbn))).
                 head().fields().size(), NumberMatcher.is(9));
 
         assertThat(records.get(people).filter(where(age, is(lessThan(12)))).
-                flatMap(leftJoin(records.get(books), using(isbn))).
+                flatMap(outerJoin(records.get(books), using(isbn))).
                 map(select(firstName, isbn)).
                 head().fields().size(), NumberMatcher.is(2));
 
         assertThat(records.get(people).map(select(isbn, age)).filter(where(age, is(lessThan(12)))).
-                flatMap(leftJoin(records.get(books).map(select(title, isbn)), using(isbn))).
+                flatMap(outerJoin(records.get(books).map(select(title, isbn)), using(isbn))).
                 head().fields().size(), NumberMatcher.is(3));
 
         Record personWithNoCorrespondingBook = record(firstName, "ray", lastName, "barlow", age, 9, dob, date(1977, 1, 10), isbn, uri("urn:isbn:0000000000"));
@@ -236,46 +256,53 @@ public abstract class RecordsContract<T extends Records> {
         records.add(people, personWithNoCorrespondingBook);
 
         assertThat(records.get(people).map(select(isbn, firstName)).filter(where(firstName, is("ray"))).
-                flatMap(leftJoin(records.get(books).map(select(title, isbn)), using(isbn))).
+                flatMap(outerJoin(records.get(books).map(select(title, isbn)), using(isbn))).
                 head().get(firstName), Matchers.is("ray"));
+    }
+
+    public interface Prices extends Definition{
+        Prices prices = definition(Prices.class, "salePrices");
+        Keyword<BigDecimal> price = keyword("salePrice", BigDecimal.class);
+        Keyword<URI> isbn = Books.isbn;
     }
 
     @Test
     public void supportsJoiningAcrossMoreThanTwoTables() {
-        Keyword<BigDecimal> salePrice = keyword("salePrice", BigDecimal.class);
-        Definition salePrices = Grammar.definition("salePrices", isbn, salePrice);
-        records.remove(salePrices);
-        records.add(salePrices, record(isbn, zenIsbn, salePrice, new BigDecimal("4.95")));
+        records.remove(prices);
+        records.add(prices, record(Prices.isbn, zenIsbn, price, new BigDecimal("4.95")));
 
         Sequence<Record> peopleAndBooksAndSalePrices = records.get(people).
-                flatMap(leftJoin(records.get(books), using(isbn))).
-                flatMap(leftJoin(records.get(salePrices), using(isbn)));
+                flatMap(outerJoin(records.get(books), using(isbn))).
+                flatMap(outerJoin(records.get(prices), using(isbn)));
 
         Record dansFavouriteBook = peopleAndBooksAndSalePrices.filter(where(firstName, Grammar.is("dan"))).head();
         assertThat(dansFavouriteBook.get(firstName), Matchers.is("dan"));
         assertThat(dansFavouriteBook.get(title), Matchers.is("Zen And The Art Of Motorcycle Maintenance"));
-        assertThat(dansFavouriteBook.get(salePrice), matcher(between(new BigDecimal("4.95"), new BigDecimal("4.95"))));
+        assertThat(dansFavouriteBook.get(price), matcher(between(new BigDecimal("4.95"), new BigDecimal("4.95"))));
 
         Record mattsFavouriteBook = peopleAndBooksAndSalePrices.filter(where(firstName, Grammar.is("matt"))).head();
         assertThat(mattsFavouriteBook.get(firstName), Matchers.is("matt"));
         assertThat(mattsFavouriteBook.get(title), Matchers.is("Godel, Escher, Bach: An Eternal Golden Braid"));
-        assertThat(mattsFavouriteBook.get(salePrice), Matchers.is(Matchers.nullValue()));
+        assertThat(mattsFavouriteBook.get(price), Matchers.is(Matchers.nullValue()));
+    }
+
+    public interface Trades extends Definition{
+        Definition trades = definition(Trades.class);
+        Keyword<BigDecimal> price = Prices.price;
+        Keyword<String> creatorId = keyword("creator_id", String.class);
+        Keyword<String> approverId = keyword("approver_id", String.class);
     }
 
     @Test
     public void supportsJoiningOnSameTableMultipleTimes() {
-        Keyword<BigDecimal> price = keyword("price", BigDecimal.class);
-        Keyword<String> creatorId = keyword("creator_id", String.class);
-        Keyword<String> approverId = keyword("approver_id", String.class);
-        Definition trades = Grammar.definition("trades", creatorId, approverId, price);
         records.remove(trades);
         records.add(trades, record(creatorId, "dan", approverId, "matt", price, new BigDecimal("4.95")));
 
         Keyword<String> creator = lastName.as("creator");
         Keyword<String> approver = lastName.as("approver");
         Record tradeDetails = records.get(trades).
-                flatMap(leftJoin(records.get(people).map(select(firstName, creator)), on(creatorId, firstName))).
-                flatMap(leftJoin(records.get(people).map(select(firstName, approver)), on(approverId, firstName))).head();
+                flatMap(outerJoin(records.get(people).map(select(firstName, creator)), on(creatorId, firstName))).
+                flatMap(outerJoin(records.get(people).map(select(firstName, approver)), on(approverId, firstName))).head();
 
         assertThat(tradeDetails.get(creator), Matchers.is("bodart"));
         assertThat(tradeDetails.get(price), matcher(between(new BigDecimal("4.95"), new BigDecimal("4.95"))));
@@ -284,26 +311,23 @@ public abstract class RecordsContract<T extends Records> {
 
     @Test
     public void supportsJoiningOnToSameTable() {
-        Keyword<BigDecimal> salePrice = keyword("salePrice", BigDecimal.class);
-        Definition salePrices = Grammar.definition("salePrices", isbn, salePrice);
-        records.remove(salePrices);
-        records.add(salePrices, record(isbn, zenIsbn, salePrice, new BigDecimal("4.95")));
+        records.remove(prices);
+        records.add(prices, record(isbn, zenIsbn, price, new BigDecimal("4.95")));
 
         Sequence<Record> peopleAndBooksAndSalePrices = records.get(people).
-                flatMap(leftJoin(records.get(books), using(isbn))).
-                flatMap(leftJoin(records.get(salePrices), using(isbn)));
+                flatMap(outerJoin(records.get(books), using(isbn))).
+                flatMap(outerJoin(records.get(prices), using(isbn)));
 
         Record dansFavouriteBook = peopleAndBooksAndSalePrices.filter(where(firstName, Grammar.is("dan"))).head();
         assertThat(dansFavouriteBook.get(firstName), Matchers.is("dan"));
         assertThat(dansFavouriteBook.get(title), Matchers.is("Zen And The Art Of Motorcycle Maintenance"));
-        assertThat(dansFavouriteBook.get(salePrice), matcher(between(new BigDecimal("4.95"), new BigDecimal("4.95"))));
+        assertThat(dansFavouriteBook.get(price), matcher(between(new BigDecimal("4.95"), new BigDecimal("4.95"))));
 
         Record mattsFavouriteBook = peopleAndBooksAndSalePrices.filter(where(firstName, Grammar.is("matt"))).head();
         assertThat(mattsFavouriteBook.get(firstName), Matchers.is("matt"));
         assertThat(mattsFavouriteBook.get(title), Matchers.is("Godel, Escher, Bach: An Eternal Golden Braid"));
-        assertThat(mattsFavouriteBook.get(salePrice), Matchers.is(Matchers.nullValue()));
+        assertThat(mattsFavouriteBook.get(price), Matchers.is(Matchers.nullValue()));
     }
-
 
     @Test
     public void supportsUUID() throws Exception {

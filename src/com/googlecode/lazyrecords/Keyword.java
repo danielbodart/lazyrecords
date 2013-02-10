@@ -22,7 +22,7 @@ public interface Keyword<T> extends Named, Metadata<Keyword<T>>, Callable1<Recor
             return keyword(keyword.name(), keyword.forClass()).metadata(keyword.metadata());
         }
 
-        public static <T> CompositeKeyword<T> compose(Callable2<? super T, ? super T, ? extends T> combiner, Sequence<? extends Keyword<T>> keywords) {
+        public static <T> CompositeKeyword<T> compose(Binary<T> combiner, Sequence<? extends Keyword<T>> keywords) {
             return CompositeKeyword.compose(combiner, keywords);
         }
     }

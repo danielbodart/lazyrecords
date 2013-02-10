@@ -4,10 +4,10 @@ import com.googlecode.lazyrecords.*;
 import com.googlecode.totallylazy.*;
 import com.googlecode.totallylazy.regex.Regex;
 
+import static com.googlecode.lazyrecords.Keywords.qualifier;
 import static com.googlecode.lazyrecords.sql.expressions.ColumnReference.columnReference;
-import static com.googlecode.lazyrecords.sql.expressions.SelectList.asClause;
 import static com.googlecode.lazyrecords.sql.expressions.TableName.tableName;
-import static com.googlecode.totallylazy.Option.none;
+import static com.googlecode.totallylazy.Functions.identity;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static java.lang.String.format;
 
@@ -36,30 +36,25 @@ public class Expressions {
         return TextOnlyExpression.textOnly(expression.toString());
     }
 
-    public static ColumnReference name(Keyword<?> keyword) {
-        return columnReference(keyword.name(), metadata(keyword, Keywords.qualifier), metadata(keyword, Keywords.alias));
+    public static ColumnReference columnReference(Keyword<?> keyword) {
+        return ColumnReference.columnReference(keyword.name(), keyword.metadata(qualifier));
     }
 
-    public static TableName name(Definition definition) {
-        return tableName(definition.name(), metadata(definition, Keywords.qualifier), metadata(definition, Keywords.alias));
+    public static TableName tableName(Definition definition) {
+        return TableName.tableName(definition.name(), definition.metadata(qualifier));
     }
 
-    private static <T> Option<T> metadata(Named named, Keyword<T> keyword) {
-        if (named instanceof Metadata) return ((Metadata) named).metadata().getOption(keyword);
-        return Option.none();
-    }
-
-    public static Mapper<Keyword<?>, AbstractExpression> name() {
-        return new Mapper<Keyword<?>, AbstractExpression>() {
+    public static Mapper<Keyword<?>, ColumnReference> columnReference() {
+        return new Mapper<Keyword<?>, ColumnReference>() {
             @Override
-            public AbstractExpression call(Keyword<?> keyword) throws Exception {
-                return name(keyword);
+            public ColumnReference call(Keyword<?> keyword) throws Exception {
+                return columnReference(keyword);
             }
         };
     }
 
     public static String names(Sequence<Keyword<?>> keywords) {
-        return formatList(keywords.map(name()));
+        return formatList(keywords.map(columnReference()));
     }
 
     public static String formatList(final Sequence<?> values) {
@@ -72,6 +67,13 @@ public class Expressions {
         @Override
         public String call(String value) throws Exception {
             return quote(value);
+        }
+    };
+
+    public static Mapper<String, TextOnlyExpression> quotedText = new Mapper<String, TextOnlyExpression>() {
+        @Override
+        public TextOnlyExpression call(String value) throws Exception {
+            return textOnly(quote(value));
         }
     };
 
@@ -112,7 +114,15 @@ public class Expressions {
         return empty().text().equals(expression.text());
     }
 
+    public static boolean isEmpty(Sequence<? extends Expression> expressions) {
+        return empty().text().equals(join(expressions).text());
+    }
+
     public static String toString(Expression expression, Callable1<Object, Object> valueConverter) {
         return format(expression.text().replace("%", "%%").replace("?", "'%s'"), expression.parameters().map(valueConverter).toArray(Object.class));
+    }
+
+    public static Expression expression(Option<? extends Expression> optionalExpression) {
+        return optionalExpression.map(identity(Expression.class)).getOrElse(empty());
     }
 }

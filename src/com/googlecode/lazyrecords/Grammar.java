@@ -9,6 +9,7 @@ import com.googlecode.totallylazy.comparators.Minimum;
 import com.googlecode.totallylazy.numbers.Integers;
 import com.googlecode.totallylazy.numbers.Longs;
 import com.googlecode.totallylazy.numbers.Numbers;
+import com.googlecode.totallylazy.predicates.LogicalBinaryPredicate;
 import com.googlecode.totallylazy.predicates.LogicalPredicate;
 import com.googlecode.totallylazy.time.Dates;
 
@@ -199,23 +200,23 @@ public class Grammar {
         return Aggregates.to(aggregates);
     }
 
-    public static Callable1<Record, Iterable<Record>> join(final Sequence<Record> records, final Callable1<? super Record, Predicate<Record>> using) {
+    public static Join join(final Sequence<Record> records, final Joiner using) {
         return InnerJoin.innerJoin(records, using);
     }
 
-    public static Callable1<Record, Iterable<Record>> innerJoin(final Sequence<Record> records, final Callable1<? super Record, Predicate<Record>> using) {
+    public static Join innerJoin(final Sequence<Record> records, final Joiner using) {
         return join(records, using);
     }
 
-    public static Callable1<Record, Iterable<Record>> leftJoin(final Sequence<Record> records, final Callable1<? super Record, Predicate<Record>> using) {
-        return LeftJoin.leftJoin(records, using);
+    public static Join leftJoin(final Sequence<Record> records, final Joiner using) {
+        return OuterJoin.outerJoin(records, using);
     }
 
-    public static Callable1<Record, Iterable<Record>> leftOuterJoin(final Sequence<Record> records, final Callable1<? super Record, Predicate<Record>> using) {
+    public static Join leftOuterJoin(final Sequence<Record> records, final Joiner using) {
         return leftJoin(records, using);
     }
 
-    public static Callable1<Record, Iterable<Record>> outerJoin(final Sequence<Record> records, final Callable1<? super Record, Predicate<Record>> using) {
+    public static Join outerJoin(final Sequence<Record> records, final Joiner using) {
         return leftJoin(records, using);
     }
 
@@ -239,7 +240,7 @@ public class Grammar {
         return On.on(left, right);
     }
 
-    public static <T> On<T> on(Keyword<T> left, Callable1<T, ? extends Predicate<T>> predicateCreator, Keyword<T> right) {
+    public static <T> On<T> on(Keyword<T> left, LogicalBinaryPredicate<T> predicateCreator, Keyword<T> right) {
         return On.on(left, predicateCreator, right);
     }
 
@@ -292,6 +293,14 @@ public class Grammar {
     }
 
     public static <S, T extends Predicate<S>> T is(final T t) {
+        return Predicates.is(t);
+    }
+
+    public static <T> LogicalPredicate<T> eq(final T t) {
+        return Predicates.is(t);
+    }
+
+    public static <S, T extends Predicate<S>> T eq(final T t) {
         return Predicates.is(t);
     }
 

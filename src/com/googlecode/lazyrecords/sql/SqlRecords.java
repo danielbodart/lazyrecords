@@ -8,6 +8,7 @@ import com.googlecode.lazyrecords.Logger;
 import com.googlecode.lazyrecords.Loggers;
 import com.googlecode.lazyrecords.Queryable;
 import com.googlecode.lazyrecords.Record;
+import com.googlecode.lazyrecords.sql.expressions.AnsiSelectBuilder;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.expressions.Expressions;
 import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
@@ -19,6 +20,7 @@ import com.googlecode.totallylazy.Computation;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Functions;
 import com.googlecode.totallylazy.Group;
+import com.googlecode.totallylazy.LazyException;
 import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Pair;
@@ -38,6 +40,7 @@ import static com.googlecode.lazyrecords.sql.grammars.SqlGrammar.functions.updat
 import static com.googlecode.totallylazy.Closeables.using;
 import static com.googlecode.totallylazy.Pair.pair;
 import static com.googlecode.totallylazy.Sequences.sequence;
+import static com.googlecode.totallylazy.callables.TimeCallable.calculateMilliseconds;
 
 public class SqlRecords extends AbstractRecords implements Queryable<Expression>, Closeable {
     private final Connection connection;
@@ -57,13 +60,17 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
         this(connection, new SqlMappings(), new AnsiSqlGrammar(), new IgnoreLogger());
     }
 
+    Connection connection() {
+        return connection;
+    }
+
     public void close() throws IOException {
         closeables.close();
     }
 
 
     public SqlSequence<Record> get(Definition definition) {
-        return new SqlSequence<Record>(this, from(grammar, definition), logger, Functions.<Record>identity());
+        return new SqlSequence<Record>(this, AnsiSelectBuilder.from(grammar, definition), logger, Functions.<Record>identity());
     }
 
     public Sequence<Record> query(final Expression expression, final Sequence<Keyword<?>> definitions) {
@@ -90,11 +97,19 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
         return expressions.groupBy(Expressions.text()).map(new Callable1<Group<String, Expression>, Number>() {
             public Number call(Group<String, Expression> group) throws Exception {
                 Map<String, Object> log = Maps.<String, Object>map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.EXPRESSION, expressions));
-                Number rowCount = using(connection.prepareStatement(group.key()),
-                        mappings.addValuesInBatch(group.map(Expressions.parameters())).time(milliseconds(log)));
-                log.put(Loggers.ROWS, rowCount);
-                logger.log(log);
-                return rowCount;
+                long start = System.nanoTime();
+                try {
+                    Number rowCount = using(connection.prepareStatement(group.key()),
+                            mappings.addValuesInBatch(group.map(Expressions.parameters())).time(milliseconds(log)));
+                    log.put(Loggers.ROWS, rowCount);
+                    return rowCount;
+                } catch (Exception e) {
+                    log.put(Loggers.MESSAGE, e.getMessage());
+                    throw LazyException.lazyException(e);
+                } finally {
+                    log.put(Loggers.MILLISECONDS, calculateMilliseconds(start, System.nanoTime()));
+                    logger.log(log);
+                }
             }
         }).reduce(Numbers.sum());
     }
