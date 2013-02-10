@@ -21,6 +21,7 @@ import java.util.Set;
 
 import static com.googlecode.lazyrecords.sql.expressions.AnsiFromClause.fromClause;
 import static com.googlecode.lazyrecords.sql.expressions.AnsiQualifiedJoin.qualifiedJoin;
+import static com.googlecode.lazyrecords.sql.expressions.Qualifier.qualifier;
 import static com.googlecode.totallylazy.Sequences.empty;
 import static com.googlecode.totallylazy.Sequences.one;
 import static com.googlecode.totallylazy.Sequences.sequence;
@@ -40,8 +41,8 @@ public class Merger {
         qualifiers = qualifiers(primaryTable, secondaryTable);
         primaryQualifier = qualifier(primaryTable);
         secondaryQualifier = qualifier(secondaryTable);
-        this.primary = new Qualifier(primaryQualifier).qualify(primary);
-        this.secondary = new Qualifier(secondaryQualifier).qualify(secondary);
+        this.primary = Qualifier.qualifier(primaryQualifier).qualify(primary);
+        this.secondary = Qualifier.qualifier(secondaryQualifier).qualify(secondary);
         this.joinType = joinType;
         this.joinSpecification = joinSpecification;
     }

@@ -207,6 +207,14 @@ public class SqlRecordsTest extends RecordsContract<Records> {
                 "where p.age < '12'");
     }
 
+    @Test @Override
+    public void supportsJoinOn() throws Exception {
+        super.supportsJoinOn();
+        assertSql("select p.age, p.dob, p.firstName, p.lastName, p.isbn, p1.book, p1.price " +
+                "from people p left join prices p1 on p.isbn = p1.book " +
+                "where p.firstName = 'matt'");
+    }
+
     protected void assertSql(final String expected) {
         assertEquals(expected, sql());
     }

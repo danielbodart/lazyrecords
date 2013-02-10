@@ -9,33 +9,34 @@ import com.googlecode.lazyrecords.OuterJoin;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.Using;
 import com.googlecode.lazyrecords.sql.expressions.AnsiJoinType;
-import com.googlecode.lazyrecords.sql.expressions.AnsiSelectBuilder;
-import com.googlecode.lazyrecords.sql.expressions.AnsiSelectList;
 import com.googlecode.lazyrecords.sql.expressions.DerivedColumn;
 import com.googlecode.lazyrecords.sql.expressions.Expressible;
-import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.expressions.ExpressionBuilder;
 import com.googlecode.lazyrecords.sql.expressions.JoinCondition;
 import com.googlecode.lazyrecords.sql.expressions.JoinSpecification;
 import com.googlecode.lazyrecords.sql.expressions.JoinType;
 import com.googlecode.lazyrecords.sql.expressions.NamedColumnsJoin;
+import com.googlecode.lazyrecords.sql.expressions.OrderByClause;
+import com.googlecode.lazyrecords.sql.expressions.Qualifier;
 import com.googlecode.lazyrecords.sql.expressions.SelectExpression;
 import com.googlecode.lazyrecords.sql.expressions.SelectList;
+import com.googlecode.lazyrecords.sql.expressions.WhereClause;
 import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.totallylazy.Mapper;
+import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Reducer;
 import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Unary;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 import static com.googlecode.lazyrecords.sql.expressions.AnsiSelectBuilder.from;
-import static com.googlecode.lazyrecords.sql.expressions.AnsiSelectList.selectList;
+import static com.googlecode.lazyrecords.sql.expressions.DerivedColumn.methods.columnReferences;
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.columnReference;
+import static com.googlecode.lazyrecords.sql.expressions.SelectBuilder.aggregates;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class AnsiJoinBuilder implements ExpressionBuilder {
@@ -92,58 +93,48 @@ public class AnsiJoinBuilder implements ExpressionBuilder {
 
     @Override
     public ExpressionBuilder select(Sequence<? extends Keyword<?>> columns) {
-        Sequence<DerivedColumn> selectList = grammar.selectList(columns).derivedColumns();
-        final Map<String, List<DerivedColumn>> existingNames = existingNames(expression.selectList().derivedColumns());
-        SelectExpression select = from(grammar, expression).select(selectList(selectList.map(lookup(existingNames)))).build();
+        return select(grammar.selectList(columns));
+    }
+
+    public ExpressionBuilder select(final SelectList selectList) {
+        return builder(from(grammar, expression).select(qualifier().qualify(selectList)).build());
+    }
+
+    public ExpressionBuilder builder(final SelectExpression select) {
         return new AnsiJoinBuilder(grammar, select);
-    }
-
-    private Unary<DerivedColumn> lookup(final Map<String, List<DerivedColumn>> existingNames) {
-        return new Unary<DerivedColumn>() {
-            @Override
-            public DerivedColumn call(final DerivedColumn column) throws Exception {
-                return existingNames.get(name(column)).get(0);
-            }
-        };
-    }
-
-    private Map<String, List<DerivedColumn>> existingNames(final Sequence<DerivedColumn> derivedColumns) {
-        return derivedColumns.toMap(new Mapper<DerivedColumn, String>() {
-            @Override
-            public String call(final DerivedColumn column) throws Exception {
-                return name(column);
-            }
-        });
-    }
-
-    private String name(final DerivedColumn column) {
-        if(!column.asClause().isEmpty()) return column.asClause().get().alias();
-        return DerivedColumn.methods.columnReferences(column).head().name();
     }
 
     @Override
     public ExpressionBuilder filter(Predicate<? super Record> predicate) {
-        throw new UnsupportedOperationException();
+        return filter(grammar.whereClause(predicate));
+    }
+
+    public ExpressionBuilder filter(final WhereClause whereClause) {
+        return builder(from(grammar, expression).filter(qualifier().qualify(whereClause)).build());
     }
 
     @Override
     public ExpressionBuilder orderBy(Comparator<? super Record> comparator) {
-        throw new UnsupportedOperationException();
+        return orderBy(grammar.orderByClause(comparator));
+    }
+
+    public ExpressionBuilder orderBy(final OrderByClause orderByClause) {
+        return builder(from(grammar, expression).orderBy(qualifier().qualify(orderByClause)).build());
     }
 
     @Override
     public ExpressionBuilder count() {
-        throw new UnsupportedOperationException();
+        return builder(from(grammar, expression).count().build());
     }
 
     @Override
     public ExpressionBuilder distinct() {
-        throw new UnsupportedOperationException();
+        return builder(from(grammar, expression).distinct().build());
     }
 
     @Override
     public ExpressionBuilder reduce(Reducer<?, ?> reducer) {
-        throw new UnsupportedOperationException();
+        return select(aggregates(reducer, fields()));
     }
 
     @Override
@@ -161,5 +152,39 @@ public class AnsiJoinBuilder implements ExpressionBuilder {
         return expression.parameters();
     }
 
+    private Qualifier qualifier() {
+        return Qualifier.qualifier("ignored", lookup(existingQualifiers()));
+    }
 
+    private Mapper<String, String> lookup(final Map<String, String> existingNames) {
+        return new Mapper<String, String>() {
+            @Override
+            public String call(final String column) throws Exception {
+                return existingNames.get(column);
+            }
+        };
+    }
+
+    private Map<String, String> existingQualifiers() {
+        return Maps.mapValues(expression.selectList().derivedColumns().toMap(name()), new Mapper<List<DerivedColumn>, String>() {
+            @Override
+            public String call(final List<DerivedColumn> columns) throws Exception {
+                return columnReferences(columns.get(0)).head().qualifier().get();
+            }
+        });
+    }
+
+    private Mapper<DerivedColumn, String> name() {
+        return new Mapper<DerivedColumn, String>() {
+            @Override
+            public String call(final DerivedColumn column) throws Exception {
+                return name(column);
+            }
+        };
+    }
+
+    private String name(final DerivedColumn column) {
+        if(!column.asClause().isEmpty()) return column.asClause().get().alias();
+        return columnReferences(column).head().name();
+    }
 }

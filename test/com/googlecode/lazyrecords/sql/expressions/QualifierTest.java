@@ -25,8 +25,8 @@ public class QualifierTest {
     @Test
     public void doesNotOverrideAlreadyQualifiedSelectExpression() throws Exception {
         SelectExpression expression = from(grammar, people).select(firstName, lastName).distinct().filter(where(firstName, eq("dan"))).build();
-        SelectExpression qualified = new Qualifier("t0").qualify(expression);
-        SelectExpression again = new Qualifier("p").qualify(qualified);
+        SelectExpression qualified = Qualifier.qualifier("t0").qualify(expression);
+        SelectExpression again = Qualifier.qualifier("p").qualify(qualified);
         assertThat(again.toString(), is("select distinct t0.firstName, t0.lastName from people t0 where t0.firstName = 'dan'"));
     }
 
@@ -41,7 +41,7 @@ public class QualifierTest {
     @Test
     public void canQualifyAnSelectExpression() throws Exception {
         SelectExpression expression = from(grammar, people).select(firstName, lastName).distinct().filter(where(firstName, eq("dan"))).build();
-        SelectExpression qualified = new Qualifier("t0").qualify(expression);
+        SelectExpression qualified = Qualifier.qualifier("t0").qualify(expression);
         assertThat(qualified.toString(), is("select distinct t0.firstName, t0.lastName from people t0 where t0.firstName = 'dan'"));
     }
 

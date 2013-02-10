@@ -50,12 +50,12 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
     }
 
     @Override
-    public ExpressionBuilder select(final Keyword<?>... columns) {
+    public AnsiSelectBuilder select(final Keyword<?>... columns) {
         return select(sequence(columns));
     }
 
     @Override
-    public ExpressionBuilder select(final Sequence<? extends Keyword<?>> columns) {
+    public AnsiSelectBuilder select(final Sequence<? extends Keyword<?>> columns) {
         return select(grammar.selectList(columns));
     }
 
@@ -69,11 +69,11 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
     }
 
     @Override
-    public ExpressionBuilder filter(final Predicate<? super Record> predicate) {
+    public AnsiSelectBuilder filter(final Predicate<? super Record> predicate) {
         return filter(grammar.whereClause(predicate));
     }
 
-    public ExpressionBuilder filter(final WhereClause whereClause) {
+    public AnsiSelectBuilder filter(final WhereClause whereClause) {
         return from(grammar, selectExpression(
                 expression.setQuantifier(),
                 expression.selectList(),
@@ -88,11 +88,11 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
     }
 
     @Override
-    public ExpressionBuilder orderBy(final Comparator<? super Record> comparator) {
+    public AnsiSelectBuilder orderBy(final Comparator<? super Record> comparator) {
         return orderBy(grammar.orderByClause(comparator));
     }
 
-    public ExpressionBuilder orderBy(final OrderByClause orderByClause) {
+    public AnsiSelectBuilder orderBy(final OrderByClause orderByClause) {
         return from(grammar, selectExpression(
                 expression.setQuantifier(),
                 expression.selectList(),
@@ -102,7 +102,7 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
     }
 
     @Override
-    public ExpressionBuilder count() {
+    public AnsiSelectBuilder count() {
         return from(grammar, selectExpression(
                 expression.setQuantifier(),
                 grammar.selectList(countStar()),
@@ -112,7 +112,7 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
     }
 
     @Override
-    public ExpressionBuilder distinct() {
+    public AnsiSelectBuilder distinct() {
         return from(grammar, selectExpression(
                 Option.<SetQuantifier>some(DISTINCT),
                 expression.selectList(),
@@ -122,7 +122,7 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
     }
 
     @Override
-    public ExpressionBuilder reduce(final Reducer<?, ?> reducer) {
+    public AnsiSelectBuilder reduce(final Reducer<?, ?> reducer) {
         return select(aggregates(reducer, fields()));
     }
 

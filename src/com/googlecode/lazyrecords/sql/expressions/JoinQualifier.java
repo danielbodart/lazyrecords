@@ -5,8 +5,8 @@ public class JoinQualifier extends AbstractQualifier {
     private final Qualifier right;
 
     public JoinQualifier(final String left, final String right) {
-        this.left = new Qualifier(left);
-        this.right = new Qualifier(right);
+        this.left = Qualifier.qualifier(left);
+        this.right = Qualifier.qualifier(right);
     }
 
     public QualifiedJoin qualify(final QualifiedJoin qualifiedJoin) {

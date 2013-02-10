@@ -10,7 +10,7 @@ import static java.lang.String.format;
 
 public abstract class Reference<Self extends Reference<Self>> extends AbstractExpression {
     protected final String name;
-    protected final Option<String> qualifier;
+    public final Option<String> qualifier;
 
     protected Reference(String name, Option<String> qualifier) {
         this.qualifier = qualifier.map(quote);
@@ -18,6 +18,10 @@ public abstract class Reference<Self extends Reference<Self>> extends AbstractEx
     }
 
     protected abstract Self self(String text, Option<String> qualifier);
+
+    public Option<String> qualifier() {
+        return qualifier;
+    }
 
     public Self qualify(String qualifier) {
         if (isQualified()) return self(name, this.qualifier);

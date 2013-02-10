@@ -1,9 +1,11 @@
 package com.googlecode.lazyrecords.sql;
 
 import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.sql.expressions.ExpressionBuilder;
 import com.googlecode.lazyrecords.sql.expressions.SelectBuilder;
 import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
+import com.googlecode.totallylazy.Predicates;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
@@ -18,6 +20,7 @@ import static com.googlecode.lazyrecords.sql.AnsiJoinBuilder.join;
 import static com.googlecode.lazyrecords.sql.expressions.AnsiJoinType.inner;
 import static com.googlecode.lazyrecords.sql.expressions.NamedColumnsJoin.namedColumnsJoin;
 import static com.googlecode.lazyrecords.sql.expressions.SelectBuilder.from;
+import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.matchers.Matchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -50,4 +53,15 @@ public class AnsiJoinBuilderTest {
         String sql = join.build().text();
         assertThat(sql, is("select p.firstName, p.isbn, b.title, s.salePrice from people p inner join books b using (isbn) inner join salePrices s using (isbn)"));
     }
+
+    @Test
+    public void canFilterAfterJoining() throws Exception {
+        SelectBuilder primary = from(grammar, people).select(firstName, isbn);
+        SelectBuilder secondary = from(grammar, books).select(title);
+        ExpressionBuilder join = join(primary, secondary, inner, namedColumnsJoin("isbn")).
+            filter(where(firstName, Predicates.is("dan")));
+        String sql = join.build().toString();
+        assertThat(sql, is("select p.firstName, p.isbn, b.title from people p inner join books b using (isbn) where p.firstName = 'dan'"));
+    }
+
 }
