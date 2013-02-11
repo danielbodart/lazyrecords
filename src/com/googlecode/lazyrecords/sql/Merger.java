@@ -50,7 +50,7 @@ public class Merger {
     private String qualifier(final TableReference tableReference) {
         TablePrimary table = tables(tableReference).head();
         if (!table.asClause().isEmpty()) return table.asClause().get().alias();
-        String prefix = String.valueOf(table.tableName().name().charAt(0));
+        String prefix = String.valueOf(table.tableName().name().charAt(0)).toLowerCase();
         for (int i = 0; i < Integer.MAX_VALUE; i++) {
             String possible = i == 0 ? prefix : prefix + i;
             if (!qualifiers.contains(possible)) {

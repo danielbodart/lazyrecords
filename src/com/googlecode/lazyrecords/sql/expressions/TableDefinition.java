@@ -6,11 +6,14 @@ import com.googlecode.totallylazy.Function1;
 
 import java.util.Map;
 
+import static com.googlecode.lazyrecords.sql.expressions.Expressions.quote;
+import static com.googlecode.lazyrecords.sql.expressions.Expressions.quotedText;
+import static com.googlecode.lazyrecords.sql.expressions.Expressions.tableName;
 import static java.lang.String.format;
 
 public class TableDefinition extends TextOnlyExpression {
     public TableDefinition(Definition definition, Map<Class, String> mappings) {
-        super(format("create table %s (%s)", Expressions.tableName(definition), definition.fields().map(asColumn(mappings))));
+        super(format("create table %s (%s)", tableName(definition), definition.fields().map(asColumn(mappings))));
     }
 
     public static TableDefinition createTable(Definition definition, Map<Class, String> mappings) {
@@ -33,6 +36,6 @@ public class TableDefinition extends TextOnlyExpression {
     }
 
     public static CompoundExpression dropTable(Definition definition) {
-        return textOnly("drop table").join(textOnly(definition));
+        return textOnly("drop table").join(tableName(definition));
     }
 }

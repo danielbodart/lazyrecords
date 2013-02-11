@@ -4,13 +4,19 @@ import com.googlecode.lazyrecords.Aggregate;
 import com.googlecode.lazyrecords.AliasedKeyword;
 import com.googlecode.lazyrecords.CompositeKeyword;
 import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.Join;
+import com.googlecode.lazyrecords.Joiner;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.RecordTo;
+import com.googlecode.lazyrecords.sql.AnsiJoinBuilder;
 import com.googlecode.lazyrecords.sql.expressions.AsClause;
 import com.googlecode.lazyrecords.sql.expressions.DerivedColumn;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
+import com.googlecode.lazyrecords.sql.expressions.ExpressionBuilder;
 import com.googlecode.lazyrecords.sql.expressions.FromClause;
+import com.googlecode.lazyrecords.sql.expressions.JoinSpecification;
+import com.googlecode.lazyrecords.sql.expressions.JoinType;
 import com.googlecode.lazyrecords.sql.expressions.OrderByClause;
 import com.googlecode.lazyrecords.sql.expressions.SelectExpression;
 import com.googlecode.lazyrecords.sql.expressions.SelectList;
@@ -69,6 +75,14 @@ public interface SqlGrammar {
     ValueExpression valueExpression(Aggregate aggregate);
 
     ValueExpression valueExpression(CompositeKeyword<?> composite);
+
+    JoinSpecification joinSpecification(Joiner joiner);
+
+    JoinType joinType(Join join);
+
+    AnsiJoinBuilder join(ExpressionBuilder primary, ExpressionBuilder secondary, JoinType type, JoinSpecification specification);
+
+    ExpressionBuilder join(ExpressionBuilder builder, Join join);
 
 
     class functions {

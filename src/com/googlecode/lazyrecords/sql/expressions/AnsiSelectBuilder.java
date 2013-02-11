@@ -1,6 +1,7 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
 import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.Join;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.sql.grammars.AndExpression;
@@ -124,6 +125,11 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
     @Override
     public AnsiSelectBuilder reduce(final Reducer<?, ?> reducer) {
         return select(aggregates(reducer, fields()));
+    }
+
+    @Override
+    public ExpressionBuilder join(Join join) {
+        return grammar.join(this, join);
     }
 
     @Override
