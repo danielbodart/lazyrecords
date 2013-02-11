@@ -1,4 +1,4 @@
-s3://repo.bodar.com/com.googlecode.funclate:funclate:jar|sources:74
+s3://repo.bodar.com/com.googlecode.funclate:funclate:jar|sources:100
 s3://repo.bodar.com/com.googlecode.lazyparsec:lazyparsec:jar|sources:8
 
 mvn:cglib:cglib-nodep:jar:2.2
