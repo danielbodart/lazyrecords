@@ -5,12 +5,21 @@ import com.googlecode.lazyrecords.Aliased;
 import com.googlecode.lazyrecords.AliasedKeyword;
 import com.googlecode.lazyrecords.CompositeKeyword;
 import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.InnerJoin;
+import com.googlecode.lazyrecords.Join;
+import com.googlecode.lazyrecords.Joiner;
 import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.On;
+import com.googlecode.lazyrecords.OuterJoin;
 import com.googlecode.lazyrecords.Record;
+import com.googlecode.lazyrecords.Using;
+import com.googlecode.lazyrecords.sql.AnsiJoinBuilder;
+import com.googlecode.lazyrecords.sql.Merger;
 import com.googlecode.lazyrecords.sql.expressions.AnsiAsClause;
 import com.googlecode.lazyrecords.sql.expressions.AnsiDeleteStatement;
 import com.googlecode.lazyrecords.sql.expressions.AnsiDerivedColumn;
 import com.googlecode.lazyrecords.sql.expressions.AnsiFromClause;
+import com.googlecode.lazyrecords.sql.expressions.AnsiJoinType;
 import com.googlecode.lazyrecords.sql.expressions.AnsiOrderByClause;
 import com.googlecode.lazyrecords.sql.expressions.AnsiPredicateExpression;
 import com.googlecode.lazyrecords.sql.expressions.AnsiSelectExpression;
@@ -24,9 +33,14 @@ import com.googlecode.lazyrecords.sql.expressions.CompositeExpression;
 import com.googlecode.lazyrecords.sql.expressions.DerivedColumn;
 import com.googlecode.lazyrecords.sql.expressions.Expressible;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
+import com.googlecode.lazyrecords.sql.expressions.ExpressionBuilder;
 import com.googlecode.lazyrecords.sql.expressions.Expressions;
 import com.googlecode.lazyrecords.sql.expressions.FromClause;
 import com.googlecode.lazyrecords.sql.expressions.InsertStatement;
+import com.googlecode.lazyrecords.sql.expressions.JoinCondition;
+import com.googlecode.lazyrecords.sql.expressions.JoinSpecification;
+import com.googlecode.lazyrecords.sql.expressions.JoinType;
+import com.googlecode.lazyrecords.sql.expressions.NamedColumnsJoin;
 import com.googlecode.lazyrecords.sql.expressions.OrderByClause;
 import com.googlecode.lazyrecords.sql.expressions.OrderingSpecification;
 import com.googlecode.lazyrecords.sql.expressions.PredicateExpression;
@@ -94,6 +108,38 @@ public class AnsiSqlGrammar implements SqlGrammar {
     }
 
     @Override
+    public AnsiJoinBuilder join(ExpressionBuilder primary, ExpressionBuilder secondary, JoinType type, JoinSpecification specification) {
+        if (primary instanceof AnsiJoinBuilder) {
+            AnsiJoinBuilder builder = (AnsiJoinBuilder) primary;
+            return AnsiJoinBuilder.join(this, Merger.merger(builder.build(), (SelectExpression) secondary.build(), type, specification).merge());
+        }
+        return AnsiJoinBuilder.join(this, Merger.merger((SelectExpression) primary.build(), (SelectExpression) secondary.build(), type, specification).merge());
+    }
+
+    @Override
+    public ExpressionBuilder join(final ExpressionBuilder builder, final Join join) {
+        ExpressionBuilder secondary = (ExpressionBuilder) ((Expressible) join.records()).build();
+        return join(builder, secondary, joinType(join), joinSpecification(join.joiner()));
+    }
+
+    @Override
+    public JoinSpecification joinSpecification(final Joiner joiner) {
+        if (joiner instanceof On<?>)
+            return JoinCondition.joinCondition(columnReference(((On) joiner).left()), columnReference(((On) joiner).right()));
+        if (joiner instanceof Using)
+            return NamedColumnsJoin.namedColumnsJoin(((Using) joiner).keywords().map(Keyword.functions.name));
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public JoinType joinType(final Join join) {
+        if (join instanceof InnerJoin) return AnsiJoinType.inner;
+        if (join instanceof OuterJoin) return AnsiJoinType.left;
+        throw new UnsupportedOperationException();
+    }
+
+
+    @Override
     public SelectExpression selectExpression(Option<SetQuantifier> setQuantifier,
                                              Sequence<? extends Keyword<?>> selectList,
                                              Definition fromClause,
@@ -159,8 +205,7 @@ public class AnsiSqlGrammar implements SqlGrammar {
 
     @Override
     public ValueExpression valueExpression(Callable1<? super Record, ?> callable) {
-        return new multi() {
-        }.<ValueExpression>methodOption(callable).getOrThrow(new UnsupportedOperationException("Unsupported reducer " + callable));
+        return new multi() {}.<ValueExpression>methodOption(callable).getOrThrow(new UnsupportedOperationException("Unsupported reducer " + callable));
     }
 
     @Override

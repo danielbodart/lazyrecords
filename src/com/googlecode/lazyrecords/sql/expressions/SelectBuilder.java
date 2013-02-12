@@ -128,6 +128,11 @@ public class SelectBuilder implements Expression, ExpressionBuilder {
     }
 
     @Override
+    public ExpressionBuilder join(Join join) {
+        return grammar.join(this, join);
+    }
+
+    @Override
     public String text() {
         return build().text();
     }

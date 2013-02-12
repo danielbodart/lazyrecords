@@ -7,6 +7,7 @@ import com.googlecode.lazyrecords.RecordsContract;
 import com.googlecode.lazyrecords.SchemaGeneratingRecords;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
+import com.googlecode.lazyrecords.sql.grammars.OracleGrammar;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
 import com.googlecode.totallylazy.Option;
@@ -59,18 +60,13 @@ public class OracleRecordsTest extends RecordsContract<Records> {
 
     public Records createRecords() throws Exception {
         supportsRowCount = false;
-        SqlGrammar grammar = new AnsiSqlGrammar(oracle());
+        SqlGrammar grammar = new OracleGrammar();
         sqlRecords = new SqlRecords(connection.get(), new SqlMappings(), grammar, logger);
         SqlSchema sqlSchema = new SqlSchema(sqlRecords, grammar);
         sqlSchema.undefine(people);
         sqlSchema.undefine(books);
-
+        sqlSchema.undefine(Trades.trades);
         return new SchemaGeneratingRecords(sqlRecords, sqlSchema);
-    }
-
-    @Override
-    @Ignore("Waiting for Dan to test against Oracle")
-    public void supportsBigDecimal() throws Exception {
     }
 
     @Test

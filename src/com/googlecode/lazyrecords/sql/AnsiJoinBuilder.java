@@ -2,20 +2,15 @@ package com.googlecode.lazyrecords.sql;
 
 import com.googlecode.lazyrecords.InnerJoin;
 import com.googlecode.lazyrecords.Join;
-import com.googlecode.lazyrecords.Joiner;
 import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.lazyrecords.On;
 import com.googlecode.lazyrecords.OuterJoin;
 import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.Using;
 import com.googlecode.lazyrecords.sql.expressions.AnsiJoinType;
 import com.googlecode.lazyrecords.sql.expressions.DerivedColumn;
 import com.googlecode.lazyrecords.sql.expressions.Expressible;
 import com.googlecode.lazyrecords.sql.expressions.ExpressionBuilder;
-import com.googlecode.lazyrecords.sql.expressions.JoinCondition;
 import com.googlecode.lazyrecords.sql.expressions.JoinSpecification;
 import com.googlecode.lazyrecords.sql.expressions.JoinType;
-import com.googlecode.lazyrecords.sql.expressions.NamedColumnsJoin;
 import com.googlecode.lazyrecords.sql.expressions.OrderByClause;
 import com.googlecode.lazyrecords.sql.expressions.Qualifier;
 import com.googlecode.lazyrecords.sql.expressions.SelectExpression;
@@ -48,37 +43,8 @@ public class AnsiJoinBuilder implements ExpressionBuilder {
         this.expression = expression;
     }
 
-    private static AnsiJoinBuilder join(final SelectExpression expression) {
-        return new AnsiJoinBuilder(new AnsiSqlGrammar(), expression);
-    }
-
-    public static AnsiJoinBuilder join(ExpressionBuilder primary, ExpressionBuilder secondary, JoinType type, JoinSpecification specification) {
-        if (primary instanceof AnsiJoinBuilder) {
-            AnsiJoinBuilder builder = (AnsiJoinBuilder) primary;
-            return join(Merger.merger(builder.expression, (SelectExpression) secondary.build(), type, specification).merge());
-        }
-        return join(Merger.merger((SelectExpression) primary.build(), (SelectExpression) secondary.build(), type, specification).merge());
-    }
-
-    public static ExpressionBuilder join(final ExpressionBuilder builder, final Join join) {
-        ExpressionBuilder secondary = (ExpressionBuilder) ((Expressible) join.records()).build();
-        JoinType type = joinType(join);
-        JoinSpecification specification = joinSpecification(join.joiner());
-        return join(builder, secondary, type, specification);
-    }
-
-    private static JoinSpecification joinSpecification(final Joiner joiner) {
-        if (joiner instanceof On<?>)
-            return JoinCondition.joinCondition(columnReference(((On) joiner).left()), columnReference(((On) joiner).right()));
-        if (joiner instanceof Using)
-            return NamedColumnsJoin.namedColumnsJoin(((Using) joiner).keywords().map(Keyword.functions.name));
-        throw new UnsupportedOperationException();
-    }
-
-    private static JoinType joinType(final Join join) {
-        if (join instanceof InnerJoin) return AnsiJoinType.inner;
-        if (join instanceof OuterJoin) return AnsiJoinType.left;
-        throw new UnsupportedOperationException();
+    public static AnsiJoinBuilder join(AnsiSqlGrammar grammar, final SelectExpression expression) {
+        return new AnsiJoinBuilder(grammar, expression);
     }
 
     @Override
@@ -135,6 +101,11 @@ public class AnsiJoinBuilder implements ExpressionBuilder {
     @Override
     public ExpressionBuilder reduce(Reducer<?, ?> reducer) {
         return select(aggregates(reducer, fields()));
+    }
+
+    @Override
+    public ExpressionBuilder join(Join join) {
+        return grammar.join(this, join);
     }
 
     @Override
