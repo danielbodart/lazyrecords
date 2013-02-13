@@ -16,6 +16,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
+import static com.googlecode.totallylazy.time.DateFormatConverter.defaultConverter;
+import static com.googlecode.totallylazy.time.Dates.format;
 
 
 public class StandardParser implements PredicateParser {
@@ -29,7 +31,7 @@ public class StandardParser implements PredicateParser {
         this(new StringMappings().
                 add(Integer.class, new IntegerMapping()).
                 add(Long.class, new LongMapping()).
-                add(Date.class, new DateMapping(new DateFormatConverter(Sequences.<DateFormat>sequence(dateFormat())))));
+                add(Date.class, new DateMapping(new DateFormatConverter(defaultConverter().formats().add(dateFormat())))));
     }
 
     public StandardParser(StringMappings mappings) {
@@ -44,7 +46,7 @@ public class StandardParser implements PredicateParser {
             }
             return Grammar.PARSER(implicits, mappings).parse(query);
         } catch (ParserException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalArgumentException(raw, e);
         }
     }
 }

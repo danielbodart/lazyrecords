@@ -25,7 +25,7 @@ public class ParametrizedParserTest {
         PredicateParser parser = new ParametrizedParser(new StandardParser(), new ParserParameters().add("now", Dates.date(2001, 2, 3)));
         Keyword<Date> created = keyword("Created", Date.class);
 
-        Predicate<Record> predicate = parser.parse("Created > $now$", sequence(created));
+        Predicate<Record> predicate = parser.parse("Created > \"$now$\"", sequence(created));
 
         assertThat(predicate.matches(Record.constructors.record().set(created, date(2001, 2, 4))), is(true));
         assertThat(predicate.matches(Record.constructors.record().set(created, date(2001, 2, 3))), is(false));

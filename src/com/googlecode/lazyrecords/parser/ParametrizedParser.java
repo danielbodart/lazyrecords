@@ -8,6 +8,7 @@ import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
+import com.googlecode.totallylazy.time.Dates;
 
 import java.util.Date;
 
@@ -46,7 +47,7 @@ public class ParametrizedParser implements PredicateParser {
     private Callable1<Date, String> formatDate() {
         return new Callable1<Date, String>() {
             public String call(Date date) throws Exception {
-                return StandardParser.dateFormat().format(date);
+                return Dates.RFC3339withMilliseconds().format(date); // this format isn't lossy
             }
         };
     }
