@@ -22,7 +22,8 @@ import static org.hamcrest.Matchers.is;
 public class ParametrizedParserTest {
     @Test
     public void canInjectCurrentTime() throws Exception {
-        PredicateParser parser = new ParametrizedParser(new StandardParser(), new ParserParameters().add("now", Dates.date(2001, 2, 3)));
+        ParserDateConverter dateConverter = new ParserDateConverter();
+        PredicateParser parser = new ParametrizedParser(new StandardParser(), dateConverter, new ParserParameters().add("now", Dates.date(2001, 2, 3)));
         Keyword<Date> created = keyword("Created", Date.class);
 
         Predicate<Record> predicate = parser.parse("Created > \"$now$\"", sequence(created));
@@ -39,7 +40,8 @@ public class ParametrizedParserTest {
                 add("name", Predicates.always(), StringFunclate.functions.first(returnArgument(String.class).then(Strings.reverse()))).
                 add("shoeSize", Predicates.always(), StringFunclate.functions.first(returnArgument(String.class).then(Strings.reverse())));
 
-        PredicateParser parser = new ParametrizedParser(new StandardParser(), parserFunctions, new ParserParameters());
+        ParserDateConverter dateConverter = new ParserDateConverter();
+        PredicateParser parser = new ParametrizedParser(new StandardParser(), dateConverter, parserFunctions, new ParserParameters());
 
         Keyword<String> data = keyword("data", String.class);
         Keyword<String> shoeSize = keyword("shoeSize", String.class);

@@ -8,24 +8,28 @@ import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
+import com.googlecode.totallylazy.time.DateConverter;
 import com.googlecode.totallylazy.time.Dates;
 
 import java.util.Date;
 
 import static com.googlecode.totallylazy.Predicates.instanceOf;
 import static com.googlecode.totallylazy.Sequences.sequence;
+import static com.googlecode.totallylazy.time.DateConverter.functions.format;
 
 public class ParametrizedParser implements PredicateParser {
     private final PredicateParser parser;
+    private final ParserDateConverter dateConverter;
     private final ParserFunctions parserFunctions;
     private final ParserParameters data;
 
-    public ParametrizedParser(PredicateParser parser, ParserParameters data) {
-        this(parser, new ParserFunctions(), data);
+    public ParametrizedParser(PredicateParser parser, ParserDateConverter dateConverter, ParserParameters data) {
+        this(parser, dateConverter, new ParserFunctions(), data);
     }
 
-    public ParametrizedParser(PredicateParser parser, ParserFunctions parserFunctions, ParserParameters data) {
+    public ParametrizedParser(PredicateParser parser, ParserDateConverter dateConverter, ParserFunctions parserFunctions, ParserParameters data) {
         this.parser = parser;
+        this.dateConverter = dateConverter;
         this.parserFunctions = parserFunctions;
         this.data = data;
     }
@@ -33,7 +37,7 @@ public class ParametrizedParser implements PredicateParser {
     public Predicate<Record> parse(String query, Sequence<? extends Keyword<?>> implicits) throws IllegalArgumentException {
         try {
             Funclate funclate = new StringFunclate(query);
-            funclate.add(instanceOf(Date.class), formatDate());
+            funclate.add(instanceOf(Date.class), format(dateConverter));
 
             sequence(parserFunctions.functions()).fold(funclate, CompositeFunclate.functions.addCallable());
 
@@ -42,13 +46,5 @@ public class ParametrizedParser implements PredicateParser {
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }
-    }
-
-    private Callable1<Date, String> formatDate() {
-        return new Callable1<Date, String>() {
-            public String call(Date date) throws Exception {
-                return Dates.RFC3339withMilliseconds().format(date); // this format isn't lossy
-            }
-        };
     }
 }
