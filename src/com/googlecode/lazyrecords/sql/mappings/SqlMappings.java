@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.Map;
 
 import static com.googlecode.totallylazy.Maps.map;
+import static com.googlecode.totallylazy.Sequences.contains;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.numbers.Numbers.*;
 
@@ -71,7 +72,9 @@ public class SqlMappings {
                     addValues(statement, sequence(values));
                     statement.addBatch();
                 }
-                return numbers(statement.executeBatch()).filter(not(Statement.SUCCESS_NO_INFO)).fold(0, sum());
+                Sequence<Number> counts = numbers(statement.executeBatch());
+                if(counts.contains(Statement.SUCCESS_NO_INFO)) return statement.getUpdateCount();
+                return counts.filter(not(Statement.SUCCESS_NO_INFO)).fold(0, sum());
             }
         };
     }

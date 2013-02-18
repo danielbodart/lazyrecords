@@ -6,14 +6,12 @@ import com.googlecode.lazyrecords.Records;
 import com.googlecode.lazyrecords.RecordsContract;
 import com.googlecode.lazyrecords.SchemaGeneratingRecords;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
-import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
 import com.googlecode.lazyrecords.sql.grammars.OracleGrammar;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
 import com.googlecode.totallylazy.Option;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.sql.Connection;
@@ -24,7 +22,6 @@ import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
 import static com.googlecode.lazyrecords.RecordsContract.Books.books;
 import static com.googlecode.lazyrecords.RecordsContract.People.people;
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
-import static com.googlecode.lazyrecords.sql.grammars.ColumnDatatypeMappings.oracle;
 import static com.googlecode.totallylazy.Closeables.safeClose;
 import static java.sql.DriverManager.getConnection;
 import static org.hamcrest.CoreMatchers.is;
@@ -59,7 +56,6 @@ public class OracleRecordsTest extends RecordsContract<Records> {
     }
 
     public Records createRecords() throws Exception {
-        supportsRowCount = false;
         SqlGrammar grammar = new OracleGrammar();
         sqlRecords = new SqlRecords(connection.get(), new SqlMappings(), grammar, logger);
         SqlSchema sqlSchema = new SqlSchema(sqlRecords, grammar);
