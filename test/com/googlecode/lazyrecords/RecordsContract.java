@@ -40,7 +40,6 @@ import static com.googlecode.lazyrecords.Grammar.in;
 import static com.googlecode.lazyrecords.Grammar.is;
 import static com.googlecode.lazyrecords.Grammar.join;
 import static com.googlecode.lazyrecords.Grammar.keyword;
-import static com.googlecode.lazyrecords.Grammar.outerJoin;
 import static com.googlecode.lazyrecords.Grammar.lessThan;
 import static com.googlecode.lazyrecords.Grammar.lessThanOrEqualTo;
 import static com.googlecode.lazyrecords.Grammar.maximum;
@@ -49,6 +48,7 @@ import static com.googlecode.lazyrecords.Grammar.not;
 import static com.googlecode.lazyrecords.Grammar.notNullValue;
 import static com.googlecode.lazyrecords.Grammar.nullValue;
 import static com.googlecode.lazyrecords.Grammar.on;
+import static com.googlecode.lazyrecords.Grammar.outerJoin;
 import static com.googlecode.lazyrecords.Grammar.record;
 import static com.googlecode.lazyrecords.Grammar.select;
 import static com.googlecode.lazyrecords.Grammar.startsWith;
@@ -58,9 +58,9 @@ import static com.googlecode.lazyrecords.Grammar.update;
 import static com.googlecode.lazyrecords.Grammar.using;
 import static com.googlecode.lazyrecords.Grammar.where;
 import static com.googlecode.lazyrecords.Loggers.loggers;
-import static com.googlecode.lazyrecords.RecordsContract.Books.isbn;
 import static com.googlecode.lazyrecords.RecordsContract.Books.books;
 import static com.googlecode.lazyrecords.RecordsContract.Books.inPrint;
+import static com.googlecode.lazyrecords.RecordsContract.Books.isbn;
 import static com.googlecode.lazyrecords.RecordsContract.Books.rrp;
 import static com.googlecode.lazyrecords.RecordsContract.Books.title;
 import static com.googlecode.lazyrecords.RecordsContract.Books.uuid;
@@ -260,7 +260,7 @@ public abstract class RecordsContract<T extends Records> {
                 head().get(firstName), Matchers.is("ray"));
     }
 
-    public interface Prices extends Definition{
+    public interface Prices extends Definition {
         Prices prices = definition(Prices.class, "salePrices");
         Keyword<BigDecimal> price = keyword("salePrice", BigDecimal.class);
         Keyword<URI> isbn = Books.isbn;
@@ -286,7 +286,7 @@ public abstract class RecordsContract<T extends Records> {
         assertThat(mattsFavouriteBook.get(price), Matchers.is(Matchers.nullValue()));
     }
 
-    public interface Trades extends Definition{
+    public interface Trades extends Definition {
         Definition trades = definition(Trades.class);
         Keyword<BigDecimal> price = Prices.price;
         Keyword<String> creatorId = keyword("creator_id", String.class);
@@ -422,7 +422,7 @@ public abstract class RecordsContract<T extends Records> {
 
     @Test
     public void correctlyReportsCountWhenUpdatingValueUsedInPredicate() throws Exception {
-        assertCount(records.set(people,sequence(
+        assertCount(records.set(people, sequence(
                 pair(where(isbn, is(godelEsherBach)), record(isbn, zenIsbn)))), 1);
         assertThat(records.get(people).filter(where(age, is(12))).map(isbn), hasExactly(zenIsbn));
     }

@@ -21,6 +21,8 @@ import com.googlecode.totallylazy.collections.PersistentList;
 import com.googlecode.totallylazy.collections.PersistentMap;
 import com.googlecode.totallylazy.collections.PersistentSortedMap;
 
+import java.util.ConcurrentModificationException;
+
 import static com.googlecode.lazyrecords.Record.functions.merge;
 import static com.googlecode.lazyrecords.Record.methods.filter;
 import static com.googlecode.totallylazy.Pair.pair;
@@ -31,7 +33,7 @@ public class STMRecords extends AbstractRecords implements Transaction {
     private final StringMappings mappings;
     private final STM stm;
     private STM snapshot;
-    private PersistentList<Function1<PersistentMap<Definition, PersistentList<PersistentMap<String, String>>>, Pair<PersistentMap<Definition, PersistentList<PersistentMap<String, String>>>, Integer>>> modifications;
+    private PersistentList<Pair<Integer, Function1<PersistentMap<Definition, PersistentList<PersistentMap<String, String>>>, Pair<PersistentMap<Definition, PersistentList<PersistentMap<String, String>>>, Integer>>>> modifications;
 
     public STMRecords(STM stm, StringMappings mappings) {
         this.stm = stm;
@@ -115,7 +117,7 @@ public class STMRecords extends AbstractRecords implements Transaction {
 
     private Integer modifyReturn(Function1<PersistentMap<Definition, PersistentList<PersistentMap<String, String>>>, Pair<PersistentMap<Definition, PersistentList<PersistentMap<String, String>>>, Integer>> callable) {
         Integer modified = snapshot.modifyReturn(callable);
-        modifications = modifications.cons(callable);
+        modifications = modifications.cons(Pair.pair(modified, callable));
         return modified;
     }
 
@@ -167,14 +169,20 @@ public class STMRecords extends AbstractRecords implements Transaction {
         };
     }
 
-    private static <T, R> Function1<T, T> applyAll(final Iterable<? extends Function1<T, Pair<T, R>>> callables) {
+    private static <T, R> Function1<T, T> applyAll(final Iterable<? extends Pair<R, ? extends Function1<T, Pair<T, R>>>> callables) {
         return new Function1<T, T>() {
             @Override
             public T call(T data) throws Exception {
-                return sequence(callables).fold(data, new Function2<T, Function1<T, Pair<T, R>>, T>() {
+                return sequence(callables).fold(data, new Function2<T, Pair<R, ? extends Function1<T, Pair<T, R>>>, T>() {
                     @Override
-                    public T call(T t, Function1<T, Pair<T, R>> modification) throws Exception {
-                        return modification.call(t).first();
+                    public T call(T t, Pair<R, ? extends Function1<T, Pair<T, R>>> modification) throws Exception {
+                        R expected = modification.first();
+                        Pair<T, R> result = modification.second().call(t);
+                        R actual = result.second();
+                        if (!expected.equals(actual))
+                            throw new ConcurrentModificationException("Expected:" + expected + " Actual:" + actual);
+                        return result.first();
+
                     }
                 });
             }
