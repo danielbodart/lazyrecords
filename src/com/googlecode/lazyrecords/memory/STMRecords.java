@@ -20,7 +20,6 @@ import com.googlecode.totallylazy.Value;
 import com.googlecode.totallylazy.collections.PersistentList;
 import com.googlecode.totallylazy.collections.PersistentMap;
 import com.googlecode.totallylazy.collections.PersistentSortedMap;
-import com.googlecode.totallylazy.predicates.LogicalPredicate;
 
 import static com.googlecode.lazyrecords.Record.functions.merge;
 import static com.googlecode.lazyrecords.Record.methods.filter;
@@ -60,8 +59,6 @@ public class STMRecords extends AbstractRecords implements Transaction {
     }
 
     public Number remove(final Definition definition, Predicate<? super Record> predicate) {
-        PersistentList<PersistentMap<String, String>> matches = matches(predicate, get(definition));
-
         return modifyReturn(removeAll(definition, predicate));
     }
 
