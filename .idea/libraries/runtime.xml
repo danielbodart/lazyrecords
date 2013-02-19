@@ -6,10 +6,11 @@
     <JAVADOC />
     <SOURCES>
       <root url="file://$PROJECT_DIR$/lib/runtime" />
-      <root url="file://$PROJECT_DIR$/lib/runtime" />
+      <root url="jar://$PROJECT_DIR$/lib/runtime/totallylazy-1020-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/runtime/totallylazy-1020-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/runtime/totallylazy-1020-sources.jar!/" />
     </SOURCES>
     <jarDirectory url="file://$PROJECT_DIR$/lib/runtime" recursive="false" />
-    <jarDirectory url="file://$PROJECT_DIR$/lib/runtime" recursive="false" type="SOURCES" />
     <jarDirectory url="file://$PROJECT_DIR$/lib/runtime" recursive="false" type="SOURCES" />
   </library>
 </component>

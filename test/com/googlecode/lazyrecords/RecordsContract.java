@@ -421,6 +421,13 @@ public abstract class RecordsContract<T extends Records> {
     }
 
     @Test
+    public void supportsUpdatingWithMultiplePredicates() throws Exception {
+        assertCount(records.set(people,sequence(
+                pair(where(age, is(12)).and(where(firstName, is("matt"))), record(isbn, zenIsbn)))), 1);
+        assertThat(records.get(people).filter(where(age, is(12))).map(isbn), hasExactly(zenIsbn));
+    }
+
+    @Test
     public void supportsInsertOrUpdate() throws Exception {
         URI newIsbn = uri("urn:isbn:0192861980");
         String updatedTitle = "Zen And The Art Of Motorcycle Maintenance: 25th Anniversary Edition: An Inquiry into Values";
