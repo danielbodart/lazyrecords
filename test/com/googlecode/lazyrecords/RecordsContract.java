@@ -421,9 +421,9 @@ public abstract class RecordsContract<T extends Records> {
     }
 
     @Test
-    public void supportsUpdatingWithMultiplePredicates() throws Exception {
+    public void correctlyReportsCountWhenUpdatingValueUsedInPredicate() throws Exception {
         assertCount(records.set(people,sequence(
-                pair(where(age, is(12)).and(where(firstName, is("matt"))), record(isbn, zenIsbn)))), 1);
+                pair(where(isbn, is(godelEsherBach)), record(isbn, zenIsbn)))), 1);
         assertThat(records.get(people).filter(where(age, is(12))).map(isbn), hasExactly(zenIsbn));
     }
 
