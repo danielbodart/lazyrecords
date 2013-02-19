@@ -20,6 +20,7 @@ import com.googlecode.totallylazy.Value;
 import com.googlecode.totallylazy.collections.PersistentList;
 import com.googlecode.totallylazy.collections.PersistentMap;
 import com.googlecode.totallylazy.collections.PersistentSortedMap;
+import com.googlecode.totallylazy.predicates.LogicalPredicate;
 
 import static com.googlecode.lazyrecords.Record.functions.merge;
 import static com.googlecode.lazyrecords.Record.methods.filter;
@@ -79,21 +80,23 @@ public class STMRecords extends AbstractRecords implements Transaction {
             public Pair<PersistentMap<Definition, PersistentList<PersistentMap<String, String>>>, Integer> call(PersistentMap<Definition, PersistentList<PersistentMap<String, String>>> database) throws Exception {
                 PersistentList<PersistentMap<String, String>> table = listFor(database, definition);
 
-                int count = 0;
+                final int[] count = {0};
 
-                PersistentList<PersistentMap<String, String>> result = PersistentList.constructors.empty();
-                for (PersistentMap<String, String> row : table) {
-                    for (Pair<? extends Predicate<? super Record>, Record> pair : records) {
-                        Record original = asRecord(definition, row);
-                        if (pair.first().matches(original)) {
-                            row = asPersistentMap(definition, merge(filter(pair.second(), definition.fields())).call(original));
-                            count++;
+                PersistentList<PersistentMap<String, String>> result = table.map(new Mapper<PersistentMap<String, String>, PersistentMap<String, String>>() {
+                    @Override
+                    public PersistentMap<String, String> call(PersistentMap<String, String> row) throws Exception {
+                        for (Pair<? extends Predicate<? super Record>, Record> pair : records) {
+                            Record original = asRecord(definition, row);
+                            if (pair.first().matches(original)) {
+                                row = asPersistentMap(definition, merge(filter(pair.second(), definition.fields())).call(original));
+                                count[0]++;
+                            }
                         }
+                        return row;
                     }
-                    result = result.cons(row);
-                }
+                });
 
-                return Pair.pair(database.put(definition, result), count);
+                return Pair.pair(database.put(definition, result), count[0]);
             }
         });
     }
