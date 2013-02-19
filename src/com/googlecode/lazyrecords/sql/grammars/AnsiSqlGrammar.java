@@ -59,6 +59,7 @@ import com.googlecode.totallylazy.Mapper;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.annotations.multimethod;
 import com.googlecode.totallylazy.callables.JoinString;
 import com.googlecode.totallylazy.comparators.AscendingComparator;
 import com.googlecode.totallylazy.comparators.CompositeComparator;
@@ -165,19 +166,18 @@ public class AnsiSqlGrammar implements SqlGrammar {
     }
 
     public Sequence<SortSpecification> sortSpecification(Comparator<? super Record> comparator) {
-        return new multi() {
-        }.<Sequence<SortSpecification>>methodOption(comparator).getOrThrow(new UnsupportedOperationException("Unsupported comparator " + comparator));
+        return new multi() {}.<Sequence<SortSpecification>>methodOption(comparator).getOrThrow(new UnsupportedOperationException("Unsupported comparator " + comparator));
     }
 
-    public Sequence<SortSpecification> sortSpecification(AscendingComparator<? super Record, ?> comparator) {
+    @multimethod public Sequence<SortSpecification> sortSpecification(AscendingComparator<? super Record, ?> comparator) {
         return one(AnsiSortSpecification.sortSpecification(valueExpression(comparator.callable()), OrderingSpecification.asc));
     }
 
-    public Sequence<SortSpecification> sortSpecification(DescendingComparator<? super Record, ?> comparator) {
+    @multimethod public Sequence<SortSpecification> sortSpecification(DescendingComparator<? super Record, ?> comparator) {
         return one(AnsiSortSpecification.sortSpecification(valueExpression(comparator.callable()), OrderingSpecification.desc));
     }
 
-    public Sequence<SortSpecification> sortSpecification(CompositeComparator<Record> comparator) {
+    @multimethod public Sequence<SortSpecification> sortSpecification(CompositeComparator<Record> comparator) {
         return comparator.comparators().flatMap(sortSpecification);
     }
 
@@ -208,22 +208,22 @@ public class AnsiSqlGrammar implements SqlGrammar {
         return new multi() {}.<ValueExpression>methodOption(callable).getOrThrow(new UnsupportedOperationException("Unsupported reducer " + callable));
     }
 
-    @Override
+    @Override @multimethod
     public ValueExpression valueExpression(Keyword<?> keyword) {
         return Expressions.columnReference(keyword);
     }
 
-    @Override
+    @Override @multimethod
     public ValueExpression valueExpression(AliasedKeyword aliasedKeyword) {
         return valueExpression(aliasedKeyword.source());
     }
 
-    @Override
+    @Override @multimethod
     public ValueExpression valueExpression(Aggregate aggregate) {
         return setFunctionType(aggregate.reducer(), aggregate.source());
     }
 
-    @Override
+    @Override @multimethod
     public ValueExpression valueExpression(CompositeKeyword<?> composite) {
         Binary<?> combiner = composite.combiner();
         if (combiner instanceof JoinString) {
@@ -259,64 +259,59 @@ public class AnsiSqlGrammar implements SqlGrammar {
         }.<Expression>methodOption(predicate).getOrThrow(new UnsupportedOperationException());
     }
 
-    public Expression toSql(AlwaysTrue predicate) {
-        return textOnly("1 = 1");
-    }
+    @multimethod public Expression toSql(AlwaysTrue predicate) { return textOnly("1 = 1"); }
+    @multimethod public Expression toSql(AlwaysFalse predicate) { return textOnly("1 != 1"); }
 
-    public Expression toSql(AlwaysFalse predicate) {
-        return textOnly("1 != 1");
-    }
-
-    public Expression toSql(AndPredicate<?> predicate) {
+    @multimethod public Expression toSql(AndPredicate<?> predicate) {
         if (predicate.predicates().isEmpty()) return empty();
         return AndExpression.andExpression(toExpressions(predicate.predicates()));
     }
 
-    public Expression toSql(OrPredicate<?> predicate) {
+    @multimethod public Expression toSql(OrPredicate<?> predicate) {
         if (predicate.predicates().isEmpty()) return empty();
         if (!predicate.predicates().safeCast(AlwaysTrue.class).isEmpty()) return empty();
         return OrExpression.orExpression(toExpressions(predicate.predicates()));
     }
 
-    public Expression toSql(Not<?> predicate) {
+    @multimethod public Expression toSql(Not<?> predicate) {
         return textOnly("not (").join(toSql(predicate.predicate())).join(textOnly(")"));
     }
 
-    public PredicateExpression toSql(WherePredicate<Record, ?> predicate) {
+    @multimethod public PredicateExpression toSql(WherePredicate<Record, ?> predicate) {
         ValueExpression valueExpression = valueExpression(predicate.callable());
         Expression predicateSql = toSql(predicate.predicate());
         return AnsiPredicateExpression.predicateExpression(valueExpression, predicateSql);
     }
 
-    public Expression toSql(NullPredicate<?> predicate) {
+    @multimethod public Expression toSql(NullPredicate<?> predicate) {
         return textOnly("is null");
     }
 
-    public Expression toSql(EqualsPredicate<?> predicate) {
+    @multimethod public Expression toSql(EqualsPredicate<?> predicate) {
         return Expressions.expression("= ?", predicate.value());
     }
 
-    public Expression toSql(GreaterThan<?> predicate) {
+    @multimethod public Expression toSql(GreaterThan<?> predicate) {
         return Expressions.expression("> ?", predicate.value());
     }
 
-    public Expression toSql(GreaterThanOrEqualTo<?> predicate) {
+    @multimethod public Expression toSql(GreaterThanOrEqualTo<?> predicate) {
         return Expressions.expression(">= ?", predicate.value());
     }
 
-    public Expression toSql(LessThan<?> predicate) {
+    @multimethod public Expression toSql(LessThan<?> predicate) {
         return Expressions.expression("< ?", predicate.value());
     }
 
-    public Expression toSql(LessThanOrEqualTo<?> predicate) {
+    @multimethod public Expression toSql(LessThanOrEqualTo<?> predicate) {
         return Expressions.expression("<= ?", predicate.value());
     }
 
-    public Expression toSql(Between<?> predicate) {
+    @multimethod public Expression toSql(Between<?> predicate) {
         return Expressions.expression("between ? and ?", sequence(predicate.lower(), predicate.upper()));
     }
 
-    public Expression toSql(InPredicate<?> predicate) {
+    @multimethod public Expression toSql(InPredicate<?> predicate) {
         Sequence<Object> sequence = sequence(predicate.values());
         if (sequence instanceof Expressible) {
             Expression pair = ((Expressible) sequence).build();
@@ -325,15 +320,15 @@ public class AnsiSqlGrammar implements SqlGrammar {
         return Expressions.expression(repeat("?").take(sequence.size()).toString("in (", ",", ")"), sequence);
     }
 
-    public Expression toSql(StartsWithPredicate predicate) {
+    @multimethod public Expression toSql(StartsWithPredicate predicate) {
         return Expressions.expression("like ?", sequence(predicate.value() + "%"));
     }
 
-    public Expression toSql(EndsWithPredicate predicate) {
+    @multimethod public Expression toSql(EndsWithPredicate predicate) {
         return Expressions.expression("like ?", sequence("%" + predicate.value()));
     }
 
-    public Expression toSql(ContainsPredicate predicate) {
+    @multimethod public Expression toSql(ContainsPredicate predicate) {
         return Expressions.expression("like ?", sequence("%" + predicate.value() + "%"));
     }
 

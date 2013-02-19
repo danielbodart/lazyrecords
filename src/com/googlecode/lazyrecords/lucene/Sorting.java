@@ -5,6 +5,7 @@ import com.googlecode.lazyrecords.Record;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Unchecked;
+import com.googlecode.totallylazy.annotations.multimethod;
 import com.googlecode.totallylazy.comparators.AscendingComparator;
 import com.googlecode.totallylazy.comparators.CompositeComparator;
 import com.googlecode.totallylazy.comparators.DescendingComparator;
@@ -21,15 +22,15 @@ public class Sorting {
         return new multi() {}.<Sort>methodOption(comparator).getOrThrow(new UnsupportedOperationException("Unsupported comparator " + comparator));
     }
 
-    public static Sort sort(AscendingComparator<? super Record, ?> comparator) {
+    @multimethod public static Sort sort(AscendingComparator<? super Record, ?> comparator) {
         return sortBy(name(comparator.callable()), false);
     }
 
-    public static Sort sort(DescendingComparator<? super Record, ?> comparator) {
+    @multimethod public static Sort sort(DescendingComparator<? super Record, ?> comparator) {
         return sortBy(name(comparator.callable()), true);
     }
 
-    public static Sort sort(CompositeComparator<? super Record> comparator) {
+    @multimethod public static Sort sort(CompositeComparator<? super Record> comparator) {
         Sequence<SortField> sortFields = comparator.comparators().map(sort()).flatMap(sortFields());
         return new Sort(sortFields.toArray(SortField.class));
     }
