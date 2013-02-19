@@ -1,5 +1,7 @@
 package com.googlecode.lazyrecords;
 
+import static java.lang.String.format;
+
 public abstract class AbstractKeyword<T> extends AbstractMetadata<Keyword<T>> implements Keyword<T> {
     protected AbstractKeyword(Record metadata) {
         super(metadata);

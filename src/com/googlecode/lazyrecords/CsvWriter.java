@@ -61,6 +61,6 @@ public class CsvWriter {
     }
 
     private static String headers(Sequence<Keyword<?>> fields) {
-        return fields.map(toString).toString(FIELD_SEPARATOR);
+        return fields.map(Keyword.functions.name).toString(FIELD_SEPARATOR);
     }
 }

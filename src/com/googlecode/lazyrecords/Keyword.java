@@ -9,6 +9,8 @@ import static com.googlecode.totallylazy.Strings.equalIgnoringCase;
 public interface Keyword<T> extends Named, Metadata<Keyword<T>>, Callable1<Record, T>, GenericType<T>, Comparable<Keyword<T>> {
     Record metadata();
 
+    public String toString();
+
     class constructors {
         public static ImmutableKeyword<Object> keyword(String value) {
             return new ImmutableKeyword<Object>(value, Object.class);

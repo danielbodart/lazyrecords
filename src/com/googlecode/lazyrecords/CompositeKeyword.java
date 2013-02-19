@@ -35,7 +35,7 @@ public class CompositeKeyword<T> extends AbstractKeyword<T> implements Aliased {
 
     @Override
     public String name() {
-        return combiner.toString() + "_" + keywords.toString("_");
+        return combiner.toString() + "_" + keywords.map(functions.name).toString("_");
     }
 
     public Binary<T> combiner() {

@@ -21,7 +21,7 @@ public class Lucene {
     static final Sort NO_SORT = new Sort();
 
     public static Query record(Definition definition) {
-        return new TermQuery(new Term(RECORD_KEY.toString(), definition.name()));
+        return new TermQuery(new Term(RECORD_KEY.name(), definition.name()));
     }
 
     public static Query and(Query... queries) {
@@ -90,9 +90,9 @@ public class Lucene {
     @multimethod public Query query(Keyword<?> keyword, Between<?> predicate) { return between(keyword, predicate.lower(), predicate.upper()); }
     @multimethod public Query query(Keyword<?> keyword, Not<?> predicate) { return not(query(keyword, predicate.predicate())); }
     @multimethod public Query query(Keyword<?> keyword, InPredicate<?> predicate) { return or(sequence(predicate.values()).map(asQuery(keyword))); }
-    @multimethod public Query query(Keyword<?> keyword, StartsWithPredicate predicate) { return new PrefixQuery(new Term(keyword.toString(), predicate.value())); }
-    @multimethod public Query query(Keyword<?> keyword, ContainsPredicate predicate) { return new WildcardQuery(new Term(keyword.toString(), "*" + predicate.value() + "*")); }
-    @multimethod public Query query(Keyword<?> keyword, EndsWithPredicate predicate) { return new WildcardQuery(new Term(keyword.toString(), "*" + predicate.value())); }
+    @multimethod public Query query(Keyword<?> keyword, StartsWithPredicate predicate) { return new PrefixQuery(new Term(keyword.name(), predicate.value())); }
+    @multimethod public Query query(Keyword<?> keyword, ContainsPredicate predicate) { return new WildcardQuery(new Term(keyword.name(), "*" + predicate.value() + "*")); }
+    @multimethod public Query query(Keyword<?> keyword, EndsWithPredicate predicate) { return new WildcardQuery(new Term(keyword.name(), "*" + predicate.value())); }
     @multimethod public Query query(Keyword<?> keyword, NullPredicate<?> predicate) { return nullValue(keyword); }
 
     private Query newRange(Keyword<?> keyword, Object lower, Object upper, boolean minInclusive, boolean maxInclusive) {
