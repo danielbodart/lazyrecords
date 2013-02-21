@@ -1,6 +1,7 @@
 package com.googlecode.lazyrecords.sql;
 
 import com.googlecode.lazyrecords.Aggregates;
+import com.googlecode.lazyrecords.ClientComputation;
 import com.googlecode.lazyrecords.Join;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Logger;
@@ -72,6 +73,8 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
 
     @Override
     public <S> Sequence<S> map(Callable1<? super T, ? extends S> callable) {
+        if(callable instanceof ClientComputation) return super.map(callable);
+
         Callable1 raw = (Callable1) callable;
         if (raw instanceof Keyword) {
             return build(Unchecked.<Keyword<S>>cast(raw));
@@ -85,6 +88,8 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
 
     @Override
     public <S> Sequence<S> flatMap(Callable1<? super T, ? extends Iterable<? extends S>> callable) {
+        if(callable instanceof ClientComputation) return super.flatMap(callable);
+
         Callable1 raw = (Callable1) callable;
         if (raw instanceof Join) {
             return Unchecked.cast(build(selectBuilder.join((Join) raw)));
@@ -95,6 +100,8 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
 
     @Override
     public Sequence<T> filter(Predicate<? super T> predicate) {
+        if(callable instanceof ClientComputation) return super.filter(predicate);
+
         try {
             return build(selectBuilder.filter(Unchecked.<Predicate<Record>>cast(predicate)));
         } catch (UnsupportedOperationException ex) {
@@ -110,6 +117,8 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
 
     @Override
     public Sequence<T> sortBy(Comparator<? super T> comparator) {
+        if(callable instanceof ClientComputation) return super.sortBy(comparator);
+
         try {
             return build(selectBuilder.orderBy(Unchecked.<Comparator<Record>>cast(comparator)));
         } catch (UnsupportedOperationException ex) {
@@ -121,6 +130,8 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
     @Override
     @SuppressWarnings("unchecked")
     public <S> S reduce(Callable2<? super S, ? super T, ? extends S> callable) {
+        if(callable instanceof ClientComputation) return super.reduce(callable);
+
         try {
             if (callable instanceof Reducer) {
                 Reducer<?, ?> reducer = (Reducer) callable;
