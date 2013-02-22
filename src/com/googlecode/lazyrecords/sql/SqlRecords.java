@@ -96,6 +96,7 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
     }
 
     public Number update(final Sequence<Expression> expressions) {
+        if(expressions.isEmpty()) return 0;
         Map<String, Object> log = Maps.<String, Object>map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.EXPRESSION, expressions));
         long start = System.nanoTime();
         try {
