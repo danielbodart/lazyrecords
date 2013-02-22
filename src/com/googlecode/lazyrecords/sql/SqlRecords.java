@@ -21,6 +21,7 @@ import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Functions;
 import com.googlecode.totallylazy.Group;
 import com.googlecode.totallylazy.LazyException;
+import com.googlecode.totallylazy.Mapper;
 import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Pair;
@@ -31,6 +32,7 @@ import com.googlecode.totallylazy.numbers.Numbers;
 import java.io.Closeable;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.Map;
 
 import static com.googlecode.lazyrecords.Loggers.milliseconds;
@@ -94,24 +96,20 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
     }
 
     public Number update(final Sequence<Expression> expressions) {
-        return expressions.groupBy(Expressions.text()).map(new Callable1<Group<String, Expression>, Number>() {
-            public Number call(Group<String, Expression> group) throws Exception {
-                Map<String, Object> log = Maps.<String, Object>map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.EXPRESSION, expressions));
-                long start = System.nanoTime();
-                try {
-                    Number rowCount = using(connection.prepareStatement(group.key()),
-                            mappings.addValuesInBatch(group.map(Expressions.parameters())).time(milliseconds(log)));
-                    log.put(Loggers.ROWS, rowCount);
-                    return rowCount;
-                } catch (Exception e) {
-                    log.put(Loggers.MESSAGE, e.getMessage());
-                    throw LazyException.lazyException(e);
-                } finally {
-                    log.put(Loggers.MILLISECONDS, calculateMilliseconds(start, System.nanoTime()));
-                    logger.log(log);
-                }
-            }
-        }).reduce(Numbers.sum());
+        Map<String, Object> log = Maps.<String, Object>map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.EXPRESSION, expressions));
+        long start = System.nanoTime();
+        try {
+            Number rowCount = using(connection.prepareStatement(expressions.head().text()),
+                    mappings.addValuesInBatch(expressions.map(Expressions.parameters())).time(milliseconds(log)));
+            log.put(Loggers.ROWS, rowCount);
+            return rowCount;
+        } catch (Exception e) {
+            log.put(Loggers.MESSAGE, e.getMessage());
+            throw LazyException.lazyException(e);
+        } finally {
+            log.put(Loggers.MILLISECONDS, calculateMilliseconds(start, System.nanoTime()));
+            logger.log(log);
+        }
     }
 
     public Number remove(Definition definition, Predicate<? super Record> predicate) {
