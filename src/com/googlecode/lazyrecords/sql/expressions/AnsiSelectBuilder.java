@@ -83,7 +83,12 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
                 expression.orderByClause()));
     }
 
-    private WhereClause combine(final Option<WhereClause> existing, final WhereClause additional) {
+    public static Option<WhereClause> combine(final Option<WhereClause> existing, final Option<WhereClause> additional) {
+        if(additional.isEmpty()) return existing;
+        return some(combine(existing, additional.get()));
+    }
+
+    public static WhereClause combine(final Option<WhereClause> existing, final WhereClause additional) {
         if (existing.isEmpty()) return additional;
         return whereClause(andExpression(existing.get().expression(), additional.expression()));
     }

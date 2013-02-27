@@ -26,11 +26,13 @@ import static com.googlecode.lazyrecords.sql.AnsiJoinBuilderTest.Plants.plants;
 import static com.googlecode.lazyrecords.sql.expressions.AnsiJoinType.inner;
 import static com.googlecode.lazyrecords.sql.expressions.NamedColumnsJoin.namedColumnsJoin;
 import static com.googlecode.lazyrecords.sql.expressions.SelectBuilder.from;
+import static com.googlecode.totallylazy.Predicates.equalTo;
 import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Strings.capitalise;
 import static com.googlecode.totallylazy.matchers.Matchers.is;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 public class AnsiJoinBuilderTest {
     SqlGrammar grammar = new AnsiSqlGrammar();
@@ -70,6 +72,18 @@ public class AnsiJoinBuilderTest {
             filter(where(firstName, Predicates.is("dan")));
         String sql = join.build().toString();
         assertThat(sql, is("select p.firstName, p.isbn, b.title from people p inner join books b using (isbn) where p.firstName = 'dan'"));
+    }
+
+    @Test
+    public void canJoinWithExistingFilter() throws Exception {
+        SelectBuilder primary = from(grammar, people).select(firstName, isbn);
+        SelectBuilder secondary = from(grammar, books).select(title).filter(where(title, equalTo("ray")));
+        ExpressionBuilder join = grammar.join(primary, secondary, inner, namedColumnsJoin("isbn"));
+        assertSql(join, "select p.firstName, p.isbn, b.title from people p inner join books b using (isbn) where b.title = 'ray'");
+    }
+
+    private void assertSql(ExpressionBuilder actual, String expected) {
+        assertEquals(expected, actual.build().toString());
     }
 
     public interface Plants extends Definition {

@@ -1,6 +1,7 @@
 package com.googlecode.lazyrecords.sql;
 
 import com.googlecode.lazyrecords.sql.expressions.AnsiQualifiedJoin;
+import com.googlecode.lazyrecords.sql.expressions.AnsiSelectBuilder;
 import com.googlecode.lazyrecords.sql.expressions.AnsiSelectExpression;
 import com.googlecode.lazyrecords.sql.expressions.AnsiSelectList;
 import com.googlecode.lazyrecords.sql.expressions.DerivedColumn;
@@ -14,7 +15,9 @@ import com.googlecode.lazyrecords.sql.expressions.SelectExpression;
 import com.googlecode.lazyrecords.sql.expressions.SelectList;
 import com.googlecode.lazyrecords.sql.expressions.TablePrimary;
 import com.googlecode.lazyrecords.sql.expressions.TableReference;
+import com.googlecode.lazyrecords.sql.expressions.WhereClause;
 import com.googlecode.totallylazy.Mapper;
+import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Sequence;
 
 import java.util.Set;
@@ -100,8 +103,12 @@ public class Merger {
                 primary.setQuantifier(),
                 mergeSelectList(),
                 mergeFromClause(),
-                primary.whereClause(),
+                mergeWhereClause(),
                 primary.orderByClause());
+    }
+
+    private Option<WhereClause> mergeWhereClause() {
+        return AnsiSelectBuilder.combine(primary.whereClause(), secondary.whereClause());
     }
 
     private FromClause mergeFromClause() {

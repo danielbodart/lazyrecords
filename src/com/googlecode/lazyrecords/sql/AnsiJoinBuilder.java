@@ -1,16 +1,10 @@
 package com.googlecode.lazyrecords.sql;
 
-import com.googlecode.lazyrecords.InnerJoin;
 import com.googlecode.lazyrecords.Join;
 import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.lazyrecords.OuterJoin;
 import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.sql.expressions.AnsiJoinType;
 import com.googlecode.lazyrecords.sql.expressions.DerivedColumn;
-import com.googlecode.lazyrecords.sql.expressions.Expressible;
 import com.googlecode.lazyrecords.sql.expressions.ExpressionBuilder;
-import com.googlecode.lazyrecords.sql.expressions.JoinSpecification;
-import com.googlecode.lazyrecords.sql.expressions.JoinType;
 import com.googlecode.lazyrecords.sql.expressions.OrderByClause;
 import com.googlecode.lazyrecords.sql.expressions.Qualifier;
 import com.googlecode.lazyrecords.sql.expressions.SelectExpression;
@@ -30,7 +24,6 @@ import java.util.Map;
 
 import static com.googlecode.lazyrecords.sql.expressions.AnsiSelectBuilder.from;
 import static com.googlecode.lazyrecords.sql.expressions.DerivedColumn.methods.columnReferences;
-import static com.googlecode.lazyrecords.sql.expressions.Expressions.columnReference;
 import static com.googlecode.lazyrecords.sql.expressions.SelectBuilder.aggregates;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
@@ -155,7 +148,7 @@ public class AnsiJoinBuilder implements ExpressionBuilder {
     }
 
     private String name(final DerivedColumn column) {
-        if(!column.asClause().isEmpty()) return column.asClause().get().alias();
+        if (!column.asClause().isEmpty()) return column.asClause().get().alias();
         return columnReferences(column).head().name();
     }
 }
