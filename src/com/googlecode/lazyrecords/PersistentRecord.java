@@ -38,7 +38,7 @@ public class PersistentRecord implements Record {
     }
 
     public Sequence<Pair<Keyword<?>, Object>> fields() {
-        return fields.persistentList().toSequence();
+        return fields.toSequence();
     }
 
     public Sequence<Keyword<?>> keywords() {
