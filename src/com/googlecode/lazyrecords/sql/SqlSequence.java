@@ -174,8 +174,7 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public boolean exists(Predicate<? super T> predicate) {
-        return !filter(predicate).map((Callable1<T, Integer>) SqlSchema.one).unique().isEmpty();
+        return !filter(predicate).map(Unchecked.<Callable1<T, Integer>>cast(SqlSchema.one)).unique().isEmpty();
     }
 }
