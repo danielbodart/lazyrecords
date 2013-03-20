@@ -489,6 +489,14 @@ public class DelegatingPrepareStatement implements PreparedStatement {
         return preparedStatement.isPoolable();
     }
 
+    public void closeOnCompletion() throws SQLException {
+        throw new UnsupportedOperationException();
+    }
+
+    public boolean isCloseOnCompletion() throws SQLException {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
         return preparedStatement.unwrap(iface);
