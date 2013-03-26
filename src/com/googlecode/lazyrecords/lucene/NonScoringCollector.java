@@ -11,8 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NonScoringCollector extends Collector {
+    private final int maxDocs;
     private int base = 0;
     private final List<ScoreDoc> docs = new ArrayList<ScoreDoc>();
+
+    public NonScoringCollector(int maxDocs) {
+        this.maxDocs = maxDocs;
+    }
 
     @Override
     public void setScorer(Scorer scorer) throws IOException {
@@ -20,6 +25,7 @@ public class NonScoringCollector extends Collector {
 
     @Override
     public void collect(int doc) throws IOException {
+        if(docs.size() >= maxDocs) return;
         docs.add(new ScoreDoc(doc + base, 0));
     }
 

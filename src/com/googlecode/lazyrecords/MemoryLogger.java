@@ -26,6 +26,6 @@ public class MemoryLogger implements Logger {
     }
 
     public Sequence<Map<String, ?>> data() {
-        return sequence(data);
+        return data.toSequence();
     }
 }

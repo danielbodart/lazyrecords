@@ -31,6 +31,16 @@ public class RecoveringSearcher implements Searcher {
         }
     }
 
+    @Override
+    public TopDocs search(Query query, Sort sort, int end) throws IOException {
+        try {
+            return searcher.search(query, sort, end);
+        } catch (Exception e) {
+            replaceBrokenSearcher();
+            return search(query, sort, end);
+        }
+    }
+
     private synchronized void replaceBrokenSearcher() {
         safeClose(searcher);
         this.searcher = Callers.call(newSearcher);

@@ -16,19 +16,17 @@ public class LuceneSearcher implements Searcher {
 
     @Override
     public TopDocs search(Query query, Sort sort) throws IOException {
-        if (sortSpecified(sort)) {
-            return searcher.search(query, Integer.MAX_VALUE, sort);
-        } else {
-            return searchWithoutSort(query);
-        }
+        return search(query, sort, Integer.MAX_VALUE);
     }
 
-    private boolean sortSpecified(Sort sort) {
-        return sort != Lucene.NO_SORT;
+    @Override
+    public TopDocs search(Query query, Sort sort, int end) throws IOException {
+        if (sortSpecified(sort)) return searcher.search(query, end, sort);
+        return this.search(query, end);
     }
 
-    private TopDocs searchWithoutSort(Query query) throws IOException {
-        NonScoringCollector results = new NonScoringCollector();
+    public TopDocs search(Query query, int end) throws IOException {
+        NonScoringCollector results = new NonScoringCollector(end);
         searcher.search(query, results);
         return results.topDocs();
     }
@@ -52,5 +50,9 @@ public class LuceneSearcher implements Searcher {
 
     public IndexSearcher searcher() {
         return searcher;
+    }
+
+    private boolean sortSpecified(Sort sort) {
+        return sort != Lucene.NO_SORT;
     }
 }

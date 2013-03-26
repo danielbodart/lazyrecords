@@ -679,6 +679,19 @@ public abstract class RecordsContract<T extends Records> {
     }
 
     @Test
+    public void supportsTake() throws Exception {
+        assertThat(records.get(people).sortBy(firstName).take(2).size(), NumberMatcher.is(2));
+        assertThat(records.get(people).sortBy(firstName).take(1).map(firstName), hasExactly("bob"));
+    }
+
+    @Test
+    public void canCombineDropAndTake() throws Exception {
+        assertThat(records.get(people).sortBy(firstName).drop(1).take(1).size(), NumberMatcher.is(1));
+        assertThat(records.get(people).sortBy(firstName).take(2).drop(1).size(), NumberMatcher.is(1));
+        assertThat(records.get(people).sortBy(firstName).drop(1).take(2).drop(1).map(firstName), hasExactly("matt"));
+    }
+
+    @Test
     public void supportsExists() throws Exception {
         assertThat(records.get(people).exists(where(firstName, is("dan"))), CoreMatchers.is(true));
         assertThat(records.get(people).exists(where(firstName, is("george bush"))), CoreMatchers.is(false));

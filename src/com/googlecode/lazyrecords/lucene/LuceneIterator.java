@@ -31,15 +31,17 @@ public class LuceneIterator extends StatefulIterator<Record> implements Closeabl
     private final Logger logger;
     private ScoreDoc[] scoreDocs;
     private int index;
+    private final int end;
     private Searcher searcher;
     private boolean closed = false;
 
-    public LuceneIterator(LuceneStorage storage, Query query, Sort sort, Callable1<? super Document, Record> documentToRecord, int start, CloseableList closeables, Logger logger) {
+    public LuceneIterator(LuceneStorage storage, Query query, Sort sort, Callable1<? super Document, Record> documentToRecord, int start, int end, CloseableList closeables, Logger logger) {
         this.storage = storage;
         this.query = query;
         this.sort = sort;
         this.documentToRecord = documentToRecord;
         this.index = start;
+        this.end = end;
         this.closeables = closeables;
         this.logger = logger;
     }
@@ -59,7 +61,7 @@ public class LuceneIterator extends StatefulIterator<Record> implements Closeabl
         if( scoreDocs == null) {
             Map<String,Object> log = Maps.<String, Object>map(pair(Loggers.TYPE, Loggers.LUCENE), pair(Loggers.EXPRESSION, query));
             long start = System.nanoTime();
-            scoreDocs = searcher().search(query, sort).scoreDocs;
+            scoreDocs = searcher().search(query, sort, end).scoreDocs;
             log.put(Loggers.MILLISECONDS, calculateMilliseconds(start, System.nanoTime()));
             log.put(Loggers.ROWS, scoreDocs.length);
             logger.log(log);

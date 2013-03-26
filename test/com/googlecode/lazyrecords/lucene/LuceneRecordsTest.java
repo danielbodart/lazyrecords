@@ -75,7 +75,7 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
         Record head = result.head();
         Sequence<Map<String, ?>> logs = memory.data();
         assertThat(head, Matchers.is(result.head())); // Check iterator
-        assertThat(logs, Matchers.is(memory.data())); // Check queries
+        assertThat(memory.data(), Matchers.is(logs)); // Check queries
     }
 
     @Override

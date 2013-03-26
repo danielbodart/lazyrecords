@@ -24,6 +24,11 @@ public class PooledSearcher implements Searcher {
     }
 
     @Override
+    public TopDocs search(Query query, Sort sort, int end) throws IOException {
+        return searcher.search(query, sort, end);
+    }
+
+    @Override
     public Document document(int id) throws IOException {
         return searcher.document(id);
     }

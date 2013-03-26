@@ -11,6 +11,8 @@ import java.io.IOException;
 public interface Searcher extends Closeable{
     TopDocs search(Query query, Sort sort) throws IOException;
 
+    TopDocs search(Query query, Sort sort, int end) throws IOException;
+
     Document document(int id) throws IOException;
 
     int count(Query query) throws IOException;
