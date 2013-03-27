@@ -9,7 +9,7 @@ import java.io.File;
 
 import static com.googlecode.lazyrecords.lucene.LucenePartitionedIndex.partitionedIndex;
 import static com.googlecode.lazyrecords.lucene.PartitionedIndex.functions.noSyncDirectory;
-import static com.googlecode.totallylazy.Files.emptyTemporaryDirectory;
+import static com.googlecode.totallylazy.Files.emptyRandomDirectory;
 
 public class LucenePartitionedRecordsTest extends RecordsContract<LucenePartitionedRecords> {
     private File file;
@@ -17,7 +17,7 @@ public class LucenePartitionedRecordsTest extends RecordsContract<LucenePartitio
 
     @Override
     protected LucenePartitionedRecords createRecords() throws Exception {
-        file = emptyTemporaryDirectory("totallylazy/partitioned-index");
+        file = emptyRandomDirectory("totallylazy/partitioned-index");
         partitionedIndex = partitionedIndex(noSyncDirectory(file));
         return new LucenePartitionedRecords(partitionedIndex, new LuceneMappings(), logger);
     }
@@ -29,10 +29,10 @@ public class LucenePartitionedRecordsTest extends RecordsContract<LucenePartitio
         partitionedIndex.close();
     }
 
-	@Override
-	@Ignore("Still thinking about lexical representation of BigDecimal")
-	public void supportsBigDecimal() throws Exception {
-	}
+    @Override
+    @Ignore("Still thinking about lexical representation of BigDecimal")
+    public void supportsBigDecimal() throws Exception {
+    }
 
     @Override
     @Ignore

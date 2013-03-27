@@ -2,7 +2,6 @@ package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Logger;
-import com.googlecode.lazyrecords.MemoryLogger;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.RecordsContract;
 import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
@@ -22,10 +21,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-import static com.googlecode.lazyrecords.RecordsContract.People.age;
-import static com.googlecode.lazyrecords.RecordsContract.People.lastName;
-import static com.googlecode.lazyrecords.RecordsContract.People.people;
-import static com.googlecode.totallylazy.Files.temporaryDirectory;
+import static com.googlecode.lazyrecords.RecordsContract.People.*;
+import static com.googlecode.totallylazy.Files.emptyRandomDirectory;
 import static com.googlecode.totallylazy.matchers.IterableMatcher.hasExactly;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -38,7 +35,7 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
 
     @Override
     protected LuceneRecords createRecords() throws Exception {
-        file = temporaryDirectory("totallylazy");
+        file = emptyRandomDirectory("totallylazy");
         directory = new NoSyncDirectory(file);
         storage = new OptimisedStorage(directory, new LucenePool(directory));
         return luceneRecords(logger);
