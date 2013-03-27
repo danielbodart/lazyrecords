@@ -11,7 +11,7 @@ public class IndexMigratorTest {
     @Ignore
     public void shouldMigrateProd() throws Exception {
         File old = new File("../../20121031121454787.bgb.unzipped");
-        File newStructure = Files.emptyRandomDirectory("partitioned-index");
+        File newStructure = Files.emptyVMDirectory("partitioned-index");
         IndexMigrator.migrate(old, newStructure);
 
     }

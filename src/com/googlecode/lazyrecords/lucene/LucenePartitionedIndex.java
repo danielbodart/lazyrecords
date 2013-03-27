@@ -110,7 +110,7 @@ public class LucenePartitionedIndex implements Closeable, Persistence, Partition
     }
 
     private File tempUnzipLocation() {
-        return Files.emptyRandomDirectory("lucene-index-unzipped");
+        return Files.emptyVMDirectory("lucene-index-unzipped");
     }
 
     private File unzipIfNeeded(File source) throws IOException {

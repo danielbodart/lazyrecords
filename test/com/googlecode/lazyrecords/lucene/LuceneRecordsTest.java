@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import static com.googlecode.lazyrecords.RecordsContract.People.*;
-import static com.googlecode.totallylazy.Files.emptyRandomDirectory;
+import static com.googlecode.totallylazy.Files.emptyVMDirectory;
 import static com.googlecode.totallylazy.matchers.IterableMatcher.hasExactly;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -35,7 +35,7 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
 
     @Override
     protected LuceneRecords createRecords() throws Exception {
-        file = emptyRandomDirectory("totallylazy");
+        file = emptyVMDirectory("totallylazy");
         directory = new NoSyncDirectory(file);
         storage = new OptimisedStorage(directory, new LucenePool(directory));
         return luceneRecords(logger);

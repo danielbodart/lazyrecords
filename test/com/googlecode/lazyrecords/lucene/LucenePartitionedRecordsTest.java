@@ -9,7 +9,7 @@ import java.io.File;
 
 import static com.googlecode.lazyrecords.lucene.LucenePartitionedIndex.partitionedIndex;
 import static com.googlecode.lazyrecords.lucene.PartitionedIndex.functions.noSyncDirectory;
-import static com.googlecode.totallylazy.Files.emptyRandomDirectory;
+import static com.googlecode.totallylazy.Files.emptyVMDirectory;
 
 public class LucenePartitionedRecordsTest extends RecordsContract<LucenePartitionedRecords> {
     private File file;
@@ -17,7 +17,7 @@ public class LucenePartitionedRecordsTest extends RecordsContract<LucenePartitio
 
     @Override
     protected LucenePartitionedRecords createRecords() throws Exception {
-        file = emptyRandomDirectory("totallylazy/partitioned-index");
+        file = emptyVMDirectory("totallylazy/partitioned-index");
         partitionedIndex = partitionedIndex(noSyncDirectory(file));
         return new LucenePartitionedRecords(partitionedIndex, new LuceneMappings(), logger);
     }
