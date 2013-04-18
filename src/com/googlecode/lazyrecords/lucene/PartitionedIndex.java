@@ -4,6 +4,7 @@ import com.googlecode.lazyrecords.Definition;
 import com.googlecode.totallylazy.Files;
 import com.googlecode.totallylazy.Function1;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.MMapDirectory;
 import org.apache.lucene.store.NIOFSDirectory;
 import org.apache.lucene.store.RAMDirectory;
 
@@ -43,5 +44,13 @@ public interface PartitionedIndex extends Persistence {
             };
         }
 
+        public static Function1<String, Directory> mmapDirectory(final File rootDirectory) {
+            return new Function1<String, Directory>() {
+                @Override
+                public Directory call(String definition) throws Exception {
+                    return new MMapDirectory(Files.directory(rootDirectory, definition));
+                }
+            };
+        }
     }
 }

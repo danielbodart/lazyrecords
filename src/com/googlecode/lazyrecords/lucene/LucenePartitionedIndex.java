@@ -6,8 +6,6 @@ import com.googlecode.totallylazy.Files;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Lazy;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.NIOFSDirectory;
-import org.apache.lucene.store.RAMDirectory;
 
 import java.io.Closeable;
 import java.io.File;
@@ -16,7 +14,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import static com.googlecode.lazyrecords.lucene.PartitionedIndex.functions.nioDirectory;
+import static com.googlecode.lazyrecords.lucene.PartitionedIndex.functions.mmapDirectory;
 import static com.googlecode.lazyrecords.lucene.PartitionedIndex.functions.ramDirectory;
 import static com.googlecode.totallylazy.Callables.value;
 import static com.googlecode.totallylazy.Closeables.safeClose;
@@ -35,7 +33,7 @@ public class LucenePartitionedIndex implements Closeable, Persistence, Partition
     }
 
     public static LucenePartitionedIndex partitionedIndex(final File rootDirectory) {
-        return partitionedIndex(nioDirectory(rootDirectory));
+        return partitionedIndex(mmapDirectory(rootDirectory));
     }
 
     public static LucenePartitionedIndex partitionedIndex() {
