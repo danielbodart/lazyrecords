@@ -5,7 +5,9 @@ mvn:cglib:cglib-nodep:jar:2.2
 mvn:org.objenesis:objenesis:jar:1.2
 mvn:org.hsqldb:hsqldb:jar:2.2.8
 mvn:mysql:mysql-connector-java:jar:5.1.21
-mvn:org.apache.lucene:lucene-core:jar|sources:3.6.0
+mvn:org.apache.lucene:lucene-core:jar|sources:4.2.1
+mvn:org.apache.lucene:lucene-analyzers-common:jar|sources:4.2.1
+mvn:org.apache.lucene:lucene-queryparser:jar|sources:4.2.1
 mvn:org.enumerable:enumerable-java:jar:0.4.0
 
 

@@ -1,26 +1,14 @@
 package com.googlecode.lazyrecords.lucene;
 
-import com.googlecode.totallylazy.*;
-import org.apache.lucene.analysis.KeywordAnalyzer;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
+import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.search.MatchAllDocsQuery;
-import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import static com.googlecode.totallylazy.Sequences.repeat;
-import static com.googlecode.totallylazy.Sequences.sequence;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -43,7 +31,7 @@ public class SearcherPoolTest {
 
     private RAMDirectory emptyDirectory() throws IOException {
         RAMDirectory ramDirectory = new RAMDirectory();
-        IndexWriter writer = new IndexWriter(ramDirectory, new IndexWriterConfig(Version.LUCENE_30, new KeywordAnalyzer()));
+        IndexWriter writer = new IndexWriter(ramDirectory, new IndexWriterConfig(Version.LUCENE_42, new KeywordAnalyzer()));
         writer.commit();
         return ramDirectory;
     }
