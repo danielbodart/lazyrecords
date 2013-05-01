@@ -1,6 +1,7 @@
 package com.googlecode.lazyrecords;
 
 import com.googlecode.totallylazy.*;
+import com.googlecode.totallylazy.collections.PersistentMap;
 
 import java.util.Map;
 
@@ -53,8 +54,8 @@ public interface Record {
             return record(sequence(fields));
         }
 
-        public static Record record(final Iterable<? extends Pair<Keyword<?>, Object>> fields) {
-            return new PersistentRecord(listMap(fields));
+        public static Record record(final Iterable<? extends Pair<? extends Keyword<?>, ?>> fields) {
+            return new PersistentRecord(listMap(Unchecked.<Iterable<? extends Pair<Keyword<?>, Object>>>cast(fields)));
         }
     }
 

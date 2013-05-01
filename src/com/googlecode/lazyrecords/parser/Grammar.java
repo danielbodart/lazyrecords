@@ -86,11 +86,11 @@ public class Grammar {
     }
 
 
-    private static Parser<Void> ws(char value) {
+    public static Parser<Void> ws(char value) {
         return ws(String.valueOf(value));
     }
 
-    private static Parser<Void> ws(String value) {
+    public static Parser<Void> ws(String value) {
         return pattern(regex(String.format("\\s*%s\\s*", quote(value))), value);
     }
 
