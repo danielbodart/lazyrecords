@@ -16,7 +16,7 @@ public class CsvWriter {
     private static final String FIELD_SEPARATOR = ",";
     private static final char ROW_SEPARATOR = '\n';
 
-    public static void writeTo(Iterator<Record> records, Writer writer, Sequence<Keyword<?>> fields) {
+    public static void writeTo(Iterator<Record> records, Writer writer, Sequence<? extends Keyword<?>> fields) {
         Iterators.fold(Iterators.cons(headers(fields), Iterators.map(records, rowToString(fields))), writer, writeLine());
     }
 
@@ -29,7 +29,7 @@ public class CsvWriter {
         };
     }
 
-    private static RecordTo<String> rowToString(final Sequence<Keyword<?>> fields) {
+    private static RecordTo<String> rowToString(final Sequence<? extends Keyword<?>> fields) {
         return new RecordTo<String>() {
             @Override
             public String call(final Record record) throws Exception {
@@ -60,7 +60,7 @@ public class CsvWriter {
         };
     }
 
-    private static String headers(Sequence<Keyword<?>> fields) {
+    private static String headers(Sequence<? extends Keyword<?>> fields) {
         return fields.map(Keyword.functions.name).toString(FIELD_SEPARATOR);
     }
 }
