@@ -39,7 +39,7 @@ public interface CsvReader {
         static final Parser<String> QUOTED = or(notChar(QUOTE).source(), ESCAPED_QUOTE).many().map(join).between(isChar(QUOTE), isChar(QUOTE));
         static final Parser<String> TEXT = or(QUOTED, RAW);
         static final Parser<List<String>> FIELDS = TEXT.sepBy(ws(COMMA));
-        static final Parser<List<List<String>>> ROW = FIELDS.followedBy(among("\n\r").many()).many1();
+        static final Parser<List<List<String>>> ROW = FIELDS.sepBy(among("\n\r").many());
 
         @Override
         public Sequence<Record> read(Reader reader) {
