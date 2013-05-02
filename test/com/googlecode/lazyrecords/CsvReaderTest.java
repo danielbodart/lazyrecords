@@ -40,9 +40,9 @@ public class CsvReaderTest {
         Keyword<String> a = keyword("A", String.class);
         Keyword<String> b = keyword("B", String.class);
         Keyword<String> c = keyword("C", String.class);
-        String sampleCsv = "A,B,C\n" + "a,\"b,b,b\",c";
+        String sampleCsv = "A,B,C\n" + "a,\"b,b,b\",\"a\nnew line\"";
 
-        assertThat(csvReader.read(new StringReader(sampleCsv)), is(one(record(a, "a", b, "b,b,b", c, "c"))));
+        assertThat(csvReader.read(new StringReader(sampleCsv)), is(one(record(a, "a", b, "b,b,b", c, "a\nnew line"))));
     }
 
     @Test

@@ -1,18 +1,23 @@
 package com.googlecode.lazyrecords;
 
 import com.googlecode.lazyparsec.Parser;
+import com.googlecode.lazyparsec.Parsers;
+import com.googlecode.lazyparsec.Scanners;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Mapper;
 import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Strings;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.util.List;
 
 import static com.googlecode.lazyparsec.Parsers.or;
+import static com.googlecode.lazyparsec.Scanners.among;
 import static com.googlecode.lazyparsec.Scanners.isChar;
+import static com.googlecode.lazyparsec.Scanners.notAmong;
 import static com.googlecode.lazyparsec.Scanners.notChar;
 import static com.googlecode.lazyrecords.parser.Grammar.ws;
+import static com.googlecode.totallylazy.LazyException.lazyException;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
 public interface CsvReader {
@@ -29,30 +34,35 @@ public interface CsvReader {
                 return sequence(strings).toString("");
             }
         };
-        static final Parser<String> RAW = notChar(COMMA).many1().source();
+        static final Parser<String> RAW = notAmong(",\n").many1().source();
         static final Parser<String> ESCAPED_QUOTE = isChar(QUOTE).times(2).retn("\"");
         static final Parser<String> QUOTED = or(notChar(QUOTE).source(), ESCAPED_QUOTE).many().map(join).between(isChar(QUOTE), isChar(QUOTE));
         static final Parser<String> TEXT = or(QUOTED, RAW);
         static final Parser<List<String>> FIELDS = TEXT.sepBy(ws(COMMA));
+        static final Parser<List<List<String>>> ROW = FIELDS.followedBy(among("\n\r").many()).many1();
 
         @Override
         public Sequence<Record> read(Reader reader) {
-            Sequence<String> allLines = Strings.lines(reader);
-            Sequence<Keyword<String>> keywords = keywords(allLines.head());
-            return records(keywords, allLines.tail());
+            try {
+                List<List<String>> allLines = ROW.parse(reader);
+                Sequence<Keyword<String>> keywords = keywords(allLines.get(0));
+                return records(keywords, allLines.subList(1, allLines.size()));
+            } catch (IOException e) {
+                throw lazyException(e);
+            }
         }
 
-        private Sequence<Record> records(final Sequence<Keyword<String>> keywords, Sequence<String> rows) {
-            return rows.map(new Mapper<String, Record>() {
+        private Sequence<Record> records(final Sequence<Keyword<String>> keywords, Iterable<List<String>> rows) {
+            return sequence(rows).map(new Mapper<List<String>, Record>() {
                 @Override
-                public Record call(String row) throws Exception {
-                    return Record.constructors.record(keywords.zip(FIELDS.parse(row)));
+                public Record call(List<String> fields) throws Exception {
+                    return Record.constructors.record(keywords.zip(fields));
                 }
             });
         }
 
-        private Sequence<Keyword<String>> keywords(String header) {
-            return sequence(FIELDS.parse(header)).map(keyword).realise();
+        private Sequence<Keyword<String>> keywords(Iterable<String> parse) {
+            return sequence(parse).map(keyword).realise();
         }
 
         private final Mapper<String, Keyword<String>> keyword = new Mapper<String, Keyword<String>>() {
