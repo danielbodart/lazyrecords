@@ -1,5 +1,8 @@
-package com.googlecode.lazyrecords;
+package com.googlecode.lazyrecords.csv;
 
+import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.Record;
+import com.googlecode.lazyrecords.RecordTo;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
@@ -12,7 +15,7 @@ import java.util.Iterator;
 
 import static com.googlecode.totallylazy.Callables.toString;
 
-public class CsvWriter {
+public class CsvWriterLegacy {
     private static final String FIELD_SEPARATOR = ",";
     private static final char ROW_SEPARATOR = '\n';
 

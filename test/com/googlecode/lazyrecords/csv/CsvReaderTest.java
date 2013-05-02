@@ -1,13 +1,14 @@
-package com.googlecode.lazyrecords;
+package com.googlecode.lazyrecords.csv;
 
+import com.googlecode.lazyrecords.Keyword;
 import org.junit.Test;
 
 import java.io.StringReader;
 import java.util.Date;
 
-import static com.googlecode.lazyrecords.CsvReader.Grammar.ESCAPED_QUOTE;
-import static com.googlecode.lazyrecords.CsvReader.Grammar.QUOTED;
-import static com.googlecode.lazyrecords.CsvReader.constructors.csvReader;
+import static com.googlecode.lazyrecords.csv.CsvReader.Grammar.ESCAPED_QUOTE;
+import static com.googlecode.lazyrecords.csv.CsvReader.Grammar.QUOTED;
+import static com.googlecode.lazyrecords.csv.CsvReader.constructors.csvReader;
 import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
 import static com.googlecode.lazyrecords.Record.constructors.record;
 import static com.googlecode.lazyrecords.mappings.StringMappings.functions.fromString;

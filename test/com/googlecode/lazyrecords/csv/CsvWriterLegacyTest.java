@@ -1,5 +1,7 @@
-package com.googlecode.lazyrecords;
+package com.googlecode.lazyrecords.csv;
 
+import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.Record;
 import com.googlecode.totallylazy.Sequence;
 import org.junit.Test;
 
@@ -14,7 +16,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-public class CsvWriterTest {
+public class CsvWriterLegacyTest {
     @Test
     public void shouldWorkWhenFieldsAreMissingInThenMiddle() throws Exception {
         Writer writer = new StringWriter();
@@ -26,7 +28,7 @@ public class CsvWriterTest {
         Record record2 = record(keywordB, "2");
         Sequence<Record> recordSequence = sequence(record1, record2);
 
-        CsvWriter.writeTo(recordSequence.iterator(), writer, keywords);
+        CsvWriterLegacy.writeTo(recordSequence.iterator(), writer, keywords);
 
         String expected = "A,B,C,D\n" +
                 "1,,,\n" +
@@ -41,7 +43,7 @@ public class CsvWriterTest {
 
         Record record = record(keywordA, "Well,hello there,sugar");
 
-        CsvWriter.writeTo(one(record).iterator(), writer, one(keywordA));
+        CsvWriterLegacy.writeTo(one(record).iterator(), writer, one(keywordA));
 
         assertThat(writer.toString(), is("A\n\"Well,hello there,sugar\"\n"));
     }

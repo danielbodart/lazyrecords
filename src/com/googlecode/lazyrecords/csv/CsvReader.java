@@ -1,6 +1,8 @@
-package com.googlecode.lazyrecords;
+package com.googlecode.lazyrecords.csv;
 
 import com.googlecode.lazyparsec.Parser;
+import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.Record;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Mapper;
 import com.googlecode.totallylazy.Sequence;
