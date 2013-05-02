@@ -32,7 +32,7 @@ public interface CsvReader {
                 return sequence(strings).toString("");
             }
         };
-        public static final Parser<String> RAW = notAmong(",\n").many1().source();
+        public static final Parser<String> RAW = notAmong(",\n\r").many().source();
         public static final Parser<String> ESCAPED_QUOTE = isChar(QUOTE).times(2).retn("\"");
         public static final Parser<String> QUOTED = or(notChar(QUOTE).source(), ESCAPED_QUOTE).many().map(join).between(isChar(QUOTE), isChar(QUOTE));
         public static final Parser<String> TEXT = or(QUOTED, RAW);

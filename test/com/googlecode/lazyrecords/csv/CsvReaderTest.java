@@ -1,6 +1,7 @@
 package com.googlecode.lazyrecords.csv;
 
 import com.googlecode.lazyrecords.Keyword;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.StringReader;
@@ -26,6 +27,30 @@ public class CsvReaderTest {
         String sampleCsv = "A\n" + "a";
 
         assertThat(csvReader.read(new StringReader(sampleCsv)), is(one(record(a, "a"))));
+    }
+
+    @Test
+    public void parsesEmptyColumns() throws Exception {
+        Keyword<String> a = keyword("A", String.class);
+        Keyword<String> b = keyword("B", String.class);
+        Keyword<String> c = keyword("C", String.class);
+
+        assertThat(csvReader.read(new StringReader("A,B,C\n" + "1,,3")), is(one(record(a, "1", b, "", c, "3"))));
+        assertThat(csvReader.read(new StringReader("A,B,C\n" + "1,2,")), is(one(record(a, "1", b, "2", c, ""))));
+        assertThat(csvReader.read(new StringReader("A,B,C\n" + "1,,")), is(one(record(a, "1", b, "", c, ""))));
+
+    }
+
+    @Test
+    @Ignore("Dan and Stu: 2/5/2013")
+    public void parsesLeadingEmptyColumns() throws Exception {
+        Keyword<String> a = keyword("A", String.class);
+        Keyword<String> b = keyword("B", String.class);
+        Keyword<String> c = keyword("C", String.class);
+
+        assertThat(csvReader.read(new StringReader("A,B,C\n" + ",2,3")), is(one(record(a, "", b, "2", c, "3"))));
+        assertThat(csvReader.read(new StringReader("A,B,C\n" + ",,3")), is(one(record(a, "", b, "", c, "3"))));
+        assertThat(csvReader.read(new StringReader("A,B,C\n" + ",2,")), is(one(record(a, "", b, "2", c, ""))));
     }
 
     @Test
