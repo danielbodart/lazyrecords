@@ -58,7 +58,7 @@ public interface CsvReader {
                 public Record call(List<String> fields) throws Exception {
                     return Record.constructors.record(keywords.zip(fields));
                 }
-            });
+            }).realise();
         }
 
         private Sequence<Keyword<String>> keywords(Iterable<String> parse) {
