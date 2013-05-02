@@ -18,6 +18,14 @@ import static org.hamcrest.Matchers.is;
 
 public class CsvReaderTest {
     @Test
+    public void parsesSingleColumn() throws Exception {
+        Keyword<String> a = keyword("A", String.class);
+        String sampleCsv = "A\n" + "a";
+
+        assertThat(csvReader.read(new StringReader(sampleCsv)), is(one(record(a, "a"))));
+    }
+
+    @Test
     public void parsesSimpleFile() throws Exception {
         Keyword<String> a = keyword("A", String.class);
         Keyword<String> b = keyword("B", String.class);
@@ -38,6 +46,15 @@ public class CsvReaderTest {
     }
 
     @Test
+    public void parsesFileWithLotsOfQuotes() throws Exception {
+        Keyword<String> a = keyword("A", String.class);
+        Keyword<String> b = keyword("B", String.class);
+        Keyword<String> c = keyword("C", String.class);
+        String sampleCsv = "A,B,C\n" + "\"\",\"\"\"b\"\"\",\"\"\"\"";
+        assertThat(csvReader.read(new StringReader(sampleCsv)), is(one(record(a, "", b, "\"b\"", c, "\""))));
+    }
+
+    @Test
     public void canMapTypes() throws Exception {
         Keyword<Integer> a = keyword("A", Integer.class);
         Keyword<Long> b = keyword("B", Long.class);
@@ -47,5 +64,25 @@ public class CsvReaderTest {
 
         assertThat(csvReader.read(new StringReader(sampleCsv)).map(fromString(javaMappings(), sequence(a, b, c))),
                 is(one(record(a, 1, b, 2L, c, someDate))));
+    }
+
+    @Test
+    public void parsesEscapedQuotes() throws Exception {
+        assertThat(CsvReader.constructors.ESCAPED_QUOTE.parse("\"\""), is("\""));
+    }
+
+    @Test
+    public void parsesEmptyQuote() throws Exception {
+        assertThat(CsvReader.constructors.QUOTED.parse("\"\""), is(""));
+    }
+
+    @Test
+    public void parsesSingleQuotedQuote() throws Exception {
+        assertThat(CsvReader.constructors.QUOTED.parse("\"\"\"\""), is("\""));
+    }
+
+    @Test
+    public void parsesQuotedValue() throws Exception {
+        assertThat(CsvReader.constructors.QUOTED.parse("\"\"\"b\"\"\""), is("\"b\""));
     }
 }
