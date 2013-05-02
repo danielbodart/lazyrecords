@@ -5,6 +5,8 @@ import org.junit.Test;
 import java.io.StringReader;
 import java.util.Date;
 
+import static com.googlecode.lazyrecords.CsvReader.Grammar.ESCAPED_QUOTE;
+import static com.googlecode.lazyrecords.CsvReader.Grammar.QUOTED;
 import static com.googlecode.lazyrecords.CsvReader.constructors.csvReader;
 import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
 import static com.googlecode.lazyrecords.Record.constructors.record;
@@ -68,21 +70,21 @@ public class CsvReaderTest {
 
     @Test
     public void parsesEscapedQuotes() throws Exception {
-        assertThat(CsvReader.constructors.ESCAPED_QUOTE.parse("\"\""), is("\""));
+        assertThat(ESCAPED_QUOTE.parse("\"\""), is("\""));
     }
 
     @Test
     public void parsesEmptyQuote() throws Exception {
-        assertThat(CsvReader.constructors.QUOTED.parse("\"\""), is(""));
+        assertThat(QUOTED.parse("\"\""), is(""));
     }
 
     @Test
     public void parsesSingleQuotedQuote() throws Exception {
-        assertThat(CsvReader.constructors.QUOTED.parse("\"\"\"\""), is("\""));
+        assertThat(QUOTED.parse("\"\"\"\""), is("\""));
     }
 
     @Test
     public void parsesQuotedValue() throws Exception {
-        assertThat(CsvReader.constructors.QUOTED.parse("\"\"\"b\"\"\""), is("\"b\""));
+        assertThat(QUOTED.parse("\"\"\"b\"\"\""), is("\"b\""));
     }
 }

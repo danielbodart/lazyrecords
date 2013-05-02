@@ -1,8 +1,6 @@
 package com.googlecode.lazyrecords;
 
 import com.googlecode.lazyparsec.Parser;
-import com.googlecode.lazyparsec.Parsers;
-import com.googlecode.lazyparsec.Scanners;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Mapper;
 import com.googlecode.totallylazy.Sequence;
@@ -24,27 +22,29 @@ public interface CsvReader {
 
     Sequence<Record> read(Reader reader);
 
-    enum constructors implements CsvReader {
-        csvReader;
-
-        private static final char QUOTE = '"';
-        private static final char COMMA = ',';
-        static final Function1<List<String>, String> join = new Function1<List<String>, String>() {
+    class Grammar {
+        public static final char QUOTE = '"';
+        public static final char COMMA = ',';
+        public static final Function1<List<String>, String> join = new Function1<List<String>, String>() {
             public String call(List<String> strings) throws Exception {
                 return sequence(strings).toString("");
             }
         };
-        static final Parser<String> RAW = notAmong(",\n").many1().source();
-        static final Parser<String> ESCAPED_QUOTE = isChar(QUOTE).times(2).retn("\"");
-        static final Parser<String> QUOTED = or(notChar(QUOTE).source(), ESCAPED_QUOTE).many().map(join).between(isChar(QUOTE), isChar(QUOTE));
-        static final Parser<String> TEXT = or(QUOTED, RAW);
-        static final Parser<List<String>> FIELDS = TEXT.sepBy(ws(COMMA));
-        static final Parser<List<List<String>>> ROW = FIELDS.sepBy(among("\n\r").many());
+        public static final Parser<String> RAW = notAmong(",\n").many1().source();
+        public static final Parser<String> ESCAPED_QUOTE = isChar(QUOTE).times(2).retn("\"");
+        public static final Parser<String> QUOTED = or(notChar(QUOTE).source(), ESCAPED_QUOTE).many().map(join).between(isChar(QUOTE), isChar(QUOTE));
+        public static final Parser<String> TEXT = or(QUOTED, RAW);
+        public static final Parser<List<String>> FIELDS = TEXT.sepBy(ws(COMMA));
+        public static final Parser<List<List<String>>> ROW = FIELDS.sepBy(among("\n\r").many());
+    }
+
+    enum constructors implements CsvReader {
+        csvReader;
 
         @Override
         public Sequence<Record> read(Reader reader) {
             try {
-                List<List<String>> allLines = ROW.parse(reader);
+                List<List<String>> allLines = Grammar.ROW.parse(reader);
                 Sequence<Keyword<String>> keywords = keywords(allLines.get(0));
                 return records(keywords, allLines.subList(1, allLines.size()));
             } catch (IOException e) {
