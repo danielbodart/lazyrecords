@@ -36,7 +36,7 @@ public interface CsvReader {
         public static final Parser<String> ESCAPED_QUOTE = isChar(QUOTE).times(2).retn("\"");
         public static final Parser<String> QUOTED = or(notChar(QUOTE).source(), ESCAPED_QUOTE).many().map(join).between(isChar(QUOTE), isChar(QUOTE));
         public static final Parser<String> TEXT = or(QUOTED, RAW);
-        public static final Parser<List<String>> FIELDS = TEXT.sepBy(ws(COMMA));
+        public static final Parser<List<String>> FIELDS = TEXT.sepBy(isChar(COMMA));
         public static final Parser<List<List<String>>> ROW = FIELDS.sepBy(among("\n\r").many());
     }
 

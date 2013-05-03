@@ -35,22 +35,12 @@ public class CsvReaderTest {
         Keyword<String> b = keyword("B", String.class);
         Keyword<String> c = keyword("C", String.class);
 
+        assertThat(csvReader.read(new StringReader("A,B,C\n" + ",2,3")), is(one(record(a, "", b, "2", c, "3"))));
         assertThat(csvReader.read(new StringReader("A,B,C\n" + "1,,3")), is(one(record(a, "1", b, "", c, "3"))));
         assertThat(csvReader.read(new StringReader("A,B,C\n" + "1,2,")), is(one(record(a, "1", b, "2", c, ""))));
         assertThat(csvReader.read(new StringReader("A,B,C\n" + "1,,")), is(one(record(a, "1", b, "", c, ""))));
-
-    }
-
-    @Test
-    @Ignore("Dan and Stu: 2/5/2013")
-    public void parsesLeadingEmptyColumns() throws Exception {
-        Keyword<String> a = keyword("A", String.class);
-        Keyword<String> b = keyword("B", String.class);
-        Keyword<String> c = keyword("C", String.class);
-
-        assertThat(csvReader.read(new StringReader("A,B,C\n" + ",2,3")), is(one(record(a, "", b, "2", c, "3"))));
-        assertThat(csvReader.read(new StringReader("A,B,C\n" + ",,3")), is(one(record(a, "", b, "", c, "3"))));
         assertThat(csvReader.read(new StringReader("A,B,C\n" + ",2,")), is(one(record(a, "", b, "2", c, ""))));
+        assertThat(csvReader.read(new StringReader("A,B,C\n" + ",,3")), is(one(record(a, "", b, "", c, "3"))));
     }
 
     @Test
