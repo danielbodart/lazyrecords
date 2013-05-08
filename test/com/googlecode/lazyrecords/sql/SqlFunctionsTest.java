@@ -21,6 +21,7 @@ import java.util.Properties;
 import static com.googlecode.lazyrecords.Loggers.loggers;
 import static com.googlecode.totallylazy.Closeables.safeClose;
 import static com.googlecode.totallylazy.Option.none;
+import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.Streams.streams;
 import static java.sql.DriverManager.getConnection;
 import static org.hamcrest.CoreMatchers.is;

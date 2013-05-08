@@ -5,6 +5,7 @@ import com.googlecode.lazyrecords.Loggers;
 import com.googlecode.lazyrecords.sql.mappings.SqlMapping;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
 import com.googlecode.totallylazy.Callable1;
+import com.googlecode.totallylazy.LazyException;
 import com.googlecode.totallylazy.Maps;
 
 import java.lang.reflect.InvocationHandler;
@@ -18,6 +19,7 @@ import static com.googlecode.totallylazy.Functions.constant;
 import static com.googlecode.totallylazy.Pair.pair;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.Unchecked.cast;
+import static com.googlecode.totallylazy.callables.TimeCallable.calculateMilliseconds;
 import static java.lang.reflect.Proxy.newProxyInstance;
 
 public class SqlFunctions {
@@ -35,29 +37,44 @@ public class SqlFunctions {
         return cast(newProxyInstance(getClass().getClassLoader(), new Class[]{sqlFunction}, new InvocationHandler() {
             @Override
             public Object invoke(Object proxy, final Method method, final Object[] args) throws Throwable {
-                String call = String.format("{? = call %s%s}", functionName(method), arguments(method));
+                String call = buildCall(method);
                 final Map<String, Object> log = Maps.<String, Object>map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.EXPRESSION, call));
-                CallableStatement statement = connection.prepareCall(call);
-                Object result = using(statement, new Callable1<CallableStatement, Object>() {
-                    @Override
-                    public Object call(CallableStatement statement) throws Exception {
-                        final SqlMapping<Object> returnValueMapping = mappings.get(method.getReturnType());
-                        statement.registerOutParameter(1, returnValueMapping.sqlType());
-                        for (int i = 0; i < (args == null ? 0 : args.length); i++) {
-                            statement.setObject(i + 2, args[i], mappings.get(method.getParameterTypes()[i]).sqlType());
-                        }
-                        statement.execute();
-                        return returnValueMapping.getValue(statement, 1);
-                    }
-                });
-                logger.log(log);
-                return result;
+                long start = System.nanoTime();
+
+                try {
+                    return using(connection.prepareCall(call), callStatement(method, args));
+                } catch (Exception e) {
+                    log.put(Loggers.MESSAGE, e.getMessage());
+                    throw LazyException.lazyException(e);
+                } finally {
+                    log.put(Loggers.MILLISECONDS, calculateMilliseconds(start, System.nanoTime()));
+                    logger.log(log);
+                }
             }
         }));
     }
 
-    private String arguments(Method method) {
-        return sequence(method.getParameterTypes()).map(constant("?")).toString("(", ",", ")");
+    private Callable1<CallableStatement, Object> callStatement(final Method method, final Object[] args) {
+        return new Callable1<CallableStatement, Object>() {
+            @Override
+            public Object call(CallableStatement statement) throws Exception {
+                final SqlMapping<Object> returnValueMapping = mappings.get(method.getReturnType());
+                statement.registerOutParameter(1, returnValueMapping.sqlType());
+                for (int i = 0; i < args.length; i++) {
+                    statement.setObject(i + 2, args[i], mappings.get(method.getParameterTypes()[i]).sqlType());
+                }
+                statement.execute();
+                return returnValueMapping.getValue(statement, 1);
+            }
+        };
+    }
+
+    private String buildCall(Method method) {
+        return String.format("{? = call %s%s}", functionName(method), arguments(method.getParameterTypes()));
+    }
+
+    private String arguments(Class<?>[] parameterTypes) {
+        return parameterTypes.length == 0 ? "" : sequence(parameterTypes).map(constant("?")).toString("(", ",", ")");
     }
 
     private String functionName(Method method) {
