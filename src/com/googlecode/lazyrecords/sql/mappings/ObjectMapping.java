@@ -2,9 +2,11 @@ package com.googlecode.lazyrecords.sql.mappings;
 
 import com.googlecode.lazyrecords.mappings.StringMappings;
 
+import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 public class ObjectMapping implements SqlMapping<Object> {
     private final Class<?> aClass;
@@ -16,10 +18,24 @@ public class ObjectMapping implements SqlMapping<Object> {
     }
 
     public Object getValue(ResultSet resultSet, Integer index) throws SQLException {
-        return stringMappings.toValue(aClass, resultSet.getString(index));
+        return toObject(resultSet.getString(index));
+    }
+
+    @Override
+    public Object getValue(CallableStatement statement, Integer index) throws SQLException {
+        return toObject(statement.getString(index));
     }
 
     public void setValue(PreparedStatement statement, Integer index, Object value) throws SQLException {
         statement.setString(index, stringMappings.toString(aClass, value));
+    }
+
+    @Override
+    public int sqlType() {
+        return Types.OTHER;
+    }
+
+    private Object toObject(String value) {
+        return stringMappings.toValue(aClass, value);
     }
 }

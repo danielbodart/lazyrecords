@@ -79,15 +79,4 @@ public class OracleRecordsTest extends RecordsContract<Records> {
         Integer integer = records.get(definition).head().get(nextValue.of(foo));
         assertThat(integer, is(1));
     }
-
-    @Test
-    public void supportsJdbcFunctions() throws Exception {
-        LengthFunction function = new SqlFunctions(connection.get(), logger).get(LengthFunction.class);
-        assertThat(function.length("Raymond"), is(7));
-    }
-
-    public static interface LengthFunction {
-        @SqlFunction("length")
-        int length(String value);
-    }
 }
