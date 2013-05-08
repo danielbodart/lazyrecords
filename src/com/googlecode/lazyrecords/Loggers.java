@@ -46,7 +46,6 @@ public final class Loggers implements Logger {
     public static final String PREDICATE = "predicate";
     public static final String FUNCTION = "function";
 
-
     public static final String SQL = "Sql";
     public static final String LUCENE = "Lucene";
     public static final String SIMPLE_DB = "SimpleDb";

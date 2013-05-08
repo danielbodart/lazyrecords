@@ -1,6 +1,7 @@
 package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.totallylazy.Files;
+import com.googlecode.totallylazy.Sequences;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.store.RAMDirectory;
 import org.junit.Test;
@@ -8,6 +9,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 
+import static com.googlecode.totallylazy.Sequences.one;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -16,7 +18,7 @@ public class LuceneStorageTest {
     @Test
     public void canBackupAndRestore() throws Exception {
         LuceneStorage source = storage();
-        source.add(sequence(new Document()));
+        source.add(one(new Document()));
         source.flush();
         assertThat(source.count(Lucene.all()), is(1));
 
@@ -38,8 +40,8 @@ public class LuceneStorageTest {
     @Test
     public void canDeleteAll() throws IOException {
         LuceneStorage storage = storage();
-        storage.add(sequence(new Document()));
-        storage.add(sequence(new Document()));
+        storage.add(one(new Document()));
+        storage.add(one(new Document()));
         storage.flush();
         assertThat(storage.count(Lucene.all()), is(2));
         storage.deleteAll();
