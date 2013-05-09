@@ -36,7 +36,7 @@ public class MysqlRecordsTest extends RecordsContract<Records> {
             safeClose(mysql);
     }
 
-    private static Option<Connection> createConnection() {
+    static Option<Connection> createConnection() {
         try {
             Properties properties = new Properties();
             properties.load(MysqlRecordsTest.class.getResourceAsStream("mysql.properties"));

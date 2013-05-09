@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.Properties;
 
 import static com.googlecode.lazyrecords.Loggers.loggers;
+import static com.googlecode.lazyrecords.sql.MysqlRecordsTest.createConnection;
 import static com.googlecode.totallylazy.Closeables.safeClose;
 import static com.googlecode.totallylazy.Option.none;
 import static com.googlecode.totallylazy.Sequences.sequence;
@@ -40,17 +41,6 @@ public class SqlFunctionsTest {
     @AfterClass
     public static void shutDown() {
         for (Connection oracle : connection) safeClose(oracle);
-    }
-
-    private static Option<Connection> createConnection() {
-        try {
-            Properties properties = new Properties();
-            properties.load(MysqlRecordsTest.class.getResourceAsStream("mysql.properties"));
-            Class.forName(properties.getProperty("driver"));
-            return Option.some(getConnection(properties.getProperty("url"), properties.getProperty("username"), properties.getProperty("password")));
-        } catch (Exception e) {
-            return none();
-        }
     }
 
     @Test

@@ -42,7 +42,7 @@ public class OracleRecordsTest extends RecordsContract<Records> {
         for (Connection oracle : connection) safeClose(oracle);
     }
 
-    private static Option<Connection> createConnection() {
+    static Option<Connection> createConnection() {
         try {
             Properties properties = new Properties();
             properties.load(OracleRecordsTest.class.getResourceAsStream("oracle.properties"));
