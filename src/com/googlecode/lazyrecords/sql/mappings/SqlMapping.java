@@ -12,5 +12,5 @@ public interface SqlMapping<T> {
 
     void setValue(PreparedStatement statement, Integer index, T instance) throws SQLException;
 
-    int sqlType();
+    int type();
 }

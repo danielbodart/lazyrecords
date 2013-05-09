@@ -38,7 +38,6 @@ public class SqlMappings {
         add(Number.class, new BigDecimalMapping());
         add(Long.class, new LongMapping());
         add(long.class, new LongMapping());
-        add(String.class, new StringMapping());
     }
 
     public SqlMappings() {

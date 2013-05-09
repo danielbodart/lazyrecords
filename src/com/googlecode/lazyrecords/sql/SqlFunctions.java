@@ -2,12 +2,10 @@ package com.googlecode.lazyrecords.sql;
 
 import com.googlecode.lazyrecords.Logger;
 import com.googlecode.lazyrecords.Loggers;
-import com.googlecode.lazyrecords.sql.mappings.SqlMapping;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.LazyException;
 import com.googlecode.totallylazy.Maps;
-import com.googlecode.totallylazy.Option;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -61,9 +59,9 @@ public class SqlFunctions {
         return new Callable1<CallableStatement, Object>() {
             @Override
             public Object call(CallableStatement statement) throws Exception {
-                statement.registerOutParameter(1, mappings.get(method.getReturnType()).sqlType());
+                statement.registerOutParameter(1, mappings.get(method.getReturnType()).type());
                 for (int i = 0; i < (args == null ? 0 : args.length); i++) {
-                    statement.setObject(i + 2, args[i], mappings.get(method.getParameterTypes()[i]).sqlType());
+                    statement.setObject(i + 2, args[i], mappings.get(method.getParameterTypes()[i]).type());
                 }
                 statement.execute();
                 return mappings.get(method.getReturnType()).getValue(statement, 1);

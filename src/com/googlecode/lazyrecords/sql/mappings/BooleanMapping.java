@@ -21,7 +21,7 @@ public class BooleanMapping implements SqlMapping<Boolean> {
     }
 
     @Override
-    public int sqlType() {
+    public int type() {
         return Types.BOOLEAN;
     }
 }

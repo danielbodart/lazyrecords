@@ -23,12 +23,8 @@ public class DateMapping implements SqlMapping<Date> {
     }
 
     @Override
-    public int sqlType() {
+    public int type() {
         return Types.TIMESTAMP;
-    }
-
-    public String type() {
-        return "timestamp";
     }
 
     private Date dateFrom(Timestamp timestamp) {

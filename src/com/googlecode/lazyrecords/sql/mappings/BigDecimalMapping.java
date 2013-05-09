@@ -27,7 +27,7 @@ public class BigDecimalMapping implements SqlMapping<BigDecimal> {
     }
 
     @Override
-    public int sqlType() {
+    public int type() {
         return Types.NUMERIC;
     }
 }

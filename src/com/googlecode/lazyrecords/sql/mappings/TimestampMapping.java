@@ -22,7 +22,7 @@ public class TimestampMapping implements SqlMapping<Timestamp> {
     }
 
     @Override
-    public int sqlType() {
+    public int type() {
         return Types.TIMESTAMP;
     }
 }

@@ -24,7 +24,7 @@ public class LongMapping implements SqlMapping<Long> {
     }
 
     @Override
-    public int sqlType() {
+    public int type() {
         return Types.BIGINT;
     }
 }

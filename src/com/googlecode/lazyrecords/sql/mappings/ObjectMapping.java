@@ -31,8 +31,8 @@ public class ObjectMapping implements SqlMapping<Object> {
     }
 
     @Override
-    public int sqlType() {
-        return Types.OTHER;
+    public int type() {
+        return Types.VARCHAR;
     }
 
     private Object toObject(String value) {

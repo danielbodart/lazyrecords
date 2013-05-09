@@ -23,7 +23,7 @@ public class IntegerMapping implements SqlMapping<Integer> {
     }
 
     @Override
-    public int sqlType() {
+    public int type() {
         return Types.INTEGER;
     }
 }
