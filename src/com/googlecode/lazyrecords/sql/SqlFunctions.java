@@ -7,6 +7,7 @@ import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.LazyException;
 import com.googlecode.totallylazy.Maps;
+import com.googlecode.totallylazy.Option;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -14,8 +15,10 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.util.Map;
 
+import static com.googlecode.lazyrecords.sql.SqlFunction.functions.value;
 import static com.googlecode.totallylazy.Closeables.using;
 import static com.googlecode.totallylazy.Functions.constant;
+import static com.googlecode.totallylazy.Option.option;
 import static com.googlecode.totallylazy.Pair.pair;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.Unchecked.cast;
@@ -58,9 +61,10 @@ public class SqlFunctions {
         return new Callable1<CallableStatement, Object>() {
             @Override
             public Object call(CallableStatement statement) throws Exception {
-                final SqlMapping<Object> returnValueMapping = mappings.get(method.getReturnType());
+                final Class<?> returnType = method.getReturnType();
+                final SqlMapping<Object> returnValueMapping = mappings.get(returnType);
                 statement.registerOutParameter(1, returnValueMapping.sqlType());
-                for (int i = 0; i < args.length; i++) {
+                for (int i = 0; i < (args == null ? 0 : args.length); i++) {
                     statement.setObject(i + 2, args[i], mappings.get(method.getParameterTypes()[i]).sqlType());
                 }
                 statement.execute();
@@ -78,7 +82,6 @@ public class SqlFunctions {
     }
 
     private String functionName(Method method) {
-        final String name = method.getAnnotation(SqlFunction.class).value();
-        return name.isEmpty() ? method.getName() : name;
+        return option(method.getAnnotation(SqlFunction.class)).map(value()).getOrElse(method.getName());
     }
 }

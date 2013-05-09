@@ -21,6 +21,7 @@ import static com.googlecode.lazyrecords.Definition.constructors.definition;
 import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
 import static com.googlecode.lazyrecords.RecordsContract.Books.books;
 import static com.googlecode.lazyrecords.RecordsContract.People.people;
+import static com.googlecode.lazyrecords.sql.SqlFunctionsTest.sqlFunctions;
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
 import static com.googlecode.totallylazy.Closeables.safeClose;
 import static java.sql.DriverManager.getConnection;
@@ -33,7 +34,7 @@ public class OracleRecordsTest extends RecordsContract<Records> {
 
     @BeforeClass
     public static void setupOracle() {
-        connection = createConnection();
+        connection = oracleConnection();
         org.junit.Assume.assumeTrue(!connection.isEmpty());
     }
 
@@ -42,7 +43,7 @@ public class OracleRecordsTest extends RecordsContract<Records> {
         for (Connection oracle : connection) safeClose(oracle);
     }
 
-    static Option<Connection> createConnection() {
+    static Option<Connection> oracleConnection() {
         try {
             Properties properties = new Properties();
             properties.load(OracleRecordsTest.class.getResourceAsStream("oracle.properties"));
@@ -79,4 +80,14 @@ public class OracleRecordsTest extends RecordsContract<Records> {
         Integer integer = records.get(definition).head().get(nextValue.of(foo));
         assertThat(integer, is(1));
     }
+
+    @Test
+    public void supportsArity0() {
+        assertThat(sqlFunctions(connection.get(), logger).get(Artiy0Function.class).user(), is("PENFOLD_OWNER"));
+    }
+
+    public interface Artiy0Function {
+        String user();
+    }
+
 }

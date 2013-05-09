@@ -26,7 +26,7 @@ public class MysqlRecordsTest extends RecordsContract<Records> {
 
     @BeforeClass
     public static void setupMysql() {
-        connection = createConnection();
+        connection = mySqlConnection();
         org.junit.Assume.assumeTrue(!connection.isEmpty());
     }
 
@@ -36,7 +36,7 @@ public class MysqlRecordsTest extends RecordsContract<Records> {
             safeClose(mysql);
     }
 
-    static Option<Connection> createConnection() {
+    static Option<Connection> mySqlConnection() {
         try {
             Properties properties = new Properties();
             properties.load(MysqlRecordsTest.class.getResourceAsStream("mysql.properties"));
