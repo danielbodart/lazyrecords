@@ -61,7 +61,7 @@ public class SqlFunctions {
             public Object call(CallableStatement statement) throws Exception {
                 statement.registerOutParameter(1, mappings.get(method.getReturnType()).type());
                 for (int i = 0; i < (args == null ? 0 : args.length); i++) {
-                    statement.setObject(i + 2, args[i], mappings.get(method.getParameterTypes()[i]).type());
+                    mappings.get(method.getParameterTypes()[i]).setValue(statement, i + 2, args[i]);
                 }
                 statement.execute();
                 return mappings.get(method.getReturnType()).getValue(statement, 1);
