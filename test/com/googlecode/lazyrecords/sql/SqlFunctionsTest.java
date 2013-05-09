@@ -155,17 +155,6 @@ public class SqlFunctionsTest {
         String substring(String value, int pos, int len);
     }
 
-    @Test
-    @Ignore("in progress")
-    public void supportsVoidReturnType() {
-        sqlFunctions(connection.get(), logger).get(VoidReturnFunction.class).ignoreResultSubstring("Quadratically", 5, 6);
-    }
-
-    public interface VoidReturnFunction {
-        @SqlFunction("substring")
-        void ignoreResultSubstring(String value, int pos, int len);
-    }
-
     public static SqlFunctions sqlFunctions(Connection connection, Logger logger) {
         return new SqlFunctions(connection, new SqlMappings(), logger);
     }

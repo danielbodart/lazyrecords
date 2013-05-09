@@ -61,14 +61,12 @@ public class SqlFunctions {
         return new Callable1<CallableStatement, Object>() {
             @Override
             public Object call(CallableStatement statement) throws Exception {
-                final Class<?> returnType = method.getReturnType();
-                final SqlMapping<Object> returnValueMapping = mappings.get(returnType);
-                statement.registerOutParameter(1, returnValueMapping.sqlType());
+                statement.registerOutParameter(1, mappings.get(method.getReturnType()).sqlType());
                 for (int i = 0; i < (args == null ? 0 : args.length); i++) {
                     statement.setObject(i + 2, args[i], mappings.get(method.getParameterTypes()[i]).sqlType());
                 }
                 statement.execute();
-                return returnValueMapping.getValue(statement, 1);
+                return mappings.get(method.getReturnType()).getValue(statement, 1);
             }
         };
     }
