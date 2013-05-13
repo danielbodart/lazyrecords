@@ -2,7 +2,7 @@
 
 JAVA_OPTS=${JAVA_OPTS}
 BUILD_NUMBER=${BUILD_NUMBER-dev.build}
-version=137
+version=138
 artifact=jcompilo
 group=com/googlecode/${artifact}
 repo=repo.bodar.com
@@ -14,7 +14,6 @@ remote_sh=${url}.sh
 
 if [ "$1" = "update" ]; then
 	rm ${jar}
-	shift 1
 fi
 
 if [ ! -f ${jar} ]; then

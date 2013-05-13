@@ -5,11 +5,15 @@ import com.googlecode.lazyrecords.ImmutableKeyword;
 import com.googlecode.lazyrecords.Records;
 import com.googlecode.lazyrecords.RecordsContract;
 import com.googlecode.lazyrecords.SchemaGeneratingRecords;
+import com.googlecode.lazyrecords.mappings.StringMapping;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.grammars.OracleGrammar;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
+import com.googlecode.totallylazy.Eq;
 import com.googlecode.totallylazy.Option;
+import com.googlecode.totallylazy.Value;
+import com.googlecode.totallylazy.annotations.multimethod;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -90,4 +94,53 @@ public class OracleRecordsTest extends RecordsContract<Records> {
         String user();
     }
 
+    @Test
+    public void supportsSqlFunctionsWithCustomTypes() throws Exception {
+        SqlMappings mappings = new SqlMappings().add(MyString.class, new MyStringMapping());
+        CustomTypesFunction customTypesFunction = sqlFunctions(connection.get(), logger, mappings).get(CustomTypesFunction.class);
+        assertThat(customTypesFunction.trim(new MyString("  cheese  ")), is(new MyString("cheese")));
+    }
+
+    public interface CustomTypesFunction {
+        MyString trim(MyString value);
+    }
+
+    public class MyString extends Eq implements Value<String> {
+        private final String value;
+
+        public MyString(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public int hashCode() {
+            return value.hashCode();
+        }
+
+        @multimethod
+        public boolean equals(MyString other) {
+            return this.value.equals(other.value);
+        }
+        @Override
+        public String toString() {
+            return value();
+        }
+    }
+
+    public class MyStringMapping implements StringMapping<MyString> {
+        @Override
+        public MyString toValue(String value) throws Exception {
+            return new MyString(value);
+        }
+
+        @Override
+        public String toString(MyString value) throws Exception {
+            return value.value();
+        }
+    }
 }

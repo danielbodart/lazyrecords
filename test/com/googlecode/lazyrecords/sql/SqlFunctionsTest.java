@@ -8,7 +8,6 @@ import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.time.Dates;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -156,6 +155,10 @@ public class SqlFunctionsTest {
     }
 
     public static SqlFunctions sqlFunctions(Connection connection, Logger logger) {
-        return new SqlFunctions(connection, new SqlMappings(), logger);
+        return sqlFunctions(connection, logger, new SqlMappings());
+    }
+
+    public static SqlFunctions sqlFunctions(Connection connection, Logger logger, SqlMappings mappings) {
+        return new SqlFunctions(connection, mappings, logger);
     }
 }
