@@ -17,13 +17,14 @@ import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
 import static com.googlecode.totallylazy.Callables.second;
 import static com.googlecode.totallylazy.Maps.pairs;
 import static com.googlecode.totallylazy.Predicates.where;
+import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class SetFunctionType extends CompoundExpression implements ValueExpression {
     private final TextOnlyExpression functionName;
     private final ColumnReference columnReference;
 
     private SetFunctionType(TextOnlyExpression functionName, ColumnReference columnReference) {
-        super(functionName, textOnly("("), columnReference, textOnly(")"));
+        super(sequence(functionName, textOnly("("), columnReference, textOnly(")")),"");
         this.functionName = functionName;
         this.columnReference = columnReference;
     }
