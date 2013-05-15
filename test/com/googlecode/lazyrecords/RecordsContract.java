@@ -9,10 +9,7 @@ import com.googlecode.totallylazy.matchers.IterableMatcher;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
@@ -213,6 +210,15 @@ public abstract class RecordsContract<T extends Records> {
                 flatMap(join(records.get(books), using(isbn))).
                 map(select(firstName, isbn)).
                 head().fields().size(), NumberMatcher.is(2));
+    }
+
+    @Test
+    @Ignore
+    public void canSortAfterJoining() throws Exception {
+        assertThat(records.get(people).
+                flatMap(join(records.get(books), using(isbn))).
+                sortBy(age).
+                head().get(age), NumberMatcher.is(9));
     }
 
     @Test

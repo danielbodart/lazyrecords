@@ -1,9 +1,6 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
-import com.googlecode.lazyrecords.Record;
-import com.googlecode.totallylazy.*;
-
-import java.util.Comparator;
+import com.googlecode.totallylazy.Sequence;
 
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
 import static com.googlecode.totallylazy.Sequences.cons;
