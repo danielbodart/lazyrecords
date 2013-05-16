@@ -213,15 +213,6 @@ public abstract class RecordsContract<T extends Records> {
     }
 
     @Test
-    @Ignore
-    public void canSortAfterJoining() throws Exception {
-        assertThat(records.get(people).
-                flatMap(join(records.get(books), using(isbn))).
-                sortBy(age).
-                head().get(age), NumberMatcher.is(9));
-    }
-
-    @Test
     public void supportsJoinOn() throws Exception {
         Keyword<BigDecimal> price = keyword("price", BigDecimal.class);
         Keyword<URI> book = keyword("book", URI.class);
