@@ -54,7 +54,7 @@ public class Sorting {
     }
 
     private static Sort sortBy(String name, boolean reverse) {
-        return new Sort(new SortField(name, SortField.Type.STRING, reverse));
+        return new Sort(new SortField(name, SortField.STRING, reverse));
     }
 
     private static String name(Callable1<?, ?> callable) {

@@ -6,7 +6,7 @@ import com.googlecode.totallylazy.Files;
 import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Sequence;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.core.KeywordAnalyzer;
+import org.apache.lucene.analysis.KeywordAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexCommit;
 import org.apache.lucene.index.IndexWriter;
@@ -15,7 +15,6 @@ import org.apache.lucene.index.KeepOnlyLastCommitDeletionPolicy;
 import org.apache.lucene.index.SnapshotDeletionPolicy;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.IOContext;
 import org.apache.lucene.store.NIOFSDirectory;
 import org.apache.lucene.util.Version;
 
@@ -30,7 +29,6 @@ import static com.googlecode.totallylazy.Lists.list;
 import static com.googlecode.totallylazy.Runnables.VOID;
 
 public class OptimisedStorage implements LuceneStorage {
-    public static final IOContext DEFAULT_IOCONTEXT = new IOContext(IOContext.Context.DEFAULT);
     private final Directory directory;
     private final Version version;
     private final Analyzer analyzer;
@@ -42,7 +40,7 @@ public class OptimisedStorage implements LuceneStorage {
     private SnapshotDeletionPolicy snapShotter;
 
     public OptimisedStorage(Directory directory, SearcherPool searcherPool) {
-        this(directory, Version.LUCENE_42, new KeywordAnalyzer(), IndexWriterConfig.OpenMode.CREATE_OR_APPEND, searcherPool);
+        this(directory, Version.LUCENE_36, new KeywordAnalyzer(), IndexWriterConfig.OpenMode.CREATE_OR_APPEND, searcherPool);
     }
 
     public OptimisedStorage(Directory directory, Version version, Analyzer analyzer, IndexWriterConfig.OpenMode mode, SearcherPool pool) {
@@ -134,7 +132,7 @@ public class OptimisedStorage implements LuceneStorage {
 
     public static void copy(Directory source, Directory destination, Collection<String> strings) throws IOException {
         for (String segment : strings) {
-            source.copy(destination, segment, segment, DEFAULT_IOCONTEXT);
+            source.copy(destination, segment, segment);
         }
     }
 

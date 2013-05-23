@@ -1,9 +1,10 @@
 package com.googlecode.lazyrecords.lucene.mappings;
 
 import com.googlecode.lazyrecords.Definition;
-import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.RecordTo;
+import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.Keywords;
+import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.SourceRecord;
 import com.googlecode.lazyrecords.ToRecord;
 import com.googlecode.lazyrecords.lucene.Lucene;
@@ -16,8 +17,7 @@ import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.index.IndexableField;
+import org.apache.lucene.document.Fieldable;
 
 import static com.googlecode.lazyrecords.Definition.methods.sortFields;
 import static com.googlecode.lazyrecords.Record.functions.updateValues;
@@ -53,26 +53,26 @@ public class LuceneMappings {
         };
     }
 
-    public Function1<IndexableField, Pair<Keyword<?>, Object>> asPair(final Sequence<Keyword<?>> definitions) {
-        return new Function1<IndexableField, Pair<Keyword<?>, Object>>() {
-            public Pair<Keyword<?>, Object> call(IndexableField field) throws Exception {
-                String name = field.name();
+    public Function1<Fieldable, Pair<Keyword<?>, Object>> asPair(final Sequence<Keyword<?>> definitions) {
+        return new Function1<Fieldable, Pair<Keyword<?>, Object>>() {
+            public Pair<Keyword<?>, Object> call(Fieldable fieldable) throws Exception {
+                String name = fieldable.name();
                 Keyword<?> keyword = Keyword.methods.matchKeyword(name, definitions);
-                return Pair.<Keyword<?>, Object>pair(keyword, stringMappings.toValue(keyword.forClass(), field.stringValue()));
+                return Pair.<Keyword<?>, Object>pair(keyword, stringMappings.toValue(keyword.forClass(), fieldable.stringValue()));
             }
         };
     }
 
-    public Function1<Pair<Keyword<?>, Object>, Field> asField(final Sequence<Keyword<?>> definitions) {
-        return new Function1<Pair<Keyword<?>, Object>, Field>() {
-            public Field call(Pair<Keyword<?>, Object> pair) throws Exception {
+    public Function1<Pair<Keyword<?>, Object>, Fieldable> asField(final Sequence<Keyword<?>> definitions) {
+        return new Function1<Pair<Keyword<?>, Object>, Fieldable>() {
+            public Fieldable call(Pair<Keyword<?>, Object> pair) throws Exception {
                 if (pair.second() == null) {
                     return null;
                 }
 
                 String name = pair.first().name();
                 Keyword<?> keyword = Keyword.methods.matchKeyword(name, definitions);
-                return new StringField(name, LuceneMappings.this.stringMappings.toString(keyword.forClass(), pair.second()), Field.Store.YES);
+                return new Field(name, LuceneMappings.this.stringMappings.toString(keyword.forClass(), pair.second()), Field.Store.YES, Field.Index.NOT_ANALYZED);
             }
         };
     }
@@ -89,10 +89,10 @@ public class LuceneMappings {
         };
     }
 
-    public static Function2<? super Document, ? super Field, Document> intoFields() {
-        return new Function2<Document, Field, Document>() {
-            public Document call(Document document, Field field) throws Exception {
-                document.add(field);
+    public static Function2<? super Document, ? super Fieldable, Document> intoFields() {
+        return new Function2<Document, Fieldable, Document>() {
+            public Document call(Document document, Fieldable fieldable) throws Exception {
+                document.add(fieldable);
                 return document;
             }
         };
