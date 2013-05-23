@@ -78,8 +78,8 @@ public class OptimisedStorage implements LuceneStorage {
 
         writer.deleteAll();
         flush();
-        deleteAllSegments(directory);
         close();
+        deleteAllSegments(directory);
         writer = null;
     }
 
