@@ -5,6 +5,9 @@ import com.googlecode.totallylazy.CloseableList;
 import com.googlecode.totallylazy.Files;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Lazy;
+import com.googlecode.totallylazy.Mapper;
+import com.googlecode.totallylazy.Pair;
+import com.googlecode.totallylazy.collections.PersistentMap;
 import org.apache.lucene.store.Directory;
 
 import java.io.Closeable;
@@ -19,9 +22,11 @@ import static com.googlecode.lazyrecords.lucene.PartitionedIndex.functions.ramDi
 import static com.googlecode.totallylazy.Callables.value;
 import static com.googlecode.totallylazy.Closeables.safeClose;
 import static com.googlecode.totallylazy.Files.directory;
+import static com.googlecode.totallylazy.Functions.returns;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.Zip.unzip;
 import static com.googlecode.totallylazy.Zip.zip;
+import static com.googlecode.totallylazy.collections.PersistentSortedMap.constructors.sortedMap;
 
 public class LucenePartitionedIndex implements Closeable, Persistence, PartitionedIndex {
     private final ConcurrentMap<String, Lazy<LuceneStorage>> partitions = new ConcurrentHashMap<String, Lazy<LuceneStorage>>();
@@ -59,6 +64,16 @@ public class LucenePartitionedIndex implements Closeable, Persistence, Partition
     public LuceneStorage partition(final String definition) throws IOException {
         partitions.putIfAbsent(definition, lazyStorage(definition));
         return partitions.get(definition).value();
+    }
+
+    @Override
+    public PersistentMap<String, LuceneStorage> partitions() {
+        return sortedMap(sequence(partitions.entrySet()).map(new Mapper<Map.Entry<String, Lazy<LuceneStorage>>, Pair<String, LuceneStorage>>() {
+            @Override
+            public Pair<String, LuceneStorage> call(Map.Entry<String, Lazy<LuceneStorage>> entry) throws Exception {
+                return Pair.pair(returns(entry.getKey()), entry.getValue());
+            }
+        }));
     }
 
     private Lazy<LuceneStorage> lazyStorage(final String definition) {

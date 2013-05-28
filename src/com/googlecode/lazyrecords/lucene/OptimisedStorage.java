@@ -8,6 +8,7 @@ import com.googlecode.totallylazy.Sequence;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.KeywordAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.CheckIndex;
 import org.apache.lucene.index.IndexCommit;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -102,6 +103,20 @@ public class OptimisedStorage implements LuceneStorage {
     public Searcher searcher() throws IOException {
         ensureIndexIsSetup();
         return pool.searcher();
+    }
+
+    @Override
+    public CheckIndex.Status check() throws IOException {
+        return new CheckIndex(directory).checkIndex();
+    }
+
+    @Override
+    public void fix() throws IOException {
+        synchronized (lock) {
+            CheckIndex checkIndex = new CheckIndex(directory);
+            CheckIndex.Status status = checkIndex.checkIndex();
+            checkIndex.fixIndex(status);
+        }
     }
 
     @Override

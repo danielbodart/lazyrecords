@@ -3,6 +3,10 @@ package com.googlecode.lazyrecords.lucene;
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.totallylazy.Files;
 import com.googlecode.totallylazy.Function1;
+import com.googlecode.totallylazy.Pair;
+import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.collections.PersistentMap;
+import com.googlecode.totallylazy.collections.PersistentSortedMap;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.MMapDirectory;
 import org.apache.lucene.store.NIOFSDirectory;
@@ -15,6 +19,8 @@ public interface PartitionedIndex extends Persistence {
     LuceneStorage partition(Definition definition) throws IOException;
 
     LuceneStorage partition(String definition) throws IOException;
+
+    PersistentMap<String, LuceneStorage> partitions();
 
     public static class functions {
         public static Function1<String, Directory> ramDirectory() {

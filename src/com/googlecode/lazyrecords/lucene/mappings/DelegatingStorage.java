@@ -5,6 +5,7 @@ import com.googlecode.lazyrecords.lucene.Searcher;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Sequence;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.CheckIndex;
 import org.apache.lucene.search.Query;
 
 import java.io.File;
@@ -41,6 +42,12 @@ public abstract class DelegatingStorage implements LuceneStorage {
 
     @Override
     public Searcher searcher() throws IOException {return storage.searcher();}
+
+    @Override
+    public CheckIndex.Status check() { return storage.check(); }
+
+    @Override
+    public void fix() { storage.fix(); }
 
     @Override
     public void backup(File destination) throws Exception {storage.backup(destination);}
