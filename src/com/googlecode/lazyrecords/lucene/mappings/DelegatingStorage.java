@@ -44,10 +44,10 @@ public abstract class DelegatingStorage implements LuceneStorage {
     public Searcher searcher() throws IOException {return storage.searcher();}
 
     @Override
-    public CheckIndex.Status check() { return storage.check(); }
+    public CheckIndex.Status check() throws IOException { return storage.check(); }
 
     @Override
-    public void fix() { storage.fix(); }
+    public void fix() throws IOException { storage.fix(); }
 
     @Override
     public void backup(File destination) throws Exception {storage.backup(destination);}
