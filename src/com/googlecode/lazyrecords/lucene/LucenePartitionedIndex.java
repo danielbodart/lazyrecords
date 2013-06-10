@@ -113,7 +113,7 @@ public class LucenePartitionedIndex implements Closeable, Persistence, Partition
     @Override
     public void restore(File file) throws Exception {
         File sourceDirectory = unzipIfNeeded(file);
-
+        deleteAll();
         for (File partition : Files.files(sourceDirectory)) {
             String name = partition.getName();
             LuceneStorage luceneStorage = partition(name);

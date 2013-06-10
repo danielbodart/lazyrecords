@@ -81,7 +81,6 @@ public class OptimisedStorage implements LuceneStorage {
         flush();
         close();
         deleteAllSegments(directory);
-        writer = null;
     }
 
     @Override
@@ -121,6 +120,7 @@ public class OptimisedStorage implements LuceneStorage {
 
     @Override
     public void backup(final File folder) throws Exception {
+        ensureIndexIsSetup();
         Files.delete(folder);
         String id = UUID.randomUUID().toString();
         try {
@@ -128,6 +128,7 @@ public class OptimisedStorage implements LuceneStorage {
             using(directoryFor(folder), copy(indexCommit.getFileNames()).apply(directory));
         } finally {
             snapShotter.release(id);
+            writer.deleteUnusedFiles();
         }
     }
 
@@ -165,7 +166,6 @@ public class OptimisedStorage implements LuceneStorage {
 
     private void resetReadersAndWriters() throws IOException {
         close();
-        writer = null;
         pool.markAsDirty();
     }
 
@@ -180,6 +180,8 @@ public class OptimisedStorage implements LuceneStorage {
     public void close() throws IOException {
         try {
             Closeables.close(writer);
+            writer = null;
+            snapShotter = null;
         } catch (Throwable ignored) {
         } finally {
             try {
