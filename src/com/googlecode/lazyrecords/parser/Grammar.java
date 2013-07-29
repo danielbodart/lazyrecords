@@ -5,7 +5,6 @@ import com.googlecode.lazyparsec.Parsers;
 import com.googlecode.lazyparsec.Scanners;
 import com.googlecode.lazyparsec.pattern.CharacterPredicates;
 import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.lazyrecords.Keywords;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.Callable1;
@@ -61,7 +60,7 @@ public class Grammar {
 
     public final Parser<Predicate<Record>> GROUP = group.lazy();
 
-    public final Parser<Predicate<Record>> NAME_AND_VALUE =  Parsers.tuple(NAME, ws(':').or(OPERATORS.peek()), VALUE_PREDICATES).map(new Callable1<Triple<String, Void, List<Pair<String, Callable1<Object, Predicate>>>>, Predicate<Record>>() {
+    public final Parser<Predicate<Record>> NAME_AND_VALUE = Parsers.tuple(NAME, SEPARATORS, VALUE_PREDICATES).map(new Callable1<Triple<String, Void, List<Pair<String, Callable1<Object, Predicate>>>>, Predicate<Record>>() {
         @Override
         public Predicate<Record> call(Triple<String, Void, List<Pair<String, Callable1<Object, Predicate>>>> triple) throws Exception {
             final String name = triple.first();
@@ -85,7 +84,6 @@ public class Grammar {
         return OrPredicate.or(valuesPredicates);
     }
 
-
     public static Parser<Void> ws(char value) {
         return ws(String.valueOf(value));
     }
@@ -107,6 +105,7 @@ public class Grammar {
     public static final Parser<Void> LT = ws('<');
     public static final Parser<Void> LTE = ws("<=");
     public static final Parser<Void> OPERATORS = Parsers.or(GTE, GT, LTE, LT);
+    private static final Parser<Void> SEPARATORS = ws(':').or(ws('=')).or(OPERATORS.peek());
 
     public static final Parser<Callable2<Predicate<Record>, Predicate<Record>, Predicate<Record>>> OR = ws("OR ").map(new Callable1<Void, Callable2<Predicate<Record>, Predicate<Record>, Predicate<Record>>>() {
         public Callable2<Predicate<Record>, Predicate<Record>, Predicate<Record>> call(Void aVoid) throws Exception {

@@ -5,10 +5,7 @@ import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.lucene.Lucene;
 import com.googlecode.lazyrecords.lucene.LuceneRecordsTest;
 import com.googlecode.lazyrecords.mappings.StringMappings;
-import com.googlecode.lazyrecords.sql.expressions.AnsiWhereClause;
-import com.googlecode.lazyrecords.sql.expressions.WhereClause;
 import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
-import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
@@ -36,7 +33,7 @@ public class StandardParserTest {
     private final Keyword<String> id = keyword("id", String.class);
 
     @Test
-    public void producesTheSameResultAsLucne() throws Exception {
+    public void producesTheSameResultAsLucene() throws Exception {
         QueryParser parser = new QueryParser(LuceneRecordsTest.VERSION, null, LuceneRecordsTest.ANALYZER);
         Predicate<Record> predicates = new StandardParser().parse("type:people OR (firstName:da* AND lastName:bod)", Sequences.<Keyword<?>>empty());
         Query query = new Lucene(new StringMappings()).query(predicates);
@@ -327,7 +324,7 @@ public class StandardParserTest {
     }
 
     @Test
-    public void supportsGreaterThanQueries() throws Exception {
+    public void supportsGreaterThanDateQueries() throws Exception {
         Sequence<Keyword<?>> keywords = Sequences.<Keyword<?>>sequence(keyword("dob", Date.class));
         Predicate<Record> predicate = predicateParser.parse("dob > 2001/1/10", keywords);
 
@@ -432,5 +429,23 @@ public class StandardParserTest {
         Predicate<Record> expected = where(keyword, Predicates.nullValue());
 
         assertThat(predicate, is(expected));
+    }
+
+    @Test
+    public void supportsColonAsSeparator() throws Exception {
+        Predicate<Record> predicate = predicateParser.parse("name:value", Sequences.<Keyword<?>>empty());
+        Predicate<Record> expected = Predicates.where(name, Predicates.is("value"));
+        assertThat(predicate, is(expected));
+
+        assertLuceAndSqlSyntax(predicate);
+    }
+
+    @Test
+    public void supportsEqualsAsSeparator() throws Exception {
+        Predicate<Record> predicate = predicateParser.parse("name=value", Sequences.<Keyword<?>>empty());
+        Predicate<Record> expected = Predicates.where(name, Predicates.is("value"));
+        assertThat(predicate, is(expected));
+
+        assertLuceAndSqlSyntax(predicate);
     }
 }
