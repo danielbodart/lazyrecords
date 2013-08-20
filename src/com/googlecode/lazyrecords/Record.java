@@ -131,6 +131,15 @@ public interface Record {
             };
         }
 
+        public static <T> RecordTo<T> get(final Keyword<T> keyword) {
+            return new RecordTo<T>() {
+                @Override
+                public T call(Record record) throws Exception {
+                    return record.get(keyword);
+                }
+            };
+        }
+
         public static <T> RecordTo<Option<T>> getOption(final Keyword<T> keyword) {
             return new RecordTo<Option<T>>() {
                 public Option<T> call(Record record) throws Exception {
