@@ -2,6 +2,7 @@ package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.Named;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.*;
@@ -21,7 +22,15 @@ public class Lucene {
     static final Sort NO_SORT = new Sort();
 
     public static Query record(Definition definition) {
-        return new TermQuery(new Term(RECORD_KEY.name(), definition.name()));
+        return getQuery(definition.name());
+    }
+
+    public static Query record(Named name) {
+        return getQuery(name.name());
+    }
+
+    private static Query getQuery(String name) {
+        return new TermQuery(new Term(RECORD_KEY.name(), name));
     }
 
     public static Query and(Query... queries) {

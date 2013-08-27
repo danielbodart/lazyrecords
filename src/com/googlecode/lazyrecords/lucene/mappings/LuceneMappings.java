@@ -15,6 +15,7 @@ import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Sequences;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Fieldable;
@@ -48,6 +49,17 @@ public class LuceneMappings {
                 return sequence(document.getFields()).
                         map(asPair(definitions)).
                         filter(where(Callables.<Keyword<?>>first(), is(Predicates.<Keyword<?>>not(Lucene.RECORD_KEY)).and(in(definitions)))).
+                        fold(SourceRecord.record(document), updateValues());
+            }
+        };
+    }
+
+    public ToRecord<Document> asUnfilteredRecord(final Sequence<Keyword<?>> definitions) {
+        return new ToRecord<Document>() {
+            public Record call(Document document) throws Exception {
+                return sequence(document.getFields()).
+                        map(asPair(definitions)).
+                        filter(where(Callables.<Keyword<?>>first(), is(Predicates.<Keyword<?>>not(Lucene.RECORD_KEY)))).
                         fold(SourceRecord.record(document), updateValues());
             }
         };

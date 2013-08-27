@@ -54,6 +54,10 @@ public class LuceneRecords extends AbstractRecords implements Queryable<Query>, 
         return query(record(definition), definition.fields());
     }
 
+    private Sequence<Record> getAll(final Definition definition) {
+        return LuceneSequence.luceneSequence(lucene, storage, record(definition), mappings.asUnfilteredRecord(definition.fields()), logger, closeables);
+    }
+
     public Number add(final Definition definition, final Sequence<Record> records) {
         return process(new Function<Number>() {
             @Override
@@ -103,7 +107,7 @@ public class LuceneRecords extends AbstractRecords implements Queryable<Query>, 
         return new Function1<Pair<? extends Predicate<? super Record>, Record>, Number>() {
             public Number call(Pair<? extends Predicate<? super Record>, Record> pair) throws Exception {
                 Predicate<? super Record> predicate = pair.first();
-                Sequence<Record> matched = get(definition).filter(predicate).realise();
+                Sequence<Record> matched = getAll(definition).filter(predicate).realise();
                 Record updatedFields = Record.methods.filter(pair.second(), definition.fields());
                 if (matched.isEmpty()) {
                     return internalAdd(definition, one(updatedFields));
