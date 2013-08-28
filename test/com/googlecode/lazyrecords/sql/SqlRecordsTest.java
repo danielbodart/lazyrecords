@@ -227,5 +227,6 @@ public class SqlRecordsTest extends RecordsContract<Records> {
     @Override
     @Ignore
     public void putDoesntRemoveOtherFields() throws Exception {
+        // not implemented
     }
 }

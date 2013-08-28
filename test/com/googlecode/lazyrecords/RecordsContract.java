@@ -2,7 +2,6 @@ package com.googlecode.lazyrecords;
 
 import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Closeables;
-import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
@@ -11,7 +10,10 @@ import com.googlecode.totallylazy.matchers.IterableMatcher;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
@@ -728,9 +730,10 @@ public abstract class RecordsContract<T extends Records> {
 
     @Test
     public void putDoesntRemoveOtherFields() throws Exception {
-        Keyword<String> aka = keyword("aka", String.class);
-        records.put(definition(books.name(), isbn, aka), update(using(isbn), record(isbn, zenIsbn, aka, "The Meaning of Life")));
-        Record record = records.get(definition(books.name(), books.fields().cons(aka))).find(Predicates.where(People.isbn, Predicates.is(zenIsbn))).get();
-        assertThat(record.fields().size(), com.googlecode.totallylazy.matchers.Matchers.is(books.fields().size() + 1));
+        Definition subsetDefinition = definition(books.name(), isbn, title);
+        records.put(subsetDefinition, update(using(isbn), record(isbn, zenIsbn, title, "The Meaning of Life")));
+        Record record = records.get(Books.books).find(Predicates.where(People.isbn, Predicates.is(zenIsbn))).get();
+        assertThat(record.get(title), Matchers.is("The Meaning of Life"));
+        assertThat(record.fields().size(), Matchers.is(books.fields().size()));
     }
 }
