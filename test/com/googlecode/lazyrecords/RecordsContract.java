@@ -2,6 +2,8 @@ package com.googlecode.lazyrecords;
 
 import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Closeables;
+import com.googlecode.totallylazy.Option;
+import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
 import com.googlecode.totallylazy.Unchecked;
@@ -722,5 +724,13 @@ public abstract class RecordsContract<T extends Records> {
     public void canFullyQualifyAKeywordDuringFiltering() throws Exception {
         AliasedKeyword<String> fullyQualified = firstName.of(people);
         assertThat(records.get(people).filter(where(fullyQualified, is("dan"))).map(age).head(), CoreMatchers.is(9));
+    }
+
+    @Test
+    public void putDoesntRemoveOtherFields() throws Exception {
+        Keyword<String> aka = keyword("aka", String.class);
+        records.put(definition(books.name(), isbn, aka), update(using(isbn), record(isbn, zenIsbn, aka, "The Meaning of Life")));
+        Record record = records.get(definition(books.name(), books.fields().cons(aka))).find(Predicates.where(People.isbn, Predicates.is(zenIsbn))).get();
+        assertThat(record.fields().size(), com.googlecode.totallylazy.matchers.Matchers.is(books.fields().size() + 1));
     }
 }

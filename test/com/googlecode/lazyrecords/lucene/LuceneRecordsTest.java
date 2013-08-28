@@ -1,5 +1,7 @@
 package com.googlecode.lazyrecords.lucene;
 
+import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.ImmutableKeyword;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Logger;
 import com.googlecode.lazyrecords.Record;
@@ -19,10 +21,21 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.net.URI;
+import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
+import static com.googlecode.lazyrecords.Grammar.definition;
+import static com.googlecode.lazyrecords.Grammar.keyword;
+import static com.googlecode.lazyrecords.Grammar.record;
+import static com.googlecode.lazyrecords.Grammar.update;
+import static com.googlecode.lazyrecords.Grammar.using;
 import static com.googlecode.lazyrecords.RecordsContract.People.*;
 import static com.googlecode.totallylazy.Files.emptyVMDirectory;
+import static com.googlecode.totallylazy.Predicates.is;
+import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.matchers.IterableMatcher.hasExactly;
 import static org.hamcrest.MatcherAssert.assertThat;
 
