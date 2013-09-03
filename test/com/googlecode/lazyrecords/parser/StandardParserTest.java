@@ -10,6 +10,7 @@ import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
+import com.googlecode.totallylazy.Strings;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.Query;
 import org.junit.Test;
@@ -450,9 +451,27 @@ public class StandardParserTest {
     }
 
     @Test
-    public void supportsSearchingForSingleQuotes() throws Exception {
-        Predicate<Record> predicate = predicateParser.parse("name=O'Hanlon", Sequences.<Keyword<?>>empty());
-        Predicate<Record> expected = Predicates.where(name, Predicates.is("O'Hanlon"));
+    public void supportsContainsWithWildcards() throws Exception {
+        Predicate<Record> predicate = predicateParser.parse("name=*\"value\"*", Sequences.<Keyword<?>>empty());
+        Predicate<Record> expected = Predicates.where(name, Strings.contains("value"));
+        assertThat(predicate, is(expected));
+
+        assertLuceAndSqlSyntax(predicate);
+    }
+
+    @Test
+    public void supportsStartsWithWithWildcards() throws Exception {
+        Predicate<Record> predicate = predicateParser.parse("name=\"value\"*", Sequences.<Keyword<?>>empty());
+        Predicate<Record> expected = Predicates.where(name, Strings.startsWith("value"));
+        assertThat(predicate, is(expected));
+
+        assertLuceAndSqlSyntax(predicate);
+    }
+
+    @Test
+    public void supportsEndsWithWithWildcards() throws Exception {
+        Predicate<Record> predicate = predicateParser.parse("name=*\"value\"", Sequences.<Keyword<?>>empty());
+        Predicate<Record> expected = Predicates.where(name, Strings.endsWith("value"));
         assertThat(predicate, is(expected));
 
         assertLuceAndSqlSyntax(predicate);

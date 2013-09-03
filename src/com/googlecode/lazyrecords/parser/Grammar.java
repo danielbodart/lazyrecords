@@ -94,7 +94,7 @@ public class Grammar {
     }
 
     public static final Parser<String> DATE = pattern(regex("\\d{4}/\\d{1,2}/\\d{1,2}"), "date").source();
-    public static final Parser<String> TEXT = isChar(Predicates.<Character>or(CharacterPredicates.IS_ALPHA_NUMERIC_, CharacterPredicates.isChar('\''))).many1().source();
+    public static final Parser<String> TEXT = isChar(CharacterPredicates.IS_ALPHA_NUMERIC_).many1().source();
     public static final Parser<String> QUOTED_TEXT = notChar('"').many1().source().between(isChar('"'), isChar('"'));
     public static final Parser<String> NULL = Scanners.string("null").retn(null);
     public static final Parser<String> TEXT_ONLY = Parsers.or(QUOTED_TEXT, TEXT);
@@ -127,21 +127,21 @@ public class Grammar {
         }
     });
 
-    public static final Parser<Pair<String, Callable1<Object, Predicate>>> TEXT_STARTS_WITH = TEXT.followedBy(WILDCARD).map(valueAndPredicateCreator(new Callable1<Object, Predicate>() {
+    public static final Parser<Pair<String, Callable1<Object, Predicate>>> TEXT_STARTS_WITH = TEXT_ONLY.followedBy(WILDCARD).map(valueAndPredicateCreator(new Callable1<Object, Predicate>() {
         @Override
         public Predicate call(Object value) throws Exception {
             return startsWith(value.toString());
         }
     }));
 
-    public static final Parser<Pair<String, Callable1<Object, Predicate>>> TEXT_ENDS_WITH = Parsers.sequence(WILDCARD, TEXT).map(valueAndPredicateCreator(new Callable1<Object, Predicate>() {
+    public static final Parser<Pair<String, Callable1<Object, Predicate>>> TEXT_ENDS_WITH = Parsers.sequence(WILDCARD, TEXT_ONLY).map(valueAndPredicateCreator(new Callable1<Object, Predicate>() {
         @Override
         public Predicate call(Object value) throws Exception {
             return endsWith(value.toString());
         }
     }));
 
-    public static final Parser<Pair<String, Callable1<Object, Predicate>>> TEXT_CONTAINS = TEXT.between(WILDCARD, WILDCARD).map(valueAndPredicateCreator(new Callable1<Object, Predicate>() {
+    public static final Parser<Pair<String, Callable1<Object, Predicate>>> TEXT_CONTAINS = TEXT_ONLY.between(WILDCARD, WILDCARD).map(valueAndPredicateCreator(new Callable1<Object, Predicate>() {
         @Override
         public Predicate call(Object value) throws Exception {
             return contains(value.toString());
