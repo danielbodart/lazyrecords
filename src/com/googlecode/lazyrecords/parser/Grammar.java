@@ -24,7 +24,6 @@ import java.util.List;
 import static com.googlecode.lazyparsec.Scanners.isChar;
 import static com.googlecode.lazyparsec.Scanners.notChar;
 import static com.googlecode.lazyparsec.Scanners.pattern;
-import static com.googlecode.lazyparsec.pattern.CharacterPredicates.notAmong;
 import static com.googlecode.lazyparsec.pattern.Patterns.regex;
 import static com.googlecode.totallylazy.Predicates.or;
 import static com.googlecode.totallylazy.Predicates.where;
@@ -95,7 +94,7 @@ public class Grammar {
     }
 
     public static final Parser<String> DATE = pattern(regex("\\d{4}/\\d{1,2}/\\d{1,2}"), "date").source();
-    public static final Parser<String> TEXT = isChar(or(CharacterPredicates.IS_ALPHA_NUMERIC_, CharacterPredicates.isChar('\''))).many1().source();
+    public static final Parser<String> TEXT = isChar(Predicates.<Character>or(CharacterPredicates.IS_ALPHA_NUMERIC_, CharacterPredicates.isChar('\''))).many1().source();
     public static final Parser<String> QUOTED_TEXT = notChar('"').many1().source().between(isChar('"'), isChar('"'));
     public static final Parser<String> NULL = Scanners.string("null").retn(null);
     public static final Parser<String> TEXT_ONLY = Parsers.or(QUOTED_TEXT, TEXT);
