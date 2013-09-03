@@ -448,4 +448,13 @@ public class StandardParserTest {
 
         assertLuceAndSqlSyntax(predicate);
     }
+
+    @Test
+    public void supportsSearchingForSingleQuotes() throws Exception {
+        Predicate<Record> predicate = predicateParser.parse("name=O'Hanlon", Sequences.<Keyword<?>>empty());
+        Predicate<Record> expected = Predicates.where(name, Predicates.is("O'Hanlon"));
+        assertThat(predicate, is(expected));
+
+        assertLuceAndSqlSyntax(predicate);
+    }
 }

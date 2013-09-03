@@ -24,7 +24,9 @@ import java.util.List;
 import static com.googlecode.lazyparsec.Scanners.isChar;
 import static com.googlecode.lazyparsec.Scanners.notChar;
 import static com.googlecode.lazyparsec.Scanners.pattern;
+import static com.googlecode.lazyparsec.pattern.CharacterPredicates.notAmong;
 import static com.googlecode.lazyparsec.pattern.Patterns.regex;
+import static com.googlecode.totallylazy.Predicates.or;
 import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Strings.contains;
 import static com.googlecode.totallylazy.Strings.endsWith;
@@ -93,7 +95,7 @@ public class Grammar {
     }
 
     public static final Parser<String> DATE = pattern(regex("\\d{4}/\\d{1,2}/\\d{1,2}"), "date").source();
-    public static final Parser<String> TEXT = isChar(CharacterPredicates.IS_ALPHA_NUMERIC_).many1().source();
+    public static final Parser<String> TEXT = isChar(or(CharacterPredicates.IS_ALPHA_NUMERIC_, CharacterPredicates.isChar('\''))).many1().source();
     public static final Parser<String> QUOTED_TEXT = notChar('"').many1().source().between(isChar('"'), isChar('"'));
     public static final Parser<String> NULL = Scanners.string("null").retn(null);
     public static final Parser<String> TEXT_ONLY = Parsers.or(QUOTED_TEXT, TEXT);
@@ -111,7 +113,7 @@ public class Grammar {
         public Callable2<Predicate<Record>, Predicate<Record>, Predicate<Record>> call(Void aVoid) throws Exception {
             return new Callable2<Predicate<Record>, Predicate<Record>, Predicate<Record>>() {
                 public Predicate<Record> call(Predicate<Record> p1, Predicate<Record> p2) throws Exception {
-                    return Predicates.or(p1, p2);
+                    return or(p1, p2);
                 }
             };
         }
