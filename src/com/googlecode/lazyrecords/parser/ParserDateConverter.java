@@ -17,7 +17,7 @@ public class ParserDateConverter implements DateConverter {
     }
 
     public ParserDateConverter() {
-        this.dateConverter = new DateFormatConverter(defaultConverter().formats().add(dateFormat()));
+        this.dateConverter = new DateFormatConverter(defaultConverter().formats().append(dateFormat()));
     }
 
     public static SimpleDateFormat dateFormat() {

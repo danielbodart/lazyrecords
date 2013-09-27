@@ -93,7 +93,7 @@ public class LuceneMappings {
         return new RecordTo<Document>() {
             public Document call(Record record) throws Exception {
                 return sortFields(definition, record).fields().
-                        add(Pair.<Keyword<?>, Object>pair(Lucene.RECORD_KEY, definition)).
+                        append(Pair.<Keyword<?>, Object>pair(Lucene.RECORD_KEY, definition)).
                         map(asField(definition.fields())).
                         filter(notNullValue()).
                         fold(new Document(), intoFields());

@@ -23,7 +23,7 @@ public class PersistentRecord implements Record {
     }
 
     public <T> T get(Keyword<T> keyword) {
-        Object value = fields.get(keyword).getOrNull();
+        Object value = fields.lookup(keyword).getOrNull();
         Class<T> aClass = keyword.forClass();
         return aClass.cast(value);
     }
@@ -34,7 +34,7 @@ public class PersistentRecord implements Record {
     }
 
     public <T> Record set(Keyword<T> name, T value) {
-        return new PersistentRecord(fields.put(name, value));
+        return new PersistentRecord(fields.insert(name, value));
     }
 
     public Sequence<Pair<Keyword<?>, Object>> fields() {

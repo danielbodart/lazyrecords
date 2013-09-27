@@ -139,7 +139,7 @@ public class Grammar {
     private static final PersistentMap<Class<?>, Maximum> maximums = ListMap.<Class<?>, Maximum>listMap(Integer.class, maximumInteger(), Long.class, maximumLong(), Number.class, maximumNumber(), Date.class, maximumDate(), String.class, maximumString());
 
     public static <T> Maximum<T> maximum(Class<T> aClass) {
-        return cast(maximums.get(aClass).get());
+        return cast(maximums.lookup(aClass).get());
     }
 
     public static <T extends Comparable<? super T>> Aggregate<T, T> maximum(Keyword<T> keyword) {
@@ -149,7 +149,7 @@ public class Grammar {
     private static final PersistentMap<Class<?>, Minimum> minimums = ListMap.<Class<?>, Minimum>listMap(Integer.class, minimumInteger(), Long.class, minimumLong(), Number.class, minimumNumber(), Date.class, minimumDate(), String.class, minimumString());
 
     public static <T> Minimum<T> minimum(Class<T> aClass) {
-        return cast(minimums.get(aClass).get());
+        return cast(minimums.lookup(aClass).get());
     }
 
     public static <T extends Comparable<? super T>> Aggregate<T, T> minimum(Keyword<T> keyword) {

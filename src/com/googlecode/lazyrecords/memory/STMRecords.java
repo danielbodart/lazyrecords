@@ -95,7 +95,7 @@ public class STMRecords extends AbstractRecords implements Transaction {
                     }
                 });
 
-                return Pair.pair(database.put(definition, result), count[0]);
+                return Pair.pair(database.insert(definition, result), count[0]);
             }
         });
     }
@@ -122,7 +122,7 @@ public class STMRecords extends AbstractRecords implements Transaction {
     }
 
     private static <M extends PersistentMap<String, String>> PersistentList<M> listFor(PersistentMap<Definition, PersistentList<M>> data, Definition definition) {
-        return data.get(definition).getOrElse(PersistentList.constructors.<M>empty());
+        return data.lookup(definition).getOrElse(PersistentList.constructors.<M>empty());
     }
 
     private ToRecord<PersistentMap<String, String>> asRecord(final Definition definition) {
@@ -142,7 +142,7 @@ public class STMRecords extends AbstractRecords implements Transaction {
         return new Function1<Keyword<?>, Pair<Keyword<?>, Object>>() {
             @Override
             public Pair<Keyword<?>, Object> call(Keyword<?> keyword) throws Exception {
-                return Pair.<Keyword<?>, Object>pair(keyword, mappings.toValue(keyword.forClass(), map.get(keyword.name()).getOrNull()));
+                return Pair.<Keyword<?>, Object>pair(keyword, mappings.toValue(keyword.forClass(), map.lookup(keyword.name()).getOrNull()));
             }
         };
     }
@@ -193,7 +193,7 @@ public class STMRecords extends AbstractRecords implements Transaction {
         return new Function1<PersistentMap<Definition, PersistentList<Fields>>, Pair<PersistentMap<Definition, PersistentList<Fields>>, Integer>>() {
             @Override
             public Pair<PersistentMap<Definition, PersistentList<Fields>>, Integer> call(PersistentMap<Definition, PersistentList<Fields>> data) throws Exception {
-                return Pair.pair(data.put(definition, newRecords.joinTo(listFor(data, definition))), newRecords.size());
+                return Pair.pair(data.insert(definition, newRecords.joinTo(listFor(data, definition))), newRecords.size());
             }
         };
     }
@@ -203,7 +203,7 @@ public class STMRecords extends AbstractRecords implements Transaction {
             @Override
             public Pair<PersistentMap<Definition, PersistentList<PersistentMap<String, String>>>, Integer> call(PersistentMap<Definition, PersistentList<PersistentMap<String, String>>> data) throws Exception {
                 PersistentList<PersistentMap<String, String>> rows = matches(data, definition, predicate);
-                return pair(data.put(definition, listFor(data, definition).removeAll(rows)), rows.size());
+                return pair(data.insert(definition, listFor(data, definition).deleteAll(rows)), rows.size());
             }
         };
     }

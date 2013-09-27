@@ -18,9 +18,9 @@ public class STMRecordsTest extends RecordsContract<STMRecords> {
     @Test
     public void canCommit() throws Exception {
         assertThat(records.get(people).isEmpty(), is(false));
-        assertThat(stm.value().get(people).isEmpty(), is(true));
+        assertThat(stm.value().lookup(people).isEmpty(), is(true));
         records.commit();
-        assertThat(stm.value().get(people).isEmpty(), is(false));
+        assertThat(stm.value().lookup(people).isEmpty(), is(false));
     }
 
     @Test

@@ -14,7 +14,7 @@ public class ParserFunctions {
     private PersistentList<Triple<String, Predicate<?>, Callable1<?, String>>> functions = empty();
 
     public <T> ParserFunctions add(String name, Predicate<? super T> predicate, Callable1<? super T, String> renderer) {
-        functions = functions.add(Triple.<String, Predicate<?>, Callable1<?, String>>triple(name, predicate, renderer));
+        functions = functions.append(Triple.<String, Predicate<?>, Callable1<?, String>>triple(name, predicate, renderer));
         return this;
     }
 
