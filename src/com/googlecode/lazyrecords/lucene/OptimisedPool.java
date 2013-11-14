@@ -2,7 +2,7 @@ package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.totallylazy.Block;
 import com.googlecode.totallylazy.Function;
-import com.googlecode.totallylazy.Function1;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.store.Directory;
 
@@ -10,15 +10,14 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static com.googlecode.lazyrecords.lucene.PooledValue.checkoutValue;
+import static com.googlecode.lazyrecords.lucene.PooledValue.isDirty;
+import static com.googlecode.lazyrecords.lucene.PooledValue.theCheckoutCount;
 import static com.googlecode.totallylazy.Closeables.safeClose;
 import static com.googlecode.totallylazy.Predicates.is;
 import static com.googlecode.totallylazy.Predicates.not;
 import static com.googlecode.totallylazy.Predicates.where;
-import static com.googlecode.totallylazy.Runnables.VOID;
 import static com.googlecode.totallylazy.Sequences.sequence;
-import static com.googlecode.lazyrecords.lucene.PooledValue.theCheckoutCount;
-import static com.googlecode.lazyrecords.lucene.PooledValue.checkoutValue;
-import static com.googlecode.lazyrecords.lucene.PooledValue.isDirty;
 
 public class OptimisedPool implements SearcherPool {
     private final List<PooledValue> pool = new CopyOnWriteArrayList<PooledValue>();
@@ -59,9 +58,8 @@ public class OptimisedPool implements SearcherPool {
         return searcher;
     }
 
-    @SuppressWarnings("deprecation")
     private LuceneSearcher createLuceneSearcher() throws IOException {
-        return new LuceneSearcher(new IndexSearcher(directory));
+        return new LuceneSearcher(new IndexSearcher(DirectoryReader.open(directory)));
     }
 
     private Block<Searcher> checkIn() {

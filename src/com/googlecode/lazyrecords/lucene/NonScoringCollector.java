@@ -1,6 +1,6 @@
 package com.googlecode.lazyrecords.lucene;
 
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.Scorer;
@@ -30,8 +30,8 @@ public class NonScoringCollector extends Collector {
     }
 
     @Override
-    public void setNextReader(IndexReader reader, int docBase) throws IOException {
-        base = docBase;
+    public void setNextReader(AtomicReaderContext context) throws IOException {
+        base = context.docBase;
     }
 
     @Override

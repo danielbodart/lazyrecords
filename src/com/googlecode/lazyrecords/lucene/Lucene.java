@@ -105,7 +105,7 @@ public class Lucene {
     @multimethod public Query query(Keyword<?> keyword, NullPredicate<?> predicate) { return nullValue(keyword); }
 
     private Query newRange(Keyword<?> keyword, Object lower, Object upper, boolean minInclusive, boolean maxInclusive) {
-        return new TermRangeQuery(keyword.name(), lower == null ? null : mappings.toString(keyword.forClass(), lower), upper == null ? null : mappings.toString(keyword.forClass(), upper), minInclusive, maxInclusive);
+        return TermRangeQuery.newStringRange(keyword.name(), lower == null ? null : mappings.toString(keyword.forClass(), lower), upper == null ? null : mappings.toString(keyword.forClass(), upper), minInclusive, maxInclusive);
     }
 
     public Query where(WherePredicate<Record, ?> where) {

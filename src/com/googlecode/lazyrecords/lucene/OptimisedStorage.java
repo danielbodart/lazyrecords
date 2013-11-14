@@ -6,7 +6,7 @@ import com.googlecode.totallylazy.Files;
 import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Sequence;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.KeywordAnalyzer;
+import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CheckIndex;
 import org.apache.lucene.index.IndexCommit;
@@ -16,6 +16,7 @@ import org.apache.lucene.index.KeepOnlyLastCommitDeletionPolicy;
 import org.apache.lucene.index.SnapshotDeletionPolicy;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.IOContext;
 import org.apache.lucene.store.NIOFSDirectory;
 import org.apache.lucene.util.Version;
 
@@ -23,7 +24,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 import static com.googlecode.totallylazy.Closeables.using;
 import static com.googlecode.totallylazy.Lists.list;
@@ -41,7 +41,7 @@ public class OptimisedStorage implements LuceneStorage {
     private SnapshotDeletionPolicy snapShotter;
 
     public OptimisedStorage(Directory directory, SearcherPool searcherPool) {
-        this(directory, Version.LUCENE_36, new KeywordAnalyzer(), IndexWriterConfig.OpenMode.CREATE_OR_APPEND, searcherPool);
+        this(directory, Version.LUCENE_45, new KeywordAnalyzer(), IndexWriterConfig.OpenMode.CREATE_OR_APPEND, searcherPool);
     }
 
     public OptimisedStorage(Directory directory, Version version, Analyzer analyzer, IndexWriterConfig.OpenMode mode, SearcherPool pool) {
@@ -122,12 +122,12 @@ public class OptimisedStorage implements LuceneStorage {
     public void backup(final File folder) throws Exception {
         ensureIndexIsSetup();
         Files.delete(folder);
-        String id = UUID.randomUUID().toString();
+        IndexCommit indexCommit = null;
         try {
-            IndexCommit indexCommit = snapShotter.snapshot(id);
+            indexCommit = snapShotter.snapshot();
             using(directoryFor(folder), copy(indexCommit.getFileNames()).apply(directory));
         } finally {
-            snapShotter.release(id);
+            if(indexCommit != null) snapShotter.release(indexCommit);
             writer.deleteUnusedFiles();
         }
     }
@@ -148,7 +148,7 @@ public class OptimisedStorage implements LuceneStorage {
 
     public static void copy(Directory source, Directory destination, Collection<String> strings) throws IOException {
         for (String segment : strings) {
-            source.copy(destination, segment, segment);
+            source.copy(destination, segment, segment, IOContext.DEFAULT);
         }
     }
 

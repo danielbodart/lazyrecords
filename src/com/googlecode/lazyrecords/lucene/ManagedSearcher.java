@@ -12,7 +12,7 @@ public class ManagedSearcher implements Searcher {
     private final SearcherManager manager;
     public final LuceneSearcher searcher;
 
-    public ManagedSearcher(SearcherManager manager) {
+    public ManagedSearcher(SearcherManager manager) throws IOException {
         this.manager = manager;
         this.searcher = new LuceneSearcher(manager.acquire());
     }
