@@ -4,7 +4,6 @@ import static com.googlecode.totallylazy.Unchecked.cast;
 import static java.lang.String.format;
 
 public class ImmutableKeyword<T> extends AbstractKeyword<T> {
-    private final String name;
     private final Class<T> aClass;
 
     public ImmutableKeyword(String name, Class<? extends T> aClass) {
@@ -12,11 +11,10 @@ public class ImmutableKeyword<T> extends AbstractKeyword<T> {
     }
 
     public ImmutableKeyword(String name, Class<? extends T> aClass, Record metadata) {
-        super(metadata);
+        super(metadata, name);
         if(name == null){
             throw new IllegalArgumentException("name");
         }
-        this.name = name;
         this.aClass = cast(aClass);
     }
 
@@ -29,11 +27,7 @@ public class ImmutableKeyword<T> extends AbstractKeyword<T> {
     }
 
     public AliasedKeyword<T> of(Definition definition) {
-        return metadata(Keywords.qualifier, definition.name()).as(format("%s_%s", definition.name(), name));
-    }
-
-    public String name() {
-        return name;
+        return metadata(Keywords.qualifier, definition.name()).as(format("%s_%s", definition.name(), name()));
     }
 
     public Class<T> forClass() {
@@ -42,7 +36,7 @@ public class ImmutableKeyword<T> extends AbstractKeyword<T> {
 
     @Override
     public ImmutableKeyword<T> metadata(Record metadata) {
-        return new ImmutableKeyword<T>(name, aClass, metadata);
+        return new ImmutableKeyword<T>(name(), aClass, metadata);
     }
 
     @Override

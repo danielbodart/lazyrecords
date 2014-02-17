@@ -10,7 +10,6 @@ import static java.lang.String.format;
 public class Aggregate<T, R> extends AbstractKeyword<R> implements Reducer<T, R>, Aliased {
     private final Reducer<T, R> reducer;
     private final Keyword<T> source;
-    private final String name;
     private final Class<R> rClass;
 
     private Aggregate(final Reducer<T, R> reducer, final Keyword<T> source, final String name, final Class<R> rClass) {
@@ -18,10 +17,9 @@ public class Aggregate<T, R> extends AbstractKeyword<R> implements Reducer<T, R>
     }
 
     private Aggregate(final Reducer<T, R> reducer, final Keyword<T> source, final String name, final Class<R> rClass, Record metadata) {
-        super(metadata);
+        super(metadata, name);
         this.reducer = reducer;
         this.source = source;
-        this.name = name;
         this.rClass = rClass;
     }
 
@@ -57,17 +55,12 @@ public class Aggregate<T, R> extends AbstractKeyword<R> implements Reducer<T, R>
 
     @Override
     public Aggregate<T, R> metadata(Record metadata) {
-        return new Aggregate<T, R>(reducer, source, name, rClass, metadata);
+        return new Aggregate<T, R>(reducer, source, name(), rClass, metadata);
     }
 
     @Override
     public Class<R> forClass() {
         return rClass;
-    }
-
-    @Override
-    public String name() {
-        return name;
     }
 
     public Reducer<T, R> reducer() {

@@ -10,7 +10,7 @@ public class CompositeKeyword<T> extends AbstractKeyword<T> implements Aliased {
     private final Sequence<Keyword<T>> keywords;
 
     private CompositeKeyword(Record metadata, Binary<T> combiner, Sequence<Keyword<T>> keywords) {
-        super(metadata);
+        super(metadata, combiner.toString() + "_" + keywords.map(functions.name).toString("_"));
         this.combiner = combiner;
         this.keywords = keywords;
     }
@@ -31,11 +31,6 @@ public class CompositeKeyword<T> extends AbstractKeyword<T> implements Aliased {
     @Override
     public Class<T> forClass() {
         return Generics.getGenericSuperclassType(combiner.getClass(), 0);
-    }
-
-    @Override
-    public String name() {
-        return combiner.toString() + "_" + keywords.map(functions.name).toString("_");
     }
 
     public Binary<T> combiner() {
