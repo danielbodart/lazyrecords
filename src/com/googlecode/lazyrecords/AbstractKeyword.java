@@ -2,12 +2,10 @@ package com.googlecode.lazyrecords;
 
 public abstract class AbstractKeyword<T> extends AbstractMetadata<Keyword<T>> implements Keyword<T> {
 	private final String name;
-	private final int hashCode;
 
 	protected AbstractKeyword(Record metadata, String name) {
         super(metadata);
 		this.name = name;
-		this.hashCode = name().toLowerCase().hashCode();
 	}
 
     @Override
@@ -19,9 +17,13 @@ public abstract class AbstractKeyword<T> extends AbstractMetadata<Keyword<T>> im
         return other instanceof Keyword && Keyword.methods.equalTo(this, (Keyword) other);
     }
 
+	private int hashCode;
+
     @Override
     public int hashCode() {
-        return hashCode;
+		if(hashCode == 0)
+			hashCode = name().toLowerCase().hashCode();
+		return hashCode;
     }
 
     public T call(Record record) throws Exception {
