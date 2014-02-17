@@ -17,6 +17,7 @@ public abstract class AbstractKeyword<T> extends AbstractMetadata<Keyword<T>> im
         return other instanceof Keyword && Keyword.methods.equalTo(this, (Keyword) other);
     }
 
+	// Thread-safe Racy Single Check Idiom (Effective Java 2nd Edition p.284)
 	private int hashCode;
 
     @Override
