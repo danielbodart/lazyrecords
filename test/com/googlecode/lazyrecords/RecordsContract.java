@@ -162,7 +162,7 @@ public abstract class RecordsContract<T extends Records> {
         records.add(people,
                 record(firstName, "dan", lastName, "bodart", age, 9, dob, date(1977, 1, 10), isbn, zenIsbn),
                 record(firstName, "matt", lastName, "savage", age, 12, dob, date(1975, 1, 10), isbn, godelEsherBach),
-                record(firstName, "bob", lastName, "martin", age, 11, dob, date(1976, 1, 10), isbn, cleanCode));
+                record(firstName, "Bob", lastName, "Martin", age, 11, dob, date(1976, 1, 10), isbn, cleanCode));
     }
 
     private void setupBooks() {
@@ -191,7 +191,7 @@ public abstract class RecordsContract<T extends Records> {
                 record(firstName, "aaaalfred", lastName, "bodart", age, 10, dob, date(1977, 1, 10), isbn, zenIsbn));
         assertThat(
                 records.get(people).filter(where(age, is(notNullValue(Integer.class)))).sortBy(comparators(descending(age), ascending(firstName))).map(firstName),
-                hasExactly("matt", "bob", "aaaalfred", "dan"));
+                hasExactly("matt", "Bob", "aaaalfred", "dan"));
     }
 
     @Test
@@ -372,7 +372,7 @@ public abstract class RecordsContract<T extends Records> {
     public void supportsReduce() throws Exception {
         assertThat(records.get(people).map(age).reduce(maximum(Integer.class)), CoreMatchers.is(12));
         assertThat(records.get(people).map(dob).reduce(minimum(Date.class)), CoreMatchers.is(date(1975, 1, 10)));
-        assertThat(records.get(people).map(firstName).reduce(minimum(String.class)), CoreMatchers.is("bob"));
+        assertThat(records.get(people).map(firstName).reduce(minimum(String.class)), CoreMatchers.is("Bob"));
         assertThat(records.get(people).map(age).reduce(sum()), NumberMatcher.is(32));
         assertThat(records.get(people).map(age).reduce(average()).intValue(), NumberMatcher.is(10));
 
@@ -401,14 +401,14 @@ public abstract class RecordsContract<T extends Records> {
     public void supportsSet() throws Exception {
         records.add(people, record(firstName, "chris", lastName, "bodart", age, 13, dob, date(1974, 1, 10)));
         assertThat(records.get(people).filter(where(lastName, startsWith("bod"))).map(select(lastName)).toSet(), hasExactly(record(lastName, "bodart")));
-        assertThat(records.get(people).map(lastName).toSet(), containsInAnyOrder("bodart", "savage", "martin"));
+        assertThat(records.get(people).map(lastName).toSet(), containsInAnyOrder("bodart", "savage", "Martin"));
     }
 
     @Test
     public void supportsUnique() throws Exception {
         records.add(people, record(firstName, "chris", lastName, "bodart", age, 13, dob, date(1974, 1, 10)));
         assertThat(records.get(people).filter(where(lastName, startsWith("bod"))).map(select(lastName)).unique(), hasExactly(record(lastName, "bodart")));
-        assertThat(records.get(people).map(lastName).unique(), containsInAnyOrder("bodart", "savage", "martin"));
+        assertThat(records.get(people).map(lastName).unique(), containsInAnyOrder("bodart", "savage", "Martin"));
     }
 
     @Test
@@ -467,7 +467,7 @@ public abstract class RecordsContract<T extends Records> {
     @Test
     public void supportsMappingASingleKeyword() throws Exception {
         Sequence<String> names = records.get(people).map(firstName);
-        assertThat(names, containsInAnyOrder("dan", "matt", "bob"));
+        assertThat(names, containsInAnyOrder("dan", "matt", "Bob"));
     }
 
     @Test
@@ -502,21 +502,21 @@ public abstract class RecordsContract<T extends Records> {
     public void supportsFilteringByASingleKeyword() throws Exception {
         Sequence<Record> users = records.get(people);
         Sequence<String> names = users.filter(where(age, is(11))).map(firstName);
-        assertThat(names, hasExactly("bob"));
+        assertThat(names, hasExactly("Bob"));
     }
 
     @Test
     public void supportsFilteringByMultipleKeywords() throws Exception {
         Sequence<Record> users = records.get(people);
-        Sequence<String> names = users.filter(where(age, is(11)).and(where(lastName, is("martin")))).map(firstName);
-        assertThat(names, hasExactly("bob"));
+        Sequence<String> names = users.filter(where(age, is(11)).and(where(lastName, is("Martin")))).map(firstName);
+        assertThat(names, hasExactly("Bob"));
     }
 
     @Test
     public void supportsFilteringWithLogicalOr() throws Exception {
         Sequence<Record> users = records.get(people);
-        Sequence<String> names = users.filter(where(age, is(12)).or(where(lastName, is("martin")))).map(firstName);
-        assertThat(names, containsInAnyOrder("matt", "bob"));
+        Sequence<String> names = users.filter(where(age, is(12)).or(where(lastName, is("Martin")))).map(firstName);
+        assertThat(names, containsInAnyOrder("matt", "Bob"));
     }
 
     @Test
@@ -530,9 +530,9 @@ public abstract class RecordsContract<T extends Records> {
 
     @Test
     public void supportsFilteringWithNot() throws Exception {
-        assertThat(records.get(people).filter(where(firstName, is(not("bob")))).map(firstName), containsInAnyOrder("dan", "matt"));
-        assertThat(records.get(people).filter(where(firstName, is("bob")).not()).map(firstName), containsInAnyOrder("dan", "matt"));
-        assertThat(records.get(people).filter(not(where(firstName, is("bob")))).map(firstName), containsInAnyOrder("dan", "matt"));
+        assertThat(records.get(people).filter(where(firstName, is(not("Bob")))).map(firstName), containsInAnyOrder("dan", "matt"));
+        assertThat(records.get(people).filter(where(firstName, is("Bob")).not()).map(firstName), containsInAnyOrder("dan", "matt"));
+        assertThat(records.get(people).filter(not(where(firstName, is("Bob")))).map(firstName), containsInAnyOrder("dan", "matt"));
     }
 
     @Test
@@ -547,32 +547,32 @@ public abstract class RecordsContract<T extends Records> {
         assertThat(records.get(people).filter(where(dob, is(date(1977, 1, 10)))).map(firstName), containsInAnyOrder("dan"));
         assertThat(records.get(people).filter(where(dob, is(greaterThan(date(1977, 1, 1))))).map(firstName), containsInAnyOrder("dan"));
         assertThat(records.get(people).filter(where(dob, is(greaterThanOrEqualTo(date(1977, 1, 10))))).map(firstName), containsInAnyOrder("dan"));
-        assertThat(records.get(people).filter(where(dob, is(lessThan(date(1976, 2, 10))))).map(firstName), containsInAnyOrder("matt", "bob"));
+        assertThat(records.get(people).filter(where(dob, is(lessThan(date(1976, 2, 10))))).map(firstName), containsInAnyOrder("matt", "Bob"));
         assertThat(records.get(people).filter(where(dob, is(lessThanOrEqualTo(date(1975, 1, 10))))).map(firstName), containsInAnyOrder("matt"));
-        assertThat(records.get(people).filter(where(dob, is(between(date(1975, 6, 10), date(1976, 6, 10))))).map(firstName), containsInAnyOrder("bob"));
+        assertThat(records.get(people).filter(where(dob, is(between(date(1975, 6, 10), date(1976, 6, 10))))).map(firstName), containsInAnyOrder("Bob"));
     }
 
     @Test
     public void supportsFilteringWithStrings() throws Exception {
         assertThat(records.get(people).filter(where(firstName, is(greaterThan("e")))).map(firstName), containsInAnyOrder("matt"));
         assertThat(records.get(people).filter(where(firstName, is(greaterThanOrEqualTo("dan")))).map(firstName), containsInAnyOrder("dan", "matt"));
-        assertThat(records.get(people).filter(where(firstName, is(lessThan("dan")))).map(firstName), containsInAnyOrder("bob"));
-        assertThat(records.get(people).filter(where(firstName, is(lessThanOrEqualTo("dan")))).map(firstName), containsInAnyOrder("dan", "bob"));
-        assertThat(records.get(people).filter(where(firstName, is(between("b", "d")))).map(firstName), containsInAnyOrder("bob"));
+        assertThat(records.get(people).filter(where(firstName, is(lessThan("dan")))).map(firstName), containsInAnyOrder("Bob"));
+        assertThat(records.get(people).filter(where(firstName, is(lessThanOrEqualTo("dan")))).map(firstName), containsInAnyOrder("dan", "Bob"));
+        assertThat(records.get(people).filter(where(firstName, is(between("B", "D")))).map(firstName), containsInAnyOrder("Bob"));
     }
 
     @Test
     public void supportsFilteringWithGreaterThanOrEqualTo() throws Exception {
         Sequence<Record> users = records.get(people);
         Sequence<String> names = users.filter(where(age, is(greaterThanOrEqualTo(11)))).map(firstName);
-        assertThat(names, containsInAnyOrder("matt", "bob"));
+        assertThat(names, containsInAnyOrder("matt", "Bob"));
     }
 
     @Test
     public void supportsFilteringWithLessThan() throws Exception {
         Sequence<Record> users = records.get(people);
         Sequence<String> names = users.filter(where(age, is(lessThan(12)))).map(firstName);
-        assertThat(names, containsInAnyOrder("dan", "bob"));
+        assertThat(names, containsInAnyOrder("dan", "Bob"));
     }
 
     @Test
@@ -585,9 +585,9 @@ public abstract class RecordsContract<T extends Records> {
     @Test
     public void supportsSorting() throws Exception {
         Sequence<Record> users = records.get(people).filter(where(age, is(notNullValue())));
-        assertThat(users.sortBy(age).map(firstName), containsInAnyOrder("dan", "bob", "matt"));
-        assertThat(users.sortBy(ascending(age)).map(firstName), containsInAnyOrder("dan", "bob", "matt"));
-        assertThat(users.sortBy(descending(age)).map(firstName), containsInAnyOrder("matt", "bob", "dan"));
+        assertThat(users.sortBy(age).map(firstName), containsInAnyOrder("dan", "Bob", "matt"));
+        assertThat(users.sortBy(ascending(age)).map(firstName), containsInAnyOrder("dan", "Bob", "matt"));
+        assertThat(users.sortBy(descending(age)).map(firstName), containsInAnyOrder("matt", "Bob", "dan"));
     }
 
     @Test
@@ -599,7 +599,7 @@ public abstract class RecordsContract<T extends Records> {
     @Test
     public void supportsBetween() throws Exception {
         Sequence<Record> users = records.get(people);
-        assertThat(users.filter(where(age, is(between(9, 11)))).map(firstName), containsInAnyOrder("dan", "bob"));
+        assertThat(users.filter(where(age, is(between(9, 11)))).map(firstName), containsInAnyOrder("dan", "Bob"));
     }
 
     @Test
@@ -611,8 +611,8 @@ public abstract class RecordsContract<T extends Records> {
     @Test
     public void supportsInWithSubSelects() throws Exception {
         Sequence<Record> users = records.get(people);
-        Sequence<Integer> ages = records.get(people).filter(where(firstName, is(between("a", "e")))).map(age);
-        assertThat(users.filter(where(age, is(in(ages)))).map(firstName), containsInAnyOrder("dan", "bob"));
+        Sequence<Integer> ages = records.get(people).filter(where(firstName, is(between("d", "o")))).map(age);
+        assertThat(users.filter(where(age, is(in(ages)))).map(firstName), containsInAnyOrder("dan", "matt"));
     }
 
     @Test
@@ -682,7 +682,7 @@ public abstract class RecordsContract<T extends Records> {
     @Test
     public void supportsTake() throws Exception {
         assertThat(records.get(people).sortBy(firstName).take(2).size(), NumberMatcher.is(2));
-        assertThat(records.get(people).sortBy(firstName).take(1).map(firstName), hasExactly("bob"));
+        assertThat(records.get(people).sortBy(firstName).take(1).map(firstName), hasExactly("Bob"));
     }
 
     @Test

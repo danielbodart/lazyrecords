@@ -18,6 +18,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexableField;
 
 import static com.googlecode.lazyrecords.Definition.methods.sortFields;
@@ -84,7 +85,7 @@ public class LuceneMappings {
 
                 String name = pair.first().name();
                 Keyword<?> keyword = Keyword.methods.matchKeyword(name, definitions);
-                FieldType fieldType = new FieldType(StringField.TYPE_STORED);
+                FieldType fieldType = new FieldType(TextField.TYPE_STORED);
                 fieldType.setOmitNorms(false);
                 return new Field(name, LuceneMappings.this.stringMappings.toString(keyword.forClass(), pair.second()), fieldType);
             }

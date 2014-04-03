@@ -21,12 +21,18 @@ public class LucenePartitionedRecords implements Records, Closeable {
     private final PartitionedIndex partitionedIndex;
     private final LuceneMappings mappings;
     private final Logger logger;
+    private final QueryVisitor queryVisitor;
     private final CloseableList closeables = new CloseableList();
 
     public LucenePartitionedRecords(PartitionedIndex partitionedIndex, LuceneMappings mappings, Logger logger) {
+        this(partitionedIndex, mappings, logger, new DoNothingQueryVisitor());
+    }
+
+    public LucenePartitionedRecords(PartitionedIndex partitionedIndex, LuceneMappings mappings, Logger logger, QueryVisitor queryVisitor) {
         this.partitionedIndex = partitionedIndex;
         this.mappings = mappings;
         this.logger = logger;
+        this.queryVisitor = queryVisitor;
     }
 
     private LuceneRecords recordsFor(Definition definition) {
