@@ -51,12 +51,12 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
     protected LuceneRecords createRecords() throws Exception {
         file = emptyVMDirectory("lucene-records");
         directory = new NoSyncDirectory(file);
-        storage = new OptimisedStorage(directory, Version.LUCENE_45, new StringPhraseAnalyzer(), IndexWriterConfig.OpenMode.CREATE_OR_APPEND, new LucenePool(directory));
+        storage = new OptimisedStorage(directory, new LucenePool(directory));
         return luceneRecords(logger);
     }
 
     private LuceneRecords luceneRecords(Logger logger1) throws IOException {
-        return new LuceneRecords(storage, new LuceneMappings(), logger1, new LowerCasingQueryVisitor());
+        return new LuceneRecords(storage, new LuceneMappings(), logger1);
     }
 
     @After
@@ -101,21 +101,5 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
     @Override
     @Ignore
     public void canFullyQualifyAKeywordDuringFiltering() throws Exception {
-    }
-
-    @Test
-    public void searchShouldBeCaseInsensitive() throws Exception {
-        Sequence<Record> result = records.get(people).filter(where(keyword("firstName", String.class), is("bOB")));
-        assertThat(result.size(), Matchers.is(1));
-        assertThat(result.head().get(firstName), Matchers.is("Bob"));
-    }
-
-    public static class StringPhraseAnalyzer extends Analyzer  {
-        protected TokenStreamComponents createComponents (String fieldName, Reader reader) {
-            Tokenizer tok = new KeywordTokenizer(reader);
-            TokenFilter filter = new LowerCaseFilter(Version.LUCENE_45, tok);
-            filter = new TrimFilter(Version.LUCENE_45, filter);
-            return new TokenStreamComponents(tok, filter);
-        }
     }
 }
