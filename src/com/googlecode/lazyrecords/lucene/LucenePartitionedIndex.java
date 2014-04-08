@@ -49,12 +49,16 @@ public class LucenePartitionedIndex implements Closeable, Persistence, Partition
     }
 
     public static LucenePartitionedIndex partitionedIndex(Function1<String, Directory> directoryActivator) {
-        return new LucenePartitionedIndex(directoryActivator, new Function2<Directory, SearcherPool, LuceneStorage>() {
+        return partitionedIndex(directoryActivator, new Function2<Directory, SearcherPool, LuceneStorage>() {
             @Override
             public LuceneStorage call(Directory directory, SearcherPool searcherPool) throws Exception {
                 return new OptimisedStorage(directory, searcherPool);
             }
         });
+    }
+
+    public static LucenePartitionedIndex partitionedIndex(Function1<String, Directory> directoryActivator, Function2<Directory, SearcherPool, LuceneStorage> luceneStorageActivator) {
+        return new LucenePartitionedIndex(directoryActivator, luceneStorageActivator);
     }
 
     public void close() throws IOException {

@@ -6,21 +6,12 @@ import com.googlecode.lazyrecords.RecordsContract;
 import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.matchers.Matchers;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.TokenFilter;
-import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.core.KeywordTokenizer;
-import org.apache.lucene.analysis.core.LowerCaseFilter;
-import org.apache.lucene.analysis.miscellaneous.TrimFilter;
-import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.util.Version;
 import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.io.Reader;
 
 import static com.googlecode.lazyrecords.Grammar.is;
 import static com.googlecode.lazyrecords.Grammar.keyword;
@@ -37,13 +28,13 @@ public class CaseInsensitiveLuceneRecordsTest extends RecordsContract<LuceneReco
 
     @Override
     protected LuceneRecords createRecords() throws Exception {
-        directory = new NoSyncDirectory(emptyVMDirectory("totallylazy"));
-        storage = new OptimisedStorage(directory, Version.LUCENE_45, new StringPhraseAnalyzer(), IndexWriterConfig.OpenMode.CREATE_OR_APPEND, new LucenePool(directory));
+        directory = new NoSyncDirectory(emptyVMDirectory("case-insensitive-lucene"));
+        storage = CaseInsensitive.storage(directory, new LucenePool(directory));
         return luceneRecords(logger);
     }
 
     private LuceneRecords luceneRecords(Logger logger1) throws IOException {
-        return new LuceneRecords(storage, new LuceneMappings(), logger1, new LowerCasingQueryVisitor());
+        return new LuceneRecords(storage, new LuceneMappings(), logger1, CaseInsensitive.queryVisitor());
     }
 
     @After
@@ -83,12 +74,4 @@ public class CaseInsensitiveLuceneRecordsTest extends RecordsContract<LuceneReco
     public void canFullyQualifyAKeywordDuringFiltering() throws Exception {
     }
 
-    public static class StringPhraseAnalyzer extends Analyzer {
-        protected TokenStreamComponents createComponents (String fieldName, Reader reader) {
-            Tokenizer tok = new KeywordTokenizer(reader);
-            TokenFilter filter = new LowerCaseFilter(Version.LUCENE_45, tok);
-            filter = new TrimFilter(Version.LUCENE_45, filter);
-            return new TokenStreamComponents(tok, filter);
-        }
-    }
 }

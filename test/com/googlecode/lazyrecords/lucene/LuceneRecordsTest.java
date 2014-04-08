@@ -49,7 +49,7 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
 
     @Override
     protected LuceneRecords createRecords() throws Exception {
-        file = emptyVMDirectory("totallylazy");
+        file = emptyVMDirectory("lucene-records");
         directory = new NoSyncDirectory(file);
         storage = new OptimisedStorage(directory, Version.LUCENE_45, new StringPhraseAnalyzer(), IndexWriterConfig.OpenMode.CREATE_OR_APPEND, new LucenePool(directory));
         return luceneRecords(logger);
