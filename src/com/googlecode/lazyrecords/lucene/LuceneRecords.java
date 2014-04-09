@@ -31,7 +31,7 @@ public class LuceneRecords extends AbstractRecords implements Queryable<Query>, 
     private final LuceneStorage storage;
     private final LuceneMappings mappings;
     private final Logger logger;
-    private final QueryVisitor queryVisitor;
+    private final LuceneQueryPreprocessor preprocessor;
     private final Lucene lucene;
     private final CloseableList closeables;
 
@@ -40,20 +40,20 @@ public class LuceneRecords extends AbstractRecords implements Queryable<Query>, 
     }
 
     public LuceneRecords(final LuceneStorage storage, final LuceneMappings mappings, final Logger logger) throws IOException {
-        this(storage, mappings, logger, new DoNothingQueryVisitor());
+        this(storage, mappings, logger, new DoNothingLuceneQueryPreprocessor());
     }
 
-    public LuceneRecords(final LuceneStorage storage, final LuceneMappings mappings, final Logger logger, QueryVisitor queryVisitor) throws IOException {
+    public LuceneRecords(final LuceneStorage storage, final LuceneMappings mappings, final Logger logger, final LuceneQueryPreprocessor preprocessor) throws IOException {
         this.storage = storage;
         this.mappings = mappings;
         this.logger = logger;
-        this.queryVisitor = queryVisitor;
+        this.preprocessor = preprocessor;
         this.lucene = new Lucene(mappings.stringMappings());
         this.closeables = new CloseableList();
     }
 
     public Sequence<Record> query(final Query query, final Sequence<Keyword<?>> definitions) {
-        return LuceneSequence.luceneSequence(lucene, storage, query, queryVisitor, mappings.asRecord(definitions), logger, closeables);
+        return LuceneSequence.luceneSequence(lucene, storage, query, preprocessor, mappings.asRecord(definitions), logger, closeables);
     }
 
     public Sequence<Record> get(final Definition definition) {
@@ -61,7 +61,7 @@ public class LuceneRecords extends AbstractRecords implements Queryable<Query>, 
     }
 
     private Sequence<Record> getAll(final Definition definition) {
-        return LuceneSequence.luceneSequence(lucene, storage, record(definition), queryVisitor, mappings.asUnfilteredRecord(definition.fields()), logger, closeables);
+        return LuceneSequence.luceneSequence(lucene, storage, record(definition), preprocessor, mappings.asUnfilteredRecord(definition.fields()), logger, closeables);
     }
 
     public Number add(final Definition definition, final Sequence<Record> records) {

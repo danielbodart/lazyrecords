@@ -28,8 +28,8 @@ public class CaseInsensitive {
         };
     }
 
-    public static QueryVisitor queryVisitor() {
-        return new LowerCasingQueryVisitor();
+    public static LuceneQueryPreprocessor luceneQueryPreprocessor() {
+        return new LowerCasingLuceneQueryPreprocessor();
     }
 
 

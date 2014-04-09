@@ -21,13 +21,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 
-public class LowerCasingQueryVisitorTest {
+public class LowerCasingLuceneQueryPreprocessorTest {
 
-    private final LowerCasingQueryVisitor visitor = new LowerCasingQueryVisitor();
+    private final LowerCasingLuceneQueryPreprocessor visitor = new LowerCasingLuceneQueryPreprocessor();
 
     @Test
     public void shouldLowercaseTermQuery() throws Exception {
-        final Query visited = visitor.visit(new TermQuery(new Term("field", "VaLue")));
+        final Query visited = visitor.process(new TermQuery(new Term("field", "VaLue")));
 
         final Query expected = new TermQuery(new Term("field", "value"));
         assertThat(visited, is(expected));
@@ -35,7 +35,7 @@ public class LowerCasingQueryVisitorTest {
 
     @Test
     public void shouldLowercaseTermRangeQuery() throws Exception {
-        final Query visited = visitor.visit(new TermRangeQuery("field", new BytesRef("LowerTerm"), new BytesRef("UpperTerm"), true, true));
+        final Query visited = visitor.process(new TermRangeQuery("field", new BytesRef("LowerTerm"), new BytesRef("UpperTerm"), true, true));
 
         final Query expected = new TermRangeQuery("field", new BytesRef("lowerterm"), new BytesRef("upperterm"), true, true);
         assertThat(visited, is(expected));
@@ -43,7 +43,7 @@ public class LowerCasingQueryVisitorTest {
 
     @Test
     public void shouldKeepInclusionFlagsForTermRangeQuery() throws Exception {
-        final TermRangeQuery visited = cast(visitor.visit(new TermRangeQuery("field", new BytesRef("LowerTerm"), new BytesRef("UpperTerm"), false, true)));
+        final TermRangeQuery visited = cast(visitor.process(new TermRangeQuery("field", new BytesRef("LowerTerm"), new BytesRef("UpperTerm"), false, true)));
 
         assertThat(visited.includesLower(), is(false));
         assertThat(visited.includesUpper(), is(true));
@@ -51,7 +51,7 @@ public class LowerCasingQueryVisitorTest {
 
     @Test
     public void shouldLowercaseFuzzyQuery() throws Exception {
-        final Query visited = visitor.visit(new FuzzyQuery(new Term("field", "VaLue")));
+        final Query visited = visitor.process(new FuzzyQuery(new Term("field", "VaLue")));
 
         final Query expected = new FuzzyQuery(new Term("field", "value"));
         assertThat(visited, is(expected));
@@ -59,7 +59,7 @@ public class LowerCasingQueryVisitorTest {
 
     @Test
     public void shouldLowercaseWildcardQuery() throws Exception {
-        final Query visited = visitor.visit(new WildcardQuery(new Term("field", "VaLue")));
+        final Query visited = visitor.process(new WildcardQuery(new Term("field", "VaLue")));
 
         final Query expected = new WildcardQuery(new Term("field", "value"));
         assertThat(visited, is(expected));
@@ -70,7 +70,7 @@ public class LowerCasingQueryVisitorTest {
         final PhraseQuery query = new PhraseQuery();
         query.add(new Term("field", "VaLue1"));
         query.add(new Term("field", "vAlUE2"));
-        final PhraseQuery visited = cast(visitor.visit(query));
+        final PhraseQuery visited = cast(visitor.process(query));
 
         assertThat(sequence(visited.getTerms()), contains(new Term("field", "value1"), new Term("field", "value2")));
     }
@@ -81,14 +81,14 @@ public class LowerCasingQueryVisitorTest {
         query.add(new Term("field", "Value"));
         query.setSlop(3);
 
-        final PhraseQuery visited = cast(visitor.visit(query));
+        final PhraseQuery visited = cast(visitor.process(query));
 
         assertThat(visited.getSlop(), is(3));
     }
 
     @Test
     public void shouldLowercasePrefixQuery() throws Exception {
-        final Query visited = visitor.visit(new PrefixQuery(new Term("field", "VaLue")));
+        final Query visited = visitor.process(new PrefixQuery(new Term("field", "VaLue")));
 
         final Query expected = new PrefixQuery(new Term("field", "value"));
         assertThat(visited, is(expected));
@@ -100,7 +100,7 @@ public class LowerCasingQueryVisitorTest {
         query.add(new Term("field", "VaLuE1"));
         query.add(new Term[]{new Term("field", "VALUE2"), new Term("field", "vAlUe3")});
 
-        final MultiPhraseQuery visited = cast(visitor.visit(query));
+        final MultiPhraseQuery visited = cast(visitor.process(query));
 
         assertThat(flatTerms(visited.getTermArrays()), contains(new Term("field", "value1"), new Term("field", "value2"), new Term("field", "value3")));
     }
@@ -111,7 +111,7 @@ public class LowerCasingQueryVisitorTest {
         query.add(new Term("field", "Value"));
         query.setSlop(3);
 
-        final MultiPhraseQuery visited = cast(visitor.visit(query));
+        final MultiPhraseQuery visited = cast(visitor.process(query));
 
         assertThat(visited.getSlop(), is(3));
     }

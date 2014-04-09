@@ -12,55 +12,55 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.search.WildcardQuery;
 
-public class DoNothingQueryVisitor implements QueryVisitor {
+public class DoNothingLuceneQueryPreprocessor implements LuceneQueryPreprocessor {
 
     @Override
-    public Query visit(TermQuery query) {
+    public Query process(TermQuery query) {
         return query;
     }
 
     @Override
-    public Query visit(WildcardQuery query) {
+    public Query process(WildcardQuery query) {
         return query;
     }
 
     @Override
-    public Query visit(PhraseQuery query) {
+    public Query process(PhraseQuery query) {
         return query;
     }
 
     @Override
-    public Query visit(PrefixQuery query) {
+    public Query process(PrefixQuery query) {
         return query;
     }
 
     @Override
-    public Query visit(MultiPhraseQuery query) {
+    public Query process(MultiPhraseQuery query) {
         return query;
     }
 
     @Override
-    public Query visit(FuzzyQuery query) {
+    public Query process(FuzzyQuery query) {
         return query;
     }
 
     @Override
-    public Query visit(RegexpQuery query) {
+    public Query process(RegexpQuery query) {
         return query;
     }
 
     @Override
-    public Query visit(TermRangeQuery query) {
+    public Query process(TermRangeQuery query) {
         return query;
     }
 
     @Override
-    public Query visit(NumericRangeQuery query) {
+    public Query process(NumericRangeQuery query) {
         return query;
     }
 
     @Override
-    public Query visit(MatchAllDocsQuery query) {
+    public Query process(MatchAllDocsQuery query) {
         return query;
     }
 }

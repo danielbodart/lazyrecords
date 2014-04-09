@@ -12,24 +12,24 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.search.WildcardQuery;
 
-public interface QueryVisitor {
-    Query visit(TermQuery query);
+public interface LuceneQueryPreprocessor {
+    Query process(TermQuery query);
 
-    Query visit(WildcardQuery query);
+    Query process(WildcardQuery query);
 
-    Query visit(PhraseQuery query);
+    Query process(PhraseQuery query);
 
-    Query visit(PrefixQuery query);
+    Query process(PrefixQuery query);
 
-    Query visit(MultiPhraseQuery query);
+    Query process(MultiPhraseQuery query);
 
-    Query visit(FuzzyQuery query);
+    Query process(FuzzyQuery query);
 
-    Query visit(RegexpQuery query);
+    Query process(RegexpQuery query);
 
-    Query visit(TermRangeQuery query);
+    Query process(TermRangeQuery query);
 
-    Query visit(NumericRangeQuery query);
+    Query process(NumericRangeQuery query);
 
-    Query visit(MatchAllDocsQuery query);
+    Query process(MatchAllDocsQuery query);
 }

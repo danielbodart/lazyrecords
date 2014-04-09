@@ -17,35 +17,35 @@ import java.util.List;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
 
-public class LowerCasingQueryVisitor extends DoNothingQueryVisitor {
+public class LowerCasingLuceneQueryPreprocessor extends DoNothingLuceneQueryPreprocessor {
 
     @Override
-    public Query visit(TermQuery query) {
+    public Query process(TermQuery query) {
         final Term originalTerm = query.getTerm();
         return new TermQuery(asLowercaseTerm(originalTerm));
     }
 
     @Override
-    public Query visit(TermRangeQuery query) {
+    public Query process(TermRangeQuery query) {
         final BytesRef lowerTerm = lowerCaseValueOf(query.getLowerTerm());
         final BytesRef upperTerm = lowerCaseValueOf(query.getUpperTerm());
         return new TermRangeQuery(query.getField(), lowerTerm, upperTerm, query.includesLower(), query.includesUpper());
     }
 
     @Override
-    public Query visit(FuzzyQuery query) {
+    public Query process(FuzzyQuery query) {
         final Term originalTerm = query.getTerm();
         return new FuzzyQuery(asLowercaseTerm(originalTerm), query.getMaxEdits(), query.getPrefixLength());
     }
 
     @Override
-    public Query visit(WildcardQuery query) {
+    public Query process(WildcardQuery query) {
         final Term originalTerm = query.getTerm();
         return new WildcardQuery(asLowercaseTerm(originalTerm));
     }
 
     @Override
-    public Query visit(PhraseQuery query) {
+    public Query process(PhraseQuery query) {
         final Term[] terms = query.getTerms();
         final int[] positions = query.getPositions();
         final PhraseQuery toReturn = new PhraseQuery();
@@ -57,13 +57,13 @@ public class LowerCasingQueryVisitor extends DoNothingQueryVisitor {
     }
 
     @Override
-    public Query visit(PrefixQuery query) {
+    public Query process(PrefixQuery query) {
         final Term prefix = query.getPrefix();
         return new PrefixQuery(asLowercaseTerm(prefix));
     }
 
     @Override
-    public Query visit(MultiPhraseQuery query) {
+    public Query process(MultiPhraseQuery query) {
         final List<Term[]> termArrays = query.getTermArrays();
         final int[] positions = query.getPositions();
         final MultiPhraseQuery toReturn = new MultiPhraseQuery();

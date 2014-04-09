@@ -21,18 +21,18 @@ public class LucenePartitionedRecords implements Records, Closeable {
     private final PartitionedIndex partitionedIndex;
     private final LuceneMappings mappings;
     private final Logger logger;
-    private final QueryVisitor queryVisitor;
+    private final LuceneQueryPreprocessor preprocessor;
     private final CloseableList closeables = new CloseableList();
 
     public LucenePartitionedRecords(PartitionedIndex partitionedIndex, LuceneMappings mappings, Logger logger) {
-        this(partitionedIndex, mappings, logger, new DoNothingQueryVisitor());
+        this(partitionedIndex, mappings, logger, new DoNothingLuceneQueryPreprocessor());
     }
 
-    public LucenePartitionedRecords(PartitionedIndex partitionedIndex, LuceneMappings mappings, Logger logger, QueryVisitor queryVisitor) {
+    public LucenePartitionedRecords(PartitionedIndex partitionedIndex, LuceneMappings mappings, Logger logger, LuceneQueryPreprocessor preprocessor) {
         this.partitionedIndex = partitionedIndex;
         this.mappings = mappings;
         this.logger = logger;
-        this.queryVisitor = queryVisitor;
+        this.preprocessor = preprocessor;
     }
 
     private LuceneRecords recordsFor(Definition definition) {
@@ -41,7 +41,7 @@ public class LucenePartitionedRecords implements Records, Closeable {
 
     private LuceneRecords createRecords(Definition definition) {
         try {
-            return new LuceneRecords(partitionedIndex.partition(definition), mappings, logger);
+            return new LuceneRecords(partitionedIndex.partition(definition), mappings, logger, preprocessor);
         } catch (IOException e) {
             throw lazyException(e);
         }

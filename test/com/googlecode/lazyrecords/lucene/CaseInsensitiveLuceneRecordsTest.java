@@ -34,7 +34,7 @@ public class CaseInsensitiveLuceneRecordsTest extends RecordsContract<LuceneReco
     }
 
     private LuceneRecords luceneRecords(Logger logger1) throws IOException {
-        return new LuceneRecords(storage, new LuceneMappings(), logger1, CaseInsensitive.queryVisitor());
+        return new LuceneRecords(storage, new LuceneMappings(), logger1, CaseInsensitive.luceneQueryPreprocessor());
     }
 
     @After
