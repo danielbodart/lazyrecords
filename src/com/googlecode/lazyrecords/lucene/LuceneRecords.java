@@ -44,7 +44,7 @@ public class LuceneRecords extends AbstractRecords implements Queryable<Query>, 
     }
 
     public LuceneRecords(final LuceneStorage storage, final LuceneMappings mappings, final Logger logger, final LuceneQueryPreprocessor preprocessor) throws IOException {
-        this.storage = storage;
+        this.storage = new PreprocessedLuceneStorage(storage, preprocessor);
         this.mappings = mappings;
         this.logger = logger;
         this.preprocessor = preprocessor;
