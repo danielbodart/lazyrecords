@@ -1,22 +1,12 @@
 package com.googlecode.lazyrecords.lucene;
 
-import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.lazyrecords.Logger;
-import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.RecordsContract;
+import com.googlecode.lazyrecords.*;
 import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
 import com.googlecode.totallylazy.matchers.Matchers;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.TokenFilter;
-import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.core.KeywordAnalyzer;
-import org.apache.lucene.analysis.core.KeywordTokenizer;
-import org.apache.lucene.analysis.core.LowerCaseFilter;
-import org.apache.lucene.analysis.miscellaneous.TrimFilter;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.Version;
@@ -26,17 +16,12 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Reader;
 import java.util.Map;
 
-import static com.googlecode.lazyrecords.Grammar.is;
-import static com.googlecode.lazyrecords.Grammar.keyword;
-import static com.googlecode.lazyrecords.Grammar.where;
-import static com.googlecode.lazyrecords.RecordsContract.People.age;
-import static com.googlecode.lazyrecords.RecordsContract.People.firstName;
-import static com.googlecode.lazyrecords.RecordsContract.People.lastName;
-import static com.googlecode.lazyrecords.RecordsContract.People.people;
+import static com.googlecode.lazyrecords.Grammar.*;
+import static com.googlecode.lazyrecords.RecordsContract.People.*;
 import static com.googlecode.totallylazy.Files.emptyVMDirectory;
+import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.matchers.IterableMatcher.hasExactly;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -93,13 +78,20 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
     public void supportsConcatenationDuringFiltering() throws Exception {
     }
 
-    @Override
-    @Ignore
-    public void supportsAliasingAKeywordDuringFilter() throws Exception {
+    @Test
+    public void supportsGettingWithAliasesInDefinition() throws Exception {
+        final AliasedKeyword<String> alias = people.firstName.as("name");
+        final Definition definition = Definition.constructors.definition(people.name(), alias, people.lastName);
+        final Record record = records.get(definition).filter(where(people.lastName, is("bodart"))).head();
+        assertThat(record.get(alias), Matchers.is("dan"));
     }
 
-    @Override
-    @Ignore
-    public void canFullyQualifyAKeywordDuringFiltering() throws Exception {
+    @Test
+    @Ignore("This won't work because Keyword.call(record) doesn't work when the Keyword is aliased and present in the definition. Note this is why we currently call map() with a non-aliased Keyword")
+    public void supportsSortingByAliases() throws Exception {
+        final AliasedKeyword<String> alias = people.firstName.as("name");
+        final Definition definition = Definition.constructors.definition(people.name(), alias, people.lastName);
+        final Sequence<String> sortedRecords = records.get(definition).sortBy(descending(alias)).map(keyword("name", String.class));
+        assertThat(sortedRecords, Matchers.is(sequence("matt", "dan", "Bob")));
     }
 }
