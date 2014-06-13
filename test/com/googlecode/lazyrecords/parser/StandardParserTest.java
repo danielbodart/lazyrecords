@@ -11,9 +11,13 @@ import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
 import com.googlecode.totallylazy.Strings;
+import com.googlecode.yatspec.junit.Row;
+import com.googlecode.yatspec.junit.SpecRunner;
+import com.googlecode.yatspec.junit.Table;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Query;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Date;
 
@@ -22,11 +26,13 @@ import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
 import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.time.Dates.date;
+import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 
+@RunWith(SpecRunner.class)
 public class StandardParserTest {
     private final StandardParser predicateParser = new StandardParser();
     private final Keyword<String> name = keyword("name", String.class);
@@ -302,9 +308,16 @@ public class StandardParserTest {
     }
 
     @Test
-    public void supportsExplicitDateBasedQueries() throws Exception {
+    @Table ({
+        @Row ({"2001/1/10"}),
+        @Row ({"10/01/2001"}),
+        @Row ({"10/1/2001"}),
+        @Row ({"10/01/01"}),
+        @Row ({"10/1/01"})
+    })
+    public void supportsExplicitDateBasedQueries(String query) throws Exception {
         Keyword<Date> dob = keyword("dob", Date.class);
-        Predicate<Record> predicate = predicateParser.parse("dob:2001/1/10", Sequences.sequence(dob));
+        Predicate<Record> predicate = predicateParser.parse(format("dob:%s", query), Sequences.one(dob));
 
         assertThat(predicate.matches(record().set(dob, date(2001, 1, 10))), is(true));
         assertThat(predicate.matches(record().set(dob, date(2001, 10, 1))), is(false));
@@ -314,9 +327,16 @@ public class StandardParserTest {
     }
 
     @Test
-    public void supportsImplicitDateBasedQueries() throws Exception {
+    @Table ({
+            @Row ({"2001/1/10"}),
+            @Row ({"10/01/2001"}),
+            @Row ({"10/1/2001"}),
+            @Row ({"10/01/01"}),
+            @Row ({"10/1/01"})
+    })
+    public void supportsImplicitDateBasedQueries(String query) throws Exception {
         Sequence<Keyword<?>> keywords = Sequences.<Keyword<?>>sequence(keyword("dob", Date.class));
-        Predicate<Record> predicate = predicateParser.parse("2001/1/10", keywords);
+        Predicate<Record> predicate = predicateParser.parse(query, keywords);
 
         assertThat(predicate.matches(record().set(keyword("dob", Date.class), date(2001, 1, 10))), is(true));
         assertThat(predicate.matches(record().set(keyword("dob", Date.class), date(2001, 10, 1))), is(false));
@@ -325,9 +345,49 @@ public class StandardParserTest {
     }
 
     @Test
-    public void supportsGreaterThanDateQueries() throws Exception {
+    @Table ({
+            @Row({"2001/01/10 03:15:59"}),
+            @Row ({"10/1/2001 03:15:59"}),
+            @Row ({"10/01/01 03:15:59"})
+    })
+    public void supportsExplicitDateTimeBasedQueries(String query) throws Exception {
+        Keyword<Date> dob = keyword("dob", Date.class);
+        Predicate<Record> predicate = predicateParser.parse(format("dob:%s", query), Sequences.sequence(dob));
+
+        assertThat(predicate.matches(record().set(dob, date(2001, 1, 10))), is(false));
+        assertThat(predicate.matches(record().set(dob, date(2001, 10, 1))), is(false));
+        assertThat(predicate.matches(record().set(dob, date(2001, 1, 10, 3, 15, 59, 123))), is(true));
+
+        assertLuceAndSqlSyntax(predicate);
+    }
+
+    @Test
+    @Table ({
+            @Row ({"10/1/2001 03:15:59"}),
+            @Row ({"10/01/01 03:15:59"})
+    })
+    public void supportsImplicitDateTimeBasedQueries(String query) throws Exception {
         Sequence<Keyword<?>> keywords = Sequences.<Keyword<?>>sequence(keyword("dob", Date.class));
-        Predicate<Record> predicate = predicateParser.parse("dob > 2001/1/10", keywords);
+        Predicate<Record> predicate = predicateParser.parse(query, keywords);
+
+        assertThat(predicate.matches(record().set(keyword("dob", Date.class), date(2001, 1, 10))), is(false));
+        assertThat(predicate.matches(record().set(keyword("dob", Date.class), date(2001, 10, 1))), is(false));
+        assertThat(predicate.matches(record().set(keyword("dob", Date.class), date(2001, 1, 10, 3, 15, 59, 123))), is(true));
+
+        assertLuceAndSqlSyntax(predicate);
+    }
+
+    @Test
+    @Table ({
+            @Row ({"2001/1/10"}),
+            @Row ({"10/01/2001"}),
+            @Row ({"10/1/2001"}),
+            @Row ({"10/01/01"}),
+            @Row ({"10/1/01"})
+    })
+    public void supportsGreaterThanDateQueries(String query) throws Exception {
+        Sequence<Keyword<?>> keywords = Sequences.<Keyword<?>>sequence(keyword("dob", Date.class));
+        Predicate<Record> predicate = predicateParser.parse(format("dob > %s", query), keywords);
 
         Keyword<Date> dob = keyword("dob", Date.class);
         assertThat(predicate.matches(record().set(dob, date(2001, 1, 11))), is(true));
@@ -338,9 +398,16 @@ public class StandardParserTest {
     }
 
     @Test
-    public void supportsLowerThanDateQueries() throws Exception {
+    @Table ({
+            @Row ({"2001/1/10"}),
+            @Row ({"10/01/2001"}),
+            @Row ({"10/1/2001"}),
+            @Row ({"10/01/01"}),
+            @Row ({"10/1/01"})
+    })
+    public void supportsLowerThanDateQueries(String query) throws Exception {
         Sequence<Keyword<?>> keywords = Sequences.<Keyword<?>>sequence(keyword("dob", Date.class));
-        Predicate<Record> predicate = predicateParser.parse("dob < 2001/1/10", keywords);
+        Predicate<Record> predicate = predicateParser.parse(format("dob < %s", query), keywords);
 
         Keyword<Date> dob = keyword("dob", Date.class);
         assertThat(predicate.matches(record().set(dob, date(2001, 1, 9))), is(true));

@@ -17,11 +17,27 @@ public class ParserDateConverter implements DateConverter {
     }
 
     public ParserDateConverter() {
-        this.dateConverter = new DateFormatConverter(defaultConverter().formats().append(dateFormat()));
+        this(new DateFormatConverter(defaultConverter().formats()
+                .append(ukShortDateTimeFormat())
+                .append(ukShortDateFormat())
+                .append(dateTimeFormat())
+                .append(dateFormat())));
+    }
+
+    public static SimpleDateFormat ukShortDateTimeFormat() {
+        return Dates.format("dd/MM/yy HH:mm:ss");
+    }
+
+    public static SimpleDateFormat ukShortDateFormat() {
+        return Dates.format("dd/MM/yy");
+    }
+
+    public static SimpleDateFormat dateTimeFormat() {
+        return Dates.format("yy/MM/dd HH:mm:ss");
     }
 
     public static SimpleDateFormat dateFormat() {
-        return Dates.format("yyyy/MM/dd");
+        return Dates.format("yy/MM/dd");
     }
 
     @Override

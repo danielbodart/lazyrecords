@@ -15,6 +15,7 @@ import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Triple;
 import com.googlecode.totallylazy.predicates.OrPredicate;
+import com.googlecode.totallylazy.time.Dates;
 import com.googlecode.totallylazy.time.Seconds;
 
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Strings.contains;
 import static com.googlecode.totallylazy.Strings.endsWith;
 import static com.googlecode.totallylazy.Strings.startsWith;
+import static java.util.Calendar.MILLISECOND;
 import static java.util.regex.Pattern.quote;
 
 @SuppressWarnings("unchecked")
@@ -93,12 +95,16 @@ public class Grammar {
         return pattern(regex(String.format("\\s*%s\\s*", quote(value))), value);
     }
 
-    public static final Parser<String> DATE = pattern(regex("\\d{4}/\\d{1,2}/\\d{1,2}"), "date").source();
+    public static final Parser<String> DATE = Parsers.or(pattern(regex("\\d{4}/\\d{1,2}/\\d{1,2}"), "yyyyMMdd"),
+            pattern(regex("\\d{1,2}/\\d{1,2}/\\d{4}"), "ddMMyyyy"),
+            pattern(regex("\\d{1,2}/\\d{1,2}/\\d{2}"), "ddMMyy")).source();
+    public static final Parser<String> TIME = pattern(regex("\\d{1,2}:\\d{2}:\\d{2}"), "time").source();
+    public static final Parser<String> DATE_AND_TIME = DATE.followedBy(ws(' ')).followedBy(TIME).source();
     public static final Parser<String> TEXT = isChar(CharacterPredicates.IS_ALPHA_NUMERIC_).many1().source();
     public static final Parser<String> QUOTED_TEXT = notChar('"').many1().source().between(isChar('"'), isChar('"'));
     public static final Parser<String> NULL = Scanners.string("null").retn(null);
     public static final Parser<String> TEXT_ONLY = Parsers.or(QUOTED_TEXT, TEXT);
-    public static final Parser<String> VALUES = Parsers.or(DATE, NULL, TEXT_ONLY);
+    public static final Parser<String> VALUES = Parsers.or(DATE_AND_TIME, DATE, NULL, TEXT_ONLY);
     public static final Parser<String> NAME = TEXT_ONLY;
     public static final Parser<Void> WILDCARD = isChar('*');
     public static final Parser<Void> GT = ws('>');
@@ -117,7 +123,9 @@ public class Grammar {
             };
         }
     });
-    public static final Parser<Callable2<Predicate<Record>, Predicate<Record>, Predicate<Record>>> AND = ws("AND").or(isChar(' ').skipMany()).map(new Callable1<Void, Callable2<Predicate<Record>, Predicate<Record>, Predicate<Record>>>() {
+
+    public static final Parser<Callable2<Predicate<Record>, Predicate<Record>, Predicate<Record>>> AND = ws("AND").or(isChar
+            (' ').skipMany()).map(new Callable1<Void, Callable2<Predicate<Record>, Predicate<Record>, Predicate<Record>>>() {
         public Callable2<Predicate<Record>, Predicate<Record>, Predicate<Record>> call(Void aVoid) throws Exception {
             return new Callable2<Predicate<Record>, Predicate<Record>, Predicate<Record>>() {
                 public Predicate<Record> call(Predicate<Record> p1, Predicate<Record> p2) throws Exception {
@@ -164,6 +172,15 @@ public class Grammar {
             Date dateWithoutTime = (Date) o;
             Date upper = Seconds.add(dateWithoutTime, (24 * 60 * 60) - 1);
             return Predicates.between(dateWithoutTime, upper);
+        }
+    }));
+
+    public static final Parser<Pair<String, Callable1<Object, Predicate>>> DATE_TIME_IS = DATE_AND_TIME.map(valueAndPredicateCreator(new Callable1<Object, Predicate>() {
+        @Override
+        public Predicate call(Object value) throws Exception {
+            Date dateWithoutMillis = (Date) value;
+            Date upper = Dates.add(dateWithoutMillis, MILLISECOND, 999);
+            return Predicates.between(dateWithoutMillis, upper);
         }
     }));
 
@@ -222,7 +239,7 @@ public class Grammar {
         };
     }
 
-    public static Parser<Pair<String, Callable1<Object, Predicate>>> VALUE_PREDICATE = Parsers.or(GREATER_THAN_OR_EQUALS, LESS_THAN_OR_EQUALS, GREATER_THAN, LESS_THAN, DATE_IS, TEXT_CONTAINS, TEXT_STARTS_WITH, TEXT_ENDS_WITH, IS_NULL, TEXT_IS);
+    public static Parser<Pair<String, Callable1<Object, Predicate>>> VALUE_PREDICATE = Parsers.or(GREATER_THAN_OR_EQUALS, LESS_THAN_OR_EQUALS, GREATER_THAN, LESS_THAN, DATE_TIME_IS, DATE_IS, TEXT_CONTAINS, TEXT_STARTS_WITH, TEXT_ENDS_WITH, IS_NULL, TEXT_IS);
 
     public static Parser<List<Pair<String, Callable1<Object, Predicate>>>> VALUE_PREDICATES = VALUE_PREDICATE.sepBy(ws(','));
 }
