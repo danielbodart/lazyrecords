@@ -1,6 +1,9 @@
 package com.googlecode.lazyrecords.lucene;
 
-import com.googlecode.lazyrecords.*;
+import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.Named;
+import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.mappings.StringMappings;
 import com.googlecode.totallylazy.*;
 import com.googlecode.totallylazy.annotations.multimethod;
@@ -9,7 +12,6 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
 
 import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
-import static com.googlecode.lazyrecords.lucene.Keywords.name;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static org.apache.lucene.search.BooleanClause.Occur.MUST;
 import static org.apache.lucene.search.BooleanClause.Occur.MUST_NOT;
@@ -97,13 +99,13 @@ public class Lucene {
     @multimethod public Query query(Keyword<?> keyword, Between<?> predicate) { return between(keyword, predicate.lower(), predicate.upper()); }
     @multimethod public Query query(Keyword<?> keyword, Not<?> predicate) { return not(query(keyword, predicate.predicate())); }
     @multimethod public Query query(Keyword<?> keyword, InPredicate<?> predicate) { return or(sequence(predicate.values()).map(asQuery(keyword))); }
-    @multimethod public Query query(Keyword<?> keyword, StartsWithPredicate predicate) { return new PrefixQuery(new Term(name(keyword), predicate.value())); }
-    @multimethod public Query query(Keyword<?> keyword, EndsWithPredicate predicate) { return new WildcardQuery(new Term(name(keyword), "*" + predicate.value())); }
+    @multimethod public Query query(Keyword<?> keyword, StartsWithPredicate predicate) { return new PrefixQuery(new Term(keyword.name(), predicate.value())); }
+    @multimethod public Query query(Keyword<?> keyword, ContainsPredicate predicate) { return new WildcardQuery(new Term(keyword.name(), "*" + predicate.value() + "*")); }
+    @multimethod public Query query(Keyword<?> keyword, EndsWithPredicate predicate) { return new WildcardQuery(new Term(keyword.name(), "*" + predicate.value())); }
     @multimethod public Query query(Keyword<?> keyword, NullPredicate<?> predicate) { return nullValue(keyword); }
-    @multimethod public Query query(Keyword<?> keyword, ContainsPredicate predicate) { return new WildcardQuery(new Term(name(keyword), "*" + predicate.value() + "*")); }
 
     private Query newRange(Keyword<?> keyword, Object lower, Object upper, boolean minInclusive, boolean maxInclusive) {
-        return TermRangeQuery.newStringRange(name(keyword), lower == null ? null : mappings.toString(keyword.forClass(), lower), upper == null ? null : mappings.toString(keyword.forClass(), upper), minInclusive, maxInclusive);
+        return TermRangeQuery.newStringRange(keyword.name(), lower == null ? null : mappings.toString(keyword.forClass(), lower), upper == null ? null : mappings.toString(keyword.forClass(), upper), minInclusive, maxInclusive);
     }
 
     public Query where(WherePredicate<Record, ?> where) {
@@ -117,7 +119,7 @@ public class Lucene {
     }
 
     private Query equalTo(Keyword<?> keyword, Object value) {
-        return new TermQuery(new Term(name(keyword), mappings.toString(keyword.forClass(), value)));
+        return new TermQuery(new Term(keyword.name(), mappings.toString(keyword.forClass(), value)));
     }
 
     private Query greaterThan(Keyword<?> keyword, Object value) {
