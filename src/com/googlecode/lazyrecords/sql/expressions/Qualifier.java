@@ -68,4 +68,14 @@ public class Qualifier extends AbstractQualifier {
     @multimethod public ColumnReference qualify(ColumnReference columnReference) {
         return ColumnReference.columnReference(columnReference.name(), some(columnReference.qualifier.getOrElse(qualified.apply(columnReference.name()))));
     }
+
+    @multimethod public OrderByClause qualify(OrderByClause orderByClause){
+        return AnsiOrderByClause.orderByClause(orderByClause.sortSpecifications().map(new Callable1<SortSpecification, SortSpecification>() {
+            @Override
+            public SortSpecification call(SortSpecification value) throws Exception {
+                return AnsiSortSpecification.sortSpecification(qualify(value.sortKey()), value.orderingSpecification());
+            }
+        }));
+    }
+
 }

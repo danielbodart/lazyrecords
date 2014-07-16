@@ -29,6 +29,7 @@ import static com.googlecode.lazyrecords.sql.expressions.SelectBuilder.from;
 import static com.googlecode.totallylazy.Predicates.equalTo;
 import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Strings.capitalise;
+import static com.googlecode.totallylazy.comparators.Comparators.ascending;
 import static com.googlecode.totallylazy.matchers.Matchers.is;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -62,6 +63,16 @@ public class AnsiJoinBuilderTest {
         AnsiJoinBuilder join = grammar.join(grammar.join(primary, secondary, inner, namedColumnsJoin("isbn")), tertiary, inner, namedColumnsJoin("isbn"));
         String sql = join.build().text();
         assertThat(sql, is("select p.firstName, p.isbn, b.title, s.salePrice from people p inner join books b using (isbn) inner join salePrices s using (isbn)"));
+    }
+
+    @Test
+    public void canOrderAfterJoining() throws Exception {
+        SelectBuilder primary = from(grammar, people).select(firstName, isbn);
+        SelectBuilder secondary = from(grammar, books).select(title);
+        ExpressionBuilder join = grammar.join(primary, secondary, inner, namedColumnsJoin("isbn")).
+            orderBy(ascending(firstName));
+        String sql = join.build().toString();
+        assertThat(sql, is("select p.firstName, p.isbn, b.title from people p inner join books b using (isbn) order by p.firstName asc"));
     }
 
     @Test
