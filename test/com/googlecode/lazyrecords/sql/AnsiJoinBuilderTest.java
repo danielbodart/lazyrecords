@@ -51,8 +51,7 @@ public class AnsiJoinBuilderTest {
         SelectBuilder primary = from(grammar, people).select(firstName, isbn);
         SelectBuilder secondary = from(grammar, books).select(title);
         AnsiJoinBuilder join = (AnsiJoinBuilder) grammar.join(primary, secondary, inner, namedColumnsJoin("isbn"));
-        String sql = join.build().text();
-        assertThat(sql, is("select p.firstName, p.isbn, b.title from people p inner join books b using (isbn)"));
+        assertSql(join, "select p.firstName, p.isbn, b.title from people p inner join books b using (isbn)");
     }
 
     @Test
@@ -61,8 +60,7 @@ public class AnsiJoinBuilderTest {
         SelectBuilder secondary = from(grammar, books).select(title);
         SelectBuilder tertiary = from(grammar, prices).select(price);
         AnsiJoinBuilder join = (AnsiJoinBuilder) grammar.join(grammar.join(primary, secondary, inner, namedColumnsJoin("isbn")), tertiary, inner, namedColumnsJoin("isbn"));
-        String sql = join.build().text();
-        assertThat(sql, is("select p.firstName, p.isbn, b.title, s.salePrice from people p inner join books b using (isbn) inner join salePrices s using (isbn)"));
+        assertSql(join, "select p.firstName, p.isbn, b.title, s.salePrice from people p inner join books b using (isbn) inner join salePrices s using (isbn)");
     }
 
     @Test
@@ -71,8 +69,7 @@ public class AnsiJoinBuilderTest {
         SelectBuilder secondary = from(grammar, books).select(title);
         ExpressionBuilder join = grammar.join(primary, secondary, inner, namedColumnsJoin("isbn")).
             orderBy(ascending(firstName));
-        String sql = join.build().toString();
-        assertThat(sql, is("select p.firstName, p.isbn, b.title from people p inner join books b using (isbn) order by p.firstName asc"));
+        assertSql(join, "select p.firstName, p.isbn, b.title from people p inner join books b using (isbn) order by p.firstName asc");
     }
 
     @Test
@@ -81,8 +78,7 @@ public class AnsiJoinBuilderTest {
             orderBy(ascending(firstName));
         SelectBuilder secondary = from(grammar, books).select(title);
         ExpressionBuilder join = grammar.join(primary, secondary, inner, namedColumnsJoin("isbn"));
-        String sql = join.build().toString();
-        assertThat(sql, is("select p.firstName, p.isbn, b.title from people p inner join books b using (isbn) order by p.firstName asc"));
+        assertSql(join, "select p.firstName, p.isbn, b.title from people p inner join books b using (isbn) order by p.firstName asc");
     }
 
     @Test
@@ -91,8 +87,7 @@ public class AnsiJoinBuilderTest {
         SelectBuilder secondary = from(grammar, books).select(title);
         ExpressionBuilder join = grammar.join(primary, secondary, inner, namedColumnsJoin("isbn")).
             filter(where(firstName, Predicates.is("dan")));
-        String sql = join.build().toString();
-        assertThat(sql, is("select p.firstName, p.isbn, b.title from people p inner join books b using (isbn) where p.firstName = 'dan'"));
+        assertSql(join, "select p.firstName, p.isbn, b.title from people p inner join books b using (isbn) where p.firstName = 'dan'");
     }
 
     @Test
