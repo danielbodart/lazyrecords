@@ -1,33 +1,13 @@
 package com.googlecode.lazyrecords.sql;
 
-import com.googlecode.lazyrecords.sql.expressions.AnsiQualifiedJoin;
-import com.googlecode.lazyrecords.sql.expressions.AnsiSelectBuilder;
-import com.googlecode.lazyrecords.sql.expressions.AnsiSelectExpression;
-import com.googlecode.lazyrecords.sql.expressions.AnsiSelectList;
-import com.googlecode.lazyrecords.sql.expressions.DerivedColumn;
-import com.googlecode.lazyrecords.sql.expressions.FromClause;
-import com.googlecode.lazyrecords.sql.expressions.JoinQualifier;
-import com.googlecode.lazyrecords.sql.expressions.JoinSpecification;
-import com.googlecode.lazyrecords.sql.expressions.JoinType;
-import com.googlecode.lazyrecords.sql.expressions.QualifiedJoin;
-import com.googlecode.lazyrecords.sql.expressions.Qualifier;
-import com.googlecode.lazyrecords.sql.expressions.SelectExpression;
-import com.googlecode.lazyrecords.sql.expressions.SelectList;
-import com.googlecode.lazyrecords.sql.expressions.TablePrimary;
-import com.googlecode.lazyrecords.sql.expressions.TableReference;
-import com.googlecode.lazyrecords.sql.expressions.WhereClause;
-import com.googlecode.totallylazy.Mapper;
-import com.googlecode.totallylazy.Option;
-import com.googlecode.totallylazy.Sequence;
+import com.googlecode.lazyrecords.sql.expressions.*;
+import com.googlecode.totallylazy.*;
 
 import java.util.Set;
 
 import static com.googlecode.lazyrecords.sql.expressions.AnsiFromClause.fromClause;
 import static com.googlecode.lazyrecords.sql.expressions.AnsiQualifiedJoin.qualifiedJoin;
-import static com.googlecode.lazyrecords.sql.expressions.Qualifier.qualifier;
-import static com.googlecode.totallylazy.Sequences.empty;
-import static com.googlecode.totallylazy.Sequences.one;
-import static com.googlecode.totallylazy.Sequences.sequence;
+import static com.googlecode.totallylazy.Sequences.*;
 
 public class Merger {
     private final SelectExpression primary;
@@ -104,7 +84,15 @@ public class Merger {
                 mergeSelectList(),
                 mergeFromClause(),
                 mergeWhereClause(),
-                primary.orderByClause());
+                mergeOrderByClause());
+    }
+
+    private Option<OrderByClause> mergeOrderByClause() {
+        return sequence(primary.orderByClause(), secondary.orderByClause()).
+                flatMap(identity(OrderByClause.class)).
+                flatMap(OrderByClause.functions.sortSpecifications).
+                flatOption().
+                map(AnsiOrderByClause.functions.orderByClause);
     }
 
     private Option<WhereClause> mergeWhereClause() {

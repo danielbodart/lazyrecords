@@ -1,9 +1,6 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
-import com.googlecode.totallylazy.Callable1;
-import com.googlecode.totallylazy.Unary;
-import com.googlecode.totallylazy.UnaryFunction;
-import com.googlecode.totallylazy.Unchecked;
+import com.googlecode.totallylazy.*;
 import com.googlecode.totallylazy.annotations.multimethod;
 
 import static com.googlecode.lazyrecords.sql.expressions.AnsiAsClause.asClause;
@@ -29,7 +26,7 @@ public class Qualifier extends AbstractQualifier {
 
     @multimethod public SelectExpression qualify(SelectExpression expression) {
         return AnsiSelectExpression.selectExpression(expression.setQuantifier(), qualify(expression.selectList()),
-                qualify(expression.fromClause()), qualify(expression.whereClause()), expression.orderByClause());
+                qualify(expression.fromClause()), qualify(expression.whereClause()), qualify(expression.orderByClause()));
     }
 
     @multimethod private FromClause qualify(FromClause fromClause) {
@@ -70,7 +67,7 @@ public class Qualifier extends AbstractQualifier {
     }
 
     @multimethod public OrderByClause qualify(OrderByClause orderByClause){
-        return AnsiOrderByClause.orderByClause(orderByClause.sortSpecifications().map(new Callable1<SortSpecification, SortSpecification>() {
+        return AnsiOrderByClause.orderByClause(orderByClause.sortSpecifications().map(new Function1<SortSpecification, SortSpecification>() {
             @Override
             public SortSpecification call(SortSpecification value) throws Exception {
                 return AnsiSortSpecification.sortSpecification(qualify(value.sortKey()), value.orderingSpecification());

@@ -80,7 +80,7 @@ public interface SqlGrammar {
 
     JoinType joinType(Join join);
 
-    AnsiJoinBuilder join(ExpressionBuilder primary, ExpressionBuilder secondary, JoinType type, JoinSpecification specification);
+    ExpressionBuilder join(ExpressionBuilder primary, ExpressionBuilder secondary, JoinType type, JoinSpecification specification);
 
     ExpressionBuilder join(ExpressionBuilder builder, Join join);
 

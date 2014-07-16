@@ -42,7 +42,7 @@ public class AnsiJoinBuilderTest {
     public void joinsFieldsFromBothTables() throws Exception {
         SelectBuilder primary = from(grammar, people).select(firstName, isbn);
         SelectBuilder secondary = from(grammar, books).select(title, isbn);
-        AnsiJoinBuilder join = grammar.join(primary, secondary, inner, namedColumnsJoin("isbn"));
+        AnsiJoinBuilder join = (AnsiJoinBuilder) grammar.join(primary, secondary, inner, namedColumnsJoin("isbn"));
         assertThat(join.fields(), Matchers.<Keyword<?>>containsInAnyOrder(firstName, isbn, title));
     }
 
@@ -50,7 +50,7 @@ public class AnsiJoinBuilderTest {
     public void canJoinOneTable() throws Exception {
         SelectBuilder primary = from(grammar, people).select(firstName, isbn);
         SelectBuilder secondary = from(grammar, books).select(title);
-        AnsiJoinBuilder join = grammar.join(primary, secondary, inner, namedColumnsJoin("isbn"));
+        AnsiJoinBuilder join = (AnsiJoinBuilder) grammar.join(primary, secondary, inner, namedColumnsJoin("isbn"));
         String sql = join.build().text();
         assertThat(sql, is("select p.firstName, p.isbn, b.title from people p inner join books b using (isbn)"));
     }
@@ -60,7 +60,7 @@ public class AnsiJoinBuilderTest {
         SelectBuilder primary = from(grammar, people).select(firstName, isbn);
         SelectBuilder secondary = from(grammar, books).select(title);
         SelectBuilder tertiary = from(grammar, prices).select(price);
-        AnsiJoinBuilder join = grammar.join(grammar.join(primary, secondary, inner, namedColumnsJoin("isbn")), tertiary, inner, namedColumnsJoin("isbn"));
+        AnsiJoinBuilder join = (AnsiJoinBuilder) grammar.join(grammar.join(primary, secondary, inner, namedColumnsJoin("isbn")), tertiary, inner, namedColumnsJoin("isbn"));
         String sql = join.build().text();
         assertThat(sql, is("select p.firstName, p.isbn, b.title, s.salePrice from people p inner join books b using (isbn) inner join salePrices s using (isbn)"));
     }
@@ -71,6 +71,16 @@ public class AnsiJoinBuilderTest {
         SelectBuilder secondary = from(grammar, books).select(title);
         ExpressionBuilder join = grammar.join(primary, secondary, inner, namedColumnsJoin("isbn")).
             orderBy(ascending(firstName));
+        String sql = join.build().toString();
+        assertThat(sql, is("select p.firstName, p.isbn, b.title from people p inner join books b using (isbn) order by p.firstName asc"));
+    }
+
+    @Test
+    public void canOrderBeforeJoining() throws Exception {
+        SelectBuilder primary = from(grammar, people).select(firstName, isbn).
+            orderBy(ascending(firstName));
+        SelectBuilder secondary = from(grammar, books).select(title);
+        ExpressionBuilder join = grammar.join(primary, secondary, inner, namedColumnsJoin("isbn"));
         String sql = join.build().toString();
         assertThat(sql, is("select p.firstName, p.isbn, b.title from people p inner join books b using (isbn) order by p.firstName asc"));
     }
@@ -106,7 +116,7 @@ public class AnsiJoinBuilderTest {
     public void canJoinTablesOfDifferentCaseButSameFirstLetter() throws Exception {
         SelectBuilder priamry = from(grammar, people).select(isbn);
         SelectBuilder secondary = from(grammar, plants).select(Plants.firstName);
-        AnsiJoinBuilder join = grammar.join(priamry, secondary, inner, namedColumnsJoin("firstName"));
+        AnsiJoinBuilder join = (AnsiJoinBuilder) grammar.join(priamry, secondary, inner, namedColumnsJoin("firstName"));
         String sql = join.build().text();
         assertThat(sql, containsString("join Plants p1"));
     }

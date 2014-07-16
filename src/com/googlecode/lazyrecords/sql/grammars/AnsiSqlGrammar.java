@@ -118,7 +118,7 @@ public class AnsiSqlGrammar implements SqlGrammar {
     }
 
     @Override
-    public ExpressionBuilder join(final ExpressionBuilder builder, final Join join) {
+    public AnsiJoinBuilder join(final ExpressionBuilder builder, final Join join) {
         ExpressionBuilder secondary = (ExpressionBuilder) ((Expressible) join.records()).build();
         return join(builder, secondary, joinType(join), joinSpecification(join.joiner()));
     }

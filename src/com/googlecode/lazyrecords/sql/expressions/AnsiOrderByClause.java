@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
+import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Sequence;
 
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
@@ -24,5 +25,14 @@ public class AnsiOrderByClause extends CompoundExpression implements OrderByClau
     @Override
     public Sequence<SortSpecification> sortSpecifications() {
         return sortSpecifications;
+    }
+
+    public static class functions{
+        public static Function1<Sequence<SortSpecification>, OrderByClause> orderByClause = new Function1<Sequence<SortSpecification>, OrderByClause>() {
+            @Override
+            public OrderByClause call(Sequence<SortSpecification> sortSpecifications) throws Exception {
+                return AnsiOrderByClause.orderByClause(sortSpecifications);
+            }
+        };
     }
 }
