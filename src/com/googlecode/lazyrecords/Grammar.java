@@ -165,7 +165,7 @@ public class Grammar {
     }
 
     public static <T> Aggregate<T, T> first(Keyword<T> keyword) {
-        return Aggregate.last(keyword);
+        return Aggregate.first(keyword);
     }
 
     public static <T> CombinerFunction<T> last() {
