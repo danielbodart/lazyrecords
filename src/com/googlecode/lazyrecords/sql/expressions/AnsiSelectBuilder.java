@@ -4,7 +4,6 @@ import com.googlecode.lazyrecords.Definition;
 import com.googlecode.lazyrecords.Join;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.sql.grammars.AndExpression;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Predicate;
@@ -108,13 +107,17 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
 
     @Override
     public AnsiSelectBuilder groupBy(Sequence<? extends Keyword<?>> columns) {
+        return groupBy(grammar.groupByClause(columns));
+    }
+
+    public AnsiSelectBuilder groupBy(final GroupByClause groupByClause) {
         return from(grammar, selectExpression(
                 expression.setQuantifier(),
                 expression.selectList(),
                 expression.fromClause(),
                 expression.whereClause(),
                 expression.orderByClause(),
-                some(grammar.groupByClause(columns))));
+                some(groupByClause)));
     }
 
     public AnsiSelectBuilder orderBy(final OrderByClause orderByClause) {

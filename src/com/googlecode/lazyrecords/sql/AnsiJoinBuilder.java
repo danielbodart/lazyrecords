@@ -5,6 +5,7 @@ import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.sql.expressions.DerivedColumn;
 import com.googlecode.lazyrecords.sql.expressions.ExpressionBuilder;
+import com.googlecode.lazyrecords.sql.expressions.GroupByClause;
 import com.googlecode.lazyrecords.sql.expressions.OrderByClause;
 import com.googlecode.lazyrecords.sql.expressions.Qualifier;
 import com.googlecode.lazyrecords.sql.expressions.SelectExpression;
@@ -17,7 +18,6 @@ import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Reducer;
 import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Sequences;
 
 import java.util.Comparator;
 import java.util.List;
@@ -80,13 +80,16 @@ public class AnsiJoinBuilder implements ExpressionBuilder {
 
     @Override
     public ExpressionBuilder groupBy(Keyword<?>... columns) {
-        return groupBy(Sequences.sequence(columns));
+        return groupBy(sequence(columns));
     }
 
-    // TODO: Fix this
     @Override
     public ExpressionBuilder groupBy(Sequence<? extends Keyword<?>> columns) {
-        throw new RuntimeException("not done yet");
+        return groupBy(grammar.groupByClause(columns));
+    }
+
+    public ExpressionBuilder groupBy(final GroupByClause groupByClause) {
+        return builder(from(grammar, expression).groupBy(qualifier().qualify(groupByClause)).build());
     }
 
     public ExpressionBuilder orderBy(final OrderByClause orderByClause) {

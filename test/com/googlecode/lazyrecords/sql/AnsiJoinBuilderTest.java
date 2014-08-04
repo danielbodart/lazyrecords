@@ -8,7 +8,6 @@ import com.googlecode.lazyrecords.sql.expressions.SelectBuilder;
 import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.totallylazy.Predicates;
-import com.googlecode.totallylazy.Strings;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
@@ -21,7 +20,6 @@ import static com.googlecode.lazyrecords.RecordsContract.People.firstName;
 import static com.googlecode.lazyrecords.RecordsContract.People.people;
 import static com.googlecode.lazyrecords.RecordsContract.Prices.price;
 import static com.googlecode.lazyrecords.RecordsContract.Prices.prices;
-import static com.googlecode.lazyrecords.sql.AnsiJoinBuilder.join;
 import static com.googlecode.lazyrecords.sql.AnsiJoinBuilderTest.Plants.plants;
 import static com.googlecode.lazyrecords.sql.expressions.AnsiJoinType.inner;
 import static com.googlecode.lazyrecords.sql.expressions.NamedColumnsJoin.namedColumnsJoin;
@@ -30,7 +28,6 @@ import static com.googlecode.totallylazy.Predicates.equalTo;
 import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Strings.capitalise;
 import static com.googlecode.totallylazy.comparators.Comparators.ascending;
-import static com.googlecode.totallylazy.matchers.Matchers.is;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -68,14 +65,14 @@ public class AnsiJoinBuilderTest {
         SelectBuilder primary = from(grammar, people).select(firstName, isbn);
         SelectBuilder secondary = from(grammar, books).select(title);
         ExpressionBuilder join = grammar.join(primary, secondary, inner, namedColumnsJoin("isbn")).
-            orderBy(ascending(firstName));
+                orderBy(ascending(firstName));
         assertSql(join, "select p.firstName, p.isbn, b.title from people p inner join books b using (isbn) order by p.firstName asc");
     }
 
     @Test
     public void canOrderBeforeJoining() throws Exception {
         SelectBuilder primary = from(grammar, people).select(firstName, isbn).
-            orderBy(ascending(firstName));
+                orderBy(ascending(firstName));
         SelectBuilder secondary = from(grammar, books).select(title);
         ExpressionBuilder join = grammar.join(primary, secondary, inner, namedColumnsJoin("isbn"));
         assertSql(join, "select p.firstName, p.isbn, b.title from people p inner join books b using (isbn) order by p.firstName asc");
@@ -86,7 +83,7 @@ public class AnsiJoinBuilderTest {
         SelectBuilder primary = from(grammar, people).select(firstName, isbn);
         SelectBuilder secondary = from(grammar, books).select(title);
         ExpressionBuilder join = grammar.join(primary, secondary, inner, namedColumnsJoin("isbn")).
-            filter(where(firstName, Predicates.is("dan")));
+                filter(where(firstName, Predicates.is("dan")));
         assertSql(join, "select p.firstName, p.isbn, b.title from people p inner join books b using (isbn) where p.firstName = 'dan'");
     }
 
@@ -114,5 +111,14 @@ public class AnsiJoinBuilderTest {
         AnsiJoinBuilder join = (AnsiJoinBuilder) grammar.join(priamry, secondary, inner, namedColumnsJoin("firstName"));
         String sql = join.build().text();
         assertThat(sql, containsString("join Plants p1"));
+    }
+
+    @Test
+    public void canGroupByAfterJoining() throws Exception {
+        SelectBuilder primary = from(grammar, people).select(firstName, isbn);
+        SelectBuilder secondary = from(grammar, books).select(title);
+        ExpressionBuilder join = grammar.join(primary, secondary, inner, namedColumnsJoin("isbn")).
+                groupBy(firstName);
+        assertSql(join, "select p.firstName, p.isbn, b.title from people p inner join books b using (isbn) group by p.firstName");
     }
 }

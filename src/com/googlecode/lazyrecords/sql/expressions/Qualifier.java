@@ -1,6 +1,10 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
-import com.googlecode.totallylazy.*;
+import com.googlecode.totallylazy.Callable1;
+import com.googlecode.totallylazy.Function1;
+import com.googlecode.totallylazy.Unary;
+import com.googlecode.totallylazy.UnaryFunction;
+import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.annotations.multimethod;
 
 import static com.googlecode.lazyrecords.sql.expressions.AnsiAsClause.asClause;
@@ -71,6 +75,15 @@ public class Qualifier extends AbstractQualifier {
             @Override
             public SortSpecification call(SortSpecification value) throws Exception {
                 return AnsiSortSpecification.sortSpecification(qualify(value.sortKey()), value.orderingSpecification());
+            }
+        }));
+    }
+
+    @multimethod public GroupByClause qualify(GroupByClause groupByClause){
+        return AnsiGroupByClause.groupByClause(groupByClause.groups().map(new Unary<ValueExpression>() {
+            @Override
+            public ValueExpression call(ValueExpression expression) throws Exception {
+                return qualify(expression);
             }
         }));
     }
