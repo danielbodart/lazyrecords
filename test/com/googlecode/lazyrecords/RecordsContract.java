@@ -2,14 +2,12 @@ package com.googlecode.lazyrecords;
 
 import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Closeables;
-import com.googlecode.totallylazy.Mapper;
 import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
 import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.matchers.IterableMatcher;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
-import com.googlecode.totallylazy.numbers.Numbers;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.junit.After;
@@ -40,6 +38,7 @@ import static com.googlecode.lazyrecords.Grammar.descending;
 import static com.googlecode.lazyrecords.Grammar.endsWith;
 import static com.googlecode.lazyrecords.Grammar.greaterThan;
 import static com.googlecode.lazyrecords.Grammar.greaterThanOrEqualTo;
+import static com.googlecode.lazyrecords.Grammar.groupConcat;
 import static com.googlecode.lazyrecords.Grammar.in;
 import static com.googlecode.lazyrecords.Grammar.is;
 import static com.googlecode.lazyrecords.Grammar.join;
@@ -86,7 +85,6 @@ import static com.googlecode.totallylazy.comparators.Comparators.comparators;
 import static com.googlecode.totallylazy.matchers.IterableMatcher.hasExactly;
 import static com.googlecode.totallylazy.matchers.Matchers.matcher;
 import static com.googlecode.totallylazy.matchers.NumberMatcher.equalTo;
-import static com.googlecode.totallylazy.numbers.Numbers.valueOf;
 import static com.googlecode.totallylazy.time.Dates.date;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -743,18 +741,16 @@ public abstract class RecordsContract<T extends Records> {
 
     @Test
     public void shouldSupportGroupBy() throws Exception {
-        final Aggregate<BigDecimal, Number> average = average(rrp);
-        final Sequence<BigDecimal> results = records.get(books).groupBy(inPrint).map(Grammar.reduce(to(first(inPrint), average))).map(average).map(Numbers.valueOf).safeCast(BigDecimal.class).map(setScaleTo(2));
-        final Sequence<BigDecimal> expected = Sequences.sequence("22.47", "20.00").map(valueOf).safeCast(BigDecimal.class);
+        final Aggregate<String, String> maxTitle = Aggregate.maximum(title);
+        final Sequence<String> results = records.get(books).groupBy(inPrint).map(Grammar.reduce(to(maxTitle))).map(maxTitle);
+        final Sequence<String> expected = Sequences.sequence("Zen And The Art Of Motorcycle Maintenance", "Godel, Escher, Bach: An Eternal Golden Braid");
         assertThat(results, Matchers.is(expected));
     }
 
-    private Mapper<BigDecimal, BigDecimal> setScaleTo(final int scale) {
-        return new Mapper<BigDecimal, BigDecimal>() {
-            @Override
-            public BigDecimal call(BigDecimal bigDecimal) throws Exception {
-                return bigDecimal.setScale(scale);
-            }
-        };
+    @Test
+    public void shouldSupportGroupConcatFunction() throws Exception {
+        final Aggregate<URI, String> concatIsbn = groupConcat(isbn);
+        final Sequence<String> results = records.get(books).groupBy(inPrint).map(Grammar.reduce(to(first(inPrint), concatIsbn))).map(concatIsbn);
+        assertThat(results, containsInAnyOrder("urn:isbn:0099322617,urn:isbn:0132350882", "urn:isbn:0140289208"));
     }
 }

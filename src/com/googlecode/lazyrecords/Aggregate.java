@@ -109,4 +109,8 @@ public class Aggregate<T, R> extends AbstractKeyword<R> implements Reducer<T, R>
         return aggregate(Count.count(), keyword, Number.class);
     }
 
+    public static <T> Aggregate<T, String> groupConcat(Keyword<T> keyword) {
+        return aggregate(new JoinStringWithSeparator<T>(","), keyword, String.class);
+    }
+
 }

@@ -368,4 +368,7 @@ public class Grammar {
         return new ReducingRecordsMapper(aggregates);
     }
 
+    public static <T> Aggregate<T, String> groupConcat(Keyword<T> keyword) {
+        return Aggregate.groupConcat(keyword);
+    }
 }

@@ -13,6 +13,7 @@ import com.googlecode.totallylazy.predicates.LogicalPredicate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.googlecode.lazyrecords.JoinStringWithSeparator;
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
 import static com.googlecode.totallylazy.Callables.second;
 import static com.googlecode.totallylazy.Maps.pairs;
@@ -52,6 +53,7 @@ public class SetFunctionType extends CompoundExpression implements ValueExpressi
         put(Sum.class, "sum");
         put(Minimum.class, "min");
         put(Maximum.class, "max");
+        put(JoinStringWithSeparator.class, "group_concat");
     }};
 
     private static String get(Class<? extends Reducer> aClass) {
