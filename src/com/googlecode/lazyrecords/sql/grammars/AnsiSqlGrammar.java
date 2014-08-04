@@ -19,6 +19,7 @@ import com.googlecode.lazyrecords.sql.expressions.AnsiAsClause;
 import com.googlecode.lazyrecords.sql.expressions.AnsiDeleteStatement;
 import com.googlecode.lazyrecords.sql.expressions.AnsiDerivedColumn;
 import com.googlecode.lazyrecords.sql.expressions.AnsiFromClause;
+import com.googlecode.lazyrecords.sql.expressions.AnsiGroupByClause;
 import com.googlecode.lazyrecords.sql.expressions.AnsiJoinType;
 import com.googlecode.lazyrecords.sql.expressions.AnsiOrderByClause;
 import com.googlecode.lazyrecords.sql.expressions.AnsiPredicateExpression;
@@ -36,6 +37,7 @@ import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.expressions.ExpressionBuilder;
 import com.googlecode.lazyrecords.sql.expressions.Expressions;
 import com.googlecode.lazyrecords.sql.expressions.FromClause;
+import com.googlecode.lazyrecords.sql.expressions.GroupByClause;
 import com.googlecode.lazyrecords.sql.expressions.InsertStatement;
 import com.googlecode.lazyrecords.sql.expressions.JoinCondition;
 import com.googlecode.lazyrecords.sql.expressions.JoinSpecification;
@@ -145,9 +147,10 @@ public class AnsiSqlGrammar implements SqlGrammar {
                                              Sequence<? extends Keyword<?>> selectList,
                                              Definition fromClause,
                                              Option<Predicate<? super Record>> whereClause,
-                                             Option<Comparator<? super Record>> orderByClause) {
+                                             Option<Comparator<? super Record>> orderByClause,
+                                             Option<Sequence<? extends Keyword<?>>> groupByClause) {
         return AnsiSelectExpression.selectExpression(setQuantifier, selectList(selectList), fromClause(fromClause),
-                whereClause(whereClause), orderByClause.map(functions.orderByClause(this)));
+                whereClause(whereClause), orderByClause.map(functions.orderByClause(this)), groupByClause.map(functions.groupByClause(this)));
     }
 
     @Override
@@ -163,6 +166,16 @@ public class AnsiSqlGrammar implements SqlGrammar {
     @Override
     public OrderByClause orderByClause(Comparator<? super Record> orderBy) {
         return AnsiOrderByClause.orderByClause(sortSpecification(orderBy));
+    }
+
+    @Override
+    public GroupByClause groupByClause(Sequence<? extends Keyword<?>> columns) {
+        return AnsiGroupByClause.groupByClause(sequence(columns).map(new Callable1<Keyword<?>, ValueExpression>() {
+            @Override
+            public ValueExpression call(Keyword<?> keyword) throws Exception {
+                return valueExpression(keyword);
+            }
+        }));
     }
 
     public Sequence<SortSpecification> sortSpecification(Comparator<? super Record> comparator) {

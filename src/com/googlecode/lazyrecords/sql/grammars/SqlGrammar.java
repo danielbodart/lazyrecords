@@ -15,6 +15,7 @@ import com.googlecode.lazyrecords.sql.expressions.DerivedColumn;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.expressions.ExpressionBuilder;
 import com.googlecode.lazyrecords.sql.expressions.FromClause;
+import com.googlecode.lazyrecords.sql.expressions.GroupByClause;
 import com.googlecode.lazyrecords.sql.expressions.JoinSpecification;
 import com.googlecode.lazyrecords.sql.expressions.JoinType;
 import com.googlecode.lazyrecords.sql.expressions.OrderByClause;
@@ -38,7 +39,8 @@ public interface SqlGrammar {
                                       Sequence<? extends Keyword<?>> selectList,
                                       Definition fromClause,
                                       Option<Predicate<? super Record>> whereClause,
-                                      Option<Comparator<? super Record>> orderByClause);
+                                      Option<Comparator<? super Record>> orderByClause,
+                                      Option<Sequence<? extends Keyword<?>>> groupByClause);
 
     SelectList selectList(Sequence<? extends Keyword<?>> select);
 
@@ -47,6 +49,8 @@ public interface SqlGrammar {
     WhereClause whereClause(Predicate<? super Record> where);
 
     OrderByClause orderByClause(Comparator<? super Record> orderBy);
+
+    GroupByClause groupByClause(Sequence<? extends Keyword<?>> columns);
 
     DerivedColumn derivedColumn(Callable1<? super Record, ?> callable);
 
@@ -124,6 +128,15 @@ public interface SqlGrammar {
                 @Override
                 public OrderByClause call(Comparator<? super Record> comparator) throws Exception {
                     return grammar.orderByClause(comparator);
+                }
+            };
+        }
+
+        public static Mapper<? super Sequence<? extends Keyword<?>>,GroupByClause> groupByClause(final SqlGrammar grammar) {
+            return new Mapper<Sequence<? extends Keyword<?>>, GroupByClause>() {
+                @Override
+                public GroupByClause call(Sequence<? extends Keyword<?>> groups) throws Exception {
+                    return grammar.groupByClause(groups);
                 }
             };
         }

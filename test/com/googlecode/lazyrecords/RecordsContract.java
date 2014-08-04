@@ -2,12 +2,14 @@ package com.googlecode.lazyrecords;
 
 import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Closeables;
+import com.googlecode.totallylazy.Mapper;
 import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
 import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.matchers.IterableMatcher;
 import com.googlecode.totallylazy.matchers.NumberMatcher;
+import com.googlecode.totallylazy.numbers.Numbers;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.junit.After;
@@ -25,6 +27,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.UUID;
 
+import static com.googlecode.lazyrecords.Aggregate.first;
 import static com.googlecode.lazyrecords.Grammar.all;
 import static com.googlecode.lazyrecords.Grammar.ascending;
 import static com.googlecode.lazyrecords.Grammar.average;
@@ -83,6 +86,7 @@ import static com.googlecode.totallylazy.comparators.Comparators.comparators;
 import static com.googlecode.totallylazy.matchers.IterableMatcher.hasExactly;
 import static com.googlecode.totallylazy.matchers.Matchers.matcher;
 import static com.googlecode.totallylazy.matchers.NumberMatcher.equalTo;
+import static com.googlecode.totallylazy.numbers.Numbers.valueOf;
 import static com.googlecode.totallylazy.time.Dates.date;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -445,7 +449,7 @@ public abstract class RecordsContract<T extends Records> {
     @Test
     public void doesNotPutExtraFields() throws Exception {
         assertCount(records.put(books, update(using(isbn),
-                record(isbn, zenIsbn, firstName, "shouldBeIgnored"))
+                        record(isbn, zenIsbn, firstName, "shouldBeIgnored"))
         ), 1);
         assertThat(records.get(books).filter(where(isbn, is(zenIsbn))).head().keywords().contains(firstName), CoreMatchers.is(false));
     }
@@ -453,7 +457,7 @@ public abstract class RecordsContract<T extends Records> {
     @Test
     public void doesNotSetExtraFields() throws Exception {
         assertCount(records.set(books, update(using(isbn),
-                record(isbn, zenIsbn, firstName, "shouldBeIgnored"))
+                        record(isbn, zenIsbn, firstName, "shouldBeIgnored"))
         ), 1);
         assertThat(records.get(books).filter(where(isbn, is(zenIsbn))).head().keywords().contains(firstName), CoreMatchers.is(false));
     }
@@ -735,5 +739,22 @@ public abstract class RecordsContract<T extends Records> {
         Record record = records.get(Books.books).find(Predicates.where(People.isbn, Predicates.is(zenIsbn))).get();
         assertThat(record.get(title), Matchers.is("The Meaning of Life"));
         assertThat(record.fields().size(), Matchers.is(books.fields().size()));
+    }
+
+    @Test
+    public void shouldSupportGroupBy() throws Exception {
+        final Aggregate<BigDecimal, Number> average = average(rrp);
+        final Sequence<BigDecimal> results = records.get(books).groupBy(inPrint).map(Grammar.reduce(to(first(inPrint), average))).map(average).map(Numbers.valueOf).safeCast(BigDecimal.class).map(setScaleTo(2));
+        final Sequence<BigDecimal> expected = Sequences.sequence("22.47", "20.00").map(valueOf).safeCast(BigDecimal.class);
+        assertThat(results, Matchers.is(expected));
+    }
+
+    private Mapper<BigDecimal, BigDecimal> setScaleTo(final int scale) {
+        return new Mapper<BigDecimal, BigDecimal>() {
+            @Override
+            public BigDecimal call(BigDecimal bigDecimal) throws Exception {
+                return bigDecimal.setScale(scale);
+            }
+        };
     }
 }

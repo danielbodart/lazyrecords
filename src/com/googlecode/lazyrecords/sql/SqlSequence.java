@@ -8,6 +8,7 @@ import com.googlecode.lazyrecords.Logger;
 import com.googlecode.lazyrecords.Loggers;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.RecordTo;
+import com.googlecode.lazyrecords.ReducingRecordsMapper;
 import com.googlecode.lazyrecords.SelectCallable;
 import com.googlecode.lazyrecords.sql.expressions.Expressible;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
@@ -16,11 +17,13 @@ import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Callable2;
 import com.googlecode.totallylazy.Function;
 import com.googlecode.totallylazy.Functions;
+import com.googlecode.totallylazy.Group;
 import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Reducer;
 import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Sequences;
 import com.googlecode.totallylazy.Sets;
 import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.Value;
@@ -73,7 +76,7 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
 
     @Override
     public <S> Sequence<S> map(Callable1<? super T, ? extends S> callable) {
-        if(callable instanceof ClientComputation) return super.map(callable);
+        if (callable instanceof ClientComputation) return super.map(callable);
 
         Callable1 raw = (Callable1) callable;
         if (raw instanceof Keyword) {
@@ -82,13 +85,17 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
         if (raw instanceof SelectCallable) {
             return Unchecked.cast(build(selectBuilder.select(((SelectCallable) raw).keywords())));
         }
+        if (raw instanceof ReducingRecordsMapper) {
+            ReducingRecordsMapper reducingRecordsMapper = (ReducingRecordsMapper) raw;
+            return Unchecked.cast(build(selectBuilder.select(reducingRecordsMapper.aggregates())));
+        }
         logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.MESSAGE, "Unsupported function passed to 'map', moving computation to client"), pair(Loggers.FUNCTION, callable)));
         return super.map(callable);
     }
 
     @Override
     public <S> Sequence<S> flatMap(Callable1<? super T, ? extends Iterable<? extends S>> callable) {
-        if(callable instanceof ClientComputation) return super.flatMap(callable);
+        if (callable instanceof ClientComputation) return super.flatMap(callable);
 
         Callable1 raw = (Callable1) callable;
         if (raw instanceof Join) {
@@ -100,7 +107,7 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
 
     @Override
     public Sequence<T> filter(Predicate<? super T> predicate) {
-        if(callable instanceof ClientComputation) return super.filter(predicate);
+        if (callable instanceof ClientComputation) return super.filter(predicate);
 
         try {
             return build(selectBuilder.filter(Unchecked.<Predicate<Record>>cast(predicate)));
@@ -117,7 +124,7 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
 
     @Override
     public Sequence<T> sortBy(Comparator<? super T> comparator) {
-        if(callable instanceof ClientComputation) return super.sortBy(comparator);
+        if (callable instanceof ClientComputation) return super.sortBy(comparator);
 
         try {
             return build(selectBuilder.orderBy(Unchecked.<Comparator<Record>>cast(comparator)));
@@ -130,7 +137,7 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
     @Override
     @SuppressWarnings("unchecked")
     public <S> S reduce(Callable2<? super S, ? super T, ? extends S> callable) {
-        if(callable instanceof ClientComputation) return super.reduce(callable);
+        if (callable instanceof ClientComputation) return super.reduce(callable);
 
         try {
             if (callable instanceof Reducer) {
@@ -177,4 +184,21 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
     public boolean exists(Predicate<? super T> predicate) {
         return !filter(predicate).map(Unchecked.<Callable1<T, Integer>>cast(SqlSchema.one)).unique().isEmpty();
     }
+
+    @Override
+    public <K> Sequence<Group<K, T>> groupBy(final Callable1<? super T, ? extends K> callable) {
+        if (callable instanceof Keyword) {
+            final Keyword<K> keyword = (Keyword) callable;
+            final Callable1<? super Record, ? extends T> callable1 = this.callable;
+            return new SqlSequence<Group<K, T>>(sqlRecords, selectBuilder.groupBy(keyword), logger, new Callable1<Record, Group<K, T>>() {
+                @Override
+                public Group<K, T> call(Record record) throws Exception {
+                    return new Group<K, T>(record.get(keyword), Sequences.one(callable1.call(record)));
+                }
+            });
+        }
+        logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.MESSAGE, "Unsupported function passed to 'groupBy', moving computation to client"), pair(Loggers.FUNCTION, callable)));
+        return super.groupBy(callable);
+    }
+
 }

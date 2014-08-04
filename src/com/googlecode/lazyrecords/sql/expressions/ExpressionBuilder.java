@@ -20,6 +20,10 @@ public interface ExpressionBuilder extends Expressible, Expression {
 
     ExpressionBuilder orderBy(Comparator<? super Record> comparator);
 
+    ExpressionBuilder groupBy(Keyword<?>... columns);
+
+    ExpressionBuilder groupBy(Sequence<? extends Keyword<?>> columns);
+
     ExpressionBuilder count();
 
     ExpressionBuilder distinct();

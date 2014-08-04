@@ -17,6 +17,7 @@ import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Reducer;
 import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Sequences;
 
 import java.util.Comparator;
 import java.util.List;
@@ -75,6 +76,17 @@ public class AnsiJoinBuilder implements ExpressionBuilder {
     @Override
     public ExpressionBuilder orderBy(Comparator<? super Record> comparator) {
         return orderBy(grammar.orderByClause(comparator));
+    }
+
+    @Override
+    public ExpressionBuilder groupBy(Keyword<?>... columns) {
+        return groupBy(Sequences.sequence(columns));
+    }
+
+    // TODO: Fix this
+    @Override
+    public ExpressionBuilder groupBy(Sequence<? extends Keyword<?>> columns) {
+        throw new RuntimeException("not done yet");
     }
 
     public ExpressionBuilder orderBy(final OrderByClause orderByClause) {

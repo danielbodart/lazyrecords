@@ -84,7 +84,16 @@ public class Merger {
                 mergeSelectList(),
                 mergeFromClause(),
                 mergeWhereClause(),
-                mergeOrderByClause());
+                mergeOrderByClause(),
+                mergeGroupByClause());
+    }
+
+    private Option<GroupByClause> mergeGroupByClause() {
+        return sequence(primary.groupByClause(), secondary.groupByClause()).
+                flatMap(identity(GroupByClause.class)).
+                flatMap(GroupByClause.functions.groups).
+                flatOption().
+                map(AnsiGroupByClause.functions.groupByClause);
     }
 
     private Option<OrderByClause> mergeOrderByClause() {

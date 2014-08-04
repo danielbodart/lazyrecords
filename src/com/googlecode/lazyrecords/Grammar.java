@@ -1,6 +1,18 @@
 package com.googlecode.lazyrecords;
 
-import com.googlecode.totallylazy.*;
+import com.googlecode.totallylazy.Callable1;
+import com.googlecode.totallylazy.Callables;
+import com.googlecode.totallylazy.CombinerFunction;
+import com.googlecode.totallylazy.FirstCombiner;
+import com.googlecode.totallylazy.Function1;
+import com.googlecode.totallylazy.LastCombiner;
+import com.googlecode.totallylazy.Pair;
+import com.googlecode.totallylazy.Predicate;
+import com.googlecode.totallylazy.Predicates;
+import com.googlecode.totallylazy.ReducerFunction;
+import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Sequences;
+import com.googlecode.totallylazy.Strings;
 import com.googlecode.totallylazy.callables.Count;
 import com.googlecode.totallylazy.collections.ListMap;
 import com.googlecode.totallylazy.collections.PersistentMap;
@@ -350,6 +362,10 @@ public class Grammar {
 
     public static LogicalPredicate<String> endsWith(final String value) {
         return Strings.endsWith(value);
+    }
+
+    public static Function1<Sequence<Record>, Record> reduce(final Aggregates aggregates) {
+        return new ReducingRecordsMapper(aggregates);
     }
 
 }

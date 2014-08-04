@@ -11,4 +11,5 @@ public interface SelectExpression extends Expression {
     FromClause fromClause();
     Option<WhereClause> whereClause();
     Option<OrderByClause> orderByClause();
+    Option<GroupByClause> groupByClause();
 }

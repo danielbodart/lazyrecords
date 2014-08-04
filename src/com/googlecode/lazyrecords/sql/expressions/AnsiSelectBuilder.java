@@ -41,7 +41,8 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
                 definition.fields(),
                 definition,
                 Option.<Predicate<? super Record>>none(),
-                Option.<Comparator<? super Record>>none()
+                Option.<Comparator<? super Record>>none(),
+                Option.<Sequence<? extends Keyword<?>>>none()
         ));
     }
 
@@ -66,7 +67,8 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
                 selectList,
                 expression.fromClause(),
                 expression.whereClause(),
-                expression.orderByClause()));
+                expression.orderByClause(),
+                expression.groupByClause()));
     }
 
     @Override
@@ -80,7 +82,8 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
                 expression.selectList(),
                 expression.fromClause(),
                 some(combine(expression.whereClause(), whereClause)),
-                expression.orderByClause()));
+                expression.orderByClause(),
+                expression.groupByClause()));
     }
 
     public static Option<WhereClause> combine(final Option<WhereClause> existing, final Option<WhereClause> additional) {
@@ -98,13 +101,30 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
         return orderBy(grammar.orderByClause(comparator));
     }
 
+    @Override
+    public AnsiSelectBuilder groupBy(Keyword<?>... columns) {
+        return groupBy(sequence(columns));
+    }
+
+    @Override
+    public AnsiSelectBuilder groupBy(Sequence<? extends Keyword<?>> columns) {
+        return from(grammar, selectExpression(
+                expression.setQuantifier(),
+                expression.selectList(),
+                expression.fromClause(),
+                expression.whereClause(),
+                expression.orderByClause(),
+                some(grammar.groupByClause(columns))));
+    }
+
     public AnsiSelectBuilder orderBy(final OrderByClause orderByClause) {
         return from(grammar, selectExpression(
                 expression.setQuantifier(),
                 expression.selectList(),
                 expression.fromClause(),
                 expression.whereClause(),
-                some(orderByClause)));
+                some(orderByClause),
+                expression.groupByClause()));
     }
 
     @Override
@@ -114,7 +134,8 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
                 grammar.selectList(countStar()),
                 expression.fromClause(),
                 expression.whereClause(),
-                Option.<OrderByClause>none()));
+                Option.<OrderByClause>none(),
+                expression.groupByClause()));
     }
 
     @Override
@@ -124,7 +145,8 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
                 expression.selectList(),
                 expression.fromClause(),
                 expression.whereClause(),
-                expression.orderByClause()));
+                expression.orderByClause(),
+                expression.groupByClause()));
     }
 
     @Override

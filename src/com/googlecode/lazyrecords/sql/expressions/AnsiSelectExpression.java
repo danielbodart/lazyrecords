@@ -18,36 +18,42 @@ public class AnsiSelectExpression extends CompoundExpression implements SelectEx
     protected final FromClause fromClause;
     protected final Option<WhereClause> whereClause;
     protected final Option<OrderByClause> orderByClause;
+    protected final Option<GroupByClause> groupByClause;
 
     protected AnsiSelectExpression(Option<SetQuantifier> setQuantifier,
                                  SelectList selectList,
                                  FromClause fromClause,
                                  Option<WhereClause> whereClause,
-                                 Option<OrderByClause> orderByClause) {
+                                 Option<OrderByClause> orderByClause,
+                                 Option<GroupByClause> groupByClause) {
         super(
                 setQuantifier.isEmpty() ? select : select.join(expression(setQuantifier)),
                 selectList,
                 fromClause,
                 expression(whereClause),
-                expression(orderByClause)
+                expression(orderByClause),
+                expression(groupByClause)
         );
         this.setQuantifier = setQuantifier;
         this.selectList = selectList;
         this.fromClause = fromClause;
         this.whereClause = whereClause;
         this.orderByClause = orderByClause;
+        this.groupByClause = groupByClause;
     }
 
     public static SelectExpression selectExpression(Option<SetQuantifier> setQuantifier,
                                                     SelectList selectList,
                                                     FromClause fromClause,
                                                     Option<WhereClause> whereClause,
-                                                    Option<OrderByClause> orderByClause) {
+                                                    Option<OrderByClause> orderByClause,
+                                                    Option<GroupByClause> groupByClause) {
         return new AnsiSelectExpression(setQuantifier.filter(where(Expressions.text(), not(equalIgnoringCase("all")))),
                 selectList,
                 fromClause,
                 whereClause,
-                orderByClause);
+                orderByClause,
+                groupByClause);
     }
 
     public static String tableAlias(Number index) {
@@ -77,5 +83,10 @@ public class AnsiSelectExpression extends CompoundExpression implements SelectEx
     @Override
     public Option<OrderByClause> orderByClause() {
         return orderByClause;
+    }
+
+    @Override
+    public Option<GroupByClause> groupByClause() {
+        return groupByClause;
     }
 }
