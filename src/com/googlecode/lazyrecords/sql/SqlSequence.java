@@ -87,7 +87,8 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
         }
         if (raw instanceof ReducingRecordsMapper) {
             ReducingRecordsMapper reducingRecordsMapper = (ReducingRecordsMapper) raw;
-            return Unchecked.cast(build(selectBuilder.select(reducingRecordsMapper.aggregates())));
+            Sequence<Group<?, S>> groups = Unchecked.cast(build(selectBuilder.select(reducingRecordsMapper.aggregates())));
+            return groups.flatMap(Functions.<Sequence<S>>identity());
         }
         logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.MESSAGE, "Unsupported function passed to 'map', moving computation to client"), pair(Loggers.FUNCTION, callable)));
         return super.map(callable);

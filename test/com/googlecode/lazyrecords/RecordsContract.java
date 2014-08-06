@@ -2,6 +2,7 @@ package com.googlecode.lazyrecords;
 
 import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Closeables;
+import com.googlecode.totallylazy.Group;
 import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
@@ -23,6 +24,7 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 
 import static com.googlecode.lazyrecords.Aggregate.first;
@@ -40,6 +42,7 @@ import static com.googlecode.lazyrecords.Grammar.greaterThan;
 import static com.googlecode.lazyrecords.Grammar.greaterThanOrEqualTo;
 import static com.googlecode.lazyrecords.Grammar.groupConcat;
 import static com.googlecode.lazyrecords.Grammar.in;
+import static com.googlecode.lazyrecords.Grammar.innerJoin;
 import static com.googlecode.lazyrecords.Grammar.is;
 import static com.googlecode.lazyrecords.Grammar.join;
 import static com.googlecode.lazyrecords.Grammar.keyword;
@@ -752,5 +755,14 @@ public abstract class RecordsContract<T extends Records> {
         final Aggregate<URI, String> concatIsbn = groupConcat(isbn);
         final Sequence<String> results = records.get(books).groupBy(inPrint).map(Grammar.reduce(to(first(inPrint), concatIsbn))).map(concatIsbn);
         assertThat(results, containsInAnyOrder("urn:isbn:0099322617,urn:isbn:0132350882", "urn:isbn:0140289208"));
+    }
+
+    @Test
+    public void shouldSupportMappingQualifiedAggregates() throws Exception {
+        final Aggregate<String, String> maximum = Aggregate.maximum(firstName);
+        final Sequence<String> names = records.get(people).flatMap(innerJoin(records.get(books), using(isbn))).groupBy(firstName).map(Grammar.reduce(to(maximum))).map(maximum);
+
+        assertThat(names, Matchers.hasItems("dan", "matt", "Bob"));
+
     }
 }

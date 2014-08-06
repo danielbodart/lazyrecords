@@ -25,7 +25,9 @@ import java.util.Map;
 
 import static com.googlecode.lazyrecords.sql.expressions.AnsiSelectBuilder.from;
 import static com.googlecode.lazyrecords.sql.expressions.DerivedColumn.methods.columnReferences;
+import static com.googlecode.lazyrecords.sql.expressions.GroupByClause.functions.groups;
 import static com.googlecode.lazyrecords.sql.expressions.SelectBuilder.aggregates;
+import static com.googlecode.totallylazy.Sequences.empty;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class AnsiJoinBuilder implements ExpressionBuilder {
@@ -57,7 +59,8 @@ public class AnsiJoinBuilder implements ExpressionBuilder {
     }
 
     public ExpressionBuilder select(final SelectList selectList) {
-        return builder(from(grammar, expression).select(qualifier().qualify(selectList)).build());
+        final SelectList qualified = qualifier().qualify(selectList);
+        return builder(from(grammar, expression).select(qualified).build());
     }
 
     public ExpressionBuilder builder(final SelectExpression select) {
@@ -145,7 +148,8 @@ public class AnsiJoinBuilder implements ExpressionBuilder {
     }
 
     private Map<String, String> existingQualifiers() {
-        return Maps.mapValues(expression.selectList().derivedColumns().toMap(name()), new Mapper<List<DerivedColumn>, String>() {
+        final Sequence<DerivedColumn> interestedColumns = expression.selectList().derivedColumns().join(expression.groupByClause().map(groups).getOrElse(empty(DerivedColumn.class)));
+        return Maps.mapValues(interestedColumns.toMap(name()), new Mapper<List<DerivedColumn>, String>() {
             @Override
             public String call(final List<DerivedColumn> columns) throws Exception {
                 return columnReferences(columns.get(0)).head().qualifier().get();

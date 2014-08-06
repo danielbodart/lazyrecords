@@ -8,12 +8,12 @@ import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
 public interface GroupByClause extends Expression {
 
     TextOnlyExpression groupBy = textOnly("group by");
-    Sequence<ValueExpression> groups();
+    Sequence<DerivedColumn> groups();
 
     class functions {
-        public static Function1<GroupByClause, Sequence<ValueExpression>> groups = new Function1<GroupByClause, Sequence<ValueExpression>>() {
+        public static Function1<GroupByClause, Sequence<DerivedColumn>> groups = new Function1<GroupByClause, Sequence<DerivedColumn>>() {
             @Override
-            public Sequence<ValueExpression> call(GroupByClause groupByClause) throws Exception {
+            public Sequence<DerivedColumn> call(GroupByClause groupByClause) throws Exception {
                 return groupByClause.groups();
             }
         };

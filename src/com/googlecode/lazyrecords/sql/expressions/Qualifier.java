@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
+import com.googlecode.lazyrecords.sql.grammars.OracleGrammar;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Unary;
@@ -8,6 +9,7 @@ import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.annotations.multimethod;
 
 import static com.googlecode.lazyrecords.sql.expressions.AnsiAsClause.asClause;
+import static com.googlecode.lazyrecords.sql.expressions.SetFunctionType.setFunctionType;
 import static com.googlecode.totallylazy.Functions.constant;
 import static com.googlecode.totallylazy.Option.some;
 
@@ -62,7 +64,15 @@ public class Qualifier extends AbstractQualifier {
                 compoundExpression.separator(), compoundExpression.end());
     }
 
-    @multimethod public DerivedColumn qualify(DerivedColumn derivedColumn) {
+    @multimethod public SetFunctionType qualify(SetFunctionType functionType) {
+        return setFunctionType(functionType.functionName(), qualify(functionType.columnReference()));
+    }
+
+    @multimethod public OracleGrammar.OracleGroupConcatExpression qualify(OracleGrammar.OracleGroupConcatExpression expression) {
+        return new OracleGrammar.OracleGroupConcatExpression(qualify(expression.columnReference()), expression.listSeparator());
+    }
+
+    @multimethod public DerivedColumn qualify(final DerivedColumn derivedColumn) {
         return AnsiDerivedColumn.derivedColumn(qualify(derivedColumn.valueExpression()), derivedColumn.asClause(), derivedColumn.forClass());
     }
 
@@ -80,9 +90,9 @@ public class Qualifier extends AbstractQualifier {
     }
 
     @multimethod public GroupByClause qualify(GroupByClause groupByClause){
-        return AnsiGroupByClause.groupByClause(groupByClause.groups().map(new Unary<ValueExpression>() {
+        return AnsiGroupByClause.groupByClause(groupByClause.groups().map(new Unary<DerivedColumn>() {
             @Override
-            public ValueExpression call(ValueExpression expression) throws Exception {
+            public DerivedColumn call(DerivedColumn expression) throws Exception {
                 return qualify(expression);
             }
         }));

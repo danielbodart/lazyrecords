@@ -1,6 +1,8 @@
 package com.googlecode.lazyrecords.sql;
 
+import com.googlecode.lazyrecords.Aggregate;
 import com.googlecode.lazyrecords.Definition;
+import com.googlecode.lazyrecords.Grammar;
 import com.googlecode.lazyrecords.ImmutableKeyword;
 import com.googlecode.lazyrecords.Logger;
 import com.googlecode.lazyrecords.Record;
@@ -11,6 +13,7 @@ import com.googlecode.lazyrecords.Transaction;
 import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
+import com.googlecode.totallylazy.Group;
 import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.matchers.Matchers;
@@ -21,14 +24,20 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.net.URI;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 
 import static com.googlecode.lazyrecords.Definition.constructors.definition;
+import static com.googlecode.lazyrecords.Grammar.groupConcat;
+import static com.googlecode.lazyrecords.Grammar.to;
 import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
 import static com.googlecode.lazyrecords.Record.constructors.record;
 import static com.googlecode.lazyrecords.Record.methods.update;
+import static com.googlecode.lazyrecords.RecordsContract.Books.books;
+import static com.googlecode.lazyrecords.RecordsContract.Books.inPrint;
+import static com.googlecode.lazyrecords.RecordsContract.Books.isbn;
 import static com.googlecode.lazyrecords.RecordsContract.People.age;
 import static com.googlecode.lazyrecords.RecordsContract.People.firstName;
 import static com.googlecode.lazyrecords.RecordsContract.People.lastName;
@@ -42,6 +51,7 @@ import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Sequences.empty;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 
@@ -214,6 +224,15 @@ public class SqlRecordsTest extends RecordsContract<Records> {
         assertSql("select p.age, p.dob, p.firstName, p.lastName, p.isbn, p1.book, p1.price " +
                 "from people p left join prices p1 on p.isbn = p1.book " +
                 "where p.firstName = 'matt'");
+    }
+
+    @Test @Override
+    public void shouldSupportGroupConcatFunction() throws Exception {
+        final Aggregate<URI, String> concatIsbn = groupConcat(isbn);
+        final Sequence<Record> recordResults = records.get(books).groupBy(inPrint).map(Grammar.reduce(to(concatIsbn))).realise();
+        assertThat(recordResults.head() instanceof Group, org.hamcrest.Matchers.is(false));
+        final Sequence<String> results = recordResults.map(concatIsbn);
+        assertThat(results, containsInAnyOrder("urn:isbn:0099322617,urn:isbn:0132350882", "urn:isbn:0140289208"));
     }
 
     protected void assertSql(final String expected) {

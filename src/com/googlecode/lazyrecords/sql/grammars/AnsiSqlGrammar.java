@@ -170,10 +170,10 @@ public class AnsiSqlGrammar implements SqlGrammar {
 
     @Override
     public GroupByClause groupByClause(Sequence<? extends Keyword<?>> columns) {
-        return AnsiGroupByClause.groupByClause(sequence(columns).map(new Callable1<Keyword<?>, ValueExpression>() {
+        return AnsiGroupByClause.groupByClause(sequence(columns).map(new Callable1<Keyword<?>, DerivedColumn>() {
             @Override
-            public ValueExpression call(Keyword<?> keyword) throws Exception {
-                return valueExpression(keyword);
+            public DerivedColumn call(Keyword<?> keyword) throws Exception {
+                return derivedColumn(keyword);
             }
         }));
     }

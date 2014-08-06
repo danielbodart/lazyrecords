@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
+import com.googlecode.lazyrecords.sql.grammars.OracleGrammar;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Sequence;
 
@@ -18,6 +19,7 @@ public interface DerivedColumn extends Expression {
             if(value instanceof ColumnReference) return one((ColumnReference) value);
             if(value instanceof SetFunctionType) return one(((SetFunctionType) value).columnReference());
             if(value instanceof CompositeExpression) return ((CompositeExpression) value).columnReferences();
+            if(value instanceof OracleGrammar.OracleGroupConcatExpression) return one(((OracleGrammar.OracleGroupConcatExpression) value).columnReference());
             throw new UnsupportedOperationException();
         }
     }

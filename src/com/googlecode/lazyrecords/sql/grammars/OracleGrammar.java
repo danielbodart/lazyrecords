@@ -6,6 +6,7 @@ import com.googlecode.lazyrecords.Joiner;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.On;
 import com.googlecode.lazyrecords.Using;
+import com.googlecode.lazyrecords.sql.expressions.ColumnReference;
 import com.googlecode.lazyrecords.sql.expressions.CompoundExpression;
 import com.googlecode.lazyrecords.sql.expressions.Expressions;
 import com.googlecode.lazyrecords.sql.expressions.JoinSpecification;
@@ -40,14 +41,27 @@ public class OracleGrammar extends AnsiSqlGrammar {
     @Override @multimethod
     public ValueExpression valueExpression(Aggregate aggregate) {
         if (aggregate.reducer() instanceof JoinStringWithSeparator) {
-            return new OracleGroupConcatExpression(aggregate.source(), ((JoinStringWithSeparator) aggregate.reducer()).getSeparator());
+            return new OracleGroupConcatExpression(Expressions.columnReference(aggregate.source()), ((JoinStringWithSeparator) aggregate.reducer()).getSeparator());
         }
         return setFunctionType(aggregate.reducer(), aggregate.source());
     }
 
-    private static class OracleGroupConcatExpression extends CompoundExpression implements ValueExpression {
-        private OracleGroupConcatExpression(Keyword aggregate, String separator) {
-            super(sequence(textOnly("listagg("), Expressions.columnReference(aggregate), textOnly(",'"), textOnly(separator), textOnly("') within group(order by "), Expressions.columnReference(aggregate), textOnly(")")), "");
+    public static class OracleGroupConcatExpression extends CompoundExpression implements ValueExpression {
+        private final ColumnReference columnReference;
+        private final String separator;
+
+        public OracleGroupConcatExpression(ColumnReference columnReference, String separator) {
+            super(sequence(textOnly("listagg("), columnReference, textOnly(",'"), textOnly(separator), textOnly("') within group(order by "), columnReference, textOnly(")")), "");
+            this.columnReference = columnReference;
+            this.separator = separator;
+        }
+
+        public ColumnReference columnReference() {
+            return columnReference;
+        }
+
+        public String listSeparator() {
+            return separator;
         }
     }
 }
