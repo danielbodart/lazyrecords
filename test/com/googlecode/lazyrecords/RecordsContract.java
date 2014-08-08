@@ -790,7 +790,7 @@ public abstract class RecordsContract<T extends Records> {
                 .flatMap(innerJoin(records.get(userRoles).groupBy(username).map(reduce(to(maxUser, concat))), on(username, maxUser)))
                 .map(concat);
 
-//        assertThat(roles, Matchers.hasSize(1)); // TODO: this blows up
+        assertThat(roles, Matchers.hasSize(1));
 
         assertThat(roles, Matchers.contains("roleA,roleB"));
     }

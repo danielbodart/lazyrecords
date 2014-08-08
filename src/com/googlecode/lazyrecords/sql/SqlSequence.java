@@ -2,6 +2,7 @@ package com.googlecode.lazyrecords.sql;
 
 import com.googlecode.lazyrecords.Aggregates;
 import com.googlecode.lazyrecords.ClientComputation;
+import com.googlecode.lazyrecords.ImmutableKeyword;
 import com.googlecode.lazyrecords.Join;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Logger;
@@ -10,6 +11,7 @@ import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.RecordTo;
 import com.googlecode.lazyrecords.ReducingRecordsMapper;
 import com.googlecode.lazyrecords.SelectCallable;
+import com.googlecode.lazyrecords.sql.expressions.CompoundExpression;
 import com.googlecode.lazyrecords.sql.expressions.Expressible;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.expressions.ExpressionBuilder;
@@ -33,7 +35,10 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Set;
 
+import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
+import static com.googlecode.lazyrecords.sql.expressions.Expressions.textOnly;
 import static com.googlecode.totallylazy.Pair.pair;
+import static java.lang.String.format;
 
 public class SqlSequence<T> extends Sequence<T> implements Expressible {
     private final SqlRecords sqlRecords;
@@ -157,9 +162,9 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
 
     @Override
     public int size() {
-        T head = build(selectBuilder.count()).head();
-        Record record = (Record) head;
-        return ((Number) record.fields().head().second()).intValue();
+        final ImmutableKeyword<Number> rowCount = keyword("row_count", Number.class);
+        final CompoundExpression countExpression = new CompoundExpression(textOnly(format("select count(*) %s from (", rowCount.name())), selectBuilder.build(), textOnly(")"));
+        return sqlRecords.query(countExpression, Sequences.<Keyword<?>>sequence(rowCount)).map(rowCount).head().intValue();
     }
 
     @Override
@@ -202,7 +207,7 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
         return super.groupBy(callable);
     }
 
-    public static class SqlGroup <K> extends Group<K, Record> implements Record {
+    public static class SqlGroup<K> extends Group<K, Record> implements Record {
         private final Record record;
 
         public SqlGroup(K groupKey, Record record) {
