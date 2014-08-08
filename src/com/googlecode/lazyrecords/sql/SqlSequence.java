@@ -20,6 +20,7 @@ import com.googlecode.totallylazy.Functions;
 import com.googlecode.totallylazy.Group;
 import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.Option;
+import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Reducer;
 import com.googlecode.totallylazy.Sequence;
@@ -87,8 +88,8 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
         }
         if (raw instanceof ReducingRecordsMapper) {
             ReducingRecordsMapper reducingRecordsMapper = (ReducingRecordsMapper) raw;
-            Sequence<Group<?, S>> groups = Unchecked.cast(build(selectBuilder.select(reducingRecordsMapper.aggregates())));
-            return groups.flatMap(Functions.<Sequence<S>>identity());
+            final SqlSequence<SqlGroup<S>> groups = Unchecked.cast(build(selectBuilder.select(reducingRecordsMapper.aggregates())));
+            return Unchecked.cast(groups);
         }
         logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.MESSAGE, "Unsupported function passed to 'map', moving computation to client"), pair(Loggers.FUNCTION, callable)));
         return super.map(callable);
@@ -190,16 +191,54 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
     public <K> Sequence<Group<K, T>> groupBy(final Callable1<? super T, ? extends K> callable) {
         if (callable instanceof Keyword) {
             final Keyword<K> keyword = (Keyword) callable;
-            final Callable1<? super Record, ? extends T> callable1 = this.callable;
-            return new SqlSequence<Group<K, T>>(sqlRecords, selectBuilder.groupBy(keyword), logger, new Callable1<Record, Group<K, T>>() {
+            return Unchecked.cast(new SqlSequence<SqlGroup<K>>(sqlRecords, selectBuilder.groupBy(keyword), logger, new Callable1<Record, SqlGroup<K>>() {
                 @Override
-                public Group<K, T> call(Record record) throws Exception {
-                    return new Group<K, T>(record.get(keyword), Sequences.one(callable1.call(record)));
+                public SqlGroup<K> call(Record record) throws Exception {
+                    return new SqlGroup<K>(record.get(keyword), record);
                 }
-            });
+            }));
         }
         logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.MESSAGE, "Unsupported function passed to 'groupBy', moving computation to client"), pair(Loggers.FUNCTION, callable)));
         return super.groupBy(callable);
+    }
+
+    public static class SqlGroup <K> extends Group<K, Record> implements Record {
+        private final Record record;
+
+        public SqlGroup(K groupKey, Record record) {
+            super(groupKey, Sequences.one(record));
+            this.record = record;
+        }
+
+        @Override
+        public <S> S get(Keyword<S> keyword) {
+            return record.get(keyword);
+        }
+
+        @Override
+        public <S> Option<S> getOption(Keyword<S> keyword) {
+            return record.getOption(keyword);
+        }
+
+        @Override
+        public <S> Record set(Keyword<S> name, S value) {
+            return record.set(name, value);
+        }
+
+        @Override
+        public Sequence<Pair<Keyword<?>, Object>> fields() {
+            return record.fields();
+        }
+
+        @Override
+        public Sequence<Keyword<?>> keywords() {
+            return record.keywords();
+        }
+
+        @Override
+        public <S> Sequence<S> valuesFor(Sequence<? extends Keyword<? extends S>> keywords) {
+            return record.valuesFor(keywords);
+        }
     }
 
 }

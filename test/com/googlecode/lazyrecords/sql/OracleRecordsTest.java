@@ -116,7 +116,7 @@ public class OracleRecordsTest extends RecordsContract<Records> {
     public void shouldSupportGroupConcatFunction() throws Exception {
         final Aggregate<URI, String> concatIsbn = groupConcat(isbn);
         final Sequence<Record> recordResults = records.get(books).groupBy(inPrint).map(Grammar.reduce(to(concatIsbn))).realise();
-        assertThat(recordResults.head() instanceof Group, org.hamcrest.Matchers.is(false));
+        assertThat(recordResults.head() instanceof Record, org.hamcrest.Matchers.is(true));
         final Sequence<String> results = recordResults.map(concatIsbn);
         assertThat(results, containsInAnyOrder("urn:isbn:0099322617,urn:isbn:0132350882", "urn:isbn:0140289208"));
     }

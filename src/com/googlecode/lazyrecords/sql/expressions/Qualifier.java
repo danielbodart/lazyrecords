@@ -3,14 +3,18 @@ package com.googlecode.lazyrecords.sql.expressions;
 import com.googlecode.lazyrecords.sql.grammars.OracleGrammar;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Function1;
+import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Unary;
 import com.googlecode.totallylazy.UnaryFunction;
 import com.googlecode.totallylazy.Unchecked;
 import com.googlecode.totallylazy.annotations.multimethod;
 
 import static com.googlecode.lazyrecords.sql.expressions.AnsiAsClause.asClause;
+import static com.googlecode.lazyrecords.sql.expressions.AsClause.functions.alias;
 import static com.googlecode.lazyrecords.sql.expressions.SetFunctionType.setFunctionType;
 import static com.googlecode.totallylazy.Functions.constant;
+import static com.googlecode.totallylazy.Option.none;
+import static com.googlecode.totallylazy.Option.option;
 import static com.googlecode.totallylazy.Option.some;
 
 public class Qualifier extends AbstractQualifier {
@@ -73,7 +77,19 @@ public class Qualifier extends AbstractQualifier {
     }
 
     @multimethod public DerivedColumn qualify(final DerivedColumn derivedColumn) {
-        return AnsiDerivedColumn.derivedColumn(qualify(derivedColumn.valueExpression()), derivedColumn.asClause(), derivedColumn.forClass());
+        final Qualifier qualifier = derivedColumn.asClause().map(alias()).flatMap(columnQualifier(qualified)).getOrElse(this);
+        final ValueExpression qualifiedExpression = qualifier.qualify(derivedColumn.valueExpression());
+        return AnsiDerivedColumn.derivedColumn(qualifiedExpression, derivedColumn.asClause(), derivedColumn.forClass());
+    }
+
+    private Callable1<String, Option<Qualifier>> columnQualifier(final UnaryFunction<String> qualified) {
+        return new Callable1<String, Option<Qualifier>>() {
+            @Override
+            public Option<Qualifier> call(String columnAlias) throws Exception {
+                final Option<String> resolvedQualifier = option(qualified.apply(columnAlias));
+                return resolvedQualifier.isDefined() ? some(qualifier(resolvedQualifier.get())) : none(Qualifier.class);
+            }
+        };
     }
 
     @multimethod public ColumnReference qualify(ColumnReference columnReference) {

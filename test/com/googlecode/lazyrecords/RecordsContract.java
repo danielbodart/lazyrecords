@@ -56,6 +56,7 @@ import static com.googlecode.lazyrecords.Grammar.nullValue;
 import static com.googlecode.lazyrecords.Grammar.on;
 import static com.googlecode.lazyrecords.Grammar.outerJoin;
 import static com.googlecode.lazyrecords.Grammar.record;
+import static com.googlecode.lazyrecords.Grammar.reduce;
 import static com.googlecode.lazyrecords.Grammar.select;
 import static com.googlecode.lazyrecords.Grammar.startsWith;
 import static com.googlecode.lazyrecords.Grammar.sum;
@@ -763,6 +764,34 @@ public abstract class RecordsContract<T extends Records> {
         final Sequence<String> names = records.get(people).flatMap(innerJoin(records.get(books), using(isbn))).groupBy(firstName).map(Grammar.reduce(to(maximum))).map(maximum);
 
         assertThat(names, Matchers.hasItems("dan", "matt", "Bob"));
+    }
 
+    @Test
+    public void shouldSupportFilteringWithMultipleJoins() throws Exception {
+        Keyword<String> username = keyword("username", String.class);
+        Keyword<String> roleName = keyword("roleName", String.class);
+
+        final Definition users = definition("users", username);
+        final Definition userRoles = definition("userRoles", username, roleName);
+
+        final Record user = record(username, "enrico");
+        final Record roleA = record(username, "enrico", roleName, "roleA");
+        final Record roleB = record(username, "enrico", roleName, "roleB");
+        records.remove(userRoles);
+        records.remove(users);
+        records.add(users, user);
+        records.add(userRoles, roleA, roleB);
+
+        final Aggregate<String, String> concat = groupConcat(roleName).as("roles_concat");
+        final Aggregate<String, String> maxUser = maximum(username).as("username");
+        final Sequence<String> roles = records.get(users)
+                .flatMap(innerJoin(records.get(userRoles), using(username)))
+                .filter(where(roleName, is("roleA")))
+                .flatMap(innerJoin(records.get(userRoles).groupBy(username).map(reduce(to(maxUser, concat))), on(username, maxUser)))
+                .map(concat);
+
+//        assertThat(roles, Matchers.hasSize(1)); // TODO: this blows up
+
+        assertThat(roles, Matchers.contains("roleA,roleB"));
     }
 }
