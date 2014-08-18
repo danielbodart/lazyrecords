@@ -7,13 +7,7 @@ import com.googlecode.lazyparsec.pattern.CharacterPredicates;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.mappings.StringMappings;
-import com.googlecode.totallylazy.Callable1;
-import com.googlecode.totallylazy.Callable2;
-import com.googlecode.totallylazy.Pair;
-import com.googlecode.totallylazy.Predicate;
-import com.googlecode.totallylazy.Predicates;
-import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Triple;
+import com.googlecode.totallylazy.*;
 import com.googlecode.totallylazy.predicates.OrPredicate;
 import com.googlecode.totallylazy.time.Dates;
 import com.googlecode.totallylazy.time.Seconds;
@@ -22,15 +16,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static com.googlecode.lazyparsec.Scanners.isChar;
-import static com.googlecode.lazyparsec.Scanners.notChar;
-import static com.googlecode.lazyparsec.Scanners.pattern;
+import static com.googlecode.lazyparsec.Scanners.*;
 import static com.googlecode.lazyparsec.pattern.Patterns.regex;
 import static com.googlecode.totallylazy.Predicates.or;
 import static com.googlecode.totallylazy.Predicates.where;
-import static com.googlecode.totallylazy.Strings.contains;
-import static com.googlecode.totallylazy.Strings.endsWith;
-import static com.googlecode.totallylazy.Strings.startsWith;
+import static com.googlecode.totallylazy.Strings.*;
 import static java.util.Calendar.MILLISECOND;
 import static java.util.regex.Pattern.quote;
 
@@ -51,15 +41,15 @@ public class Grammar {
     }
 
     public Parser<Predicate<Record>> VALUE_ONLY = VALUE_PREDICATES.map(new Callable1<List<Pair<String, Callable1<Object, Predicate>>>, Predicate<Record>>() {
-            @Override
-            public Predicate<Record> call(List<Pair<String, Callable1<Object, Predicate>>> pairs) throws Exception {
-                List<Predicate<Record>> predicates = new ArrayList<Predicate<Record>>();
-                for (final Keyword<?> keyword : keywords) {
-                    predicates.add(toPredicate(keyword, pairs));
-                }
-                return OrPredicate.or(predicates);
+        @Override
+        public Predicate<Record> call(List<Pair<String, Callable1<Object, Predicate>>> pairs) throws Exception {
+            List<Predicate<Record>> predicates = new ArrayList<Predicate<Record>>();
+            for (final Keyword<?> keyword : keywords) {
+                predicates.add(toPredicate(keyword, pairs));
             }
-        });
+            return OrPredicate.or(predicates);
+        }
+    });
 
     public final Parser<Predicate<Record>> GROUP = group.lazy();
 
@@ -72,7 +62,14 @@ public class Grammar {
         }
     });
 
-    public Parser<Predicate<Record>> PARTS = Parsers.or(GROUP, NAME_AND_VALUE, VALUE_ONLY).prefix(NEGATION).infixl(OR.or(AND));
+    public final Parser<Predicate<Record>> NAME_AND_WILDCARD = Parsers.tuple(NAME, SEPARATORS, WILDCARD).map(new Callable1<Triple<String, Void, Void>, Predicate<Record>>() {
+        @Override
+        public Predicate<Record> call(Triple<String, Void, Void> triple) throws Exception {
+            return Predicates.all();
+        }
+    });
+
+    public Parser<Predicate<Record>> PARTS = Parsers.or(GROUP, NAME_AND_VALUE, NAME_AND_WILDCARD, VALUE_ONLY).prefix(NEGATION).infixl(OR.or(AND));
 
     private Predicate<Record> toPredicate(final Keyword<?> keyword, final List<Pair<String, Callable1<Object, Predicate>>> values) throws Exception {
         List<Predicate<Record>> valuesPredicates = new ArrayList<Predicate<Record>>();
@@ -241,5 +238,5 @@ public class Grammar {
 
     public static Parser<Pair<String, Callable1<Object, Predicate>>> VALUE_PREDICATE = Parsers.or(GREATER_THAN_OR_EQUALS, LESS_THAN_OR_EQUALS, GREATER_THAN, LESS_THAN, DATE_TIME_IS, DATE_IS, TEXT_CONTAINS, TEXT_STARTS_WITH, TEXT_ENDS_WITH, IS_NULL, TEXT_IS);
 
-    public static Parser<List<Pair<String, Callable1<Object, Predicate>>>> VALUE_PREDICATES = VALUE_PREDICATE.sepBy(ws(','));
+    public static Parser<List<Pair<String, Callable1<Object, Predicate>>>> VALUE_PREDICATES = VALUE_PREDICATE.sepBy1(ws(','));
 }

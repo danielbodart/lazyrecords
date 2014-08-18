@@ -543,4 +543,33 @@ public class StandardParserTest {
 
         assertLuceAndSqlSyntax(predicate);
     }
+
+    @Test
+    public void supportsWildcardOnlyQuery() throws Exception {
+        Predicate<Record> predicate = predicateParser.parse("name=*", Sequences.<Keyword<?>>empty());
+        Predicate<Record> expected = Predicates.all();
+        assertThat(predicate, is(expected));
+
+        assertLuceAndSqlSyntax(predicate);
+    }
+
+    @Test
+    public void quotedWildcardsAreConsideredText() throws Exception {
+        Predicate<Record> predicate = predicateParser.parse("name=\"*\"", Sequences.<Keyword<?>>empty());
+        Predicate<Record> expected = Predicates.where(name, Predicates.is("*"));
+        assertThat(predicate, is(expected));
+
+        assertLuceAndSqlSyntax(predicate);
+
+    }
+
+    @Test
+    public void supportsQueriesWithWildcardsAndOthers() throws Exception {
+        Predicate<Record> predicate = predicateParser.parse("name=* AND id=\"da7b97c0-bdd5-4949-b608-5064f6415b42\"", Sequences.<Keyword<?>>empty());
+        Predicate<Record> expected = Predicates.where(id, Predicates.is("da7b97c0-bdd5-4949-b608-5064f6415b42"));
+        assertThat(predicate, is(expected));
+
+        assertLuceAndSqlSyntax(predicate);
+
+    }
 }
