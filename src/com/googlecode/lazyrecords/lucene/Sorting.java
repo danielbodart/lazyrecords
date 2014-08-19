@@ -18,8 +18,10 @@ import java.util.Comparator;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class Sorting {
+    private static multi multi;
     public static Sort sort(Comparator<? super Record> comparator) {
-        return new multi() {}.<Sort>methodOption(comparator).getOrThrow(new UnsupportedOperationException("Unsupported comparator " + comparator));
+        if(multi == null) multi = new multi(){};
+        return multi.<Sort>methodOption(comparator).getOrThrow(new UnsupportedOperationException("Unsupported comparator " + comparator));
     }
 
     @multimethod public static Sort sort(AscendingComparator<? super Record, ?> comparator) {

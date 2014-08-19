@@ -26,8 +26,10 @@ public class LuceneQueryVisitor {
         this.preprocessor = preprocessor;
     }
 
+    private multi multi;
     public Query visit(Query query) {
-        return new multi() {}.<Query>methodOption(query).getOrThrow(new UnsupportedOperationException());
+        if(multi == null) multi = new multi(){};
+        return multi.<Query>methodOption(query).getOrThrow(new UnsupportedOperationException());
     }
 
     @multimethod private Query visit(BooleanQuery query) {

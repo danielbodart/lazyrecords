@@ -82,7 +82,11 @@ public class Lucene {
         this.mappings = mappings;
     }
 
-    public Query query(Predicate<? super Record> predicate) { return new multi() {}.<Query>methodOption(predicate).getOrThrow(new UnsupportedOperationException()); }
+    private multi queryP;
+    public Query query(Predicate<? super Record> predicate) {
+        if(queryP == null) queryP = new multi(){};
+        return queryP.<Query>methodOption(predicate).getOrThrow(new UnsupportedOperationException());
+    }
     @multimethod public Query query(WherePredicate<Record, ?> wherePredicate) { return where(wherePredicate); }
     @multimethod public Query query(AndPredicate<Record> andPredicate) { return and(andPredicate.predicates().map(asQuery())); }
     @multimethod public Query query(OrPredicate<Record> orPredicate) { return or(orPredicate.predicates().map(asQuery())); }
@@ -90,7 +94,11 @@ public class Lucene {
     @multimethod public Query query(AlwaysTrue alwaysTrue) { return all(); }
     @multimethod public Query query(AlwaysFalse alwaysFalse) { return not(all()); }
 
-    public Query query(Keyword<?> keyword, Predicate<?> predicate) { return new multi(){}.<Query>methodOption(keyword, predicate).getOrThrow(new UnsupportedOperationException()); }
+    private multi queryKP;
+    public Query query(Keyword<?> keyword, Predicate<?> predicate) {
+        if(queryKP == null) queryKP = new multi(){};
+        return queryKP.<Query>methodOption(keyword, predicate).getOrThrow(new UnsupportedOperationException());
+    }
     @multimethod public Query query(Keyword<?> keyword, EqualsPredicate<?> predicate) { return equalTo(keyword, predicate.value()); }
     @multimethod public Query query(Keyword<?> keyword, GreaterThan<?> predicate) { return greaterThan(keyword, predicate.value()); }
     @multimethod public Query query(Keyword<?> keyword, GreaterThanOrEqualTo<?> predicate) { return greaterThanOrEqual(keyword, predicate.value()); }

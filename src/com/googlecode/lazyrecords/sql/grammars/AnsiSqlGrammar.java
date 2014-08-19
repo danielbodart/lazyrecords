@@ -178,8 +178,10 @@ public class AnsiSqlGrammar implements SqlGrammar {
         }));
     }
 
+    private multi multiSS;
     public Sequence<SortSpecification> sortSpecification(Comparator<? super Record> comparator) {
-        return new multi() {}.<Sequence<SortSpecification>>methodOption(comparator).getOrThrow(new UnsupportedOperationException("Unsupported comparator " + comparator));
+        if(multiSS == null) multiSS = new multi(){};
+        return multiSS.<Sequence<SortSpecification>>methodOption(comparator).getOrThrow(new UnsupportedOperationException("Unsupported comparator " + comparator));
     }
 
     @multimethod public Sequence<SortSpecification> sortSpecification(AscendingComparator<? super Record, ?> comparator) {
@@ -215,10 +217,11 @@ public class AnsiSqlGrammar implements SqlGrammar {
     public AsClause asClause(String alias) {
         return AnsiAsClause.asClause(alias);
     }
-
+    private static multi multiVE;
     @Override
     public ValueExpression valueExpression(Callable1<? super Record, ?> callable) {
-        return new multi() {}.<ValueExpression>methodOption(callable).getOrThrow(new UnsupportedOperationException("Unsupported reducer " + callable));
+        if(multiVE == null) multiVE = new multi(){};
+        return multiVE.<ValueExpression>methodOption(callable).getOrThrow(new UnsupportedOperationException("Unsupported reducer " + callable));
     }
 
     @Override @multimethod
@@ -267,9 +270,10 @@ public class AnsiSqlGrammar implements SqlGrammar {
         };
     }
 
+    private multi multiToSql;
     public Expression toSql(Predicate<?> predicate) {
-        return new multi() {
-        }.<Expression>methodOption(predicate).getOrThrow(new UnsupportedOperationException());
+        if(multiToSql == null) multiToSql = new multi(){};
+        return multiToSql.<Expression>methodOption(predicate).getOrThrow(new UnsupportedOperationException());
     }
 
     @multimethod public Expression toSql(AlwaysTrue predicate) { return textOnly("1 = 1"); }

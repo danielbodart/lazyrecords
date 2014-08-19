@@ -4,18 +4,30 @@ import com.amazonaws.services.simpledb.AmazonSimpleDB;
 import com.amazonaws.services.simpledb.model.Item;
 import com.amazonaws.services.simpledb.model.SelectRequest;
 import com.amazonaws.services.simpledb.model.SelectResult;
-import com.googlecode.lazyrecords.*;
-import com.googlecode.lazyrecords.sql.expressions.Expression;
-import com.googlecode.lazyrecords.sql.expressions.Expressions;
-import com.googlecode.totallylazy.*;
+import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.Logger;
+import com.googlecode.lazyrecords.Loggers;
+import com.googlecode.lazyrecords.Record;
+import com.googlecode.lazyrecords.SelectCallable;
 import com.googlecode.lazyrecords.mappings.StringMappings;
+import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.expressions.ExpressionBuilder;
+import com.googlecode.lazyrecords.sql.expressions.Expressions;
+import com.googlecode.totallylazy.Callable1;
+import com.googlecode.totallylazy.Computation;
+import com.googlecode.totallylazy.Function;
+import com.googlecode.totallylazy.Function1;
+import com.googlecode.totallylazy.Maps;
+import com.googlecode.totallylazy.Predicate;
+import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Sequences;
+import com.googlecode.totallylazy.Unchecked;
+import com.googlecode.totallylazy.Value;
 
 import java.util.Comparator;
 import java.util.Iterator;
 
 import static com.googlecode.totallylazy.Pair.pair;
-import static java.lang.String.format;
 
 public class SimpleDBSequence<T> extends Sequence<T> {
     private final AmazonSimpleDB sdb;
