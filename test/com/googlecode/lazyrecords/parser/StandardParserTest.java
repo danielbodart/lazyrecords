@@ -11,6 +11,7 @@ import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
 import com.googlecode.totallylazy.Strings;
+import com.googlecode.totallylazy.predicates.LogicalPredicate;
 import com.googlecode.yatspec.junit.Row;
 import com.googlecode.yatspec.junit.SpecRunner;
 import com.googlecode.yatspec.junit.Table;
@@ -570,6 +571,12 @@ public class StandardParserTest {
         assertThat(predicate, is(expected));
 
         assertLuceAndSqlSyntax(predicate);
+    }
 
+    @Test
+    public void supportsDotAsTextValue() throws Exception {
+        final Predicate<Record> predicate = predicateParser.parse("name:stuart.miller", Sequences.<Keyword<?>>empty());
+        final Predicate<Record> expected = Predicates.where(name, Predicates.is("stuart.miller"));
+        assertThat(predicate, is(expected));
     }
 }
