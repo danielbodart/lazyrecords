@@ -5,13 +5,16 @@ import com.googlecode.lazyrecords.JoinStringWithSeparator;
 import com.googlecode.lazyrecords.Joiner;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.On;
+import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.Using;
 import com.googlecode.lazyrecords.sql.expressions.ColumnReference;
 import com.googlecode.lazyrecords.sql.expressions.CompoundExpression;
 import com.googlecode.lazyrecords.sql.expressions.Expressions;
 import com.googlecode.lazyrecords.sql.expressions.JoinSpecification;
 import com.googlecode.lazyrecords.sql.expressions.ValueExpression;
+import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.annotations.multimethod;
+import com.googlecode.totallylazy.multi;
 
 import java.util.Map;
 
@@ -36,6 +39,13 @@ public class OracleGrammar extends AnsiSqlGrammar {
             return super.joinSpecification(On.on(head, head));
         }
         return super.joinSpecification(joiner);
+    }
+
+    private static multi multiOracleVE;
+    @Override
+    public ValueExpression valueExpression(Callable1<? super Record, ?> callable) {
+        if (multiOracleVE == null) multiOracleVE = new multi() {};
+        return multiOracleVE.<ValueExpression>methodOption(callable).getOrThrow(new UnsupportedOperationException("Unsupported reducer " + callable));
     }
 
     @Override @multimethod

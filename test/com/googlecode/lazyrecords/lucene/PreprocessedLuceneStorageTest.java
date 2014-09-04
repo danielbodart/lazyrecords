@@ -42,7 +42,7 @@ public class PreprocessedLuceneStorageTest {
         return new OptimisedStorage(directory, new LucenePool(directory));
     }
 
-    private class LuceneQueryPreprocessorSpy extends DoNothingLuceneQueryPreprocessor {
+    private static class LuceneQueryPreprocessorSpy extends DoNothingLuceneQueryPreprocessor {
         public int processInvocationCount = 0;
 
         @Override

@@ -97,7 +97,7 @@ public class Grammar {
             pattern(regex("\\d{1,2}/\\d{1,2}/\\d{2}"), "ddMMyy")).source();
     public static final Parser<String> TIME = pattern(regex("\\d{1,2}:\\d{2}:\\d{2}"), "time").source();
     public static final Parser<String> DATE_AND_TIME = DATE.followedBy(ws(' ')).followedBy(TIME).source();
-    public static final Parser<String> TEXT = isChar(CharacterPredicates.IS_ALPHA_NUMERIC_).many1().source();
+    public static final Parser<String> TEXT = isChar(CharacterPredicates.IS_ALPHA_NUMERIC_).or(isChar('.')).many1().source();
     public static final Parser<String> QUOTED_TEXT = notChar('"').many1().source().between(isChar('"'), isChar('"'));
     public static final Parser<String> NULL = Scanners.string("null").retn(null);
     public static final Parser<String> TEXT_ONLY = Parsers.or(QUOTED_TEXT, TEXT);
