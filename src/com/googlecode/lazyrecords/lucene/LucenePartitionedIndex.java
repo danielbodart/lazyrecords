@@ -5,7 +5,6 @@ import com.googlecode.totallylazy.CloseableList;
 import com.googlecode.totallylazy.Files;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Function2;
-import com.googlecode.totallylazy.Function3;
 import com.googlecode.totallylazy.Lazy;
 import com.googlecode.totallylazy.Mapper;
 import com.googlecode.totallylazy.Pair;
@@ -34,9 +33,9 @@ public class LucenePartitionedIndex implements Closeable, Persistence, Partition
     private final ConcurrentMap<String, Lazy<LuceneStorage>> partitions = new ConcurrentHashMap<String, Lazy<LuceneStorage>>();
     private final CloseableList closeables = new CloseableList();
     private final Function1<String, Directory> directoryActivator;
-    private final Function3<String, Directory, SearcherPool, LuceneStorage> luceneStorageActivator;
+    private final Function2<Directory, SearcherPool, LuceneStorage> luceneStorageActivator;
 
-    private LucenePartitionedIndex(Function1<String, Directory> directoryActivator, Function3<String, Directory, SearcherPool, LuceneStorage> luceneStorageActivator) {
+    private LucenePartitionedIndex(Function1<String, Directory> directoryActivator, Function2<Directory, SearcherPool, LuceneStorage> luceneStorageActivator) {
         this.directoryActivator = directoryActivator;
         this.luceneStorageActivator = luceneStorageActivator;
     }
@@ -50,24 +49,15 @@ public class LucenePartitionedIndex implements Closeable, Persistence, Partition
     }
 
     public static LucenePartitionedIndex partitionedIndex(Function1<String, Directory> directoryActivator) {
-        return partitionedIndex(directoryActivator, new Function3<String, Directory, SearcherPool, LuceneStorage>() {
+        return partitionedIndex(directoryActivator, new Function2<Directory, SearcherPool, LuceneStorage>() {
             @Override
-            public LuceneStorage call(String definition, Directory directory, SearcherPool searcherPool) throws Exception {
+            public LuceneStorage call(Directory directory, SearcherPool searcherPool) throws Exception {
                 return new OptimisedStorage(directory, searcherPool);
             }
         });
     }
 
-    public static LucenePartitionedIndex partitionedIndex(Function1<String, Directory> directoryActivator, final Function2<Directory, SearcherPool, LuceneStorage> luceneStorageActivator) {
-        return new LucenePartitionedIndex(directoryActivator, new Function3<String, Directory, SearcherPool, LuceneStorage>() {
-            @Override
-            public LuceneStorage call(String ignoredDefinition, Directory directory, SearcherPool searcherPool) throws Exception {
-                return luceneStorageActivator.call(directory, searcherPool);
-            }
-        });
-    }
-
-    public static LucenePartitionedIndex partitionedIndex(Function1<String, Directory> directoryActivator, Function3<String, Directory, SearcherPool, LuceneStorage> luceneStorageActivator) {
+    public static LucenePartitionedIndex partitionedIndex(Function1<String, Directory> directoryActivator, Function2<Directory, SearcherPool, LuceneStorage> luceneStorageActivator) {
         return new LucenePartitionedIndex(directoryActivator, luceneStorageActivator);
     }
 
@@ -104,7 +94,7 @@ public class LucenePartitionedIndex implements Closeable, Persistence, Partition
             protected LuceneStorage get() throws Exception {
                 Directory directory = closeables.manage(directoryActivator.call(definition));
                 SearcherPool searcherPool = closeables.manage(new LucenePool(directory));
-                return luceneStorageActivator.call(definition, directory, searcherPool);
+                return luceneStorageActivator.call(directory, searcherPool);
             }
         };
     }

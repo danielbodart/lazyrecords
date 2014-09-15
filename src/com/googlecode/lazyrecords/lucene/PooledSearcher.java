@@ -2,7 +2,6 @@ package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.totallylazy.Callable1;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Sort;
@@ -27,11 +26,6 @@ public class PooledSearcher implements Searcher {
     @Override
     public TopDocs search(Query query, Sort sort, int end) throws IOException {
         return searcher.search(query, sort, end);
-    }
-
-    @Override
-    public void search(Query query, Collector collector) throws IOException {
-        searcher.search(query, collector);
     }
 
     @Override
