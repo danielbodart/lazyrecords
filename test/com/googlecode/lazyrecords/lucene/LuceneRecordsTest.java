@@ -41,8 +41,7 @@ import static com.googlecode.totallylazy.matchers.IterableMatcher.hasExactly;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
-    public static final Version VERSION = Version.LUCENE_45;
-    public static final Analyzer ANALYZER = new StandardAnalyzer(VERSION);
+    public static final Analyzer ANALYZER = new StandardAnalyzer();
     private Directory directory;
     private LuceneStorage storage;
     private File file;
@@ -74,7 +73,7 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
 
     @Test
     public void canQueryIndexDirectly() throws Exception {
-        QueryParser parser = new QueryParser(VERSION, null, ANALYZER);
+        QueryParser parser = new QueryParser(null, ANALYZER);
         Sequence<Record> results = records.query(parser.parse("type:people +firstName:da*"), Sequences.<Keyword<?>>sequence(lastName));
         assertThat(results.map(lastName), hasExactly("bodart"));
     }

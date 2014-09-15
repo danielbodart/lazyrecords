@@ -32,7 +32,7 @@ public class IndexAnalyzerMigrator {
             NIOFSDirectory newDir = closeables.manage(new NIOFSDirectory(newDirectory));
 
             OptimisedStorage oldStorage = closeables.manage(new OptimisedStorage(oldDir, new LucenePool(oldDir)));
-            OptimisedStorage newStorage = closeables.manage(new OptimisedStorage(newDir, Version.LUCENE_45, newAnalyzer, IndexWriterConfig.OpenMode.CREATE_OR_APPEND, new LucenePool(oldDir)));
+            OptimisedStorage newStorage = closeables.manage(new OptimisedStorage(newDir, Version.LUCENE_4_10_0, newAnalyzer, IndexWriterConfig.OpenMode.CREATE_OR_APPEND, new LucenePool(oldDir)));
 
             Searcher oldSearcher = closeables.manage(oldStorage.searcher());
             ScoreDoc[] docs = oldSearcher.search(Lucene.all(), Lucene.NO_SORT).scoreDocs;

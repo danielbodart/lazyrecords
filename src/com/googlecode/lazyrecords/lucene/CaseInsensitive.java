@@ -16,7 +16,7 @@ import java.io.Reader;
 public class CaseInsensitive {
 
     public static LuceneStorage storage(Directory directory, SearcherPool searcherPool) {
-        return new OptimisedStorage(directory, Version.LUCENE_45, new StringPhraseAnalyzer(), IndexWriterConfig.OpenMode.CREATE_OR_APPEND, searcherPool);
+        return new OptimisedStorage(directory, Version.LUCENE_4_10_0, new StringPhraseAnalyzer(), IndexWriterConfig.OpenMode.CREATE_OR_APPEND, searcherPool);
     }
 
     public static Function2<Directory, SearcherPool, LuceneStorage> storage() {
@@ -34,10 +34,10 @@ public class CaseInsensitive {
 
 
     public static class StringPhraseAnalyzer extends Analyzer {
-        protected TokenStreamComponents createComponents (String fieldName, Reader reader) {
+        protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
             Tokenizer tok = new KeywordTokenizer(reader);
-            TokenFilter filter = new LowerCaseFilter(Version.LUCENE_45, tok);
-            filter = new TrimFilter(Version.LUCENE_45, filter);
+            TokenFilter filter = new LowerCaseFilter(tok);
+            filter = new TrimFilter(filter);
             return new TokenStreamComponents(tok, filter);
         }
     }

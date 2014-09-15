@@ -41,7 +41,7 @@ public class OptimisedStorage implements LuceneStorage {
     private SnapshotDeletionPolicy snapShotter;
 
     public OptimisedStorage(Directory directory, SearcherPool searcherPool) {
-        this(directory, Version.LUCENE_45, new KeywordAnalyzer(), IndexWriterConfig.OpenMode.CREATE_OR_APPEND, searcherPool);
+        this(directory, Version.LUCENE_4_10_0, new KeywordAnalyzer(), IndexWriterConfig.OpenMode.CREATE_OR_APPEND, searcherPool);
     }
 
     public OptimisedStorage(Directory directory, Version version, Analyzer analyzer, IndexWriterConfig.OpenMode mode, SearcherPool pool) {

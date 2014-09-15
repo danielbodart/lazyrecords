@@ -31,7 +31,7 @@ public class SearcherPoolTest {
 
     private RAMDirectory emptyDirectory() throws IOException {
         RAMDirectory ramDirectory = new RAMDirectory();
-        IndexWriter writer = new IndexWriter(ramDirectory, new IndexWriterConfig(Version.LUCENE_45, new KeywordAnalyzer()));
+        IndexWriter writer = new IndexWriter(ramDirectory, new IndexWriterConfig(Version.LUCENE_4_10_0, new KeywordAnalyzer()));
         writer.commit();
         return ramDirectory;
     }

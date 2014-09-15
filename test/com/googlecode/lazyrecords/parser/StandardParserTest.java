@@ -42,7 +42,7 @@ public class StandardParserTest {
 
     @Test
     public void producesTheSameResultAsLucene() throws Exception {
-        QueryParser parser = new QueryParser(LuceneRecordsTest.VERSION, null, LuceneRecordsTest.ANALYZER);
+        QueryParser parser = new QueryParser(null, LuceneRecordsTest.ANALYZER);
         Predicate<Record> predicates = new StandardParser().parse("type:people OR (firstName:da* AND lastName:bod)", Sequences.<Keyword<?>>empty());
         Query query = new Lucene(new StringMappings()).query(predicates);
         Query plus = parser.parse("type:people (+firstName:da* +lastName:bod)");
