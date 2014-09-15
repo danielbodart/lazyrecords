@@ -8,6 +8,7 @@ mvn:mysql:mysql-connector-java:jar:5.1.24
 mvn:org.apache.lucene:lucene-core:jar|sources:4.10.0
 mvn:org.apache.lucene:lucene-analyzers-common:jar|sources:4.10.0
 mvn:org.apache.lucene:lucene-queryparser:jar|sources:4.10.0
+mvn:org.apache.lucene:lucene-facet:jar|sources:4.10.0
 mvn:org.enumerable:enumerable-java:jar:0.4.0
 
 

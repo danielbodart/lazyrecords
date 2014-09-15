@@ -3,6 +3,7 @@ package com.googlecode.lazyrecords.lucene;
 import com.googlecode.totallylazy.Callers;
 import com.googlecode.totallylazy.Closeables;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.TopDocs;
@@ -38,6 +39,16 @@ public class RecoveringSearcher implements Searcher {
         } catch (Exception e) {
             replaceBrokenSearcher();
             return search(query, sort, end);
+        }
+    }
+
+    @Override
+    public void search(Query query, Collector collector) throws IOException {
+        try {
+            searcher.search(query, collector);
+        } catch (Exception e) {
+            replaceBrokenSearcher();
+            search(query, collector);
         }
     }
 

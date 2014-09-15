@@ -25,9 +25,14 @@ public class LuceneSearcher implements Searcher {
         return this.search(query, end);
     }
 
+    @Override
+    public void search(Query query, Collector collector) throws IOException {
+        searcher.search(query, collector);
+    }
+
     public TopDocs search(Query query, int end) throws IOException {
         NonScoringCollector results = new NonScoringCollector(end);
-        searcher.search(query, results);
+        search(query, results);
         return results.topDocs();
     }
 

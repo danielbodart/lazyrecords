@@ -44,11 +44,10 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
     public static final Analyzer ANALYZER = new StandardAnalyzer();
     private Directory directory;
     private LuceneStorage storage;
-    private File file;
 
     @Override
     protected LuceneRecords createRecords() throws Exception {
-        file = emptyVMDirectory("lucene-records");
+        File file = emptyVMDirectory("lucene-records");
         directory = new NoSyncDirectory(file);
         storage = new OptimisedStorage(directory, new LucenePool(directory));
         return luceneRecords(logger);
