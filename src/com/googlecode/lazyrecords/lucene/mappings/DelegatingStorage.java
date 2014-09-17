@@ -10,10 +10,6 @@ import org.apache.lucene.search.Query;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-
-import static java.util.concurrent.Executors.newSingleThreadExecutor;
 
 public abstract class DelegatingStorage implements LuceneStorage {
     protected final LuceneStorage storage;

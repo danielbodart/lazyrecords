@@ -9,31 +9,18 @@ import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
 import com.googlecode.totallylazy.matchers.Matchers;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.TokenFilter;
-import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.core.KeywordAnalyzer;
-import org.apache.lucene.analysis.core.KeywordTokenizer;
-import org.apache.lucene.analysis.core.LowerCaseFilter;
-import org.apache.lucene.analysis.miscellaneous.TrimFilter;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.util.Version;
 import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Reader;
 import java.util.Map;
 
-import static com.googlecode.lazyrecords.Grammar.is;
-import static com.googlecode.lazyrecords.Grammar.keyword;
-import static com.googlecode.lazyrecords.Grammar.where;
 import static com.googlecode.lazyrecords.RecordsContract.People.age;
-import static com.googlecode.lazyrecords.RecordsContract.People.firstName;
 import static com.googlecode.lazyrecords.RecordsContract.People.lastName;
 import static com.googlecode.lazyrecords.RecordsContract.People.people;
 import static com.googlecode.totallylazy.Files.emptyVMDirectory;
@@ -44,11 +31,10 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
     public static final Analyzer ANALYZER = new StandardAnalyzer();
     private Directory directory;
     private LuceneStorage storage;
-    private File file;
 
     @Override
     protected LuceneRecords createRecords() throws Exception {
-        file = emptyVMDirectory("lucene-records");
+        final File file = emptyVMDirectory("lucene-records");
         directory = new NoSyncDirectory(file);
         storage = new OptimisedStorage(directory, new LucenePool(directory));
         return luceneRecords(logger);

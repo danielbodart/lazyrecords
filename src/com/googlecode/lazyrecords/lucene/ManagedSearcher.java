@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public class ManagedSearcher implements Searcher {
     private final SearcherManager manager;
-    public final LuceneSearcher searcher;
+    private final LuceneSearcher searcher;
 
     public ManagedSearcher(SearcherManager manager) throws IOException {
         this.manager = manager;
@@ -40,5 +40,9 @@ public class ManagedSearcher implements Searcher {
     @Override
     public void close() throws IOException {
         manager.release(searcher.searcher());
+    }
+
+    public LuceneSearcher luceneSearcher() {
+        return searcher;
     }
 }
