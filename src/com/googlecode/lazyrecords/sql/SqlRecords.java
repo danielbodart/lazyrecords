@@ -14,35 +14,38 @@ import com.googlecode.lazyrecords.sql.expressions.Expressions;
 import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
-import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.CloseableList;
 import com.googlecode.totallylazy.Computation;
+import com.googlecode.totallylazy.Function;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Functions;
-import com.googlecode.totallylazy.Group;
 import com.googlecode.totallylazy.LazyException;
-import com.googlecode.totallylazy.Mapper;
 import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.Option;
 import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.numbers.Numbers;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import static com.googlecode.lazyrecords.Loggers.milliseconds;
-import static com.googlecode.lazyrecords.sql.expressions.SelectBuilder.from;
 import static com.googlecode.lazyrecords.sql.grammars.SqlGrammar.functions.insertStatement;
 import static com.googlecode.lazyrecords.sql.grammars.SqlGrammar.functions.updateStatement;
 import static com.googlecode.totallylazy.Closeables.using;
 import static com.googlecode.totallylazy.Pair.pair;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.callables.TimeCallable.calculateMilliseconds;
+import static com.googlecode.totallylazy.numbers.Numbers.not;
+import static com.googlecode.totallylazy.numbers.Numbers.numbers;
+import static com.googlecode.totallylazy.numbers.Numbers.sum;
 
 public class SqlRecords extends AbstractRecords implements Queryable<Expression>, Closeable {
     private final Connection connection;
@@ -100,9 +103,29 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
         Map<String, Object> log = Maps.<String, Object>map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.EXPRESSION, expressions));
         long start = System.nanoTime();
         try {
-            Number rowCount = using(connection.prepareStatement(expressions.head().text()),
-                    mappings.addValuesInBatch(expressions.map(Expressions.parameters())).time(milliseconds(log)));
+            Map<String, PreparedStatement> statements = new HashMap<>();
+
+            for (Expression expression : expressions) {
+                String sql = expression.text();
+                Sequence<Object> values = expression.parameters();
+
+                PreparedStatement statement = statements.get(sql);
+                if(statement == null) statements.put(sql, statement = connection.prepareStatement(sql));
+
+                mappings.addValues(statement, values);
+                statement.addBatch();
+            }
+
+            Number rowCount = sequence(statements.values()).map(new Function1<PreparedStatement, Number>() {
+                public Number call(PreparedStatement statement) throws Exception {
+                    Sequence<Number> counts = numbers(statement.executeBatch());
+                    statement.close();
+                    if (counts.contains(Statement.SUCCESS_NO_INFO)) return statement.getUpdateCount();
+                    return counts.filter(not(Statement.SUCCESS_NO_INFO)).reduce(sum);
+                }
+            }.time(milliseconds(log))).reduce(sum);
             log.put(Loggers.ROWS, rowCount);
+
             return rowCount;
         } catch (Exception e) {
             log.put(Loggers.MESSAGE, e.getMessage());

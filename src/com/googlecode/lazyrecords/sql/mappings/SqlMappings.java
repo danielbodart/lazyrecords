@@ -77,17 +77,4 @@ public class SqlMappings {
         }
     }
 
-    public Function1<PreparedStatement, Number> addValuesInBatch(final Sequence<? extends Iterable<Object>> allValues) {
-        return new Function1<PreparedStatement, Number>() {
-            public Number call(PreparedStatement statement) throws Exception {
-                for (Iterable<Object> values : allValues) {
-                    addValues(statement, sequence(values));
-                    statement.addBatch();
-                }
-                Sequence<Number> counts = numbers(statement.executeBatch());
-                if (counts.contains(Statement.SUCCESS_NO_INFO)) return statement.getUpdateCount();
-                return counts.filter(not(Statement.SUCCESS_NO_INFO)).fold(0, sum());
-            }
-        };
-    }
 }
