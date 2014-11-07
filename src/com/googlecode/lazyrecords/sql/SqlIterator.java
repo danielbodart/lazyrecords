@@ -25,6 +25,7 @@ import java.sql.ResultSetMetaData;
 import java.util.Map;
 
 import static com.googlecode.lazyrecords.Keyword.methods.matchKeyword;
+import static com.googlecode.lazyrecords.Record.constructors.record;
 import static com.googlecode.totallylazy.Callables.second;
 import static com.googlecode.totallylazy.Pair.pair;
 import static com.googlecode.totallylazy.Predicates.notNullValue;
@@ -33,20 +34,12 @@ import static com.googlecode.totallylazy.callables.TimeCallable.calculateMillise
 import static com.googlecode.totallylazy.numbers.Numbers.range;
 
 public class SqlIterator extends StatefulIterator<Record> implements Closeable {
-    private final Connection connection;
     private final SqlMappings mappings;
-    private final Expression expression;
-    private final Sequence<Keyword<?>> definitions;
-    private final Logger logger;
     private final Lazy<PreparedStatement> preparedStatement;
     private final Lazy<ResultSet> resultSet;
     private final Lazy<Sequence<Pair<Integer, Keyword<Object>>>> keywords;
 
     public SqlIterator(final Connection connection, final SqlMappings mappings, final Expression expression, final Sequence<Keyword<?>> definitions, final Logger logger) {
-        this.definitions = definitions;
-        this.logger = logger;
-        this.connection = connection;
-        this.expression = expression;
         this.mappings = mappings;
         preparedStatement = new Lazy<PreparedStatement>() {
             @Override
@@ -60,7 +53,6 @@ public class SqlIterator extends StatefulIterator<Record> implements Closeable {
                 Map<String, Object> log = Maps.<String, Object>map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.EXPRESSION, expression));
                 long start = System.nanoTime();
                 try {
-
                     PreparedStatement statement = preparedStatement.value();
                     mappings.addValues(statement, expression.parameters());
                     return statement.executeQuery();
@@ -97,7 +89,7 @@ public class SqlIterator extends StatefulIterator<Record> implements Closeable {
             return finished();
         }
 
-        return Record.constructors.record(keywords.value().map(new Function1<Pair<Integer, Keyword<Object>>, Pair<Keyword<Object>, Object>>() {
+        return record(keywords.value().map(new Function1<Pair<Integer, Keyword<Object>>, Pair<Keyword<Object>, Object>>() {
             @Override
             public Pair<Keyword<Object>, Object> call(Pair<Integer, Keyword<Object>> pair) throws Exception {
                 Keyword<Object> keyword = pair.second();
