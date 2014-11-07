@@ -6,9 +6,13 @@ import com.googlecode.lazyrecords.Loggers;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
+import com.googlecode.totallylazy.Callables;
+import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Lazy;
 import com.googlecode.totallylazy.LazyException;
 import com.googlecode.totallylazy.Maps;
+import com.googlecode.totallylazy.Pair;
+import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.iterators.StatefulIterator;
 
@@ -21,7 +25,10 @@ import java.sql.ResultSetMetaData;
 import java.util.Map;
 
 import static com.googlecode.lazyrecords.Keyword.methods.matchKeyword;
+import static com.googlecode.totallylazy.Callables.second;
 import static com.googlecode.totallylazy.Pair.pair;
+import static com.googlecode.totallylazy.Predicates.notNullValue;
+import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.callables.TimeCallable.calculateMilliseconds;
 import static com.googlecode.totallylazy.numbers.Numbers.range;
 
@@ -33,6 +40,7 @@ public class SqlIterator extends StatefulIterator<Record> implements Closeable {
     private final Logger logger;
     private final Lazy<PreparedStatement> preparedStatement;
     private final Lazy<ResultSet> resultSet;
+    private final Lazy<Sequence<Pair<Integer, Keyword<Object>>>> keywords;
 
     public SqlIterator(final Connection connection, final SqlMappings mappings, final Expression expression, final Sequence<Keyword<?>> definitions, final Logger logger) {
         this.definitions = definitions;
@@ -65,29 +73,38 @@ public class SqlIterator extends StatefulIterator<Record> implements Closeable {
                 }
             }
         };
+        keywords = new Lazy<Sequence<Pair<Integer, Keyword<Object>>>>() {
+            @Override
+            protected Sequence<Pair<Integer, Keyword<Object>>> get() throws Exception {
+                final ResultSetMetaData metaData = resultSet.value().getMetaData();
+                return range(1).take(metaData.getColumnCount()).safeCast(Integer.class).map(new Function1<Integer, Pair<Integer, Keyword<Object>>>() {
+                    @Override
+                    public Pair<Integer, Keyword<Object>> call(Integer index) throws Exception {
+                        final String name = metaData.getColumnLabel(index);
+                        return pair(index, matchKeyword(name, definitions));
+                    }
+                }).unique(Callables.<Keyword<Object>>second()).realise();
+            }
+        };
     }
 
     @Override
     protected Record getNext() throws Exception {
-        ResultSet result = resultSet.value();
+        final ResultSet result = resultSet.value();
         boolean hasNext = result.next();
         if (!hasNext) {
             close();
             return finished();
         }
 
-        Record record = Record.constructors.record();
-        final ResultSetMetaData metaData = result.getMetaData();
-        for (Integer index : range(1).take(metaData.getColumnCount()).safeCast(Integer.class)) {
-            final String name = metaData.getColumnLabel(index);
-            Keyword<Object> keyword = matchKeyword(name, definitions);
-            Object value = mappings.getValue(result, index, keyword.forClass());
-            if (value != null) {
-                record = record.set(keyword, value);
+        return Record.constructors.record(keywords.value().map(new Function1<Pair<Integer, Keyword<Object>>, Pair<Keyword<Object>, Object>>() {
+            @Override
+            public Pair<Keyword<Object>, Object> call(Pair<Integer, Keyword<Object>> pair) throws Exception {
+                Keyword<Object> keyword = pair.second();
+                Integer index = pair.first();
+                return pair(keyword, mappings.getValue(result, index, keyword.forClass()));
             }
-        }
-
-        return record;
+        }).filter(where(second(Object.class), notNullValue())));
     }
 
     public void close() throws IOException {

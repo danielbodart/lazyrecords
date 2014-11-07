@@ -3,6 +3,7 @@ package com.googlecode.lazyrecords;
 import com.googlecode.totallylazy.Callables;
 import com.googlecode.totallylazy.Closeables;
 import com.googlecode.totallylazy.Group;
+import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicates;
 import com.googlecode.totallylazy.Sequence;
 import com.googlecode.totallylazy.Sequences;
@@ -245,9 +246,10 @@ public abstract class RecordsContract<T extends Records> {
 
     @Test
     public void supportsOuterJoinUsing() throws Exception {
-        assertThat(records.get(people).filter(where(age, is(lessThan(12)))).
+        Sequence<Pair<Keyword<?>, Object>> fields = records.get(people).filter(where(age, is(lessThan(12)))).
                 flatMap(outerJoin(records.get(books), using(isbn))).
-                head().fields().size(), NumberMatcher.is(9));
+                head().fields().realise();
+        assertThat(fields.size(), NumberMatcher.is(9));
 
         assertThat(records.get(people).filter(where(age, is(lessThan(12)))).
                 flatMap(outerJoin(records.get(books), using(isbn))).
