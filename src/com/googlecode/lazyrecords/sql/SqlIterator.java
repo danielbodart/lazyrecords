@@ -6,6 +6,7 @@ import com.googlecode.lazyrecords.Loggers;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
+import com.googlecode.totallylazy.Lazy;
 import com.googlecode.totallylazy.LazyException;
 import com.googlecode.totallylazy.Maps;
 import com.googlecode.totallylazy.Sequence;
@@ -30,8 +31,8 @@ public class SqlIterator extends StatefulIterator<Record> implements Closeable {
     private final Expression expression;
     private final Sequence<Keyword<?>> definitions;
     private final Logger logger;
-    private PreparedStatement preparedStatement;
-    private ResultSet resultSet;
+    private final Lazy<PreparedStatement> preparedStatement;
+    private final Lazy<ResultSet> resultSet;
 
     public SqlIterator(final Connection connection, final SqlMappings mappings, final Expression expression, final Sequence<Keyword<?>> definitions, final Logger logger) {
         this.definitions = definitions;
@@ -39,23 +40,48 @@ public class SqlIterator extends StatefulIterator<Record> implements Closeable {
         this.connection = connection;
         this.expression = expression;
         this.mappings = mappings;
+        preparedStatement = new Lazy<PreparedStatement>() {
+            @Override
+            protected PreparedStatement get() throws Exception {
+                return connection.prepareStatement(expression.text());
+            }
+        };
+        resultSet = new Lazy<ResultSet>() {
+            @Override
+            protected ResultSet get() throws Exception {
+                Map<String, Object> log = Maps.<String, Object>map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.EXPRESSION, expression));
+                long start = System.nanoTime();
+                try {
+
+                    PreparedStatement statement = preparedStatement.value();
+                    mappings.addValues(statement, expression.parameters());
+                    return statement.executeQuery();
+                } catch (Exception e) {
+                    log.put(Loggers.MESSAGE, e.getMessage());
+                    throw LazyException.lazyException(e);
+                } finally {
+                    log.put(Loggers.MILLISECONDS, calculateMilliseconds(start, System.nanoTime()));
+                    logger.log(log);
+                }
+            }
+        };
     }
 
     @Override
     protected Record getNext() throws Exception {
-        ResultSet resultSet = resultSet();
-        boolean hasNext = resultSet.next();
+        ResultSet result = resultSet.value();
+        boolean hasNext = result.next();
         if (!hasNext) {
             close();
             return finished();
         }
 
         Record record = Record.constructors.record();
-        final ResultSetMetaData metaData = resultSet.getMetaData();
+        final ResultSetMetaData metaData = result.getMetaData();
         for (Integer index : range(1).take(metaData.getColumnCount()).safeCast(Integer.class)) {
             final String name = metaData.getColumnLabel(index);
             Keyword<Object> keyword = matchKeyword(name, definitions);
-            Object value = mappings.getValue(resultSet, index, keyword.forClass());
+            Object value = mappings.getValue(result, index, keyword.forClass());
             if (value != null) {
                 record = record.set(keyword, value);
             }
@@ -64,35 +90,8 @@ public class SqlIterator extends StatefulIterator<Record> implements Closeable {
         return record;
     }
 
-    private ResultSet resultSet() {
-        if (resultSet == null) {
-            Map<String, Object> log = Maps.<String, Object>map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.EXPRESSION, expression));
-            long start = System.nanoTime();
-            try {
-                preparedStatement = connection.prepareStatement(expression.text());
-                mappings.addValues(preparedStatement, expression.parameters());
-                resultSet = preparedStatement.executeQuery();
-            } catch (Exception e) {
-                log.put(Loggers.MESSAGE, e.getMessage());
-                throw LazyException.lazyException(e);
-            } finally {
-                log.put(Loggers.MILLISECONDS, calculateMilliseconds(start, System.nanoTime()));
-                logger.log(log);
-            }
-        }
-        return resultSet;
-    }
-
     public void close() throws IOException {
-        try {
-            if (resultSet != null) {
-                resultSet.close();
-            }
-            if (preparedStatement != null) {
-                preparedStatement.close();
-            }
-        } catch (Exception e) {
-            throw new IOException(e);
-        }
+        resultSet.close();
+        preparedStatement.close();
     }
 }
