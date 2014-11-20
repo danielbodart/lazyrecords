@@ -39,6 +39,7 @@ import java.util.concurrent.ConcurrentMap;
 import static com.googlecode.lazyrecords.Loggers.milliseconds;
 import static com.googlecode.lazyrecords.sql.grammars.SqlGrammar.functions.insertStatement;
 import static com.googlecode.lazyrecords.sql.grammars.SqlGrammar.functions.updateStatement;
+import static com.googlecode.totallylazy.Closeables.safeClose;
 import static com.googlecode.totallylazy.Closeables.using;
 import static com.googlecode.totallylazy.Pair.pair;
 import static com.googlecode.totallylazy.Sequences.sequence;
@@ -102,9 +103,8 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
         if(expressions.isEmpty()) return 0;
         Map<String, Object> log = Maps.<String, Object>map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.EXPRESSION, expressions));
         long start = System.nanoTime();
+        Map<String, PreparedStatement> statements = new HashMap<>();
         try {
-            Map<String, PreparedStatement> statements = new HashMap<>();
-
             for (Expression expression : expressions) {
                 String sql = expression.text();
                 Sequence<Object> values = expression.parameters();
@@ -119,7 +119,6 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
             Number rowCount = sequence(statements.values()).map(new Function1<PreparedStatement, Number>() {
                 public Number call(PreparedStatement statement) throws Exception {
                     Sequence<Number> counts = numbers(statement.executeBatch());
-                    statement.close();
                     if (counts.contains(Statement.SUCCESS_NO_INFO)) return statement.getUpdateCount();
                     return counts.filter(not(Statement.SUCCESS_NO_INFO)).reduce(sum);
                 }
@@ -131,6 +130,7 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
             log.put(Loggers.MESSAGE, e.getMessage());
             throw LazyException.lazyException(e);
         } finally {
+            for (PreparedStatement statement : statements.values()) safeClose(statement);
             log.put(Loggers.MILLISECONDS, calculateMilliseconds(start, System.nanoTime()));
             logger.log(log);
         }
