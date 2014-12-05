@@ -2,23 +2,26 @@ package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.lazyrecords.RecordsContract;
 import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
+import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.junit.After;
 import org.junit.Ignore;
 
 import java.io.File;
 
-import static com.googlecode.lazyrecords.lucene.LucenePartitionedIndex.partitionedIndex;
 import static com.googlecode.lazyrecords.lucene.PartitionedIndex.functions.noSyncDirectory;
 import static com.googlecode.totallylazy.Files.emptyVMDirectory;
 
 public class LucenePartitionedRecordsTest extends RecordsContract<LucenePartitionedRecords> {
     private File file;
     private LucenePartitionedIndex partitionedIndex;
+    private ClosingNameToLuceneStorageFunction storageActivator;
 
     @Override
     protected LucenePartitionedRecords createRecords() throws Exception {
         file = emptyVMDirectory("totallylazy/partitioned-index");
-        partitionedIndex = partitionedIndex(noSyncDirectory(file));
+        final NameToLuceneDirectoryFunction directoryActivator = new NameToLuceneDirectoryFunction(noSyncDirectory(file));
+        storageActivator = new ClosingNameToLuceneStorageFunction(directoryActivator, new KeywordAnalyzer());
+        partitionedIndex = new LucenePartitionedIndex(storageActivator);
         return new LucenePartitionedRecords(partitionedIndex, new LuceneMappings(), logger);
     }
 
@@ -27,6 +30,7 @@ public class LucenePartitionedRecordsTest extends RecordsContract<LucenePartitio
         super.cleanUp();
         records.close();
         partitionedIndex.close();
+        storageActivator.close();
     }
 
     @Override

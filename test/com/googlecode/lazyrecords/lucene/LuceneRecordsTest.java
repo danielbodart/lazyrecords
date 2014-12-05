@@ -10,6 +10,7 @@ import com.googlecode.totallylazy.Sequences;
 import com.googlecode.totallylazy.matchers.Matchers;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.store.Directory;
 import org.junit.After;
@@ -20,9 +21,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-import static com.googlecode.lazyrecords.RecordsContract.People.age;
-import static com.googlecode.lazyrecords.RecordsContract.People.lastName;
-import static com.googlecode.lazyrecords.RecordsContract.People.people;
+import static com.googlecode.lazyrecords.RecordsContract.People.*;
+import static com.googlecode.lazyrecords.lucene.PartitionedIndex.methods.indexWriter;
 import static com.googlecode.totallylazy.Files.emptyVMDirectory;
 import static com.googlecode.totallylazy.matchers.IterableMatcher.hasExactly;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -31,12 +31,14 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
     public static final Analyzer ANALYZER = new StandardAnalyzer();
     private Directory directory;
     private LuceneStorage storage;
+    private IndexWriter writer;
 
     @Override
     protected LuceneRecords createRecords() throws Exception {
         final File file = emptyVMDirectory("lucene-records");
         directory = new NoSyncDirectory(file);
-        storage = new OptimisedStorage(directory, new LucenePool(directory));
+        writer = indexWriter(directory);
+        storage = new OptimisedStorage(writer);
         return luceneRecords(logger);
     }
 
@@ -49,6 +51,7 @@ public class LuceneRecordsTest extends RecordsContract<LuceneRecords> {
         super.cleanUp();
         records.close();
         storage.close();
+        writer.close();
         directory.close();
     }
 

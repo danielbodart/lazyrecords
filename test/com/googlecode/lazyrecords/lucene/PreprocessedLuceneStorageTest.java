@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
+import static com.googlecode.lazyrecords.lucene.PartitionedIndex.methods.indexWriter;
 import static com.googlecode.totallylazy.matchers.Matchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -39,7 +40,7 @@ public class PreprocessedLuceneStorageTest {
 
     private LuceneStorage storage() throws IOException {
         RAMDirectory directory = new RAMDirectory();
-        return new OptimisedStorage(directory, new LucenePool(directory));
+        return new OptimisedStorage(indexWriter(directory));
     }
 
     private static class LuceneQueryPreprocessorSpy extends DoNothingLuceneQueryPreprocessor {

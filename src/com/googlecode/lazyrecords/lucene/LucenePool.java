@@ -2,8 +2,8 @@ package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.totallylazy.Function;
 import com.googlecode.totallylazy.Value;
+import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.search.SearcherManager;
-import org.apache.lucene.store.Directory;
 
 import java.io.IOException;
 
@@ -12,8 +12,8 @@ import static com.googlecode.totallylazy.Closeables.safeClose;
 public class LucenePool implements SearcherPool {
     private final Value<SearcherManager> manager;
 
-    public LucenePool(final Directory directory) {
-        this.manager = createSearchManagerLazily(directory);
+    public LucenePool(final IndexWriter writer) {
+        this.manager = createSearchManagerLazily(writer);
     }
 
     @Override
@@ -35,11 +35,11 @@ public class LucenePool implements SearcherPool {
         return manager.value();
     }
 
-    private Value<SearcherManager> createSearchManagerLazily(final Directory directory) {
+    private Value<SearcherManager> createSearchManagerLazily(final IndexWriter writer) {
         return new Function<SearcherManager>() {
             @Override
             public SearcherManager call() throws Exception {
-                return new SearcherManager(directory, null);
+                return new SearcherManager(writer, true, null);
             }
         }.lazy();
     }

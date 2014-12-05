@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
+import static com.googlecode.lazyrecords.lucene.PartitionedIndex.methods.indexWriter;
 import static com.googlecode.totallylazy.Sequences.one;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -62,7 +63,6 @@ public class FacetedLuceneStorageTest {
     }
 
     private LuceneStorage testStorage() throws IOException {
-        final Directory directory = new RAMDirectory();
-        return new OptimisedStorage(directory, new LucenePool(directory));
+        return new OptimisedStorage(indexWriter(new RAMDirectory()));
     }
 }

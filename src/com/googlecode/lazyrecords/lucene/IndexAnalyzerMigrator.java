@@ -2,37 +2,34 @@ package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.totallylazy.Block;
 import com.googlecode.totallylazy.CloseableList;
-import com.googlecode.totallylazy.Closeables;
-import com.googlecode.totallylazy.Files;
 import com.googlecode.totallylazy.Sequences;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.store.NIOFSDirectory;
-import org.apache.lucene.util.Version;
 
 import java.io.File;
 import java.io.IOException;
 
+import static com.googlecode.lazyrecords.lucene.PartitionedIndex.methods.indexWriter;
 import static com.googlecode.totallylazy.Files.files;
 import static com.googlecode.totallylazy.Files.isDirectory;
-import static com.googlecode.totallylazy.Sequences.one;
-import static com.googlecode.totallylazy.Sequences.sequence;
 import static java.lang.String.format;
 
 public class IndexAnalyzerMigrator {
 
     public static void migrate(File oldDirectory, File newDirectory, Analyzer newAnalyzer) throws IOException {
-        final CloseableList closeables = new CloseableList();
 
-        try {
+        try (CloseableList closeables = new CloseableList()) {
             NIOFSDirectory oldDir = closeables.manage(new NIOFSDirectory(oldDirectory));
             NIOFSDirectory newDir = closeables.manage(new NIOFSDirectory(newDirectory));
 
-            OptimisedStorage oldStorage = closeables.manage(new OptimisedStorage(oldDir, new LucenePool(oldDir)));
-            OptimisedStorage newStorage = closeables.manage(new OptimisedStorage(newDir, Version.LUCENE_4_10_0, newAnalyzer, IndexWriterConfig.OpenMode.CREATE_OR_APPEND, new LucenePool(oldDir)));
+            final IndexWriter oldWriter = closeables.manage(indexWriter(oldDir));
+            final IndexWriter newWriter = closeables.manage(indexWriter(newDir, newAnalyzer));
+
+            OptimisedStorage oldStorage = closeables.manage(new OptimisedStorage(oldWriter));
+            OptimisedStorage newStorage = closeables.manage(new OptimisedStorage(newWriter));
 
             Searcher oldSearcher = closeables.manage(oldStorage.searcher());
             ScoreDoc[] docs = oldSearcher.search(Lucene.all(), Lucene.NO_SORT).scoreDocs;
@@ -41,8 +38,6 @@ public class IndexAnalyzerMigrator {
                 newStorage.add(Sequences.one(document));
             }
             newStorage.flush();
-        } finally {
-            closeables.close();
         }
     }
 

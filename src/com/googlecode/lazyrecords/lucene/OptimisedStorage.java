@@ -1,24 +1,18 @@
 package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.totallylazy.Callable1;
-import com.googlecode.totallylazy.Closeables;
 import com.googlecode.totallylazy.Files;
 import com.googlecode.totallylazy.Function2;
 import com.googlecode.totallylazy.Sequence;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CheckIndex;
 import org.apache.lucene.index.IndexCommit;
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.KeepOnlyLastCommitDeletionPolicy;
 import org.apache.lucene.index.SnapshotDeletionPolicy;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.IOContext;
 import org.apache.lucene.store.NIOFSDirectory;
-import org.apache.lucene.util.Version;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,35 +20,21 @@ import java.util.Collection;
 import java.util.List;
 
 import static com.googlecode.totallylazy.Closeables.using;
-import static com.googlecode.totallylazy.Lists.list;
 import static com.googlecode.totallylazy.Runnables.VOID;
 
 public class OptimisedStorage implements LuceneStorage {
-    private final Directory directory;
-    private final Version version;
-    private final Analyzer analyzer;
-    private final IndexWriterConfig.OpenMode mode;
     private final Object lock = new Object();
 
     private final SearcherPool pool;
     private IndexWriter writer;
-    private SnapshotDeletionPolicy snapShotter;
 
-    public OptimisedStorage(Directory directory, SearcherPool searcherPool) {
-        this(directory, Version.LUCENE_4_10_0, new KeywordAnalyzer(), IndexWriterConfig.OpenMode.CREATE_OR_APPEND, searcherPool);
-    }
-
-    public OptimisedStorage(Directory directory, Version version, Analyzer analyzer, IndexWriterConfig.OpenMode mode, SearcherPool pool) {
-        this.directory = directory;
-        this.version = version;
-        this.analyzer = analyzer;
-        this.mode = mode;
-        this.pool = pool;
+    public OptimisedStorage(IndexWriter indexWriter) {
+        writer = indexWriter;
+        pool = new LucenePool(indexWriter);
     }
 
     @Override
     public Number add(Sequence<Document> documents) throws IOException {
-        ensureIndexIsSetup();
         List<Document> docs = documents.toList();
         writer.addDocuments(docs);
         return docs.size();
@@ -69,7 +49,6 @@ public class OptimisedStorage implements LuceneStorage {
 
     @Override
     public void deleteNoCount(Query query) throws IOException {
-        ensureIndexIsSetup();
         writer.deleteDocuments(query);
     }
 
@@ -79,8 +58,7 @@ public class OptimisedStorage implements LuceneStorage {
 
         writer.deleteAll();
         flush();
-        close();
-        deleteAllSegments(directory);
+        deleteAllSegments(writer.getDirectory());
     }
 
     @Override
@@ -100,19 +78,18 @@ public class OptimisedStorage implements LuceneStorage {
 
     @Override
     public Searcher searcher() throws IOException {
-        ensureIndexIsSetup();
         return pool.searcher();
     }
 
     @Override
     public CheckIndex.Status check() throws IOException {
-        return new CheckIndex(directory).checkIndex();
+        return new CheckIndex(writer.getDirectory()).checkIndex();
     }
 
     @Override
     public void fix() throws IOException {
         synchronized (lock) {
-            CheckIndex checkIndex = new CheckIndex(directory);
+            CheckIndex checkIndex = new CheckIndex(writer.getDirectory());
             CheckIndex.Status status = checkIndex.checkIndex();
             checkIndex.fixIndex(status);
         }
@@ -120,12 +97,12 @@ public class OptimisedStorage implements LuceneStorage {
 
     @Override
     public void backup(final File folder) throws Exception {
-        ensureIndexIsSetup();
         Files.delete(folder);
         IndexCommit indexCommit = null;
+        SnapshotDeletionPolicy snapShotter = (SnapshotDeletionPolicy) writer.getConfig().getIndexDeletionPolicy();
         try {
             indexCommit = snapShotter.snapshot();
-            using(directoryFor(folder), copy(indexCommit.getFileNames()).apply(directory));
+            using(directoryFor(folder), copy(indexCommit.getFileNames()).apply(writer.getDirectory()));
         } finally {
             if(indexCommit != null) snapShotter.release(indexCommit);
             writer.deleteUnusedFiles();
@@ -155,19 +132,13 @@ public class OptimisedStorage implements LuceneStorage {
     @Override
     public void restore(File source) throws Exception {
         synchronized (lock) {
-            ensureIndexIsSetup();
             deleteAll();
             Directory sourceDirectory = directoryFor(source);
-            using(sourceDirectory, copy(list(sourceDirectory.listAll())).flip().apply(directory));
-            resetReadersAndWriters();
+            writer.addIndexes(sourceDirectory);
+            flush();
         }
     }
 
-
-    private void resetReadersAndWriters() throws IOException {
-        close();
-        pool.markAsDirty();
-    }
 
     private void deleteAllSegments(Directory directory) throws IOException {
         for (String segment : directory.listAll()) {
@@ -178,16 +149,12 @@ public class OptimisedStorage implements LuceneStorage {
 
     @Override
     public void close() throws IOException {
+        writer = null;
+        pool.close();
         try {
-            Closeables.close(writer);
-            writer = null;
-            snapShotter = null;
+            ensureDirectoryUnlocked();
         } catch (Throwable ignored) {
-        } finally {
-            try {
-                ensureDirectoryUnlocked();
-            } catch (Throwable ignored) {
-            }
+
         }
     }
 
@@ -198,18 +165,9 @@ public class OptimisedStorage implements LuceneStorage {
     }
 
     private void ensureDirectoryUnlocked() throws IOException {
-        if (IndexWriter.isLocked(directory)) {
-            IndexWriter.unlock(directory);
+        if (IndexWriter.isLocked(writer.getDirectory())) {
+            IndexWriter.unlock(writer.getDirectory());
         }
     }
 
-    private void ensureIndexIsSetup() throws IOException {
-        synchronized (lock) {
-            if (writer == null) {
-                snapShotter = new SnapshotDeletionPolicy(new KeepOnlyLastCommitDeletionPolicy());
-                writer = new IndexWriter(directory, new IndexWriterConfig(version, analyzer).setOpenMode(mode).setIndexDeletionPolicy(snapShotter));
-                writer.commit();
-            }
-        }
-    }
 }

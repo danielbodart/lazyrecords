@@ -1,11 +1,6 @@
 package com.googlecode.lazyrecords.lucene;
 
-import com.googlecode.lazyrecords.Facet;
-import com.googlecode.lazyrecords.FacetDrillDown;
-import com.googlecode.lazyrecords.FacetRequest;
-import com.googlecode.lazyrecords.FacetedRecords;
-import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.lazyrecords.Record;
+import com.googlecode.lazyrecords.*;
 import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
 import com.googlecode.totallylazy.Sequence;
 import org.apache.lucene.document.Document;
@@ -27,12 +22,10 @@ import static com.googlecode.lazyrecords.Facet.FacetEntry.facetEntry;
 import static com.googlecode.lazyrecords.FacetDrillDown.facetDrillDown;
 import static com.googlecode.lazyrecords.FacetRequest.facetRequest;
 import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
-import static com.googlecode.totallylazy.Predicates.alwaysTrue;
-import static com.googlecode.totallylazy.Predicates.is;
-import static com.googlecode.totallylazy.Predicates.where;
+import static com.googlecode.lazyrecords.lucene.PartitionedIndex.methods.indexWriter;
+import static com.googlecode.totallylazy.Predicates.*;
 import static com.googlecode.totallylazy.Sequences.one;
 import static com.googlecode.totallylazy.Sequences.sequence;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 
@@ -91,11 +84,11 @@ public class LuceneFacetedRecordsTest {
 
         final Facet<FacetEntry> authorFacet = facetResults.first();
         assertThat(authorFacet.key(), Matchers.<Keyword<?>>is(authorKeyword));
-        assertThat(authorFacet, contains(facetEntry("Mark Twain", 2), facetEntry("Charles Dickens", 1)));
+        assertThat(authorFacet, Matchers.contains(facetEntry("Mark Twain", 2), facetEntry("Charles Dickens", 1)));
 
         final Facet<FacetEntry> yearFacet = facetResults.second();
         assertThat(yearFacet.key(), Matchers.<Keyword<?>>is(yearKeyword));
-        assertThat(yearFacet, contains(facetEntry("2004", 2), facetEntry("2005", 1)));
+        assertThat(yearFacet, Matchers.contains(facetEntry("2004", 2), facetEntry("2005", 1)));
     }
 
     @Test
@@ -108,7 +101,7 @@ public class LuceneFacetedRecordsTest {
 
         final Facet<FacetEntry> yearFacet = facetResults.first();
         assertThat(yearFacet.key(), Matchers.<Keyword<?>>is(yearKeyword));
-        assertThat(yearFacet, contains(facetEntry("2004", 2)));
+        assertThat(yearFacet, Matchers.contains(facetEntry("2004", 2)));
     }
 
     @Test
@@ -135,7 +128,7 @@ public class LuceneFacetedRecordsTest {
 
         final Facet<FacetEntry> authorFacet = facetResults.first();
         assertThat(authorFacet.key(), Matchers.<Keyword<?>>is(publisherKeyword));
-        assertThat(authorFacet, contains(facetEntry("Bloomsbury", 1)));
+        assertThat(authorFacet, Matchers.contains(facetEntry("Bloomsbury", 1)));
     }
 
     @Test
@@ -154,7 +147,7 @@ public class LuceneFacetedRecordsTest {
 
         final Facet<FacetEntry> yearFacet = facetResults.second();
         assertThat(yearFacet.key(), Matchers.<Keyword<?>>is(yearKeyword));
-        assertThat(yearFacet, contains(facetEntry("2004", 2)));
+        assertThat(yearFacet, Matchers.contains(facetEntry("2004", 2)));
     }
 
     @Test
@@ -172,7 +165,7 @@ public class LuceneFacetedRecordsTest {
 
         final Facet<FacetEntry> facet = facetResults.first();
         assertThat(facet.key(), Matchers.<Keyword<?>>is(publishedKeyword));
-        assertThat(facet, contains(facetEntry(true, 1)));
+        assertThat(facet, Matchers.contains(facetEntry(true, 1)));
     }
 
     @Test
@@ -189,7 +182,7 @@ public class LuceneFacetedRecordsTest {
 
         final Facet<FacetEntry> authorFacet = facetResults.first();
         assertThat(authorFacet.key(), Matchers.<Keyword<?>>is(authorKeyword));
-        assertThat(authorFacet, contains(facetEntry("Mark Twain", 2), facetEntry("Charles Dickens", 1)));
+        assertThat(authorFacet, Matchers.contains(facetEntry("Mark Twain", 2), facetEntry("Charles Dickens", 1)));
 
         final Facet<FacetEntry> yearFacet = facetResults.second();
         assertThat(yearFacet.key(), Matchers.<Keyword<?>>is(yearKeyword));
@@ -211,7 +204,7 @@ public class LuceneFacetedRecordsTest {
 
         final Facet<FacetEntry> authorFacet = facetResults.first();
         assertThat(authorFacet.key(), Matchers.<Keyword<?>>is(authorKeyword));
-        assertThat(authorFacet, contains(facetEntry("Mark Twain", 1), facetEntry("Charles Dickens", 1)));
+        assertThat(authorFacet, Matchers.contains(facetEntry("Mark Twain", 1), facetEntry("Charles Dickens", 1)));
 
         final Facet<FacetEntry> yearFacet = facetResults.second();
         assertThat(yearFacet.key(), Matchers.<Keyword<?>>is(yearKeyword));
@@ -232,7 +225,7 @@ public class LuceneFacetedRecordsTest {
 
         final Facet<FacetEntry> authorFacet = facetResults.first();
         assertThat(authorFacet.key(), Matchers.<Keyword<?>>is(authorKeyword));
-        assertThat(authorFacet, contains(facetEntry("Mark Twain", 2), facetEntry("Charles Dickens", 1)));
+        assertThat(authorFacet, Matchers.contains(facetEntry("Mark Twain", 2), facetEntry("Charles Dickens", 1)));
 
         final Facet<FacetEntry> yearFacet = facetResults.second();
         assertThat(yearFacet.key(), Matchers.<Keyword<?>>is(yearKeyword));
@@ -240,7 +233,6 @@ public class LuceneFacetedRecordsTest {
     }
 
     private LuceneStorage testStorage() throws IOException {
-        final Directory directory = new RAMDirectory();
-        return new OptimisedStorage(directory, new LucenePool(directory));
+        return new OptimisedStorage(indexWriter(new RAMDirectory()));
     }
 }

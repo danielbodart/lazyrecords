@@ -1,12 +1,9 @@
 package com.googlecode.lazyrecords.lucene;
 
-import com.googlecode.lazyrecords.Definition;
-import com.googlecode.lazyrecords.Grammar;
-import com.googlecode.lazyrecords.IgnoreLogger;
-import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.lazyrecords.Record;
+import com.googlecode.lazyrecords.*;
 import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
 import com.googlecode.totallylazy.Sequence;
+import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,11 +14,11 @@ import static com.googlecode.lazyrecords.Definition.constructors.definition;
 import static com.googlecode.lazyrecords.Grammar.where;
 import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
 import static com.googlecode.lazyrecords.Record.constructors.record;
-import static com.googlecode.lazyrecords.lucene.CaseInsensitive.storage;
 import static com.googlecode.lazyrecords.lucene.IndexAnalyzerMigrator.migrate;
 import static com.googlecode.lazyrecords.lucene.IndexAnalyzerMigrator.migrateShardedIndex;
-import static com.googlecode.lazyrecords.lucene.LucenePartitionedIndex.partitionedIndex;
+import static com.googlecode.lazyrecords.lucene.PartitionedIndex.functions.mmapDirectory;
 import static com.googlecode.lazyrecords.lucene.PartitionedIndex.functions.noSyncDirectory;
+import static com.googlecode.lazyrecords.lucene.PartitionedIndex.methods.indexWriter;
 import static com.googlecode.totallylazy.Closeables.safeClose;
 import static com.googlecode.totallylazy.Files.emptyVMDirectory;
 import static com.googlecode.totallylazy.Sequences.sequence;
@@ -42,10 +39,13 @@ public class IndexAnalyzerMigratorTest {
     @Before
     public void setupCaseSensitiveTestIndex() throws IOException {
         indexDirectory = emptyVMDirectory("lucene-records-case-sensitive");
-        LucenePartitionedIndex partitionedIndex = partitionedIndex(noSyncDirectory(indexDirectory));
+        final NameToLuceneDirectoryFunction directoryActivator = new NameToLuceneDirectoryFunction(noSyncDirectory(indexDirectory));
+        final ClosingNameToLuceneStorageFunction storageActivator = new ClosingNameToLuceneStorageFunction(directoryActivator, new KeywordAnalyzer());
+        LucenePartitionedIndex partitionedIndex = new LucenePartitionedIndex(storageActivator);
         createTestShard(partitionedIndex, FIRST_DEFINITION);
         createTestShard(partitionedIndex, SECOND_DEFINITION);
         safeClose(partitionedIndex);
+        safeClose(storageActivator);
     }
 
     private void createTestShard(LucenePartitionedIndex index, Definition definition) throws IOException {
@@ -62,7 +62,8 @@ public class IndexAnalyzerMigratorTest {
         migrate(oldIndex, newIndex, new CaseInsensitive.StringPhraseAnalyzer());
         final NoSyncDirectory newDirectory = new NoSyncDirectory(newIndex);
 
-        assertShardHasBeenMigratedCorrectly(storage(newDirectory, new LucenePool(newDirectory)), FIRST_DEFINITION);
+        final OptimisedStorage newStorage = new OptimisedStorage(indexWriter(newDirectory, CaseInsensitive.queryAnalyzer()));
+        assertShardHasBeenMigratedCorrectly(newStorage, FIRST_DEFINITION);
 
         safeClose(newDirectory);
     }
@@ -71,7 +72,9 @@ public class IndexAnalyzerMigratorTest {
     public void shouldMigrateAShardedIndex() throws Exception {
         final File newIndex = emptyVMDirectory("lucene-records-migrated-sharded");
         migrateShardedIndex(indexDirectory, newIndex, new CaseInsensitive.StringPhraseAnalyzer());
-        final LucenePartitionedIndex migratedIndex = partitionedIndex(newIndex);
+        final NameToLuceneDirectoryFunction directoryActivator = new NameToLuceneDirectoryFunction(mmapDirectory(newIndex));
+        final ClosingNameToLuceneStorageFunction storageActivator = new ClosingNameToLuceneStorageFunction(directoryActivator, new KeywordAnalyzer());
+        final LucenePartitionedIndex migratedIndex = new LucenePartitionedIndex(storageActivator);
 
         assertShardHasBeenMigratedCorrectly(migratedIndex.partition(FIRST_DEFINITION), FIRST_DEFINITION);
         assertShardHasBeenMigratedCorrectly(migratedIndex.partition(SECOND_DEFINITION), SECOND_DEFINITION);

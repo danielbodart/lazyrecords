@@ -3,14 +3,19 @@ package com.googlecode.lazyrecords.lucene;
 import com.googlecode.lazyrecords.Definition;
 import com.googlecode.totallylazy.Files;
 import com.googlecode.totallylazy.Function1;
-import com.googlecode.totallylazy.Pair;
-import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.LazyException;
 import com.googlecode.totallylazy.collections.PersistentMap;
-import com.googlecode.totallylazy.collections.PersistentSortedMap;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.core.KeywordAnalyzer;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.KeepOnlyLastCommitDeletionPolicy;
+import org.apache.lucene.index.SnapshotDeletionPolicy;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.MMapDirectory;
 import org.apache.lucene.store.NIOFSDirectory;
 import org.apache.lucene.store.RAMDirectory;
+import org.apache.lucene.util.Version;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,6 +62,23 @@ public interface PartitionedIndex extends Persistence {
                     return new MMapDirectory(Files.directory(rootDirectory, definition));
                 }
             };
+        }
+    }
+
+    public static class methods {
+        public static IndexWriter indexWriter(Directory directory) {
+            return indexWriter(directory, new KeywordAnalyzer());
+        }
+
+        public static IndexWriter indexWriter(Directory directory, Analyzer analyzer) {
+            final IndexWriter writer;
+            try {
+                writer = new IndexWriter(directory, new IndexWriterConfig(Version.LUCENE_4_10_0, analyzer).setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND).setIndexDeletionPolicy(new SnapshotDeletionPolicy(new KeepOnlyLastCommitDeletionPolicy())));
+                writer.commit();
+                return writer;
+            } catch (IOException e) {
+                throw LazyException.lazyException(e);
+            }
         }
     }
 }
