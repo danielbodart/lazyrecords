@@ -1,9 +1,6 @@
 package com.googlecode.lazyrecords.lucene;
 
-import com.googlecode.totallylazy.Callable1;
-import com.googlecode.totallylazy.Files;
-import com.googlecode.totallylazy.Function2;
-import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.*;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CheckIndex;
 import org.apache.lucene.index.IndexCommit;
@@ -58,7 +55,6 @@ public class OptimisedStorage implements LuceneStorage {
 
         writer.deleteAll();
         flush();
-        deleteAllSegments(writer.getDirectory());
     }
 
     @Override
@@ -140,21 +136,17 @@ public class OptimisedStorage implements LuceneStorage {
     }
 
 
-    private void deleteAllSegments(Directory directory) throws IOException {
-        for (String segment : directory.listAll()) {
-            directory.deleteFile(segment);
-        }
-    }
-
-
     @Override
     public void close() throws IOException {
-        writer = null;
-        pool.close();
         try {
-            ensureDirectoryUnlocked();
+            writer = null;
+            pool.close();
         } catch (Throwable ignored) {
-
+        } finally {
+            try {
+                ensureDirectoryUnlocked();
+            } catch (Throwable ignored) {
+            }
         }
     }
 

@@ -55,7 +55,6 @@ public class LucenePartitionedIndex implements Closeable, Persistence, Partition
         for (LuceneStorage partition : partitions.values()) {
             partition.deleteAll();
         }
-        close();
     }
 
     @Override
