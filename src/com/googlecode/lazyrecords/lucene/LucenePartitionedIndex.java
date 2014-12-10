@@ -1,8 +1,7 @@
 package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.lazyrecords.Definition;
-import com.googlecode.totallylazy.Files;
-import com.googlecode.totallylazy.Maps;
+import com.googlecode.totallylazy.*;
 import com.googlecode.totallylazy.collections.PersistentMap;
 
 import java.io.Closeable;
@@ -12,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import static com.googlecode.totallylazy.Callers.call;
 import static com.googlecode.totallylazy.Closeables.safeClose;
 import static com.googlecode.totallylazy.Files.directory;
 import static com.googlecode.totallylazy.Sequences.sequence;
@@ -20,7 +20,7 @@ import static com.googlecode.totallylazy.Zip.zip;
 import static com.googlecode.totallylazy.collections.PersistentSortedMap.constructors.sortedMap;
 
 public class LucenePartitionedIndex implements Closeable, Persistence, PartitionedIndex {
-    private final ConcurrentMap<String, LuceneStorage> partitions = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Lazy<LuceneStorage>> partitions = new ConcurrentHashMap<>();
     private final NameToLuceneStorageFunction storageActivator;
 
     public LucenePartitionedIndex(NameToLuceneStorageFunction storageActivator) {
@@ -28,7 +28,7 @@ public class LucenePartitionedIndex implements Closeable, Persistence, Partition
     }
 
     public void close() throws IOException {
-        sequence(partitions.values()).each(safeClose());
+        sequence(partitions.values()).map(Callables.<LuceneStorage>call()).each(safeClose());
         partitions.clear();
     }
 
@@ -39,21 +39,29 @@ public class LucenePartitionedIndex implements Closeable, Persistence, Partition
 
     @Override
     public LuceneStorage partition(final String definition) throws IOException {
-        if (!partitions.containsKey(definition)) {
-            partitions.putIfAbsent(definition, storageActivator.getForName(definition));
-        }
-        return partitions.get(definition);
+        partitions.putIfAbsent(definition, storageFor(definition));
+        return call(partitions.get(definition));
+    }
+
+    private Lazy<LuceneStorage> storageFor(final String definition) {
+        return new Lazy<LuceneStorage>() {
+            @Override
+            protected LuceneStorage get() throws Exception {
+                return storageActivator.getForName(definition);
+            }
+        };
     }
 
     @Override
     public PersistentMap<String, LuceneStorage> partitions() {
-        return sortedMap(Maps.pairs(partitions));
+        final Sequence<Pair<String, Lazy<LuceneStorage>>> partitionsPairs = Maps.pairs(partitions);
+        return sortedMap(partitionsPairs.map(Callables.<String, Lazy<LuceneStorage>, LuceneStorage>second(Callables.<LuceneStorage>call())));
     }
 
     @Override
     public void deleteAll() throws IOException {
-        for (LuceneStorage partition : partitions.values()) {
-            partition.deleteAll();
+        for (Lazy<LuceneStorage> partition : partitions.values()) {
+            call(partition).deleteAll();
         }
     }
 
@@ -62,9 +70,9 @@ public class LucenePartitionedIndex implements Closeable, Persistence, Partition
         File destination = tempUnzipLocation();
         Files.delete(destination);
 
-        for (Map.Entry<String, LuceneStorage> entry : partitions.entrySet()) {
+        for (Map.Entry<String, Lazy<LuceneStorage>> entry : partitions.entrySet()) {
             String name = entry.getKey();
-            LuceneStorage luceneStorage = entry.getValue();
+            LuceneStorage luceneStorage = call(entry.getValue());
             luceneStorage.backup(directory(destination, name));
         }
 
