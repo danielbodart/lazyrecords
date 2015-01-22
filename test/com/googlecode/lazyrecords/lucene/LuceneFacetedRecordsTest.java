@@ -1,6 +1,11 @@
 package com.googlecode.lazyrecords.lucene;
 
-import com.googlecode.lazyrecords.*;
+import com.googlecode.lazyrecords.Facet;
+import com.googlecode.lazyrecords.FacetDrillDown;
+import com.googlecode.lazyrecords.FacetRequest;
+import com.googlecode.lazyrecords.FacetedRecords;
+import com.googlecode.lazyrecords.Keyword;
+import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
 import com.googlecode.totallylazy.Sequence;
 import org.apache.lucene.document.Document;
@@ -23,7 +28,10 @@ import static com.googlecode.lazyrecords.FacetDrillDown.facetDrillDown;
 import static com.googlecode.lazyrecords.FacetRequest.facetRequest;
 import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
 import static com.googlecode.lazyrecords.lucene.PartitionedIndex.methods.indexWriter;
-import static com.googlecode.totallylazy.Predicates.*;
+import static com.googlecode.totallylazy.Predicates.alwaysTrue;
+import static com.googlecode.totallylazy.Predicates.in;
+import static com.googlecode.totallylazy.Predicates.is;
+import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Sequences.one;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -37,7 +45,7 @@ public class LuceneFacetedRecordsTest {
     @Before
     public void setUp() throws Exception {
         final Directory taxonomyDirectory = new RAMDirectory();
-        luceneFacetedStorage = new TaxonomyFacetedLuceneStorage(testStorage(), taxonomyDirectory, new FacetsConfig());
+        luceneFacetedStorage = new TaxonomyFacetedLuceneStorage(testStorage(), taxonomyDirectory, new FacetsConfig(),  new FieldBasedFacetingPolicy(in("Author", "Year", "Publisher", "Published")));
         facetedRecords = new LuceneFacetedRecords(luceneFacetedStorage, new LuceneMappings(), new DoNothingLuceneQueryPreprocessor());
 
         luceneFacetedStorage.add(testDocuments());

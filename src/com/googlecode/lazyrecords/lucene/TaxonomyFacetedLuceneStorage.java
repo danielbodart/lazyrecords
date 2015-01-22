@@ -24,8 +24,9 @@ public class TaxonomyFacetedLuceneStorage extends DelegatingStorage implements F
 
     private final Lazy<DirectoryTaxonomyWriter> lazyTaxonomyWriter;
     private final FacetsConfig facetsConfig;
+    private final FieldBasedFacetingPolicy facetingPolicy;
 
-    public TaxonomyFacetedLuceneStorage(LuceneStorage storage, final Directory directory, FacetsConfig facetsConfig) {
+    public TaxonomyFacetedLuceneStorage(final LuceneStorage storage, final Directory directory, final FacetsConfig facetsConfig, FieldBasedFacetingPolicy facetingPolicy) {
         super(storage);
         this.lazyTaxonomyWriter = new Lazy<DirectoryTaxonomyWriter>() {
             @Override
@@ -33,7 +34,9 @@ public class TaxonomyFacetedLuceneStorage extends DelegatingStorage implements F
                 return new DirectoryTaxonomyWriter(directory);
             }
         };
+
         this.facetsConfig = facetsConfig;
+        this.facetingPolicy = facetingPolicy;
     }
 
     @Override
@@ -66,8 +69,9 @@ public class TaxonomyFacetedLuceneStorage extends DelegatingStorage implements F
         return new Callable2<Document, IndexableField, Document>() {
             @Override
             public Document call(Document document, IndexableField indexableField) throws Exception {
-                if (!indexableField.stringValue().isEmpty())
+                if (facetingPolicy.value().matches(indexableField.name()) && !indexableField.stringValue().isEmpty()) {
                     document.add(new FacetField(indexableField.name(), indexableField.stringValue()));
+                }
                 document.add(indexableField);
                 return document;
             }

@@ -1,5 +1,6 @@
 package com.googlecode.lazyrecords.lucene;
 
+import com.googlecode.totallylazy.Predicates;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.TextField;
@@ -27,7 +28,7 @@ public class FacetedLuceneStorageTest {
     public void setupStorage() throws Exception {
         taxonomyDirectory = new RAMDirectory();
         delegatedStorage = testStorage();
-        storage = new TaxonomyFacetedLuceneStorage(delegatedStorage, taxonomyDirectory, new FacetsConfig());
+        storage = new TaxonomyFacetedLuceneStorage(delegatedStorage, taxonomyDirectory, new FacetsConfig(), new FieldBasedFacetingPolicy(Predicates.is("name")));
     }
 
     @After
@@ -55,6 +56,19 @@ public class FacetedLuceneStorageTest {
 
         final Document document = new Document();
         document.add(new TextField("name", "", Field.Store.YES));
+        storage.add(one(document));
+        storage.flush();
+
+        assertThat(storage.taxonomyReader().getSize(), is(originalSize));
+        assertThat(delegatedStorage.count(new MatchAllDocsQuery()), is(1));
+    }
+
+    @Test
+    public void shouldNotGenerateTaxonomyInformationForFieldsThatShouldNotBeFaceted() throws Exception {
+        final int originalSize = storage.taxonomyReader().getSize();
+
+        final Document document = new Document();
+        document.add(new TextField("non-faceted-field", "value", Field.Store.YES));
         storage.add(one(document));
         storage.flush();
 

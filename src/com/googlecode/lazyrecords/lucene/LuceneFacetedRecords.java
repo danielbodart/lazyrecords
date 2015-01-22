@@ -21,6 +21,7 @@ import org.apache.lucene.facet.LabelAndValue;
 import org.apache.lucene.facet.taxonomy.TaxonomyReader;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TotalHitCountCollector;
 
 import java.io.IOException;
 
@@ -58,7 +59,7 @@ public class LuceneFacetedRecords implements FacetedRecords {
 
         final DrillSideways drillSideways = new DrillSideways(indexSearcher, facetsConfig, taxonomyReader);
         final DrillDownQuery drillDownQuery = drillDownQuery(processedQuery, drillDowns);
-        final DrillSidewaysResult drillSidewaysResult = drillSideways.search(drillDownQuery, indexSearcher.getIndexReader().maxDoc());
+        final DrillSidewaysResult drillSidewaysResult = drillSideways.search(drillDownQuery, new TotalHitCountCollector());
 
         return facetsRequests.map(new Mapper<Pair<Keyword<?>, Integer>, Facet<FacetEntry>>() {
             @Override
