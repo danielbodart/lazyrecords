@@ -19,7 +19,7 @@ import com.googlecode.totallylazy.numbers.Numbers;
 import java.util.List;
 
 import static com.googlecode.lazyrecords.SelectCallable.select;
-import static com.googlecode.lazyrecords.sql.expressions.SelectBuilder.from;
+import static com.googlecode.lazyrecords.sql.expressions.AnsiSelectBuilder.from;
 import static com.googlecode.totallylazy.numbers.Numbers.sum;
 
 public class SimpleDBRecords extends AbstractRecords {

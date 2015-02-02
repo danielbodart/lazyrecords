@@ -60,6 +60,7 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
 
     @Override
     public AnsiSelectBuilder select(final Sequence<? extends Keyword<?>> columns) {
+        if(columns.isEmpty()) return this;
         return select(grammar.selectList(columns));
     }
 
