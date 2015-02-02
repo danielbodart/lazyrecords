@@ -15,58 +15,13 @@ import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.Using;
 import com.googlecode.lazyrecords.sql.AnsiJoinBuilder;
 import com.googlecode.lazyrecords.sql.Merger;
-import com.googlecode.lazyrecords.sql.expressions.AnsiAsClause;
-import com.googlecode.lazyrecords.sql.expressions.AnsiDeleteStatement;
-import com.googlecode.lazyrecords.sql.expressions.AnsiDerivedColumn;
-import com.googlecode.lazyrecords.sql.expressions.AnsiFromClause;
-import com.googlecode.lazyrecords.sql.expressions.AnsiGroupByClause;
-import com.googlecode.lazyrecords.sql.expressions.AnsiJoinType;
-import com.googlecode.lazyrecords.sql.expressions.AnsiOrderByClause;
-import com.googlecode.lazyrecords.sql.expressions.AnsiPredicateExpression;
-import com.googlecode.lazyrecords.sql.expressions.AnsiSelectExpression;
-import com.googlecode.lazyrecords.sql.expressions.AnsiSelectList;
-import com.googlecode.lazyrecords.sql.expressions.AnsiSetClause;
-import com.googlecode.lazyrecords.sql.expressions.AnsiSortSpecification;
-import com.googlecode.lazyrecords.sql.expressions.AnsiUpdateStatement;
-import com.googlecode.lazyrecords.sql.expressions.AnsiWhereClause;
-import com.googlecode.lazyrecords.sql.expressions.AsClause;
-import com.googlecode.lazyrecords.sql.expressions.CompositeExpression;
-import com.googlecode.lazyrecords.sql.expressions.DerivedColumn;
-import com.googlecode.lazyrecords.sql.expressions.Expressible;
-import com.googlecode.lazyrecords.sql.expressions.Expression;
-import com.googlecode.lazyrecords.sql.expressions.ExpressionBuilder;
-import com.googlecode.lazyrecords.sql.expressions.Expressions;
-import com.googlecode.lazyrecords.sql.expressions.FromClause;
-import com.googlecode.lazyrecords.sql.expressions.GroupByClause;
-import com.googlecode.lazyrecords.sql.expressions.InsertStatement;
-import com.googlecode.lazyrecords.sql.expressions.JoinCondition;
-import com.googlecode.lazyrecords.sql.expressions.JoinSpecification;
-import com.googlecode.lazyrecords.sql.expressions.JoinType;
-import com.googlecode.lazyrecords.sql.expressions.NamedColumnsJoin;
-import com.googlecode.lazyrecords.sql.expressions.OrderByClause;
-import com.googlecode.lazyrecords.sql.expressions.OrderingSpecification;
-import com.googlecode.lazyrecords.sql.expressions.PredicateExpression;
-import com.googlecode.lazyrecords.sql.expressions.SelectExpression;
-import com.googlecode.lazyrecords.sql.expressions.SelectList;
-import com.googlecode.lazyrecords.sql.expressions.SetClause;
-import com.googlecode.lazyrecords.sql.expressions.SetQuantifier;
-import com.googlecode.lazyrecords.sql.expressions.SortSpecification;
-import com.googlecode.lazyrecords.sql.expressions.TableDefinition;
-import com.googlecode.lazyrecords.sql.expressions.UpdateStatement;
-import com.googlecode.lazyrecords.sql.expressions.ValueExpression;
-import com.googlecode.lazyrecords.sql.expressions.WhereClause;
-import com.googlecode.totallylazy.Binary;
-import com.googlecode.totallylazy.Callable1;
-import com.googlecode.totallylazy.Mapper;
-import com.googlecode.totallylazy.Option;
-import com.googlecode.totallylazy.Predicate;
-import com.googlecode.totallylazy.Sequence;
+import com.googlecode.lazyrecords.sql.expressions.*;
+import com.googlecode.totallylazy.*;
 import com.googlecode.totallylazy.annotations.multimethod;
 import com.googlecode.totallylazy.callables.JoinString;
 import com.googlecode.totallylazy.comparators.AscendingComparator;
 import com.googlecode.totallylazy.comparators.CompositeComparator;
 import com.googlecode.totallylazy.comparators.DescendingComparator;
-import com.googlecode.totallylazy.multi;
 import com.googlecode.totallylazy.predicates.AlwaysFalse;
 import com.googlecode.totallylazy.predicates.AlwaysTrue;
 import com.googlecode.totallylazy.predicates.AndPredicate;
@@ -148,9 +103,11 @@ public class AnsiSqlGrammar implements SqlGrammar {
                                              Definition fromClause,
                                              Option<Predicate<? super Record>> whereClause,
                                              Option<Comparator<? super Record>> orderByClause,
-                                             Option<Sequence<? extends Keyword<?>>> groupByClause) {
+                                             Option<Sequence<? extends Keyword<?>>> groupByClause,
+                                             Option<Integer> fetchClause) {
         return AnsiSelectExpression.selectExpression(setQuantifier, selectList(selectList), fromClause(fromClause),
-                whereClause(whereClause), orderByClause.map(functions.orderByClause(this)), groupByClause.map(functions.groupByClause(this)));
+                whereClause(whereClause), orderByClause.map(functions.orderByClause(this)), groupByClause.map(functions.groupByClause(this)),
+                fetchClause.map(FetchClause.functions.fetchClause()));
     }
 
     @Override
@@ -166,6 +123,11 @@ public class AnsiSqlGrammar implements SqlGrammar {
     @Override
     public OrderByClause orderByClause(Comparator<? super Record> orderBy) {
         return AnsiOrderByClause.orderByClause(sortSpecification(orderBy));
+    }
+
+    @Override
+    public FetchClause fetchClause(int number) {
+        return new AnsiFetchClause(number);
     }
 
     @Override

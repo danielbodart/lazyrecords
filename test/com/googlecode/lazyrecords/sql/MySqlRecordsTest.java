@@ -3,8 +3,7 @@ package com.googlecode.lazyrecords.sql;
 import com.googlecode.lazyrecords.Records;
 import com.googlecode.lazyrecords.RecordsContract;
 import com.googlecode.lazyrecords.SchemaGeneratingRecords;
-import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
-import com.googlecode.lazyrecords.sql.grammars.ColumnDatatypeMappings;
+import com.googlecode.lazyrecords.sql.grammars.MySqlGrammar;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
 import com.googlecode.totallylazy.Option;
@@ -20,7 +19,7 @@ import static com.googlecode.totallylazy.Closeables.safeClose;
 import static com.googlecode.totallylazy.Option.none;
 import static java.sql.DriverManager.getConnection;
 
-public class MysqlRecordsTest extends RecordsContract<Records> {
+public class MySqlRecordsTest extends RecordsContract<Records> {
     private SqlRecords sqlRecords;
     private static Option<Connection> connection = none();
 
@@ -39,7 +38,7 @@ public class MysqlRecordsTest extends RecordsContract<Records> {
     static Option<Connection> mySqlConnection() {
         try {
             Properties properties = new Properties();
-            properties.load(MysqlRecordsTest.class.getResourceAsStream("mysql.properties"));
+            properties.load(MySqlRecordsTest.class.getResourceAsStream("mysql.properties"));
             Class.forName(properties.getProperty("driver"));
             return Option.some(getConnection(properties.getProperty("url"), properties.getProperty("username"), properties.getProperty("password")));
         } catch (Exception e) {
@@ -49,7 +48,7 @@ public class MysqlRecordsTest extends RecordsContract<Records> {
 
     public Records createRecords() throws Exception {
         supportsRowCount = true;
-        SqlGrammar grammar = new AnsiSqlGrammar(ColumnDatatypeMappings.mysql());
+        SqlGrammar grammar = new MySqlGrammar();
         sqlRecords = new SqlRecords(connection.get(), new SqlMappings(), grammar, logger);
         SqlSchema sqlSchema = new SqlSchema(sqlRecords, grammar);
         sqlSchema.undefine(people);

@@ -8,6 +8,7 @@ import java.util.Set;
 import static com.googlecode.lazyrecords.sql.expressions.AnsiFromClause.fromClause;
 import static com.googlecode.lazyrecords.sql.expressions.AnsiQualifiedJoin.qualifiedJoin;
 import static com.googlecode.totallylazy.Sequences.*;
+import static com.googlecode.totallylazy.comparators.Comparators.descending;
 
 public class Merger {
     private final SelectExpression primary;
@@ -85,7 +86,15 @@ public class Merger {
                 mergeFromClause(),
                 mergeWhereClause(),
                 mergeOrderByClause(),
-                mergeGroupByClause());
+                mergeGroupByClause(),
+                mergeFetchClause());
+    }
+
+    private Option<FetchClause> mergeFetchClause() {
+        return sequence(primary.fetchClause(), secondary.fetchClause()).
+                flatMap(identity(FetchClause.class)).
+                sort(descending(FetchClause.functions.number())).
+                headOption();
     }
 
     private Option<GroupByClause> mergeGroupByClause() {

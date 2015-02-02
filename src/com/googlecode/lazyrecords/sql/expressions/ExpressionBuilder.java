@@ -24,6 +24,8 @@ public interface ExpressionBuilder extends Expressible, Expression {
 
     ExpressionBuilder groupBy(Sequence<? extends Keyword<?>> columns);
 
+    ExpressionBuilder fetch(int number);
+
     ExpressionBuilder count();
 
     ExpressionBuilder distinct();

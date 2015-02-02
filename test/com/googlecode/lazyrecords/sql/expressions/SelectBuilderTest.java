@@ -41,6 +41,12 @@ public class SelectBuilderTest {
     }
 
     @Test
+    public void canFetchACertainAmountOfRows() throws Exception {
+        Expression build = from(grammar, cars).select(make).fetch(10).build();
+        assertThat(build.text(), is("select make from cars fetch next 10 rows only"));
+    }
+
+    @Test
     public void selectMultipleColumns() throws Exception {
         Expression build = from(grammar, cars).select(make, model).build();
         assertThat(build.text(), is("select make, model from cars"));

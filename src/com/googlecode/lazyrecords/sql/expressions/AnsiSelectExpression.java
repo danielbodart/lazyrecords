@@ -1,11 +1,8 @@
 package com.googlecode.lazyrecords.sql.expressions;
 
 import com.googlecode.totallylazy.Option;
-import com.googlecode.totallylazy.Strings;
-import com.googlecode.totallylazy.predicates.LogicalPredicate;
 
 import static com.googlecode.lazyrecords.sql.expressions.Expressions.expression;
-import static com.googlecode.lazyrecords.sql.expressions.Expressions.text;
 import static com.googlecode.totallylazy.Predicates.is;
 import static com.googlecode.totallylazy.Predicates.not;
 import static com.googlecode.totallylazy.Predicates.where;
@@ -19,20 +16,23 @@ public class AnsiSelectExpression extends CompoundExpression implements SelectEx
     protected final Option<WhereClause> whereClause;
     protected final Option<OrderByClause> orderByClause;
     protected final Option<GroupByClause> groupByClause;
+    protected final Option<FetchClause> fetchClause;
 
     protected AnsiSelectExpression(Option<SetQuantifier> setQuantifier,
-                                 SelectList selectList,
-                                 FromClause fromClause,
-                                 Option<WhereClause> whereClause,
-                                 Option<OrderByClause> orderByClause,
-                                 Option<GroupByClause> groupByClause) {
+                                   SelectList selectList,
+                                   FromClause fromClause,
+                                   Option<WhereClause> whereClause,
+                                   Option<OrderByClause> orderByClause,
+                                   Option<GroupByClause> groupByClause,
+                                   Option<FetchClause> fetchClause) {
         super(
                 setQuantifier.isEmpty() ? select : select.join(expression(setQuantifier)),
                 selectList,
                 fromClause,
                 expression(whereClause),
                 expression(orderByClause),
-                expression(groupByClause)
+                expression(groupByClause),
+                expression(fetchClause)
         );
         this.setQuantifier = setQuantifier;
         this.selectList = selectList;
@@ -40,6 +40,7 @@ public class AnsiSelectExpression extends CompoundExpression implements SelectEx
         this.whereClause = whereClause;
         this.orderByClause = orderByClause;
         this.groupByClause = groupByClause;
+        this.fetchClause = fetchClause;
     }
 
     public static SelectExpression selectExpression(Option<SetQuantifier> setQuantifier,
@@ -47,13 +48,15 @@ public class AnsiSelectExpression extends CompoundExpression implements SelectEx
                                                     FromClause fromClause,
                                                     Option<WhereClause> whereClause,
                                                     Option<OrderByClause> orderByClause,
-                                                    Option<GroupByClause> groupByClause) {
+                                                    Option<GroupByClause> groupByClause,
+                                                    Option<FetchClause> fetchClause) {
         return new AnsiSelectExpression(setQuantifier.filter(where(Expressions.text(), not(equalIgnoringCase("all")))),
                 selectList,
                 fromClause,
                 whereClause,
                 orderByClause,
-                groupByClause);
+                groupByClause,
+                fetchClause);
     }
 
     public static String tableAlias(Number index) {
@@ -88,5 +91,10 @@ public class AnsiSelectExpression extends CompoundExpression implements SelectEx
     @Override
     public Option<GroupByClause> groupByClause() {
         return groupByClause;
+    }
+
+    @Override
+    public Option<FetchClause> fetchClause() {
+        return fetchClause;
     }
 }

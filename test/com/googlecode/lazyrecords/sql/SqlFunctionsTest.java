@@ -18,7 +18,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 
 import static com.googlecode.lazyrecords.Loggers.loggers;
-import static com.googlecode.lazyrecords.sql.MysqlRecordsTest.mySqlConnection;
+import static com.googlecode.lazyrecords.sql.MySqlRecordsTest.mySqlConnection;
 import static com.googlecode.totallylazy.Closeables.safeClose;
 import static com.googlecode.totallylazy.Streams.streams;
 import static junit.framework.Assert.fail;

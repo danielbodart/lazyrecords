@@ -27,6 +27,7 @@ import static com.googlecode.lazyrecords.sql.expressions.AnsiSelectBuilder.from;
 import static com.googlecode.lazyrecords.sql.expressions.DerivedColumn.methods.columnReferences;
 import static com.googlecode.lazyrecords.sql.expressions.GroupByClause.functions.groups;
 import static com.googlecode.lazyrecords.sql.expressions.SelectBuilder.aggregates;
+import static com.googlecode.totallylazy.Option.some;
 import static com.googlecode.totallylazy.Sequences.empty;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
@@ -89,6 +90,11 @@ public class AnsiJoinBuilder implements ExpressionBuilder {
     @Override
     public ExpressionBuilder groupBy(Sequence<? extends Keyword<?>> columns) {
         return groupBy(grammar.groupByClause(columns));
+    }
+
+    @Override
+    public ExpressionBuilder fetch(int number) {
+        return builder(from(grammar, expression).fetch(number).build());
     }
 
     public ExpressionBuilder groupBy(final GroupByClause groupByClause) {

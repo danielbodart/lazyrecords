@@ -18,6 +18,7 @@ import static com.googlecode.lazyrecords.sql.expressions.AnsiWhereClause.whereCl
 import static com.googlecode.lazyrecords.sql.expressions.SelectBuilder.aggregates;
 import static com.googlecode.lazyrecords.sql.expressions.SelectBuilder.countStar;
 import static com.googlecode.lazyrecords.sql.grammars.AndExpression.andExpression;
+import static com.googlecode.totallylazy.Option.none;
 import static com.googlecode.totallylazy.Option.some;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
@@ -41,7 +42,8 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
                 definition,
                 Option.<Predicate<? super Record>>none(),
                 Option.<Comparator<? super Record>>none(),
-                Option.<Sequence<? extends Keyword<?>>>none()
+                Option.<Sequence<? extends Keyword<?>>>none(),
+                none(Integer.class)
         ));
     }
 
@@ -67,7 +69,8 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
                 expression.fromClause(),
                 expression.whereClause(),
                 expression.orderByClause(),
-                expression.groupByClause()));
+                expression.groupByClause(),
+                expression.fetchClause()));
     }
 
     @Override
@@ -82,7 +85,8 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
                 expression.fromClause(),
                 some(combine(expression.whereClause(), whereClause)),
                 expression.orderByClause(),
-                expression.groupByClause()));
+                expression.groupByClause(),
+                expression.fetchClause()));
     }
 
     public static Option<WhereClause> combine(final Option<WhereClause> existing, final Option<WhereClause> additional) {
@@ -110,6 +114,18 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
         return groupBy(grammar.groupByClause(columns));
     }
 
+    @Override
+    public AnsiSelectBuilder fetch(int number) {
+        return from(grammar, selectExpression(
+                expression.setQuantifier(),
+                expression.selectList(),
+                expression.fromClause(),
+                expression.whereClause(),
+                expression.orderByClause(),
+                expression.groupByClause(),
+                some(grammar.fetchClause(number))));
+    }
+
     public AnsiSelectBuilder groupBy(final GroupByClause groupByClause) {
         return from(grammar, selectExpression(
                 expression.setQuantifier(),
@@ -117,7 +133,8 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
                 expression.fromClause(),
                 expression.whereClause(),
                 expression.orderByClause(),
-                some(groupByClause)));
+                some(groupByClause),
+                expression.fetchClause()));
     }
 
     public AnsiSelectBuilder orderBy(final OrderByClause orderByClause) {
@@ -127,7 +144,8 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
                 expression.fromClause(),
                 expression.whereClause(),
                 some(orderByClause),
-                expression.groupByClause()));
+                expression.groupByClause(),
+                expression.fetchClause()));
     }
 
     @Override
@@ -138,7 +156,8 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
                 expression.fromClause(),
                 expression.whereClause(),
                 Option.<OrderByClause>none(),
-                expression.groupByClause()));
+                expression.groupByClause(),
+                expression.fetchClause()));
     }
 
     @Override
@@ -149,7 +168,8 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
                 expression.fromClause(),
                 expression.whereClause(),
                 expression.orderByClause(),
-                expression.groupByClause()));
+                expression.groupByClause(),
+                expression.fetchClause()));
     }
 
     @Override

@@ -1,35 +1,12 @@
 package com.googlecode.lazyrecords.sql;
 
-import com.googlecode.lazyrecords.Aggregates;
-import com.googlecode.lazyrecords.ClientComputation;
-import com.googlecode.lazyrecords.ImmutableKeyword;
-import com.googlecode.lazyrecords.Join;
-import com.googlecode.lazyrecords.Keyword;
-import com.googlecode.lazyrecords.Logger;
-import com.googlecode.lazyrecords.Loggers;
+import com.googlecode.lazyrecords.*;
 import com.googlecode.lazyrecords.Record;
-import com.googlecode.lazyrecords.RecordTo;
-import com.googlecode.lazyrecords.ReducingRecordsMapper;
-import com.googlecode.lazyrecords.SelectCallable;
 import com.googlecode.lazyrecords.sql.expressions.CompoundExpression;
 import com.googlecode.lazyrecords.sql.expressions.Expressible;
 import com.googlecode.lazyrecords.sql.expressions.Expression;
 import com.googlecode.lazyrecords.sql.expressions.ExpressionBuilder;
-import com.googlecode.totallylazy.Callable1;
-import com.googlecode.totallylazy.Callable2;
-import com.googlecode.totallylazy.Function;
-import com.googlecode.totallylazy.Functions;
-import com.googlecode.totallylazy.Group;
-import com.googlecode.totallylazy.Maps;
-import com.googlecode.totallylazy.Option;
-import com.googlecode.totallylazy.Pair;
-import com.googlecode.totallylazy.Predicate;
-import com.googlecode.totallylazy.Reducer;
-import com.googlecode.totallylazy.Sequence;
-import com.googlecode.totallylazy.Sequences;
-import com.googlecode.totallylazy.Sets;
-import com.googlecode.totallylazy.Unchecked;
-import com.googlecode.totallylazy.Value;
+import com.googlecode.totallylazy.*;
 
 import java.util.Comparator;
 import java.util.Iterator;
@@ -139,6 +116,11 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
             logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.MESSAGE, "Unsupported comparator passed to 'sortBy', moving computation to client"), pair(Loggers.COMPARATOR, comparator)));
             return super.sortBy(comparator);
         }
+    }
+
+    @Override
+    public Sequence<T> take(int count) {
+        return build(selectBuilder.fetch(count));
     }
 
     @Override

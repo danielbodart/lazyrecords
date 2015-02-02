@@ -9,21 +9,7 @@ import com.googlecode.lazyrecords.Joiner;
 import com.googlecode.lazyrecords.Keyword;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.RecordTo;
-import com.googlecode.lazyrecords.sql.AnsiJoinBuilder;
-import com.googlecode.lazyrecords.sql.expressions.AsClause;
-import com.googlecode.lazyrecords.sql.expressions.DerivedColumn;
-import com.googlecode.lazyrecords.sql.expressions.Expression;
-import com.googlecode.lazyrecords.sql.expressions.ExpressionBuilder;
-import com.googlecode.lazyrecords.sql.expressions.FromClause;
-import com.googlecode.lazyrecords.sql.expressions.GroupByClause;
-import com.googlecode.lazyrecords.sql.expressions.JoinSpecification;
-import com.googlecode.lazyrecords.sql.expressions.JoinType;
-import com.googlecode.lazyrecords.sql.expressions.OrderByClause;
-import com.googlecode.lazyrecords.sql.expressions.SelectExpression;
-import com.googlecode.lazyrecords.sql.expressions.SelectList;
-import com.googlecode.lazyrecords.sql.expressions.SetQuantifier;
-import com.googlecode.lazyrecords.sql.expressions.ValueExpression;
-import com.googlecode.lazyrecords.sql.expressions.WhereClause;
+import com.googlecode.lazyrecords.sql.expressions.*;
 import com.googlecode.totallylazy.Callable1;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.Mapper;
@@ -40,7 +26,7 @@ public interface SqlGrammar {
                                       Definition fromClause,
                                       Option<Predicate<? super Record>> whereClause,
                                       Option<Comparator<? super Record>> orderByClause,
-                                      Option<Sequence<? extends Keyword<?>>> groupByClause);
+                                      Option<Sequence<? extends Keyword<?>>> groupByClause, Option<Integer> fetchClause);
 
     SelectList selectList(Sequence<? extends Keyword<?>> select);
 
@@ -49,6 +35,8 @@ public interface SqlGrammar {
     WhereClause whereClause(Predicate<? super Record> where);
 
     OrderByClause orderByClause(Comparator<? super Record> orderBy);
+
+    FetchClause fetchClause(int number);
 
     GroupByClause groupByClause(Sequence<? extends Keyword<?>> columns);
 

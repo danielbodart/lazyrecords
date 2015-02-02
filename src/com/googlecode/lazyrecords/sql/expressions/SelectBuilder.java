@@ -23,6 +23,8 @@ import java.util.Comparator;
 import static com.googlecode.lazyrecords.Keyword.constructors.keyword;
 import static com.googlecode.lazyrecords.sql.expressions.AnsiSetQuantifier.ALL;
 import static com.googlecode.lazyrecords.sql.expressions.AnsiSetQuantifier.DISTINCT;
+import static com.googlecode.totallylazy.Option.none;
+import static com.googlecode.totallylazy.Option.some;
 import static com.googlecode.totallylazy.Predicates.and;
 import static com.googlecode.totallylazy.Sequences.join;
 import static com.googlecode.totallylazy.Sequences.sequence;
@@ -36,13 +38,15 @@ public class SelectBuilder implements Expression, ExpressionBuilder {
     private final Option<Predicate<? super Record>> where;
     private final Option<Comparator<? super Record>> comparator;
     private final Option<Sequence<? extends Keyword<?>>> groupBy;
+    private final Option<Integer> fetch;
     private final Lazy<SelectExpression> value;
 
     private SelectBuilder(SqlGrammar grammar, SetQuantifier setQuantifier, Sequence<? extends Keyword<?>> select,
-                          Definition table, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> comparator, Option<Sequence<? extends Keyword<?>>> groupBy) {
+                          Definition table, Option<Predicate<? super Record>> where, Option<Comparator<? super Record>> comparator, Option<Sequence<? extends Keyword<?>>> groupBy, Option<Integer> fetch) {
         this.grammar = grammar;
         this.setQuantifier = setQuantifier;
         this.groupBy = groupBy;
+        this.fetch = fetch;
         this.select = select.isEmpty() ? table.fields() : select;
         this.table = table;
         this.where = where;
@@ -59,7 +63,8 @@ public class SelectBuilder implements Expression, ExpressionBuilder {
                         table,
                         where,
                         comparator,
-                        groupBy);
+                        groupBy,
+                        fetch);
             }
         };
     }
@@ -79,7 +84,7 @@ public class SelectBuilder implements Expression, ExpressionBuilder {
     }
 
     public static SelectBuilder from(SqlGrammar grammar, Definition table) {
-        return new SelectBuilder(grammar, ALL, table.fields(), table, Option.<Predicate<? super Record>>none(), Option.<Comparator<? super Record>>none(), Option.<Sequence<? extends Keyword<?>>>none());
+        return new SelectBuilder(grammar, ALL, table.fields(), table, Option.<Predicate<? super Record>>none(), Option.<Comparator<? super Record>>none(), Option.<Sequence<? extends Keyword<?>>>none(), none(Integer.class));
     }
 
     @Override
@@ -100,17 +105,17 @@ public class SelectBuilder implements Expression, ExpressionBuilder {
                 });
             }
         });
-        return new SelectBuilder(grammar, setQuantifier, qualifiedColumns, table, where, comparator, groupBy);
+        return new SelectBuilder(grammar, setQuantifier, qualifiedColumns, table, where, comparator, groupBy, fetch);
     }
 
     @Override
     public SelectBuilder filter(Predicate<? super Record> predicate) {
-        return new SelectBuilder(grammar, setQuantifier, select, table, Option.<Predicate<? super Record>>some(combine(where, predicate)), comparator, groupBy);
+        return new SelectBuilder(grammar, setQuantifier, select, table, Option.<Predicate<? super Record>>some(combine(where, predicate)), comparator, groupBy, fetch);
     }
 
     @Override
     public SelectBuilder orderBy(Comparator<? super Record> comparator) {
-        return new SelectBuilder(grammar, setQuantifier, select, table, where, Option.<Comparator<? super Record>>some(comparator), groupBy);
+        return new SelectBuilder(grammar, setQuantifier, select, table, where, Option.<Comparator<? super Record>>some(comparator), groupBy, fetch);
     }
 
     @Override
@@ -120,17 +125,22 @@ public class SelectBuilder implements Expression, ExpressionBuilder {
 
     @Override
     public ExpressionBuilder groupBy(Sequence<? extends Keyword<?>> columns) {
-        return new SelectBuilder(grammar, setQuantifier, select, table, where, comparator, Option.<Sequence<? extends Keyword<?>>>some(columns));
+        return new SelectBuilder(grammar, setQuantifier, select, table, where, comparator, Option.<Sequence<? extends Keyword<?>>>some(columns), fetch);
+    }
+
+    @Override
+    public ExpressionBuilder fetch(int number) {
+        return new SelectBuilder(grammar, setQuantifier, select, table, where, comparator, groupBy, some(number));
     }
 
     @Override
     public SelectBuilder count() {
-        return new SelectBuilder(grammar, setQuantifier, countStar(), table, where, Option.<Comparator<? super Record>>none(), groupBy);
+        return new SelectBuilder(grammar, setQuantifier, countStar(), table, where, Option.<Comparator<? super Record>>none(), groupBy, fetch);
     }
 
     @Override
     public SelectBuilder distinct() {
-        return new SelectBuilder(grammar, DISTINCT, select, table, where, comparator, groupBy);
+        return new SelectBuilder(grammar, DISTINCT, select, table, where, comparator, groupBy, fetch);
     }
 
     @Override
