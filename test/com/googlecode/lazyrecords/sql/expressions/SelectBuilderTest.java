@@ -41,6 +41,12 @@ public class SelectBuilderTest {
     }
 
     @Test
+    public void canOffsetACertainAmountOfRows() throws Exception {
+        Expression build = from(grammar, cars).select(make).offset(10).build();
+        assertThat(build.text(), is("select make from cars offset 10 rows"));
+    }
+
+    @Test
     public void canFetchACertainAmountOfRows() throws Exception {
         Expression build = from(grammar, cars).select(make).fetch(10).build();
         assertThat(build.text(), is("select make from cars fetch next 10 rows only"));

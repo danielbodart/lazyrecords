@@ -43,6 +43,7 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
                 Option.<Predicate<? super Record>>none(),
                 Option.<Comparator<? super Record>>none(),
                 Option.<Sequence<? extends Keyword<?>>>none(),
+                none(Integer.class),
                 none(Integer.class)
         ));
     }
@@ -70,6 +71,7 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
                 expression.whereClause(),
                 expression.orderByClause(),
                 expression.groupByClause(),
+                expression.offsetClause(),
                 expression.fetchClause()));
     }
 
@@ -86,6 +88,7 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
                 some(combine(expression.whereClause(), whereClause)),
                 expression.orderByClause(),
                 expression.groupByClause(),
+                expression.offsetClause(),
                 expression.fetchClause()));
     }
 
@@ -115,6 +118,19 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
     }
 
     @Override
+    public AnsiSelectBuilder offset(int number) {
+        return from(grammar, selectExpression(
+                expression.setQuantifier(),
+                expression.selectList(),
+                expression.fromClause(),
+                expression.whereClause(),
+                expression.orderByClause(),
+                expression.groupByClause(),
+                some(grammar.offsetClause(number)),
+                expression.fetchClause()));
+    }
+
+    @Override
     public AnsiSelectBuilder fetch(int number) {
         return from(grammar, selectExpression(
                 expression.setQuantifier(),
@@ -123,6 +139,7 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
                 expression.whereClause(),
                 expression.orderByClause(),
                 expression.groupByClause(),
+                expression.offsetClause(),
                 some(grammar.fetchClause(number))));
     }
 
@@ -134,6 +151,7 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
                 expression.whereClause(),
                 expression.orderByClause(),
                 some(groupByClause),
+                expression.offsetClause(),
                 expression.fetchClause()));
     }
 
@@ -145,6 +163,7 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
                 expression.whereClause(),
                 some(orderByClause),
                 expression.groupByClause(),
+                expression.offsetClause(),
                 expression.fetchClause()));
     }
 
@@ -157,6 +176,7 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
                 expression.whereClause(),
                 Option.<OrderByClause>none(),
                 expression.groupByClause(),
+                expression.offsetClause(),
                 expression.fetchClause()));
     }
 
@@ -169,6 +189,7 @@ public class AnsiSelectBuilder implements ExpressionBuilder {
                 expression.whereClause(),
                 expression.orderByClause(),
                 expression.groupByClause(),
+                expression.offsetClause(),
                 expression.fetchClause()));
     }
 

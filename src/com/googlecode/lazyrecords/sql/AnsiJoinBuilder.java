@@ -93,6 +93,11 @@ public class AnsiJoinBuilder implements ExpressionBuilder {
     }
 
     @Override
+    public ExpressionBuilder offset(int number) {
+        return builder(from(grammar, expression).offset(number).build());
+    }
+
+    @Override
     public ExpressionBuilder fetch(int number) {
         return builder(from(grammar, expression).fetch(number).build());
     }

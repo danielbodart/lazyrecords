@@ -5,14 +5,14 @@ import org.junit.Test;
 import static com.googlecode.totallylazy.matchers.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-public class FetchClauseTest {
+public class OffsetClauseTest {
     @Test
     public void supportsAnsiSql() throws Exception {
-        assertThat(new AnsiFetchClause(20).toString(), is("fetch next 20 rows only"));
+        assertThat(new AnsiOffsetClause(20).toString(), is("offset 20 rows"));
     }
 
     @Test
     public void supportsMySql() throws Exception {
-        assertThat(new MySqlLimitClause(20).toString(), is("limit 20"));
+        assertThat(new MySqlOffsetClause(20).toString(), is("offset 20"));
     }
 }

@@ -26,7 +26,9 @@ public interface SqlGrammar {
                                       Definition fromClause,
                                       Option<Predicate<? super Record>> whereClause,
                                       Option<Comparator<? super Record>> orderByClause,
-                                      Option<Sequence<? extends Keyword<?>>> groupByClause, Option<Integer> fetchClause);
+                                      Option<Sequence<? extends Keyword<?>>> groupByClause,
+                                      Option<Integer> offsetClause,
+                                      Option<Integer> fetchClause);
 
     SelectList selectList(Sequence<? extends Keyword<?>> select);
 
@@ -35,6 +37,8 @@ public interface SqlGrammar {
     WhereClause whereClause(Predicate<? super Record> where);
 
     OrderByClause orderByClause(Comparator<? super Record> orderBy);
+
+    OffsetClause offsetClause(int number);
 
     FetchClause fetchClause(int number);
 

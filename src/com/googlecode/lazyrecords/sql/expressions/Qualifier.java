@@ -37,6 +37,7 @@ public class Qualifier extends AbstractQualifier {
     @multimethod public SelectExpression qualify(SelectExpression expression) {
         return AnsiSelectExpression.selectExpression(expression.setQuantifier(), qualify(expression.selectList()),
                 qualify(expression.fromClause()), qualify(expression.whereClause()), qualify(expression.orderByClause()), qualify(expression.groupByClause()),
+                expression.offsetClause(),
                 expression.fetchClause());
     }
 

@@ -53,6 +53,7 @@ import static com.googlecode.totallylazy.Predicates.always;
 import static com.googlecode.totallylazy.Predicates.in;
 import static com.googlecode.totallylazy.Predicates.where;
 import static com.googlecode.totallylazy.Sequences.empty;
+import static com.googlecode.totallylazy.matchers.IterableMatcher.hasExactly;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -238,6 +239,15 @@ public class SqlRecordsTest extends RecordsContract<Records> {
         final Sequence<String> results = recordResults.map(concatIsbn);
         assertThat(results, containsInAnyOrder("urn:isbn:0099322617,urn:isbn:0132350882", "urn:isbn:0140289208"));
     }
+
+    @Test @Override
+    public void canCombineDropAndTake() throws Exception {
+        assertThat(records.get(people).sortBy(firstName).drop(1).take(1).size(), NumberMatcher.is(1));
+        // TODO Fix so it does it like LuceneSequence
+//        assertThat(records.get(people).sortBy(firstName).take(2).drop(1).size(), NumberMatcher.is(1));
+//        assertThat(records.get(people).sortBy(firstName).drop(1).take(2).drop(1).map(firstName), hasExactly("matt"));
+    }
+
 
     protected void assertSql(final String expected) {
         assertEquals(expected, sql());

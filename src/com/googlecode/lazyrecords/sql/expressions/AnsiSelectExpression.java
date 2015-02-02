@@ -16,6 +16,7 @@ public class AnsiSelectExpression extends CompoundExpression implements SelectEx
     protected final Option<WhereClause> whereClause;
     protected final Option<OrderByClause> orderByClause;
     protected final Option<GroupByClause> groupByClause;
+    protected final Option<OffsetClause> offsetClause;
     protected final Option<FetchClause> fetchClause;
 
     protected AnsiSelectExpression(Option<SetQuantifier> setQuantifier,
@@ -24,6 +25,7 @@ public class AnsiSelectExpression extends CompoundExpression implements SelectEx
                                    Option<WhereClause> whereClause,
                                    Option<OrderByClause> orderByClause,
                                    Option<GroupByClause> groupByClause,
+                                   Option<OffsetClause> offsetClause,
                                    Option<FetchClause> fetchClause) {
         super(
                 setQuantifier.isEmpty() ? select : select.join(expression(setQuantifier)),
@@ -32,6 +34,7 @@ public class AnsiSelectExpression extends CompoundExpression implements SelectEx
                 expression(whereClause),
                 expression(orderByClause),
                 expression(groupByClause),
+                expression(offsetClause),
                 expression(fetchClause)
         );
         this.setQuantifier = setQuantifier;
@@ -40,6 +43,7 @@ public class AnsiSelectExpression extends CompoundExpression implements SelectEx
         this.whereClause = whereClause;
         this.orderByClause = orderByClause;
         this.groupByClause = groupByClause;
+        this.offsetClause = offsetClause;
         this.fetchClause = fetchClause;
     }
 
@@ -49,6 +53,7 @@ public class AnsiSelectExpression extends CompoundExpression implements SelectEx
                                                     Option<WhereClause> whereClause,
                                                     Option<OrderByClause> orderByClause,
                                                     Option<GroupByClause> groupByClause,
+                                                    Option<OffsetClause> offsetClause,
                                                     Option<FetchClause> fetchClause) {
         return new AnsiSelectExpression(setQuantifier.filter(where(Expressions.text(), not(equalIgnoringCase("all")))),
                 selectList,
@@ -56,6 +61,7 @@ public class AnsiSelectExpression extends CompoundExpression implements SelectEx
                 whereClause,
                 orderByClause,
                 groupByClause,
+                offsetClause,
                 fetchClause);
     }
 
@@ -91,6 +97,11 @@ public class AnsiSelectExpression extends CompoundExpression implements SelectEx
     @Override
     public Option<GroupByClause> groupByClause() {
         return groupByClause;
+    }
+
+    @Override
+    public Option<OffsetClause> offsetClause() {
+        return offsetClause;
     }
 
     @Override

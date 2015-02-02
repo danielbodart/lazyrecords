@@ -119,6 +119,11 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
     }
 
     @Override
+    public Sequence<T> drop(int count) {
+        return build(selectBuilder.offset(count));
+    }
+
+    @Override
     public Sequence<T> take(int count) {
         return build(selectBuilder.fetch(count));
     }

@@ -104,9 +104,11 @@ public class AnsiSqlGrammar implements SqlGrammar {
                                              Option<Predicate<? super Record>> whereClause,
                                              Option<Comparator<? super Record>> orderByClause,
                                              Option<Sequence<? extends Keyword<?>>> groupByClause,
-                                             Option<Integer> fetchClause) {
+                                             Option<Integer> offsetClause, Option<Integer> fetchClause) {
         return AnsiSelectExpression.selectExpression(setQuantifier, selectList(selectList), fromClause(fromClause),
-                whereClause(whereClause), orderByClause.map(functions.orderByClause(this)), groupByClause.map(functions.groupByClause(this)),
+                whereClause(whereClause), orderByClause.map(functions.orderByClause(this)),
+                groupByClause.map(functions.groupByClause(this)),
+                offsetClause.map(OffsetClause.functions.offsetClause()),
                 fetchClause.map(FetchClause.functions.fetchClause()));
     }
 
@@ -123,6 +125,11 @@ public class AnsiSqlGrammar implements SqlGrammar {
     @Override
     public OrderByClause orderByClause(Comparator<? super Record> orderBy) {
         return AnsiOrderByClause.orderByClause(sortSpecification(orderBy));
+    }
+
+    @Override
+    public OffsetClause offsetClause(int number) {
+        return new AnsiOffsetClause(number);
     }
 
     @Override

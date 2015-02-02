@@ -87,7 +87,15 @@ public class Merger {
                 mergeWhereClause(),
                 mergeOrderByClause(),
                 mergeGroupByClause(),
+                mergeOffsetClause(),
                 mergeFetchClause());
+    }
+
+    private Option<OffsetClause> mergeOffsetClause() {
+        return sequence(primary.offsetClause(), secondary.offsetClause()).
+                flatMap(identity(OffsetClause.class)).
+                sort(descending(OffsetClause.functions.number())).
+                headOption();
     }
 
     private Option<FetchClause> mergeFetchClause() {
