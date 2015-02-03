@@ -120,12 +120,22 @@ public class SqlSequence<T> extends Sequence<T> implements Expressible {
 
     @Override
     public Sequence<T> drop(int count) {
-        return build(selectBuilder.offset(count));
+        try {
+            return build(selectBuilder.offset(count));
+        } catch (UnsupportedOperationException e) {
+            logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.MESSAGE, String.format("Unsupported operation in 'drop', moving computation to client due to exception: %s", e.getMessage()))));
+            return super.drop(count);
+        }
     }
 
     @Override
     public Sequence<T> take(int count) {
-        return build(selectBuilder.fetch(count));
+        try {
+            return build(selectBuilder.fetch(count));
+        } catch (UnsupportedOperationException e) {
+            logger.log(Maps.map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.MESSAGE, String.format("Unsupported operation in 'take', moving computation to client due to exception: %s", e.getMessage()))));
+            return super.take(count);
+        }
     }
 
     @Override
