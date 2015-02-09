@@ -21,7 +21,7 @@ public class ClosingNameToLuceneStorageFunction implements NameToLuceneStorageFu
     }
 
     @Override
-    public LuceneStorage getForName(String name) {
+    public synchronized LuceneStorage getForName(String name) {
         final Directory directory = closeables.manage(directoryActivator.value().apply(name));
         final IndexWriter indexWriter = closeables.manage(indexWriter(directory, analyzer));
         return closeables.manage(new OptimisedStorage(indexWriter));
