@@ -1,10 +1,6 @@
 package com.googlecode.lazyrecords.sql.mappings;
 
-import java.sql.CallableStatement;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 
 public class IntegerMapping implements SqlMapping<Integer> {
     public Integer getValue(ResultSet resultSet, Integer index) throws SQLException {
@@ -19,7 +15,11 @@ public class IntegerMapping implements SqlMapping<Integer> {
     }
 
     public void setValue(PreparedStatement statement, Integer index, Integer value) throws SQLException {
-        statement.setInt(index, value);
+        if(value == null) {
+            statement.setNull(index, type());
+        } else {
+            statement.setInt(index, value);
+        }
     }
 
     @Override

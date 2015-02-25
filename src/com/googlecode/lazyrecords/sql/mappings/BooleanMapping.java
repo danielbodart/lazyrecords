@@ -1,10 +1,6 @@
 package com.googlecode.lazyrecords.sql.mappings;
 
-import java.sql.CallableStatement;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 
 public class BooleanMapping implements SqlMapping<Boolean> {
     public Boolean getValue(ResultSet resultSet, Integer index) throws SQLException {
@@ -17,7 +13,11 @@ public class BooleanMapping implements SqlMapping<Boolean> {
     }
 
     public void setValue(PreparedStatement statement, Integer index, Boolean value) throws SQLException {
-        statement.setBoolean(index, value);
+        if(value == null) {
+            statement.setNull(index, type());
+        } else {
+            statement.setBoolean(index, value);
+        }
     }
 
     @Override

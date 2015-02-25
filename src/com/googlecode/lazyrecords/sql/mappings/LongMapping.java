@@ -1,11 +1,6 @@
 package com.googlecode.lazyrecords.sql.mappings;
 
-import java.math.BigDecimal;
-import java.sql.CallableStatement;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 
 public class LongMapping implements SqlMapping<Long> {
     public Long getValue(ResultSet resultSet, Integer index) throws SQLException {
@@ -20,7 +15,11 @@ public class LongMapping implements SqlMapping<Long> {
     }
 
     public void setValue(PreparedStatement statement, Integer index, Long value) throws SQLException {
-        statement.setLong(index, value);
+        if(value == null) {
+            statement.setNull(index, type());
+        } else {
+            statement.setLong(index, value);
+        }
     }
 
     @Override
