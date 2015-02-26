@@ -4,12 +4,14 @@ import java.sql.*;
 
 public class BooleanMapping implements SqlMapping<Boolean> {
     public Boolean getValue(ResultSet resultSet, Integer index) throws SQLException {
-        return resultSet.getBoolean(index);
+        boolean result = resultSet.getBoolean(index);
+        return resultSet.wasNull() ? null : result;
     }
 
     @Override
     public Boolean getValue(CallableStatement statement, Integer index) throws SQLException {
-        return statement.getBoolean(index);
+        boolean result = statement.getBoolean(index);
+        return statement.wasNull() ? null : result;
     }
 
     public void setValue(PreparedStatement statement, Integer index, Boolean value) throws SQLException {
