@@ -14,23 +14,11 @@ import com.googlecode.lazyrecords.sql.expressions.Expressions;
 import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
-import com.googlecode.totallylazy.CloseableList;
-import com.googlecode.totallylazy.Computation;
-import com.googlecode.totallylazy.Function;
-import com.googlecode.totallylazy.Function1;
-import com.googlecode.totallylazy.Functions;
-import com.googlecode.totallylazy.LazyException;
-import com.googlecode.totallylazy.Maps;
-import com.googlecode.totallylazy.Option;
-import com.googlecode.totallylazy.Pair;
-import com.googlecode.totallylazy.Predicate;
-import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.*;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -100,8 +88,8 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
     }
 
     public Number update(final Sequence<Expression> expressions) {
-        if(expressions.isEmpty()) return 0;
-        Map<String, Object> log = Maps.<String, Object>map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.EXPRESSION, expressions));
+        if (expressions.isEmpty()) return 0;
+        final Map<String, Object> log = Maps.<String, Object>map(pair(Loggers.TYPE, Loggers.SQL), pair(Loggers.EXPRESSION, expressions));
         long start = System.nanoTime();
         Map<String, PreparedStatement> statements = new HashMap<>();
         try {
@@ -110,7 +98,7 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
                 Sequence<Object> values = expression.parameters();
 
                 PreparedStatement statement = statements.get(sql);
-                if(statement == null) statements.put(sql, statement = connection.prepareStatement(sql));
+                if (statement == null) statements.put(sql, statement = connection.prepareStatement(sql));
 
                 mappings.addValues(statement, values);
                 statement.addBatch();
@@ -126,6 +114,14 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
             log.put(Loggers.ROWS, rowCount);
 
             return rowCount;
+        } catch (SQLException ex) {
+            Iterators.each(ex.iterator(), new Block<Throwable>() {
+                @Override
+                protected void execute(Throwable e) throws Exception {
+                    log.put(Loggers.MESSAGE, e.getMessage());
+                }
+            });
+            throw LazyException.lazyException(ex);
         } catch (Exception e) {
             log.put(Loggers.MESSAGE, e.getMessage());
             throw LazyException.lazyException(e);
