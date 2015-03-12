@@ -6,7 +6,7 @@ import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.Records;
 import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
 import com.googlecode.totallylazy.Callable1;
-import com.googlecode.totallylazy.CloseableList;
+import com.googlecode.totallylazy.collections.CloseableList;
 import com.googlecode.totallylazy.Pair;
 import com.googlecode.totallylazy.Predicate;
 import com.googlecode.totallylazy.Sequence;
@@ -16,13 +16,14 @@ import java.io.IOException;
 
 import static com.googlecode.totallylazy.Closeables.using;
 import static com.googlecode.totallylazy.LazyException.lazyException;
+import static com.googlecode.totallylazy.collections.CloseableList.constructors.closeableList;
 
 public class LucenePartitionedRecords implements Records, Closeable {
     private final PartitionedIndex partitionedIndex;
     private final LuceneMappings mappings;
     private final Logger logger;
     private final LuceneQueryPreprocessor preprocessor;
-    private final CloseableList closeables = new CloseableList();
+    private final CloseableList<LuceneRecords> closeables = closeableList();
 
     public LucenePartitionedRecords(PartitionedIndex partitionedIndex, LuceneMappings mappings, Logger logger) {
         this(partitionedIndex, mappings, logger, new DoNothingLuceneQueryPreprocessor());

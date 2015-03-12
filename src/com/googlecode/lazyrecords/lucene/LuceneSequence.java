@@ -3,7 +3,7 @@ package com.googlecode.lazyrecords.lucene;
 import com.googlecode.lazyrecords.Logger;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.totallylazy.Callable1;
-import com.googlecode.totallylazy.CloseableList;
+import com.googlecode.totallylazy.collections.CloseableList;
 import com.googlecode.totallylazy.Computation;
 import com.googlecode.totallylazy.Lazy;
 import com.googlecode.totallylazy.LazyException;
@@ -14,6 +14,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Sort;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -35,7 +36,7 @@ public class LuceneSequence extends Sequence<Record> {
 
     private LuceneSequence(final Lucene lucene, final LuceneStorage storage, final Query query,
                            final LuceneQueryPreprocessor luceneQueryPreprocessor, final Callable1<? super Document, Record> documentToRecord, final Logger logger,
-                           final CloseableList closeables, final Sort sort, final int start, final int end) {
+                           final CloseableList<Closeable> closeables, final Sort sort, final int start, final int end) {
         this.lucene = lucene;
         this.storage = storage;
         this.query = query;

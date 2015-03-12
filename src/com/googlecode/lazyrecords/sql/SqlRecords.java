@@ -14,7 +14,18 @@ import com.googlecode.lazyrecords.sql.expressions.Expressions;
 import com.googlecode.lazyrecords.sql.grammars.AnsiSqlGrammar;
 import com.googlecode.lazyrecords.sql.grammars.SqlGrammar;
 import com.googlecode.lazyrecords.sql.mappings.SqlMappings;
-import com.googlecode.totallylazy.*;
+import com.googlecode.totallylazy.Block;
+import com.googlecode.totallylazy.collections.CloseableList;
+import com.googlecode.totallylazy.Computation;
+import com.googlecode.totallylazy.Function1;
+import com.googlecode.totallylazy.Functions;
+import com.googlecode.totallylazy.Iterators;
+import com.googlecode.totallylazy.LazyException;
+import com.googlecode.totallylazy.Maps;
+import com.googlecode.totallylazy.Option;
+import com.googlecode.totallylazy.Pair;
+import com.googlecode.totallylazy.Predicate;
+import com.googlecode.totallylazy.Sequence;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -32,6 +43,7 @@ import static com.googlecode.totallylazy.Closeables.using;
 import static com.googlecode.totallylazy.Pair.pair;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.callables.TimeCallable.calculateMilliseconds;
+import static com.googlecode.totallylazy.collections.CloseableList.constructors.closeableList;
 import static com.googlecode.totallylazy.numbers.Numbers.not;
 import static com.googlecode.totallylazy.numbers.Numbers.numbers;
 import static com.googlecode.totallylazy.numbers.Numbers.sum;
@@ -41,7 +53,7 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
     private final SqlMappings mappings;
     private final SqlGrammar grammar;
     private final Logger logger;
-    private final CloseableList closeables = new CloseableList();
+    private final CloseableList<SqlIterator> closeables = closeableList();
 
     public SqlRecords(final Connection connection, SqlMappings mappings, SqlGrammar grammar, Logger logger) {
         this.connection = connection;

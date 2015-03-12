@@ -1,19 +1,21 @@
 package com.googlecode.lazyrecords.lucene;
 
-import com.googlecode.totallylazy.CloseableList;
+import com.googlecode.totallylazy.collections.CloseableList;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.Directory;
 
+import java.io.Closeable;
 import java.io.IOException;
 
 import static com.googlecode.lazyrecords.lucene.PartitionedIndex.methods.indexWriter;
+import static com.googlecode.totallylazy.collections.CloseableList.constructors.closeableList;
 
 public class ClosingNameToLuceneStorageFunction implements NameToLuceneStorageFunction {
     private Analyzer analyzer;
     private NameToLuceneDirectoryFunction directoryActivator;
 
-    private CloseableList closeables = new CloseableList();
+    private CloseableList<Closeable> closeables = closeableList();
 
     public ClosingNameToLuceneStorageFunction(NameToLuceneDirectoryFunction directoryActivator, Analyzer analyzer) {
         this.directoryActivator = directoryActivator;

@@ -8,7 +8,7 @@ import com.googlecode.lazyrecords.Logger;
 import com.googlecode.lazyrecords.Queryable;
 import com.googlecode.lazyrecords.Record;
 import com.googlecode.lazyrecords.lucene.mappings.LuceneMappings;
-import com.googlecode.totallylazy.CloseableList;
+import com.googlecode.totallylazy.collections.CloseableList;
 import com.googlecode.totallylazy.Function;
 import com.googlecode.totallylazy.Function1;
 import com.googlecode.totallylazy.LazyException;
@@ -49,7 +49,7 @@ public class LuceneRecords extends AbstractRecords implements Queryable<Query>, 
         this.logger = logger;
         this.preprocessor = preprocessor;
         this.lucene = new Lucene(mappings.stringMappings());
-        this.closeables = new CloseableList();
+        this.closeables = CloseableList.constructors.closeableList();
     }
 
     public Sequence<Record> query(final Query query, final Sequence<Keyword<?>> definitions) {

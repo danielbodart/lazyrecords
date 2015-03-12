@@ -1,7 +1,7 @@
 package com.googlecode.lazyrecords.lucene;
 
 import com.googlecode.totallylazy.Block;
-import com.googlecode.totallylazy.CloseableList;
+import com.googlecode.totallylazy.collections.CloseableList;
 import com.googlecode.totallylazy.Sequences;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
@@ -21,17 +21,18 @@ public class IndexAnalyzerMigrator {
 
     public static void migrate(File oldDirectory, File newDirectory, Analyzer newAnalyzer) throws IOException {
 
-        try (CloseableList closeables = new CloseableList()) {
-            NIOFSDirectory oldDir = closeables.manage(new NIOFSDirectory(oldDirectory));
-            NIOFSDirectory newDir = closeables.manage(new NIOFSDirectory(newDirectory));
+        try (
+            NIOFSDirectory oldDir = new NIOFSDirectory(oldDirectory);
+            NIOFSDirectory newDir = new NIOFSDirectory(newDirectory);
 
-            final IndexWriter oldWriter = closeables.manage(indexWriter(oldDir));
-            final IndexWriter newWriter = closeables.manage(indexWriter(newDir, newAnalyzer));
+            IndexWriter oldWriter = indexWriter(oldDir);
+            IndexWriter newWriter = indexWriter(newDir, newAnalyzer);
 
-            OptimisedStorage oldStorage = closeables.manage(new OptimisedStorage(oldWriter));
-            OptimisedStorage newStorage = closeables.manage(new OptimisedStorage(newWriter));
+            OptimisedStorage oldStorage = new OptimisedStorage(oldWriter);
+            OptimisedStorage newStorage = new OptimisedStorage(newWriter);
 
-            Searcher oldSearcher = closeables.manage(oldStorage.searcher());
+            Searcher oldSearcher = oldStorage.searcher()
+        ) {
             ScoreDoc[] docs = oldSearcher.search(Lucene.all(), Lucene.NO_SORT).scoreDocs;
             for (ScoreDoc doc : docs) {
                 Document document = oldSearcher.document(doc.doc);
