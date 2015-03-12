@@ -41,6 +41,7 @@ import static com.googlecode.lazyrecords.sql.grammars.SqlGrammar.functions.updat
 import static com.googlecode.totallylazy.Closeables.safeClose;
 import static com.googlecode.totallylazy.Closeables.using;
 import static com.googlecode.totallylazy.Pair.pair;
+import static com.googlecode.totallylazy.Sequences.forwardOnly;
 import static com.googlecode.totallylazy.Sequences.sequence;
 import static com.googlecode.totallylazy.callables.TimeCallable.calculateMilliseconds;
 import static com.googlecode.totallylazy.collections.CloseableList.constructors.closeableList;
@@ -127,12 +128,13 @@ public class SqlRecords extends AbstractRecords implements Queryable<Expression>
 
             return rowCount;
         } catch (SQLException ex) {
-            Iterators.each(ex.iterator(), new Block<Throwable>() {
+            String message = forwardOnly(ex.iterator()).map(new Function1<Throwable, String>() {
                 @Override
-                protected void execute(Throwable e) throws Exception {
-                    log.put(Loggers.MESSAGE, e.getMessage());
+                public String call(Throwable throwable) throws Exception {
+                    return throwable.getMessage();
                 }
-            });
+            }).toString("\n");
+            log.put(Loggers.MESSAGE, message);
             throw LazyException.lazyException(ex);
         } catch (Exception e) {
             log.put(Loggers.MESSAGE, e.getMessage());
